@@ -2,7 +2,7 @@ const OSS = require('ali-oss')
 const path = require('path')
 const fsP = require('fs').promises
 const sw = new OSS({
-  endpoint: 'ecubus.oss-accelerate.aliyuncs.com',
+  endpoint: 'oss-accelerate.aliyuncs.com',
   accessKeyId: process.env.ALIYUN_ACCESS_KEY_ID,
   accessKeySecret: process.env.ALIYUN_ACCESS_KEY_SECRET,
   bucket: 'ecubus'
