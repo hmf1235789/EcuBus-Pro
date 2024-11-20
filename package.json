@@ -34,7 +34,7 @@
     "build:mac": "npm run build && electron-builder --mac",
     "build:linux": "npm run build && electron-builder --linux",
     "api": "typedoc --tsconfig tsconfig.worker.json",
-    "docan":"cd src/main/docan && npx node-gyp rebuild",
+    "docan": "cd src/main/docan && npx node-gyp rebuild",
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview"
@@ -114,6 +114,7 @@
     "rollup": "^4.27.3",
     "rollup-plugin-dts": "^6.1.1",
     "ts-loader": "^9.5.1",
+    "typedoc": "^0.26.11",
     "typescript": "^5.3.3",
     "viewerjs": "^1.11.6",
     "vite": "^5.0.12",
