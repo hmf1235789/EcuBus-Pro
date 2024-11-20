@@ -26,7 +26,6 @@ async function putDir(dir,prefix) {
 }
 
 async function put() {
-    sw.setBucketTransferAcceleration()
   //put dist folder
   const dist = path.join(__dirname, '..', '.vitepress','dist')
   await putDir(dist,'app/dist')
