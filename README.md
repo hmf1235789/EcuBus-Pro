@@ -7,7 +7,7 @@
   <h1>EcuBus-Pro</h1>
   <b>A powerful automotive ECU development tool</b><br/>
   <i>Easy of use, Cross platform, Multi dongle, Powerful script ability, CLI support</i><br/>
-  Document: <a>https://app.whyengineer.com</a>
+  Document: <a href="https://app.whyengineer.com">https://app.whyengineer.com</a>
 </div>
 
 
