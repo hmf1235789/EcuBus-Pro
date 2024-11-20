@@ -7,6 +7,7 @@
   <h1>EcuBus-Pro</h1>
   <b>A powerful automotive ECU development tool</b><br/>
   <i>Easy of use, Cross platform, Multi dongle, Powerful script ability, CLI support</i><br/>
+  Document: <a>https://app.whyengineer.com</a>
 </div>
 
 
@@ -38,6 +39,7 @@ You can also consider sponsoring us to get extra technical support services. If 
 ## License
 Apache-2.0
 
+---
 
 <script setup>
   import 'viewerjs/dist/viewer.css';
