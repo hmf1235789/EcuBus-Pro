@@ -1,0 +1,103 @@
+declare class CRC {
+    private _width;
+    private _name;
+    private _polynomial;
+    private _initialVal;
+    private _finalXorVal;
+    private _inputReflected;
+    private _resultReflected;
+    private static _list;
+    private _crcTable;
+    private _castMask;
+    private _msbMask;
+    get width(): number;
+    set width(v: number);
+    get name(): string;
+    set name(v: string);
+    get polynomial(): number;
+    set polynomial(v: number);
+    get initial(): number;
+    set initial(v: number);
+    get finalXor(): number;
+    set finalXor(v: number);
+    get inputReflected(): boolean;
+    set inputReflected(v: boolean);
+    get resultReflected(): boolean;
+    set resultReflected(v: boolean);
+    /**
+     * Creates an instance of the CRC (Cyclic Redundancy Check) class.
+     *
+     * @param name - The name of the CRC algorithm.
+     * @param width - The width of the CRC in bits.
+     * @param polynomial - The polynomial used for the CRC calculation.
+     * @param initial - The initial value for the CRC calculation.
+     * @param finalXor - The value to XOR with the final CRC value.
+     * @param inputReflected - Whether the input bytes should be reflected.
+     * @param resultReflected - Whether the result should be reflected.
+     */
+    constructor(name: string, width: number, polynomial: number, initial: number, finalXor: number, inputReflected: boolean, resultReflected: boolean);
+    /**
+     * Returns a list of default CRC configurations.
+     *
+     * The list includes various CRC algorithms with their respective parameters:
+     * - Name: The name of the CRC algorithm.
+     * - Width: The width of the CRC (number of bits).
+     * - Polynomial: The polynomial used for the CRC calculation.
+     * - Initial Value: The initial value for the CRC calculation.
+     * - Final XOR Value: The value to XOR with the final CRC value.
+     * - Reflect Input: Whether to reflect the input bytes.
+     * - Reflect Output: Whether to reflect the output CRC value.
+     *
+     * @returns {CRC[]} An array of CRC configurations.
+     */
+    static get defaults(): CRC[];
+    /**
+     * Generates the CRC table used for calculating the CRC checksum.
+     *
+     * This method initializes the `_crcTable` array with 256 entries, each representing
+     * a precomputed CRC value for a given byte. The table is generated based on the
+     * polynomial and width specified by the instance's `_polynomial` and `_width` properties.
+     *
+     * The algorithm iterates over each possible byte value (0-255) and calculates the
+     * corresponding CRC value by shifting and XORing with the polynomial. The result is
+     * stored in the `_crcTable` array.
+     *
+     * @remarks
+     * This method assumes that the instance has the following properties defined:
+     * - `_width`: The width of the CRC (number of bits).
+     * - `_castMask`: A mask used to cast the CRC value to the correct width.
+     * - `_msbMask`: A mask representing the most significant bit of the CRC.
+     * - `_polynomial`: The polynomial used for CRC calculation.
+     *
+     * @example
+     * ```typescript
+     * const crcInstance = new CrcClass();
+     * crcInstance._width = 32;
+     * crcInstance._castMask = 0xFFFFFFFF;
+     * crcInstance._msbMask = 0x80000000;
+     * crcInstance._polynomial = 0x04C11DB7;
+     * crcInstance.makeCrcTable();
+     * console.log(crcInstance._crcTable);
+     * ```
+     */
+    private makeCrcTable;
+    private makeCrcTableReversed;
+    /**
+     * Computes the CRC (Cyclic Redundancy Check) value for the given input bytes.
+     *
+     * @param {number[] | Buffer} bytes - The input data as an array of numbers or a Buffer.
+     * @returns {number} - The computed CRC value.
+     */
+    compute(bytes: number[] | Buffer): number;
+    computeBuffer(bytes: number[] | Buffer): Buffer;
+    get table(): number[];
+    /**
+     * Retrieves a CRC object from the defaults list by its name.
+     *
+     * @param name - The name of the CRC object to find.
+     * @returns The CRC object with the specified name, or `undefined` if not found.
+     */
+    static default(name: string): CRC | undefined;
+}
+
+export { CRC };

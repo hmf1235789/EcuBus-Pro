@@ -1,0 +1,9 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPoints": ["./src/main/worker/uds.ts", "./src/main/worker/crc.ts","./src/main/worker/cryptoExt.ts"],
+    "disableSources": true,
+    "out": "./resources/docs/scriptApi",
+    "name":"EcuBus-Pro Script API Documentation",
+    "readme": "README.md",
+    "skipErrorChecking": true,
+}

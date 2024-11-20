@@ -1,0 +1,43 @@
+appId: EcuBus-Pro
+productName: EcuBus-Pro
+fileAssociations:
+  ext: ecb
+  description: EcuBus-Pro
+
+directories:
+  buildResources: build
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml,package-lock.json}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+asarUnpack:
+  - resources/**
+nodeGypRebuild: false
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  publish:
+    provider: generic
+    url: ''
+nsis:
+  oneClick: false
+  allowElevation: true
+  perMachine: false
+  license: license.txt
+  allowToChangeInstallationDirectory: true
+  installerIcon: ./build/icon.ico
+  uninstallerIcon: ./build/icon.ico
+  installerHeaderIcon: ./build/icon.ico
+  installerSidebar: ./build/sidebar.bmp
+  uninstallerSidebar: ./build/sidebar.bmp
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  artifactName: EcuBus-Pro ${version}.exe
+  guid: 98123fde-012f-5ff3-8b50-881449dac91a
+electronDownload:
+  mirror: https://npmmirror.com/mirrors/electron/

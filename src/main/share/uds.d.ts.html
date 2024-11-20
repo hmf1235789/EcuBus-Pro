@@ -1,0 +1,800 @@
+interface CanMessage {
+    device: string;
+    dir: 'IN' | 'OUT';
+    data: Buffer;
+    ts: number;
+    id: number;
+    msgType: CanMsgType;
+    isSimulate?: boolean;
+}
+declare enum CAN_ID_TYPE {
+    STANDARD = "STANDARD",
+    EXTENDED = "EXTENDED"
+}
+declare enum CAN_ADDR_TYPE {
+    PHYSICAL = "PHYSICAL",
+    FUNCTIONAL = "FUNCTIONAL"
+}
+declare enum CAN_ADDR_FORMAT {
+    NORMAL = "NORMAL",
+    FIXED_NORMAL = "NORMAL_FIXED",
+    EXTENDED = "EXTENDED",
+    MIXED = "MIXED",
+    ENHANCED = "ENHANCED"
+}
+interface CanMsgType {
+    idType: CAN_ID_TYPE;
+    brs: boolean;
+    canfd: boolean;
+    remote: boolean;
+    uuid?: string;
+}
+
+type ServiceId = "0x10" | "0x11" | "0x27" | "0x28" | "0x29" | "0x3E" | "0x83" | "0x84" | "0x85" | "0x87" | "0x22" | "0x23" | "0x24" | "0x2A" | "0x2C" | "0x2E" | "0x3D" | "0x14" | "0x19" | "0x2F" | "0x31" | "0x34" | "0x35" | "0x36" | "0x37" | "0x38" | "Job";
+
+type DataType = 'NUM' | 'ARRAY' | 'ASCII' | 'UNICODE' | 'FLOAT' | 'DOUBLE';
+interface ServiceItem {
+    id: string;
+    name: string;
+    serviceId: ServiceId;
+    subfunc?: string;
+    suppress?: boolean;
+    autoSubfunc?: boolean;
+    desc?: string;
+    params: Param[];
+    respParams: Param[];
+}
+interface Param {
+    id: string;
+    name: string;
+    longName?: string;
+    desc?: string;
+    type: DataType;
+    value: Buffer;
+    phyValue: any;
+    bitLen: number;
+    bitPos?: number;
+    meta?: {
+        type: string;
+    };
+    deletable?: boolean;
+    editable?: boolean;
+}
+
+declare const testerList: readonly [
+                {{#each this.testers}}
+                    "{{this}}",
+                {{/each}}
+            ];
+declare const serviceList: readonly [
+    {{#each this.services}}
+        "{{this}}",
+    {{/each}}
+];
+declare const allServicesSend: readonly [
+    {{#each this.services}}
+        "{{this}}.send",
+    {{/each}}
+];
+declare const allServicesRecv: readonly [
+    {{#each this.services}}
+        "{{this}}.recv",
+    {{/each}}
+];
+interface Jobs {
+{{#each this.jobs}}
+    "{{this.name}}": ({{#each this.param}}{{this}},{{/each}}) => DiagRequest[]|Promise<DiagRequest[]>;
+{{/each}}
+}
+type ServiceName = (typeof serviceList)[number];
+type TesterName = (typeof testerList)[number];
+type ServiceNameSend = (typeof allServicesSend)[number];
+type ServiceNameRecv = (typeof allServicesRecv)[number];
+type JobName = keyof Jobs;
+type EventMapSend = {
+    [key in ServiceNameSend]: DiagRequest;
+};
+type EventMapRecv = {
+    [key in ServiceNameRecv]: DiagResponse;
+};
+type EventMap = EventMapSend & EventMapRecv;
+type ServiceEvent = {
+    'send': DiagRequest;
+    'recv': DiagResponse;
+};
+declare class Service {
+    
+    private params;
+    private isRequest;
+    constructor(service: ServiceItem, isRequest: boolean);
+    valueOf(): string;
+    /**
+     * Sync service params to tester sequence, after change, the sequence params will be updated.
+     *
+     * @async
+     * @returns {Promise<void>} A promise that resolves when the event has been emitted.
+     *
+     * @example
+     *
+     * ```ts
+     * UDS.Init(async () => {
+     *    const testService0 = DiagRequest.from('Can.testService')
+     *    testService.diagSetParameter('key', 0x01)
+     *    const testService1 = DiagRequest.from('Can.testService')
+     *    console.log(testService0 == testService1) // false
+     *    await testService0.syncService()
+     *    const testService2 = DiagRequest.from('Can.testService')
+     *    console.log(testService0 == testService2) // true
+     *
+     * })
+     * ```
+     */
+    changeService(): Promise<void>;
+    /**
+     * Subscribe to an event. When the event occurs, the listener function will be invoked.
+     *
+     * The valid event name should be:
+     * - `'send'`: will be happen before the msg is send
+     * - `'recv'`: will be happen when the response msg is recv
+     *
+     * @param event The event to be listened.
+     * @param listener the function when event
+     *
+     * @example
+     *
+     * ```ts
+     * UDS.Init(()=>{
+     *     const testService = DiagRequest.from('Can.testService')
+     *     testService.On('send', ()=>{
+     *         console.log('send event happened.')
+     *     })
+     *
+     *     testService.On('recv', ()=>{
+     *         console.log('recv event happened.')
+     *     })
+     * })
+     * ```
+     */
+    On<T extends keyof ServiceEvent>(event: T, listener: (data: ServiceEvent[T]) => void | Promise<void>): void;
+    /**
+     * Unsubscribe from an event.
+     *
+     * @param event - The event type.
+     * @param listener - The function to unsubscribe.
+     *
+     * @example
+     *
+     * ```ts
+     * UDS.Init(() => {
+     *     const testService = DiagRequest.from('Can.testService');
+     *     testService.On('send', () => {
+     *         console.log('send event happened.');
+     *     });
+     
+     *     // The following code will not work
+     *     testService.Off('send', () => {
+     *         console.log('send event happened.');
+     *     });
+     * });
+     * ```
+     *
+     * > **Note**: To unsubscribe from an event, you must provide a non-anonymous function.
+     */
+    Off<T extends keyof ServiceEvent>(event: T, listener: (data: ServiceEvent[T]) => void | Promise<void>): void;
+    private asyncEmit;
+    /**
+     * This function will return the service name
+     *
+     * @example
+     *
+     * ```ts
+     * UDS.Init(()=>{
+     *     const testService = DiagRequest.from('Can.testService');
+     *     console.log('ServiceName:', testService.getServiceName())
+     * })
+     * ```
+     */
+    getServiceName(): string;
+    /**
+     * This function will return the service describe setting in Service.
+     * @returns service describe.
+     *
+     * @example
+     *
+     * ```ts
+     * UDS.Init(()=>{
+     *     const testService = DiagRequest.from('Can.testService');
+     *     console.log('Desc:', testService.getServiceDesc())
+     * })
+     * ```
+     */
+    getServiceDesc(): string | undefined;
+    /**
+     * This function will return the value of the provided parameter.
+     * @param paramName param name
+     * @returns param value
+     *
+     * @example
+     *
+     * ```ts
+     * UDS.Init(()=>{
+     *     const testService = DiagRequest.from('Can.testService');
+     *     console.log('SERVICE-ID Buffer:', testService.diagGetParameter('SERVICE-ID'))
+     * })
+     * ```
+     */
+    diagGetParameter(paramName: string): string | number;
+    /**
+     * This function will return the `Buffer` of the provided parameter.
+     * @param paramName param name
+     * @returns `Buffer` value of provided parameter.
+     *
+     * @example
+     *
+     * ```ts
+     * UDS.Init(()=>{
+     *     const testService = DiagRequest.from('Can.testService');
+     *     console.log('SERVICE-ID:', testService.diagGetParameterRaw('SERVICE-ID'))
+     * })
+     * ```
+     */
+    diagGetParameterRaw(paramName: string): Buffer;
+    /**
+     * This function will return the bit size of the provided parameter.
+     * @param paramName param name
+     * @returns param bit size
+     *
+     * @example
+     *
+     * ```ts
+     * UDS.Init(()=>{
+     *     const testService = DiagRequest.from('Can.testService');
+     *     console.log('SERVICE-ID Size:', testService.diagGetParameterSize('SERVICE-ID'))
+     * })
+     */
+    diagGetParameterSize(paramName: string): number;
+    /**
+     * This function returns the names of all parameters associated with the given diag.
+     *
+     * @returns {string[]} An array of strings storing the names of all parameters.
+     *
+     * @example
+     *
+     * UDS.Init(()=>{
+     *     const testService = DiagRequest.from('Can.testService');
+     *     console.log('parameter names:', testService.diagGetParameterNames())
+     * })
+     */
+    diagGetParameterNames(): string[];
+    /**
+     * This function will change the parameter's bit size.
+     * @param paramName parameter name
+     * @param bitLen new bit size of the provided parameter.
+     *
+     * @example
+     *
+     * > It is only advisable to specify the size of num and array parameters.
+     *
+     * ```ts
+     * UDS.Init(()=>{
+     *     const testService = DiagRequest.from('Can.testService')
+     *
+     *     // array parameter
+     *     console.log('arrayParam bit size:', testService.diagGetParameterSize('arrayParam'))
+     *     testService.diagSetParameterSize('arrayParam', 64)
+     *     console.log('arrayParam bit size:', testService.diagGetParameterSize('arrayParam'))
+     *
+     *     // num parameter
+     *     console.log('numParam bit size:', testService.diagGetParameterSize('numParam'))
+     *     testService.diagSetParameterSize('numParam', 16)
+     *     console.log('numParam bit size:', testService.diagGetParameterSize('numParam'))
+     *
+     *     console.log('ascii bit size:', testService.diagGetParameterSize('asciiParam'))
+     *     testService.diagSetParameterSize('asciiParam', 16)
+     *     console.log('ascii bit size:', testService.diagGetParameterSize('asciiParam'))
+     * })
+     * ```
+     *
+     */
+    diagSetParameterSize(paramName: string, bitLen: number): void;
+    /**
+     * This function will change the provided parameter's value.
+     * @param paramName parameter's name need to be changed.
+     * @param value new value of the provided parameter.
+     *
+     * @example
+     *
+     * > Add relative param in Service.
+     *
+     * 1. **array parameter**
+     *
+     *     ```ts
+     *     UDS.Init(()=>{
+     *         // add param arrayParam in Service.
+     *         const testService = DiagRequest.from('Can.testService')
+     *
+     *         console.log('arrayParam:', testService.diagGetParameter('arrayParam'))
+     *         testService.diagSetParameter('arrayParam', '12 34 56 78')
+     *         console.log('arrayParam:', testService.diagGetParameter('arrayParam'))
+     *     })
+     *     ```
+     *
+     * 2. **num parameter**
+     *
+     *     ```ts
+     *     UDS.Init(()=>{
+     *         // add param arrayParam in Service.
+     *         const testService = DiagRequest.from('Can.testService')
+     *
+     *         // 8 bit number
+     *         console.log('8 bits num:', testService.diagGetParameter('numParam'))
+     *         testService.diagSetParameter('numParam', '12')
+     *         console.log('set parameter with str:', testService.diagGetParameter('numParam'))
+     *         testService.diagSetParameter('numParam', 99)
+     *         console.log('set parameter with number:', testService.diagGetParameter('numParam'))
+     *
+     *         // 16 bit number
+     *         console.log('8 bits num:', testService.diagGetParameterRaw('numParam'))
+     *         testService.diagSetParameterSize('numParam', 16)
+     *         console.log('change size to 16 bits:', testService.diagGetParameterRaw('numParam'))
+     *         testService.diagSetParameter('numParam', '257')
+     *         console.log('set parameter with str', testService.diagGetParameterRaw('numParam'))
+     *         testService.diagSetParameter('numParam', 65534)
+     *         console.log('set parameter with number', testService.diagGetParameterRaw('numParam'))
+     *     })
+     *     ```
+     * 3. **ascii parameter**
+     *
+     *     > The ascii parameter formats the input value into a string. It is advisable to avoid using numbers as input.
+     *
+     *     ```ts
+     *     UDS.Init(()=>{
+     *         // add param arrayParam in Service.
+     *         const testService = DiagRequest.from('Can.testService')
+     *
+     *         // 8 bit number
+     *         console.log('8 bits num:', testService.diagGetParameterRaw('asciiParam'))
+     *         testService.diagSetParameter('asciiParam', 'A')
+     *         console.log('set parameter with str:', testService.diagGetParameterRaw('asciiParam'))
+     *
+     *         // 16 bit number
+     *         console.log('8 bits num:', testService.diagGetParameterRaw('asciiParam'))
+     *         await testService.diagSetParameterSize('asciiParam', 16)
+     *         console.log('change size to 16 bits:', testService.diagGetParameterRaw('asciiParam'))
+     *         await testService.diagSetParameter('asciiParam', 'AB')
+     *         console.log('set parameter with str', testService.diagGetParameterRaw('asciiParam'))
+     *     })
+     *     ```
+     * 4. **unicode parameter**
+     *
+     *     ```ts
+     *     UDS.Init(()=>{
+     *         // add param arrayParam in Service.
+     *         const testService = DiagRequest.from('Can.testService')
+     *
+     *         // 8 bit number
+     *         console.log('24 bits num:', testService.diagGetParameter('unicodeParam'))
+     *         testService.diagSetParameter('unicodeParam', '❤')
+     *         console.log('set parameter with str:', testService.diagGetParameter('unicodeParam'))
+     *
+     *         // 16 bit number
+     *         console.log('48 bits num:', testService.diagGetParameter('unicodeParam'))
+     *         testService.diagSetParameterSize('unicodeParam', 48)
+     *         console.log('change size to 16 bits:', testService.diagGetParameter('unicodeParam'))
+     *         testService.diagSetParameter('unicodeParam', '❤️')
+     *         console.log('set parameter with str', testService.diagGetParameter('unicodeParam'))
+     *     })
+     *     ```
+     *
+     * 5. **float parameter**
+     *
+     *     ```ts
+     *     UDS.Init(()=>{
+     *         // add param arrayParam in Service.
+     *         const testService = DiagRequest.from('Can.testService')
+     *
+     *         // 8 bit number
+     *         console.log('32 bits num:', testService.diagGetParameter('floatParam'))
+     *         testService.diagSetParameter('floatParam', 0.12345)
+     *         console.log('set parameter with float:', testService.diagGetParameter('floatParam'))
+     *     })
+     *     ```
+     */
+    diagSetParameter(paramName: string, value: string | number): void;
+    /**
+     * This function will change the provided parameter's value with provided `Buffer` value.
+     *
+     * @param paramName parameter's name need to be changed.
+     * @param {Buffer} value new `Buffer` value of the provided parameter.
+     *
+     * @example
+     *
+     * > Add relative param in Service.
+     *
+     * This function modifies the value of a parameter using a Buffer. The Buffer's value will be transferred at the TP layer.
+     * You can generate a Buffer using the following methods:
+     *
+     * ```ts
+     * const newValue1 = Buffer.from([0x12, 0x34, 0x56, 0x78]);
+     *
+     * const newValue2 = Buffer.alloc(4);
+     * newValue2.writeUInt8(0x01, 0);
+     * newValue2.writeUInt8(0x02, 1);
+     * newValue2.writeUInt8(0x03, 2);
+     * newValue2.writeUInt8(0x04, 3);
+     *
+     * const newValue3 = Buffer.from('11223344', 'hex');
+     * ```
+     *
+     * To modify an array parameter, you can use the following example:
+     *
+     * ```ts
+     * UDS.Init(() => {
+    
+     *     const testService = DiagRequest.from('Can.testService');
+     *
+     *     console.log('arrayParam:', testService.diagGetParameter('arrayParam'));
+     *     const newValue1 = Buffer.from([0x12, 0x34, 0x56, 0x78]);
+     *
+     *     testService.diagSetParameterRaw('arrayParam', newValue1);
+     *     console.log('arrayParam:', testService.diagGetParameter('arrayParam'));
+     * });
+     * ```
+     *
+     * > For more examples on changing different parameter types, please refer to the {@link diagSetParameter | `diagSetParameter`} function.
+     *
+     */
+    diagSetParameterRaw(paramName: string, value: Buffer): void;
+    /**
+     * Sends a diagnostic output command to the specified device.
+     *
+     * @param deviceName - The name of the device to send the diagnostic command to.
+     * @param addressName - The address name associated with the device.
+     * @returns The diagnostic output timestamp.
+     */
+    outputDiag(deviceName?: string, addressName?: string): Promise<number>;
+    /**
+     * This function modifies all values of a service.
+     *
+     * @param data - The new data's buffer value.
+     *
+     * @example
+     *
+     * This function is typically used by a job to modify all data of a service. The following code demonstrates how to generate a new service and set its raw data:
+     *
+     * ```ts
+     * UDS.Register('Can.testJob', async (v) => {
+     *     //create a new DiagRequest in Can tester
+     *     const testService = new DiagRequest('Can');
+     *     const newData = Buffer.from([0x10, 0x01, 0x00, 0x01, 0x02]);
+     *     await testService.diagSetRaw(newData);
+     *     return [testService];
+     * });
+     * ```
+     *
+     * > - Ensure that the job `Can.testJob` is already configured in Service.
+     * > - The return type of a job should be a array.
+     *
+     * You can also modify the raw data of an existing service with the following code:
+     *
+     * ```ts
+     * UDS.Init(() => {
+    
+     *     const testService = DiagRequest.from('Can.testService');
+     *     const newData = Buffer.from([0x10, 0x02]);
+     *     await testService.diagSetRaw(newData);
+     * });
+     * ```
+     *
+     *
+     * > - Ensure that the service `Can.testService` is already configured in Service.
+     * > - The new raw data size should be equal to the old raw data size.
+     */
+    diagSetRaw(data: Buffer): void;
+    /**
+     * This function will return a raw data of one service.
+     * @returns raw data of one service.
+     *
+     * @example
+     *
+     * ```ts
+     * UDS.Init(()=>{
+    
+     *     const testService = DiagRequest.from('Can.testService')
+     *     console.log('get raw data:', testService.diagGetRaw())
+     * })
+     * ```
+     */
+    diagGetRaw(): Buffer;
+}
+/**
+ * @category UDS
+ */
+declare class DiagJob extends Service {
+    constructor(service: ServiceItem);
+    from(jobName: keyof Jobs): DiagJob;
+}
+declare class DiagResponse extends Service {
+    constructor(service: ServiceItem);
+    /**
+     * @param {string} serviceName
+     *
+     * > serviceName's type '{{{serviceName}}}' is the string configured by Service.
+     *
+     * @example
+     *
+     *     ```ts
+     *     UDS.Init(async ()=>{
+     *         // add param arrayParam in Service.
+     *         const testService = DiagRequest.from('Can.testService')
+     *         testService.On('send', ()=>{
+     *             console.log('send event happened.')
+     *         })
+     *     }
+     *     ```
+     */
+    static from(serviceName: ServiceName): DiagResponse;
+    /**
+     * @param {DiagRequest} req
+     * @returns {DiagResponse}
+     *
+     * > req's type '{{{DiagRequest}}}' is the DiagRequest object.
+     *
+     * @example
+     *
+     * ```ts
+     * UDS.On('Can.testService.send', (v)=>{
+     *     const response = DiagResponse.fromDiagRequest(v)
+     * })
+     * ```
+     */
+    static fromDiagRequest(req: DiagRequest): DiagResponse;
+    /**
+     * This function will return whether the response is a positive response or not.
+     * @returns bool
+     *
+     * @example
+     *
+     * ```ts
+     * UDS.On('Can.testService.recv', (v)=>{
+     *     console.log('response is positive:', v.diagIsPositiveResponse())
+     * })
+     * ```
+     *
+     */
+    diagIsPositiveResponse(): boolean;
+    /**
+     * This function will return the response code of one response.
+     *
+     * > **NOTE**: Positive response does not have response code.
+     *
+     * @returns response code.
+     *
+     * @example
+     *
+     * // here testService2 is a RequestDownload(0x34) service
+     * UDS.On('Can.testService2.recv', (v)=>{
+     *     console.log('response code', v.diagGetResponseCode())
+     * })
+     *
+     */
+    diagGetResponseCode(): number;
+}
+declare class DiagRequest extends Service {
+    constructor(service: ServiceItem);
+    /**
+     * @param {string} serviceName
+     *
+     * > serviceName's type '{{{serviceName}}}' is the string configured by Service.
+     *
+     * @example
+     *
+     *     ```ts
+     *     UDS.Init(async ()=>{
+     *         // add param arrayParam in Service.
+     *         const testService = DiagRequest.from('Can.testService')
+     *         testService.On('send', ()=>{
+     *             console.log('send event happened.')
+     *         })
+     *     }
+     *     ```
+     */
+    static from(serviceName: ServiceName): DiagRequest;
+}
+declare class UDSClass {
+    private isMain;
+    private event;
+    private funcMap;
+    /**
+     * Register a handler function for a job.
+     * @param jobs
+     * Job name, valid format is \<tester name\>.\<job name\>
+     * @param func
+     * Handler function for the job
+     *
+     * @example
+     *
+     * ```ts
+     * UDS.Register('Can.testJob', async (v) => {
+    
+     *     const testService = new DiagRequest();
+     *     const newData = Buffer.from([0x10, 0x01, 0x00, 0x01, 0x02]);
+     *     await testService.diagSetRaw(newData);
+     *     return [testService];
+     * });
+     * ```
+     */
+    Register(jobs: JobName, func: Jobs[keyof Jobs]): void;
+    private workerOn;
+    /**
+     * Registers an event listener for CAN messages.
+     *
+     * @param id - The CAN message ID to listen for. If `true`, listens for all CAN messages.
+     * @param fc - The callback function to be invoked when a CAN message is received.
+     */
+    OnCan(id: number | true, fc: (msg: CanMessage) => void | Promise<void>): void;
+    /**
+     * Unsubscribes from CAN messages.
+     *
+     * @param id - The identifier of the CAN message to unsubscribe from. If `true`, unsubscribes from all CAN messages.
+     * @param fc - The callback function to remove from the event listeners.
+     */
+    OffCan(id: number | true, fc: (msg: CanMessage) => void | Promise<void>): void;
+    /**
+     * Subscribe to an event, invoking the registered function when the event is emitted.
+     * @param eventName
+     * Service name, formatted as \<tester name\>.\<service name\>.\<send|recv\>
+     *
+     * @param listener
+     * Function to be called when the event is emitted
+     *
+     * @example
+     *
+     * > The `UDS` is a UDSClass type and has already been created by Service.
+     *
+     * 1. *send functions*
+     *
+     *     ```ts
+     *     UDS.On('Can.testService.send', async (req) => {
+     *        // The req is a `DiagRequest`
+     *        console.log(req.getServiceName(), ': send');
+     *     });
+     *     ```
+     * 2. *recv function*
+     *
+     *     ```ts
+     *     UDS.On('Can.testService.recv', async (req) => {
+     *        // The req is a `DiagResponse`
+     *        console.log(req.getServiceName(), ':recv');
+     *     });
+     *     ```
+     *
+     */
+    On<Name extends keyof EventMap>(eventName: Name, listener: (eventData: EventMap[Name]) => void | Promise<void>): void;
+    /**
+     * Unsubscribe from an event.
+     *
+     * > Only non-anonymous functions can be unsubscribed.
+     *
+     * @param eventName
+     * Service name, formatted as \<tester name\>.\<service name\>.\<send|recv\>
+     *
+     * @param listener
+     * Function to be unsubscribed
+     *
+     * @example
+     *
+     * ```ts
+     * UDS.On('Can.testService.send', ()=>{
+     *     console.log('this function will not be Off')
+     * })
+     *
+     * UDS.Off('Can.testService.send', ()=>{
+     *     console.log('this function will not be Off')
+     * })
+     *
+     * ```
+     *
+     */
+    Off<Name extends keyof EventMap>(eventName: Name, listener: (eventData: EventMap[Name]) => void | Promise<void>): void;
+    private start;
+    private canMsg;
+    private evnetDone;
+    constructor();
+    /**
+     * Register a function, this function will be invoked when UDSClass is initialized.
+     * @param fc Non-async or async function
+     *
+     * @example
+     *
+     * - Perform actions following UDS initialization using a normal function.
+     *     ```ts
+     *     UDS.Init(()=>{
+     *       console.log('Hello UDS!')
+     *     })
+     *     ```
+     *
+     * - Perform actions following UDS initialization using an async function.
+     *     ```ts
+     *     UDS.Init(async ()=>{
+     *       const file=await fs.readFile(path.join(process.env.PROJECT_ROOT,'file.bin'))
+     *       let length=file.length
+     *       console.log('Hello UDS file! file length is', length)
+     *     })
+     *     ```
+     *
+     * - The last registered function will override the previous ones.
+     *     ```ts
+     *     // The following code will be ignored
+     *     UDS.Init(async ()=>{
+     *         console.log('1')
+     *     })
+     *
+     *     // The following code will take effect
+     *     UDS.Init(async ()=>{
+     *         console.log('2')
+     *     })
+     *     ```
+     */
+    Init(fc: () => void | Promise<void>): void;
+}
+/**
+ * Global instance of UDSClass, providing access to UDS functionality throughout the application.
+ * Use this instance to interact with UDS features and services.
+ *
+ * @category UDS
+ * @type {UDSClass}
+ *
+ * @example
+ * 1. *Init function*
+ *     - Perform actions following UDS initialization using a normal function.
+ *         ```ts
+ *         UDS.Init(()=>{
+ *           console.log('Hello UDS!')
+ *         })
+ *         ```
+ *
+ *     - Perform actions following UDS initialization using an async function.
+ *         ```ts
+ *         UDS.Init(async ()=>{
+ *           const file=await fs.readFile(path.join(process.env.PROJECT_ROOT,'file.bin'))
+ *           let length=file.length
+ *           console.log('Hello UDS file! file length is', length)
+ *         })
+ *         ```
+ *
+ * 2. *send functions*
+ *     > * This function will be called after the message has been sent.
+ *     > * Please replace `Can.DiagRequest.send` with your own service item name. The format is `<tester name>.<service item name>.send`
+ *
+ *     ```ts
+ *     UDS.On('Can.DiagRequest.send', async (req) => {
+ *        // The req is a `DiagRequest`
+ *        console.log(req.getServiceName(), ': send');
+ *     });
+ *     ```
+ *
+ * 3. *recv function*
+ *     > * This function will be called after the response message has been received.
+ *     > * Please replace `Can.DiagRequest.recv` with your own service item name. The format is `<tester name>.<service item name>.recv`
+ *
+ *     ```ts
+ *     UDS.On('Can.DiagRequest.recv', async (req) => {
+ *        // The req is a `DiagResponse`
+ *        console.log(req.getServiceName(), ':recv');
+ *     });
+ *     ```
+ *
+ * 4. **More**
+ *     > For more details, please refer to {@link UDSClass | `UDSClass`} class.
+ */
+declare const UDS: UDSClass;
+/**
+ * Sends a CAN message
+ *
+ * @param {CanMessage} msg - The CAN message to be sent.
+ * @returns {Promise<number>} - Returns a promise that resolves to sent timestamp.
+ */
+declare function outputCan(msg: CanMessage): Promise<number>;
+
+export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type JobName, type ServiceEvent, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type TesterName, UDS, UDSClass, outputCan };
