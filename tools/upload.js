@@ -2,7 +2,7 @@ const OSS = require('ali-oss')
 const path = require('path')
 const fsP = require('fs').promises
 const sw = new OSS({
-  region: 'oss-cn-chengdu',
+  endpoint: 'ecubus.oss-accelerate.aliyuncs.com',
   accessKeyId: process.env.ALIYUN_ACCESS_KEY_ID,
   accessKeySecret: process.env.ALIYUN_ACCESS_KEY_SECRET,
   bucket: 'ecubus'
@@ -26,6 +26,7 @@ async function putDir(dir,prefix) {
 }
 
 async function put() {
+    sw.setBucketTransferAcceleration()
   //put dist folder
   const dist = path.join(__dirname, '..', '.vitepress','dist')
   await putDir(dist,'app/dist')
