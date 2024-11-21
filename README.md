@@ -6,6 +6,11 @@
 
   <h1>EcuBus-Pro</h1>
 
+   <div style="margin:5px">
+    <a href="https://github.com/ecubus/EcuBus-Pro/releases">
+      <img src="https://github.com/ecubus/EcuBus-Pro/actions/workflows/build.yml/badge.svg" alt="github-ci" />
+    </a>
+  </div>
   <b style="font-size:16px">A powerful automotive ECU development tool</b><br/>
   <i>Easy of use, Cross platform, Multi dongle, Powerful script ability, CLI support</i><br/>
   Document: <a href="https://app.whyengineer.com">https://app.whyengineer.com</a>
