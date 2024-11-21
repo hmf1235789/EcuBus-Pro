@@ -4,11 +4,7 @@
     "electron.vite.config.*",
     "src/main/**/*.ts",
     "src/preload/**/*",
-    "test/**/*.test.ts"
-  ],
-  "exclude": [
-    "src/main/worker/**/*",
-    "src/main/nodeCan/**/*"
+    "test/**/*.test.ts",
   ],
   "compilerOptions": {
     "composite": true,
