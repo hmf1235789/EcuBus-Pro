@@ -102,6 +102,7 @@
     "@vue/eslint-config-prettier": "^9.0.0",
     "@vue/eslint-config-typescript": "^12.0.0",
     "ali-oss": "^6.21.0",
+    "dotenv": "^16.4.5",
     "electron": "^32.2.3",
     "electron-builder": "24.13.3",
     "electron-vite": "^2.3.0",

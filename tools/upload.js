@@ -1,6 +1,7 @@
 const OSS = require('ali-oss')
 const path = require('path')
 const fsP = require('fs').promises
+require('dotenv').config()
 const sw = new OSS({
   endpoint: 'oss-accelerate.aliyuncs.com',
   accessKeyId: process.env.ALIYUN_ACCESS_KEY_ID,
@@ -25,46 +26,52 @@ async function putDir(dir,prefix) {
     }
 }
 
-async function put() {
+async function put(list) {
+  console.log(list)
   //put dist folder
-  const dist = path.join(__dirname, '..', '.vitepress','dist')
-  await putDir(dist,'app/dist')
+  if(list.includes('--page')){
+    const dist = path.join(__dirname, '..', '.vitepress','dist')
+    await putDir(dist,'app/dist')
+  }
 
 
  
 
   // tag need match v\d+\.\d+\.\d+$
-
-  const releasePath = path.join(__dirname, '..', 'docs', 'dev', 'releases_note.md')
-  await sw.put('app/releases_note.md', releasePath)
-  console.log('releases_note.md pushed ok')
-
-  const yamlPath = path.join(__dirname, '..', 'dist', 'latest.yml')
-  await sw.put(`app/latest.yml`, yamlPath)
-  console.log('latest.yml pushed ok')
-
-  //read yaml
-  const content = await fsP.readFile(yamlPath, 'utf-8')
-  const yaml = yml.parse(content)
-
-  const version = yaml.version
-  const options = {
-    partSize: 1000 * 1024, //设置分片大小
-    timeout: 120000 //设置超时时间
+  if(list.includes('--note')){
+    const releasePath = path.join(__dirname, '..', 'docs', 'dev', 'releases_note.md')
+    await sw.put('app/releases_note.md', releasePath)
+    console.log('releases_note.md pushed ok')
   }
-  const exePath = path.join(__dirname, '..', 'dist', `EcuBus-Pro ${version}.exe`)
 
-  await sw.multipartUpload(`app/EcuBus-Pro ${version}.exe`, exePath, options)
-  console.log('EcuBus-Pro.exe pushed ok')
+  if(list.includes('--app')){
 
-  //symbol link
-  //await sw.putSymlink(`app/EcuBus-Pro.exe`, `app/EcuBus-Pro ${version}.exe`);
+    const yamlPath = path.join(__dirname, '..', 'dist', 'latest.yml')
+    await sw.put(`app/latest.yml`, yamlPath)
+    console.log('latest.yml pushed ok')
 
-  const blockPath = path.join(__dirname, '..', 'dist', `EcuBus-Pro ${version}.exe.blockmap`)
-  await sw.put(`app/EcuBus-Pro ${version}.exe.blockmap`, blockPath)
-  console.log('EcuBus-Pro.exe.blockmap pushed ok')
+    //read yaml
+    const content = await fsP.readFile(yamlPath, 'utf-8')
+    const yaml = yml.parse(content)
+
+    const version = yaml.version
+    const options = {
+      partSize: 1000 * 1024, //设置分片大小
+      timeout: 120000 //设置超时时间
+    }
+    const exePath = path.join(__dirname, '..', 'dist', `EcuBus-Pro ${version}.exe`)
+
+    await sw.multipartUpload(`app/EcuBus-Pro ${version}.exe`, exePath, options)
+    console.log('EcuBus-Pro.exe pushed ok')
+
+    //symbol link
+    //await sw.putSymlink(`app/EcuBus-Pro.exe`, `app/EcuBus-Pro ${version}.exe`);
+
+    const blockPath = path.join(__dirname, '..', 'dist', `EcuBus-Pro ${version}.exe.blockmap`)
+    await sw.put(`app/EcuBus-Pro ${version}.exe.blockmap`, blockPath)
+    console.log('EcuBus-Pro.exe.blockmap pushed ok')
+  }
 
   process.exit(0)
 }
-
-put()
+put(process.argv.slice(2))

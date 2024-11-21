@@ -4,8 +4,7 @@ name: Build
 
 on: 
   push:
-    tags:
-    - 'v*'
+    branches: [master]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -45,7 +44,7 @@ jobs:
         env:
           ALIYUN_ACCESS_KEY_ID: ${{ secrets.ALIYUN_ACCESS_KEY_ID }}
           ALIYUN_ACCESS_KEY_SECRET: ${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}
-        run: node tools/upload.js
+        run: node tools/upload.js --note --app
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
