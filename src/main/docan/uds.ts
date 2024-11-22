@@ -1062,7 +1062,9 @@ async function compileTscEntry(
   for (const nodeFile of nodeFiles) {
     const src = path.join(libPath, nodeFile)
     const dest = path.join(outputDir, nodeFile)
-    await fsP.copyFile(src, dest)
+    if(!fs.existsSync(dest)){
+      await fsP.copyFile(src, dest)
+    }
   }
 
 
