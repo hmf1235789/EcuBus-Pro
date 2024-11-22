@@ -60,18 +60,16 @@ jobs:
           asset_name: EcuBus-Pro ${{ env.VERSION }}.exe
           asset_content_type: application/vnd.microsoft.portable-executable
       - name: Archive Release
-        uses: thedoctor0/zip-release@0.7.5
+        uses: montudor/action-zip@v1
         with:
-          type: zip
-          directory: ./dist/win-unpacked
-          filename: Portable EcuBus-Pro ${{ env.VERSION }}.zip
+          args: zip -qq -r EcuBus-Pro.zip ./dist/win-unpacked
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: Portable EcuBus-Pro ${{ env.VERSION }}.zip
+          asset_path: EcuBus-Pro.zip
           asset_name: Portable EcuBus-Pro ${{ env.VERSION }}.zip
           asset_content_type: application/zip
       - name: Upload to aliyun
