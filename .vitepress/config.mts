@@ -36,8 +36,8 @@ export default defineConfig({
         text: 'Example',
         collapsed:true,
         items: [
-          { text: 'NXP UDS Bootloader', link: '/resources/examples/nxp_bootloader/readme' },
-          { text: 'Secure Access dll', link: '/resources/examples/secure_access_dll/readme' },
+          { text: 'NXP UDS Bootloader', link: '/examples/nxp_bootloader/readme' },
+          { text: 'Secure Access dll', link: '/examples/secure_access_dll/readme' },
         ]
       },
       {
