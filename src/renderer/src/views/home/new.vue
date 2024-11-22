@@ -173,12 +173,10 @@ onMounted(() => {
     //bind href click event
     document.getElementById('mainReadme')?.addEventListener('click', (e) => {
         //if e is <a> tag
-        console.log((e.target as HTMLElement).tagName)
         if ((e.target as HTMLElement).tagName == 'A') {
             e.preventDefault()
             //get href
             const href = (e.target as HTMLElement).getAttribute('href')
-            console.log(href)
             window.electron.ipcRenderer.send('ipc-open-link', href)
         }
     })

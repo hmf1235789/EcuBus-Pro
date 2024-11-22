@@ -32,17 +32,14 @@
 
 #readme h2:before {
   counter-increment: h2;
-  content: counter(h2)" ";
 }
 
 #readme h3:before {
   counter-increment: h3;
-  content: counter(h2) "." counter(h3)" ";
 }
 
 #readme h4:before {
   counter-increment: h4;
-  content: counter(h2) "." counter(h3) "." counter(h4)" ";
 }
 
 #readme .heading-highlight {

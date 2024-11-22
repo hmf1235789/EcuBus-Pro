@@ -36,13 +36,15 @@
                 {{ version }} -> {{ updateInfo?.version }}
             </el-tag>
         </el-divider>
+        <div id="release_note">
         <div v-if="doc != ''" style="text-align: left;margin:20px;color:#303133;" 
         >
-            <div v-html="doc"  class="readme"  id="readme"/>
+            <div v-html="doc"  class="readme"   />
         </div>
         <div v-else>
             <el-skeleton :rows="5" />
         </div>
+    </div>
     </div>
 
 </template>
@@ -93,6 +95,18 @@ const props = defineProps<{
 const mainH = toRef(props, 'height')
 
 onMounted(() => {
+    console.log(document.getElementById('release_note'),'xxx')
+    document.getElementById('release_note')?.addEventListener('click', (e) => {
+        //if e is <a> tag
+        console.log((e.target as HTMLElement).tagName)
+        if ((e.target as HTMLElement).tagName == 'A') {
+            e.preventDefault()
+            //get href
+            const href = (e.target as HTMLElement).getAttribute('href')
+            console.log(href)
+            window.electron.ipcRenderer.send('ipc-open-link', href)
+        }
+    })
     marked.use(addLocalBaseUrl())
     window.electron.ipcRenderer.on('ipc-update-available', (event, info: UpdateInfo) => {
         /* open dialog when a new verison available */
