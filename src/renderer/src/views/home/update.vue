@@ -130,7 +130,7 @@ onMounted(() => {
       
             doc.value = marked.parse(html) as any
         }).catch((err: Error) => {
-            ElMessage.error(err.message)
+           null
         })
 })
 onUnmounted(() => {

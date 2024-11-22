@@ -95,7 +95,7 @@ import { UdsLOG } from '../log'
 import tsconfig from './ts.json'
 import json5 from 'json5'
 import { v4 } from 'uuid'
-
+import { glob } from 'glob'
 const NRCMsg: Record<number, string> = {
   0x10: 'General Reject',
   0x11: 'Service Not Supported',
@@ -1054,6 +1054,18 @@ async function compileTscEntry(
   if (fs.existsSync(latBuildFile) === false) {
     throw new Error('build failed, file not exist')
   }
+  //copy *.node to outputDir
+  //glob libPath/*.node
+  const nodeFiles = await glob( '*.node',{
+    cwd: libPath
+  })
+  for (const nodeFile of nodeFiles) {
+    const src = path.join(libPath, nodeFile)
+    const dest = path.join(outputDir, nodeFile)
+    await fsP.copyFile(src, dest)
+  }
+
+
 
   //modify the output file time equal to the input file
   const stats = await fsP.stat(entry)

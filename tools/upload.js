@@ -1,6 +1,10 @@
 const OSS = require('ali-oss')
 const path = require('path')
 const fsP = require('fs').promises
+const make_release_note_all = require('./release_note')
+
+
+
 require('dotenv').config()
 const sw = new OSS({
   endpoint: 'oss-accelerate.aliyuncs.com',
@@ -39,6 +43,7 @@ async function put(list) {
 
   // tag need match v\d+\.\d+\.\d+$
   if(list.includes('--note')){
+    await make_release_note_all()
     const releasePath = path.join(__dirname, '..', 'docs', 'dev', 'releases_note.md')
     await sw.put('app/releases_note.md', releasePath)
     console.log('releases_note.md pushed ok')

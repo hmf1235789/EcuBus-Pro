@@ -9,3 +9,5 @@ build
 cache
 !/build
 .env
+.ScriptBuild
+resources/docs

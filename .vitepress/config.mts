@@ -7,7 +7,14 @@ export default defineConfig({
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
    
-  
+    search: {
+      provider: 'algolia',
+      options: {
+        appId: 'FOJHNQUJ1B',
+        apiKey: '1c1720a3990b8f9c725f883d49129cf3',
+        indexName: 'EcuBus-Pro'
+      }
+    },
     sidebar: [
       {
         text: 'About',
@@ -23,6 +30,14 @@ export default defineConfig({
         text: 'User Manual',
         items: [
           { text: 'Concept', link: '/docs/um/concept' },
+        ]
+      },
+      {
+        text: 'Example',
+        collapsed:true,
+        items: [
+          { text: 'NXP UDS Bootloader', link: '/resources/examples/nxp_bootloader/readme' },
+          { text: 'Secure Access dll', link: '/resources/examples/secure_access_dll/readme' },
         ]
       },
       {
@@ -44,5 +59,6 @@ export default defineConfig({
   },
   rewrites: {
     'README.md': 'index.md',
+    'resources/examples/:pkg/:slug*': 'examples/:pkg/:slug*'
   },
 })

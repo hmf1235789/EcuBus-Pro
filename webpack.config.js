@@ -43,6 +43,7 @@ class MyCustomPlugin {
        
         // 在这里加入你的自定义代码
         fs.copyFileSync(path.resolve(__dirname,'dist','uds.js'),path.resolve(__dirname,'resources','lib','js','uds.js'))
+        fs.copyFileSync(path.resolve(__dirname,'dist','sa.node'),path.resolve(__dirname,'resources','lib','js','sa.node'))
         fs.copyFileSync(path.resolve(__dirname,'dist','crc.js'),path.resolve(__dirname,'resources','lib','js','crc.js'))
         fs.copyFileSync(path.resolve(__dirname,'dist','cryptoExt.js'),path.resolve(__dirname,'resources','lib','js','cryptoExt.js'))
         //copy uds.d.ts

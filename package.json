@@ -110,6 +110,7 @@
     "eslint-plugin-vue": "^9.20.1",
     "node-addon-api": "^8.2.2",
     "node-gyp": "^10.2.0",
+    "node-loader": "^2.1.0",
     "prettier": "^3.3.3",
     "rollup": "^4.27.3",
     "rollup-plugin-dts": "^6.1.1",

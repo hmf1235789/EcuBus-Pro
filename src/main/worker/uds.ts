@@ -8,6 +8,9 @@ import { cloneDeep } from 'lodash'
 import { v4 } from 'uuid'
 import { ServiceId, SupportServiceId } from '../share/service'
 import { CanMessage } from '../share/can'
+import SecureAccessDll from './secureAccess'
+export { SecureAccessDll }
+
 
 const testerList = ['{{{testerName}}}'] as const
 const serviceList = ['{{{serviceName}}}'] as const
@@ -15,7 +18,6 @@ const allServicesSend = ['{{{serviceName}}}.send'] as const
 const allServicesRecv = ['{{{serviceName}}}.recv'] as const
 
 interface Jobs { string: (data: Buffer) => string }
-
 
 export type ServiceName = (typeof serviceList)[number]
 export type TesterName = (typeof testerList)[number]
