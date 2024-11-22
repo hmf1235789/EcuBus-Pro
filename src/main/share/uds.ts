@@ -89,7 +89,7 @@ export function applyBuffer(service:ServiceItem,data: Buffer,isReq:boolean) {
   }
 
   if(sid!=Number(service.serviceId)){
-    throw new Error(`serviceId not match, expect ${service.serviceId} but got ${sid}`)
+    throw new Error(`serviceId not match, expect ${service.serviceId} but got 0x${sid.toString(16)}`)
   }
   const params=isReq?service.params:service.respParams
   /* remove left param */
