@@ -1,6 +1,6 @@
 {
   "name": "ecubuspro",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "description": "EcuBus-Pro",
   "main": "./out/main/index.js",
   "author": "frankie.zengfu@gmail.com",
@@ -23,7 +23,7 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "vue-tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
-    "worker": "npx webpack --config webpack.config.js --mode production",
+    "worker": "cd src/main/worker/secureAccess && npx node-gyp rebuild &&  cd ../../../.. && npx webpack --config webpack.config.js --mode production",
     "start": "electron-vite preview",
     "dev": "electron-vite dev",
     "test": "vitest --config vitest.config.ts",

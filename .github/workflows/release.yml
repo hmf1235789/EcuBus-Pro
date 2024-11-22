@@ -66,3 +66,14 @@ jobs:
           asset_path: ./dist/EcuBus-Pro ${{ env.VERSION }}.exe
           asset_name: EcuBus-Pro ${{ env.VERSION }}.exe
           asset_content_type: application/vnd.microsoft.portable-executable
+      - name: Archive Release
+        uses: thedoctor0/zip-release@0.7.5
+        with:
+          type: zip
+          directory: ./dist/win-unpacked
+          filename: Portable EcuBus-Pro ${{ env.VERSION }}.zip
+      - name: Upload Portable
+        uses: ncipollo/release-action@v1.12.0
+        with:
+          artifacts: Portable EcuBus-Pro ${{ env.VERSION }}.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
