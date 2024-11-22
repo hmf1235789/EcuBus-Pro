@@ -36,7 +36,7 @@ async function make_release_note_all() {
             // 获取并处理Git日志
             const LOG_FORMAT = "%Cgreen*%Creset %s";
             const logs = await exec(`"git" log --no-merges ${currentTag}..${nextTag} --format="${LOG_FORMAT}" --date=short`);
-
+            console.log(logs.stdout)
             for (const log of logs.stdout.split('\n')) {
                 if (/^\s*\*\s+\[(.*?)\]:/.test(log)) {
                     // log may contains mulit [xx], so we need to put each [xx] at new line
