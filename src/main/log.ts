@@ -269,3 +269,71 @@ export class UdsLOG {
   }
 
 }
+
+
+export class DoipLOG {
+  vendor: string
+  log: Logger
+  logTp: Logger
+  constructor(vendor: string, instance: string, private event: EventEmitter) {
+    this.vendor = vendor
+    const et1 = externalTransport.map((t) => t())
+    this.log = createLogger({
+      transports: [new Base(), ...et1],
+      format: format.combine(
+        format.json(),
+        instanceFormat({ instance: instance }),
+
+        format.label({ label: `IP-${vendor}` })
+      ),
+
+    })
+    const et2 = externalTransport.map((t) => t())
+    this.logTp = createLogger({
+      transports: [new Base(), ...et2],
+      format: format.combine(
+        format.json(),
+        instanceFormat({ instance: instance }),
+        format.label({ label: `CanTp-${vendor}` })
+      ),
+    })
+  }
+  close() {
+    this.log.close()
+    this.logTp.close()
+    this.event.removeAllListeners()
+
+  }
+  ipBase(type:'tcp'|'udp',dir:'OUT'|'IN',ip:string|undefined,port:number|undefined,data:Buffer) {
+    const val={
+      type,
+      ip,
+      port,
+      data
+    }
+    this.log.info({
+      method: 'ipBase',
+      data:val
+    })
+    this.event.emit('ip-frame', val)
+  }
+  // doipTp(data: { dir: 'OUT' | 'IN'; data: Buffer; ts: number; addr: CanAddr }) {
+  //   this.logTp.info(
+  //     {
+  //       method: 'canTp',
+  //       data
+  //     }
+  //   )
+  // }
+  error(ts: number, msg?: string) {
+    this.log.error(
+      {
+        method: 'ipError',
+        data: {
+          ts: ts,
+          msg: msg
+        }
+      }
+    )
+  }
+}

@@ -77,7 +77,7 @@
     "vite-raw-plugin": "^1.0.2",
     "vue-router": "^4.2.5",
     "vxe-pc-ui": "^4.2.53",
-    "vxe-table": "^4.8.15",
+    "vxe-table": "^4.9.4",
     "winston": "^3.15.0",
     "workerpool": "https://github.com/frankie-zeng/workerpool.git#efa4bab"
   },
@@ -95,7 +95,7 @@
     "@rollup/plugin-node-resolve": "^15.3.0",
     "@rushstack/eslint-patch": "^1.7.1",
     "@types/async": "^3.2.24",
-    "@types/node": "^18.19.17",
+    "@types/node": "^22.9.1",
     "@types/path-browserify": "^1.0.3",
     "@types/uuid": "^10.0.0",
     "@vitejs/plugin-vue": "^5.0.3",

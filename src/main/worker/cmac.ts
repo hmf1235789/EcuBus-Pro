@@ -50,7 +50,7 @@ function generateSubkeys(key: Buffer) {
     return { subkey1: subkey1, subkey2: subkey2 };
 };
 
-function aes(key: Buffer, message: Buffer) {
+function aes(key: Buffer, message: Buffer):Buffer{
     const keyLengthToCipher: Record<number, string> = { 16: 'aes-128-cbc', 24: 'aes-192-cbc', 32: 'aes-256-cbc' };
     if (!keyLengthToCipher[key.length]) {
         throw new Error('Keys must be 128, 192, or 256 bits in length.');
@@ -94,10 +94,12 @@ export default function CMAC(key: Buffer, message: Buffer) {
     }
 
     let x = Buffer.from('00000000000000000000000000000000', 'hex');
-    let y;
+    let y:Buffer|undefined;
 
     for (let index = 0; index < lastBlockIndex; index++) {
         y = xor(x, getMessageBlock(message, index));
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-ignore
         x = aes(key, y);
     }
     y = xor(lastBlock, x);

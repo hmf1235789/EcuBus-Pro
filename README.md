@@ -1,7 +1,7 @@
 
 <div align="center">
   <a href="https://app.whyengineer.com">
-    <img width="160" height="160" src="https://app.whyengineer.com/logo256.png">
+    <img width="160" height="160" src="https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png">
   </a>
 
   <h1>EcuBus-Pro</h1>
