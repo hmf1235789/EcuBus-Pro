@@ -583,10 +583,13 @@ export default class DOIP {
                 socket.close()
                 const list = []
                 for (const e of this.entityMap.values()) {
-
                     if (e.localPort == udpData.localPort) {
                         if (reqType == 'vin') {
-                            if (e.vin == entityAddr.vin) {
+                            const a=Buffer.alloc(17)
+                            a.write(e.vin.slice(0, 17), 'ascii')
+                            const b=Buffer.alloc(17)
+                            b.write(entityAddr.vin.slice(0, 17), 'ascii')
+                            if (a.compare(b) == 0) {
                                 list.push(e)
                             }
                         } else {
@@ -618,13 +621,21 @@ export default class DOIP {
                 this.parseDataUdp(socket, udpData, msg)
                 if (reqType == 'eid') {
                     for (const e of this.entityMap.values()) {
-                        if (e.eid == entityAddr.eid && e.localPort == udpData.localPort) {
-                            resolve([e])
-                            break
+                        if ( e.localPort == udpData.localPort) {
+                            const a=Buffer.alloc(6)
+                            a.write(e.eid.split('-').join(''), 'hex')
+                            const b=Buffer.alloc(6)
+                            b.write(entityAddr.eid.split('-').join(''), 'hex')
+                            if (a.compare(b) == 0) {
+                                clearTimeout(timeout)
+                                socket.close()
+                                resolve([e])
+                                break
+                            }
+                           
                         }
                     }
-                    clearTimeout(timeout)
-                    socket.close()
+                  
                 }
 
 
@@ -1005,6 +1016,7 @@ is in the state “Registered [Routing Active]”.*/
                         item.lastAction.payloadType == PayloadType.DoIP_VehicleIdentificationRequestWithEID ||
                         item.lastAction.payloadType == PayloadType.DoIP_VehicleIdentificationRequestWithVIN) {
                         const entity = this.vehicleIdentificationHandle(item.lastAction.payloadType, buffer)
+                    
                         if (entity && this.ethAddr) {
                             //0: no more active
                             sentData = this.getVehicleAnnouncementResponse(this.ethAddr)
@@ -1277,27 +1289,24 @@ is in the state “Registered [Routing Active]”.*/
     vehicleIdentificationHandle(payloadType: PayloadType, data: Buffer) {
         let reply = false
         if (this.ethAddr == undefined) {
-            return undefined
+            return false
         }
         if (payloadType == PayloadType.DoIP_VehicleIdentificationRequest) {
             reply = true
         } else if (payloadType == PayloadType.DoIP_VehicleIdentificationRequestWithEID) {
             const eid = data.toString('hex')
-            //join '-' every two characters
-            let seid = ''
-            for (let i = 2; i < eid.length; i += 3) {
-                seid += eid.slice(i - 2, i) + '-'
-            }
-            seid = seid.slice(0, -1)
-
             //find entity by eid
-
-            if (seid == this.ethAddr.eid) {
+            const a=Buffer.alloc(6)
+            a.write(this.ethAddr.eid.split('-').join(''), 'hex')
+            const b=Buffer.alloc(6)
+            b.write(eid, 'hex')
+            if (a.compare(b) == 0) {
                 reply = true
             }
         } else if (payloadType == PayloadType.DoIP_VehicleIdentificationRequestWithVIN) {
-            const vin = data.toString('ascii')
-            if (vin == this.ethAddr.vin) {
+            const vin = data
+            const q=Buffer.from(this.ethAddr.vin.slice(0, 17),'ascii')
+            if (Buffer.compare(vin, q) == 0) {
                 reply = true
             }
         }

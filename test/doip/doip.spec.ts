@@ -66,13 +66,13 @@ describe('vin request with resp', () => {
        
         const r = await doip.sendVehicleIdentificationRequestWithVIN(ethAddr, entity)
         //TODO:
-        // expect(r.length).toBe(1)
+        expect(r.length).toBe(1)
     })
 
     test('vin request with eid', async () => {
        
         const r = await doip.sendVehicleIdentificationRequestWithEID(ethAddr, entity)
-        // expect(r.length).toBe(1)
+        expect(r.length).toBe(1)
     })
     afterAll(()=>{
         doip.close()
