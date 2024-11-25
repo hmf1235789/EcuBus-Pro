@@ -86,10 +86,10 @@ class Base extends Transport {
   }
 
   log(info: any, callback: () => void) {
-    if (isDev) {
-      // console.log(info)
+    if (process.env.VITEST) {
+      
+      console.table(info.message)
     }
-
     // Perform the writing to the remote service
     callback()
   }
@@ -304,12 +304,14 @@ export class DoipLOG {
     this.event.removeAllListeners()
 
   }
-  ipBase(type:'tcp'|'udp',dir:'OUT'|'IN',ip:string|undefined,port:number|undefined,data:Buffer) {
+  ipBase(type:'tcp'|'udp',dir:'OUT'|'IN',ip:string|undefined,localPort:number|undefined,port:number|undefined,data:Buffer) {
     const val={
+      dir,
       type,
       ip,
+      localPort,
       port,
-      data
+      data,
     }
     this.log.info({
       method: 'ipBase',

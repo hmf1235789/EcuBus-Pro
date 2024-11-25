@@ -10,9 +10,9 @@ export default defineConfig({
     search: {
       provider: 'algolia',
       options: {
-        appId: 'FOJHNQUJ1B',
-        apiKey: '1c1720a3990b8f9c725f883d49129cf3',
-        indexName: 'EcuBus-Pro'
+        appId: 'KXFLA7UAD8',
+        apiKey: '67edbcb2f3c63548c4bf738d61602a03',
+        indexName: 'app-whyengineer'
       }
     },
     sidebar: [

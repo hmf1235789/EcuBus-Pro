@@ -45,4 +45,5 @@ export interface EntityAddr extends VinInfo {
   powerMode?: number
   localPort?: number
   sendSync?: boolean
+  udpLocalPort?: number
 }
