@@ -389,7 +389,42 @@ export class PEAK_TP extends CanBase implements CanTp {
     this.id = this.info.id
     let ret = peak.CANTP_InitializeFD_2016(this.handle, str)
     if (ret != 0) {
-      throw new Error(err2str(ret))
+      if (ret == -2013265920) {
+        //try init with normal
+        let baud = peak.PCANTP_BAUDRATE_500K
+        switch (this.info.bitrate.freq) {
+          case 1000000:
+            baud = peak.PCANTP_BAUDRATE_1M
+            break;
+          case 800000:
+            baud = peak.PCANTP_BAUDRATE_800K
+            break;
+          case 500000:
+            baud = peak.PCANTP_BAUDRATE_500K
+            break;
+          case 250000:
+            baud = peak.PCANTP_BAUDRATE_250K
+            break;
+          case 125000:
+            baud = peak.PCANTP_BAUDRATE_125K
+            break;
+          case 100000:
+            baud = peak.PCANTP_BAUDRATE_100K
+            break;
+          default:
+            throw `SJA1000 does not support ${this.info.bitrate.freq} baudrate`
+
+        }
+
+        ret = peak.CANTP_Initialize_2016(this.handle, baud, 0, 0, 0);
+        if (ret != 0) {
+          throw new Error(err2str(ret))
+        }
+      } else {
+
+        throw new Error(err2str(ret))
+
+      }
     }
 
     const targetDevice = devices.find((item) => item.handle == this.handle)
@@ -707,7 +742,7 @@ export class PEAK_TP extends CanBase implements CanTp {
                   device: this.info.name
                 }
                 this.log.canBase(message)
-                this.event.emit(this.getReadBaseId(msg.canInfo.canId,message.msgType), message)
+                this.event.emit(this.getReadBaseId(msg.canInfo.canId, message.msgType), message)
 
                 item.resolve(ts)
                 setImmediate(this.callback.bind(this))
@@ -735,7 +770,7 @@ export class PEAK_TP extends CanBase implements CanTp {
               //log must before emit
               this.log.canBase(message)
               this.event.emit(id, message)
-            
+
               setImmediate(this.callback.bind(this))
               return
             }
@@ -1061,7 +1096,7 @@ export class PEAK_TP extends CanBase implements CanTp {
         maxLen = 48
       } else if (data.length > 48) {
         maxLen = 64
-      }else {
+      } else {
         maxLen = data.length
       }
       data = Buffer.concat([data, Buffer.alloc(maxLen - data.length).fill(0)])
