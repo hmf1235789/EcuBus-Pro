@@ -2,7 +2,7 @@
 
 import { test, expect, describe, beforeAll,afterAll} from 'vitest'
 import { EntityAddr, EthAddr, EthDevice } from '../../src/main/share/doip'
-import DOIP, { DOIP_ERROR_ID, DoipError } from '../../src/main/doip'
+import { clientTcp, DOIP,DOIP_ERROR_ID, DoipError } from '../../src/main/doip'
 import { cloneDeep } from 'lodash'
 const eth: EthDevice = {
     label: '',
@@ -16,7 +16,8 @@ const ethAddr: EthAddr = {
     routeActiveTime: 0,
     testerLogicalAddr: 0,
     virReqType: 'broadcast',
-    virReqAddr: ''
+    virReqAddr: '',
+    entityNotFoundBehavior:'normal'
 }
 const entity: EntityAddr = {
     vin: 'ecubus-pro111111111111111111111',
@@ -100,7 +101,8 @@ describe('doip client with self entity',()=>{
         await doip.registerEntity(entity,false)
     })
     test('connect entity',async ()=>{
-        const e =await doip.createClient(ethAddr,entity,'normal')
+        
+        const e =await doip.createClient(ethAddr,entity)
         await doip.routeActiveRequest(e)
         expect(e.state).toBe('active')
     })
@@ -111,17 +113,19 @@ describe('doip client with self entity',()=>{
 })
 describe('doip diag 0x10',()=>{
     let doip:DOIP
+    let client:clientTcp
     beforeAll(async()=>{
         doip = new DOIP(eth)
         await doip.registerEntity(entity,false)
     })
     test('connect entity',async ()=>{
-        const e =await doip.createClient(ethAddr,entity,'normal')
+        const e =await doip.createClient(ethAddr,entity)
         await doip.routeActiveRequest(e)
         expect(e.state).toBe('active')
+        client = e
     })
     test('write diag request',async ()=>{
-       await doip.writeTpReq(ethAddr,entity,Buffer.from([0x10,0x02]))
+       await doip.writeTpReq(client,Buffer.from([0x10,0x02]))
     })
     test('write diag response',async ()=>{
         await doip.writeTpResp(ethAddr,Buffer.from([0x50,0x02]))
@@ -138,7 +142,7 @@ describe.skip('doip client without entity',()=>{
     })
     test('connect entity',async ()=>{
         try{
-            const e =await doip.createClient(ethAddr,entity,'normal')
+            const e =await doip.createClient(ethAddr,entity)
             await doip.routeActiveRequest(e)
             expect(true).toBe(false)
         }catch(e:any){
@@ -167,7 +171,7 @@ describe.skip('doip client directly',()=>{
                 virReqType: 'omit',
                 virReqAddr: '192.168.1.1'
             }
-            const e =await doip.createClient(ethAddr1,entity,'normal')
+            const e =await doip.createClient(ethAddr1,entity)
             await doip.routeActiveRequest(e)
             expect(true).toBe(false)
         }catch(e:any){
@@ -187,14 +191,14 @@ describe('doip client twice with same tester',()=>{
         await doip.registerEntity(entity,false)
     })
     test('connect entity',async ()=>{
-        const e =await doip.createClient(ethAddr,entity,'normal')
+        const e =await doip.createClient(ethAddr,entity)
         await doip.routeActiveRequest(e)
         expect(e.state).toBe('active') 
     })
     test('connect entity again with same tester',async ()=>{
         const ethAddr1=cloneDeep(ethAddr)
         ethAddr1.id='1'
-        const e =await doip.createClient(ethAddr1,entity,'normal')
+        const e =await doip.createClient(ethAddr1,entity)
         try{
             await doip.routeActiveRequest(e)
             expect(e.state).toBe('active') 
@@ -214,7 +218,7 @@ describe.skip('doip client twice with diff tester',()=>{
         await doip.registerEntity(entity,false)
     })
     test('connect entity',async ()=>{
-        const e =await doip.createClient(ethAddr,entity,'normal')
+        const e =await doip.createClient(ethAddr,entity)
         await doip.routeActiveRequest(e)
         expect(e.state).toBe('active') 
     })
@@ -228,7 +232,7 @@ describe.skip('doip client twice with diff tester',()=>{
             virReqType: 'broadcast',
             virReqAddr: ''
         }
-        const e =await doip.createClient(ethAddr1,entity,'normal')
+        const e =await doip.createClient(ethAddr1,entity)
         await doip.routeActiveRequest(e)
         expect(e.state).toBe('active') 
         expect(doip.connectTable.length).toBe(2)

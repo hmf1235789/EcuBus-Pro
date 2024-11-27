@@ -21,10 +21,9 @@ export interface EthAddr {
   routeActiveTime: number
   taType: 'physical' | 'functional'
   testerLogicalAddr: number
-  // ecuLogicalAddr: string //diag address, if use omit use it as active
-  // gatewayAddr: string// gateway address
   virReqType:'unicast'|'omit'|'broadcast'|'multicast'
   virReqAddr: string
+  entityNotFoundBehavior?: 'no' | 'normal' | 'withVin' | 'withEid' | 'forceNormal' | 'forceWithVin' | 'forceWithEid'
 }
 
 export interface VinInfo {
