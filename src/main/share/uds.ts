@@ -2,7 +2,7 @@
 import { v4 } from 'uuid'
 import { CAN_ADDR_FORMAT, CAN_ID_TYPE, CanAddr, CanBaseInfo } from './can'
 import {serviceDetail, ServiceId, SupportServiceId} from './service'
-import {EthBaseInfo,EthAddr} from './doip'
+import {EthBaseInfo,EthAddr, EntityAddr} from './doip'
 
 export type DataType = 'NUM' | 'ARRAY' | 'ASCII' | 'UNICODE' | 'FLOAT' | 'DOUBLE'
 export type HardwareType = "can" | 'lin' | 'eth'
@@ -357,7 +357,7 @@ export interface UdsInfo{
 export interface UdsAddress {
   type: HardwareType
   canAddr?:CanAddr
-  ethAddr?:EthAddr
+  ethAddr?:EntityAddr
 }
 
 export function getUdsAddrName(item?:UdsAddress){

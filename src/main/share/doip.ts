@@ -36,7 +36,9 @@ export interface VinInfo {
 }
 
 export interface EntityAddr extends VinInfo {
+  name?:string,
   nodeType?:'node'|'gateway'
+  ta?: string
   ip?: string
   mcts?: number
   ncts?: number

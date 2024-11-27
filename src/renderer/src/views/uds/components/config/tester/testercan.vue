@@ -403,18 +403,12 @@ function addCanAddress() {
       type: 'eth',
       ethAddr: {
         name: `Addr${data.value.address.length}`,
-        testerLogicalAddr: "0x1",
-        ecuLogicalAddr: "0x2",
-        routeActiveTIme: 0,
-        taType: "physical",
-        vecu: {
-          vin: "",
-          eid: "",
-          gid: "",
-          sendSync: false
-        },
-        virReqType: "unicast",
-        virReqAddr: ""
+        nodeType: "node",
+        vin: "",
+        eid: "",
+        gid: "",
+        sendSync: false,
+        logicalAddr: 0
       }
     })
   }

@@ -1,5 +1,6 @@
 import { HardwareType, Sequence, ServiceItem, UdsAddress, UdsInfo } from "./uds"
 import { ServiceId } from "./service"
+import { EntityAddr } from "./doip"
 
 
 

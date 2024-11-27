@@ -62,7 +62,8 @@ export enum DOIP_ERROR_ID {
     DOIP_DIAG_NACK_ERR,
     DOIP_TCP_ERROR,
     DOIP_DIAG_TIMEOUT,
-    DOIP_ENTITY_EXIST
+    DOIP_ENTITY_EXIST,
+    DOIP_CLOSE
 }
 
 const doipErrorMap: Record<DOIP_ERROR_ID, string> = {
@@ -74,7 +75,8 @@ const doipErrorMap: Record<DOIP_ERROR_ID, string> = {
     [DOIP_ERROR_ID.DOIP_DIAG_NACK_ERR]: 'diagnostic negative ack',
     [DOIP_ERROR_ID.DOIP_TCP_ERROR]: 'tcp error',
     [DOIP_ERROR_ID.DOIP_DIAG_TIMEOUT]: 'diagnostic message timeout',
-    [DOIP_ERROR_ID.DOIP_ENTITY_EXIST]: 'entity already exist'
+    [DOIP_ERROR_ID.DOIP_ENTITY_EXIST]: 'entity already exist',
+    [DOIP_ERROR_ID.DOIP_CLOSE]: 'self close'
 }
 
 export class DoipError extends Error {
@@ -132,7 +134,8 @@ interface tcpData {
     authInfo?: any
     confirmInfo?: any
     socket: net.Socket
-    sa?: number
+    testerAddr?: number
+   
     recvState: 'header' | 'payload'
     pendingBuffer: Buffer
     payloadLen: number
@@ -198,7 +201,7 @@ export class DOIP {
         const udp4Server = dgram.createSocket('udp4')
 
         udp4Server.on('error', (err) => {
-            this.log.error(getTsUs() - this.startTs, `udp server : ${err.toString()}`)
+            this.udsLog.systemMsg(`udp server error : ${err.toString()}`, getTsUs() - this.startTs, 'error')
             this.udp4Server?.close()
         })
         udp4Server.bind(13400, this.eth.handle)
@@ -222,7 +225,6 @@ export class DOIP {
         this.udp4Server = udp4Server
     }
     async registerEntity(entity: EntityAddr, announce = true) {
-        //TODO:entity error
         return new Promise<void>((resolve, reject) => {
             if (this.ethAddr != undefined) {
                 reject(new DoipError(DOIP_ERROR_ID.DOIP_ENTITY_EXIST))
@@ -267,6 +269,8 @@ export class DOIP {
                     payloadLen: 0
                 }
                 this.connectTable.push(item)
+                //a new client
+                this.udsLog.systemMsg(`new tcp client connected`, getTsUs() - this.startTs, 'info')
                 socket.on('data', (val) => {
 
                     if (this.eth.handle != socket.remoteAddress) {
@@ -276,14 +280,16 @@ export class DOIP {
 
                     this.parseData(socket, item, val)
                 })
-                socket.on('close', () => {
-                    this.log.error(getTsUs() - this.startTs, `remote client tcp close`)
+                socket.on('end', () => {
+                    reject(new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, 'tcp server close'))
+                    this.udsLog.systemMsg(`tcp server end`, getTsUs() - this.startTs, 'error')
+                    this.event.emit(`server-${item.testerAddr}-${entity.logicalAddr}`, 'error')
                     this.closeSocket(socket)
                 })
                 socket.on('error', (err) => {
                     reject(new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, err.toString()))
-                    this.log.error(getTsUs() - this.startTs, `connect tcp : ${err.toString()}`)
-
+                    this.udsLog.systemMsg(`tcp server : ${err.toString()}`, getTsUs() - this.startTs, 'error')
+                    this.event.emit(`server-${item.testerAddr}-${entity.logicalAddr}`, 'error')
                     this.closeSocket(socket)
                 })
 
@@ -291,7 +297,7 @@ export class DOIP {
             })
             this.server.on('error', (err) => {
                 reject(new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, err.toString()))
-                this.log.error(getTsUs() - this.startTs, `tcp server : ${err.toString()}`)
+                this.udsLog.systemMsg(`tcp main server : ${err.toString()}`,getTsUs() - this.startTs,'error')
                 this.server?.close()
                 this.tcpServer?.close()
             })
@@ -308,7 +314,8 @@ export class DOIP {
                     socket.send(data, 13400, '255.255.255.255', (err) => {
                         if (err) {
                             socket.close()
-                            this.log.error(getTsUs() - this.startTs, `udp server send error : ${err.toString()}`)
+                            this.udsLog.systemMsg(`udp server send error : ${err.toString()}`, getTsUs() - this.startTs, 'error')
+                        
                         } else {
                             this.log.ipBase('udp', 'OUT', '255.255.255.255', socket.address().port, 13400, data)
                             i++
@@ -426,34 +433,27 @@ export class DOIP {
             }, 2000)
             socket.on('connect', () => {
                 clearTimeout(timeout)
-
                 this.tcpClientMap.set(testerAddr.id, item)
                 resolve(item)
             })
             socket.on('error', (err) => {
                 reject(new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, err.toString()))
                 socket.destroy()
-
                 this.tcpClientMap.delete(testerAddr.id)
                 this.udsLog.systemMsg(`client tcp connect error:${err.toString()}`, getTsUs() - this.startTs, 'error')
-
+                this.event.emit(`client-${testerAddr.testerLogicalAddr}-${entityAddr.logicalAddr}`, 'error')
             })
             socket.on('end', () => {
                 reject(new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, 'tcp server close'))
                 socket.destroy()
-
                 this.tcpClientMap.delete(testerAddr.id)
+                this.udsLog.systemMsg(`client tcp connect end`, getTsUs() - this.startTs, 'error')
                 item.pendingPromise?.reject(new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, 'tcp server close'))
-                // this.udsLog.systemMsg(`client tcp connect end`,getTsUs() - this.startTs, 'error')
+                this.event.emit(`client-${testerAddr.testerLogicalAddr}-${entityAddr.logicalAddr}`, 'error')
+
             })
             socket.on('data', (val) => {
-                // let isSelf=false
-                // // for(const client of this.tcpClientMap.values()){
-                // //     if(client.socket.localPort==socket.remotePort&&client.socket.localAddress==socket.remoteAddress){
-                // //         isSelf=true
-                // //         break
-                // //     }
-                // // }
+
                 if (this.eth.handle != socket.remoteAddress) {
                     this.log.ipBase('tcp', 'IN', testerAddr.virReqAddr, socket.localPort, 13400, val)
                 }
@@ -491,6 +491,9 @@ export class DOIP {
                 reject(new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, 'tcp closed'))
                 return
             }
+            if(item.state!='active'){
+                reject(new DoipError(DOIP_ERROR_ID.DOIP_PARAM_ERR, undefined, 'client not active'))
+            }
             item.pendingPromise = { resolve, reject }
             const buffer = Buffer.alloc(4 + data.length)
             buffer.writeUInt16BE(item.testerAddr.testerLogicalAddr, 0)
@@ -523,7 +526,7 @@ export class DOIP {
                 return
             }
 
-            const sitem = this.connectTable.find((item) => item.sa == testerAddr.testerLogicalAddr && item.state == 'register-active')
+            const sitem = this.connectTable.find((item) => item.testerAddr == testerAddr.testerLogicalAddr && item.state == 'register-active')
             if (sitem) {
 
                 const buffer = Buffer.alloc(4 + data.length)
@@ -714,7 +717,6 @@ export class DOIP {
             }
         } else {
             //payload
-
             if (buffer.length >= item.payloadLen) {
                 let sentData: Buffer | undefined
                 item.pendingBuffer = buffer.subarray(item.payloadLen)
@@ -734,16 +736,16 @@ export class DOIP {
                     if (item.lastAction.payloadType == PayloadType.DoIP_RouteActivationRequest) {
                         const sa = buffer.readUInt16BE(0)
                         if (item.state == 'init') {
-                            item.sa = sa
+                            item.testerAddr = sa
                             clearTimeout(item.inactiveTimer)
 
 
                             //if sa in connectTable, do alive check
-                            const sitem = this.connectTable.find((item) => item.sa == sa && item.state != 'init')
+                            const sitem = this.connectTable.find((item) => item.testerAddr == sa && item.state != 'init')
                             if (sitem) {
                                 item.state = 'sa-check'
 
-                                this.aliveCheck(socket, item.sa)
+                                this.aliveCheck(socket, item.testerAddr)
 
                             } else {
                                 item.state = 'register-active'
@@ -751,7 +753,7 @@ export class DOIP {
 
                             }
                         } else {
-                            if (item.sa != sa) {
+                            if (item.testerAddr != sa) {
                                 const val = this.getRouteActiveResponse(sa, RouteCode.DoIp_SaDiff)
                                 socket.write(val, (err) => {
                                     this.log.ipBase('tcp', 'OUT', socket.remoteAddress, socket.localPort, socket.remotePort, val)
@@ -759,7 +761,7 @@ export class DOIP {
                                 })
 
                             } else {
-                                sentData = this.getRouteActiveResponse(item.sa, RouteCode.DoIP_OK)
+                                sentData = this.getRouteActiveResponse(item.testerAddr, RouteCode.DoIP_OK)
                             }
                         }
                     } else {
@@ -777,9 +779,9 @@ is in the state “Registered [Routing Active]”.*/
                                     const sitem = this.connectTable.find((qq) => qq.socket == item.aliveTimer?.socket)
 
 
-                                    if (sitem && sitem.sa != undefined) {
+                                    if (sitem && sitem.testerAddr != undefined) {
 
-                                        const val = this.getRouteActiveResponse(sitem.sa, RouteCode.DoIP_SaUsed)
+                                        const val = this.getRouteActiveResponse(sitem.testerAddr, RouteCode.DoIP_SaUsed)
                                         sitem.socket.write(val, (err) => {
                                             this.log.ipBase('tcp', 'OUT', socket.remoteAddress, socket.localPort, socket.remotePort, val)
                                             this.closeSocket(sitem.socket, 'sa used')
@@ -792,13 +794,23 @@ is in the state “Registered [Routing Active]”.*/
                             } else if (item.lastAction.payloadType == PayloadType.DoIP_DiagnosticMessage) {
                                 const sa = buffer.readUInt16BE(0)
                                 const ta = buffer.readUInt16BE(2)
-                                this.event.emit(`${sa}-${ta}`, buffer.subarray(4))
-
                                 const repl = Buffer.alloc(5 + buffer.length - 4)
                                 repl.writeUInt16BE(ta, 0)
                                 repl.writeUInt16BE(sa, 0)
                                 buffer.subarray(4).copy(repl, 5)
-                                sentData = this.buildMessage(PayloadType.DoIP_DiagnosticMessagePositiveAcknowledge, repl)
+                                if (ta != this.ethAddr?.logicalAddr) {
+                                    //Unknown target address
+                                    repl.writeUInt8(3, 4)
+                                    sentData = this.buildMessage(PayloadType.DoIP_DiagnosticMessageNegativeAcknowledge, repl)
+                                } else if(sa!=item.testerAddr){
+                                    repl.writeUInt8(2, 4)
+                                    sentData = this.buildMessage(PayloadType.DoIP_DiagnosticMessageNegativeAcknowledge, repl)
+                                }else{
+                                    sentData = this.buildMessage(PayloadType.DoIP_DiagnosticMessagePositiveAcknowledge, repl)
+                                    //testerAddr,entityAddr,targetAddr
+                                    this.event.emit(`server-${sa}-${this.ethAddr?.logicalAddr}`, buffer.subarray(4))
+                                }
+
 
                             } else {
                                 //unknown payload type
@@ -921,24 +933,36 @@ is in the state “Registered [Routing Active]”.*/
                     } else if (item.lastAction.payloadType == PayloadType.DoIP_DiagnosticMessagePositiveAcknowledge) {
                         const sa = buffer.readUInt16BE(0)
                         const ta = buffer.readUInt16BE(2)
-                        if (sa != item.entityAddr.logicalAddr || ta != item.testerAddr.testerLogicalAddr) {
-                            item.pendingPromise?.reject(new DoipError(DOIP_ERROR_ID.DOIP_DIAG_NACK_ERR, buffer, `client tcp receive diag sa or ta diff`))
+
+                        if (ta != item.testerAddr.testerLogicalAddr) {
+                            item.pendingPromise?.reject(new DoipError(DOIP_ERROR_ID.DOIP_DIAG_NACK_ERR, buffer, `client tcp receive diag ta diff`))
                         } else {
                             item.pendingPromise?.resolve({ ts: getTsUs() - this.startTs, data: buffer.subarray(4) })
                         }
+
+
 
 
                     } else if (item.lastAction.payloadType == PayloadType.DoIP_DiagnosticMessage) {
 
                         const sa = buffer.readUInt16BE(0)
                         const ta = buffer.readUInt16BE(2)
-                        if (sa != item.entityAddr.logicalAddr || ta != item.testerAddr.testerLogicalAddr) {
-                            item.pendingPromise?.reject(new DoipError(DOIP_ERROR_ID.DOIP_DIAG_NACK_ERR, buffer.subarray(4), `client tcp receive diag sa or ta diff`))
+                        if (ta != item.testerAddr.testerLogicalAddr) {
+                            item.pendingPromise?.reject(new DoipError(DOIP_ERROR_ID.DOIP_DIAG_NACK_ERR, buffer, `client tcp receive diag ta diff`))
                         } else {
-                            item.pendingPromise?.resolve({ ts: getTsUs() - this.startTs, data: buffer.subarray(4) })
+                            if (this.event.listenerCount(`client-${ta}-${sa}`) > 0) {
+                                item.pendingPromise?.resolve({ ts: getTsUs() - this.startTs, data: buffer.subarray(4) })
+                                this.event.emit(`client-${ta}-${sa}`, buffer.subarray(4))
+                            } else {
+                                item.pendingPromise?.reject(new DoipError(DOIP_ERROR_ID.DOIP_DIAG_NACK_ERR, buffer, `client tcp receive diag sa diff`))
+                            }
+
+
                         }
+
+
                     } else {
-                        //unknown payload type
+                        //unknown payload type, client do nothing
 
 
                     }
@@ -1064,7 +1088,8 @@ is in the state “Registered [Routing Active]”.*/
                     if (sentData) {
                         socket.send(sentData, item.remotePort, item.remoteIp, (err) => {
                             if (err) {
-                                this.log.error(getTsUs() - this.startTs, `udp server send error : ${err.toString()}`)
+                                this.udsLog.systemMsg(`udp server send error:${err.toString()}`, getTsUs() - this.startTs, 'error')
+                             
                             } else {
                                 this.log.ipBase('udp', 'OUT', item.remoteIp, item.localPort, item.remotePort, sentData as Buffer)
                             }
@@ -1374,7 +1399,7 @@ is in the state “Registered [Routing Active]”.*/
     }
     aliveCheck(startSocket: net.Socket, sa?: number,) {
         const doCheck = (ta: number) => {
-            const item = this.connectTable.find((item) => item.sa == ta && item.state != 'init')
+            const item = this.connectTable.find((item) => item.testerAddr == ta && item.state != 'init')
             if (item) {
                 const val = this.getAliveCheckRequest()
                 this.log.ipBase('tcp', 'OUT', item.socket.remoteAddress, item.socket.localPort, item.socket.remotePort, val)
@@ -1397,8 +1422,8 @@ is in the state “Registered [Routing Active]”.*/
             doCheck(sa)
         } else {
             for (const item of this.connectTable) {
-                if (item.socket != startSocket && item.sa != undefined) {
-                    doCheck(item.sa)
+                if (item.socket != startSocket && item.testerAddr != undefined) {
+                    doCheck(item.testerAddr)
                 }
 
             }
@@ -1414,34 +1439,113 @@ is in the state “Registered [Routing Active]”.*/
 
 export class DOIP_SOCKET {
     client?: clientTcp
- 
+    recvTimer: NodeJS.Timeout | undefined = undefined
     abortController = new AbortController()
-    constructor(private doip: DOIP, private testerAddr: EthAddr, private entityAddr: EntityAddr,private mode: 'client' | 'server') {
+    recvBuffer: ({ data: Buffer; ts: number } | DoipError)[] = []
+    cb: any
+    closed = false
+    ta: number
+    cbSpec: any
+    pendingRecv: {
+        resolve: (value: { data: Buffer; ts: number }) => void
+        reject: (reason: DoipError) => void
+    } | null = null
+    constructor(private doip: DOIP, private testerAddr: EthAddr, private entityAddr: EntityAddr, private mode: 'client' | 'server') {
         this.mode = mode
+        this.cb = this.recvHandle.bind(this)
         if (mode == 'client') {
-            this.connect()
+            this.doip.event.on(`client-${this.testerAddr.testerLogicalAddr}-${this.entityAddr.logicalAddr}`, this.cb)
+        } else {
+            this.doip.event.on(`server-${this.testerAddr.testerLogicalAddr}-${this.entityAddr.logicalAddr}`, this.cb)
         }
-
+        this.ta = entityAddr.logicalAddr
     }
-   
+    static async create(doip: DOIP, testerAddr: EthAddr, entityAddr: EntityAddr, mode: 'client' | 'server') {
+        const socket = new DOIP_SOCKET(doip, testerAddr, entityAddr, mode)
+        if (mode == 'client') {
+            await socket.connect()
+
+        }
+    }
+    setSpecialTa(ta: number) {
+        if (this.mode == 'client') {
+
+            this.doip.event.off(`client-${this.testerAddr.testerLogicalAddr}-${this.ta}`, this.cb)
+
+
+            this.doip.event.on(`client-${this.testerAddr.testerLogicalAddr}-${ta}`, this.cb)
+            this.ta = ta
+
+        }
+    }
+    recvHandle(val: { data: Buffer; ts: number } | DoipError) {
+        if (this.pendingRecv) {
+            if (this.recvTimer) {
+                clearTimeout(this.recvTimer)
+                this.recvTimer = undefined
+            }
+            if (val instanceof DoipError) {
+                this.pendingRecv.reject(val)
+            } else {
+                this.pendingRecv.resolve(val)
+            }
+            this.pendingRecv = null
+        } else {
+            this.recvBuffer.push(val)
+        }
+    }
     async connect() {
         this.client = await this.doip.createClient(this.testerAddr, this.entityAddr)
     }
     async write(data: Buffer) {
-        if(this.mode=='client'){
+        if (this.mode == 'client') {
             if (this.client) {
-                return await this.doip.writeTpReq(this.client, data)
+                return await this.doip.writeTpReq(this.client, data, this.ta)
             } else {
-                throw new Error('client not ready')
+                throw new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, data, 'client not connect')
             }
-        }else{
+        } else {
             return await this.doip.writeTpResp(this.testerAddr, data)
         }
     }
-    async read(){
-        
+    async read(timeout: number): Promise<{ data: Buffer; ts: number }> {
+        return new Promise((resolve, reject) => {
+            if (this.closed) {
+                reject(new DoipError(DOIP_ERROR_ID.DOIP_CLOSE))
+                return
+            }
+            this.abortController.signal.onabort = () => {
+                reject(new DoipError(DOIP_ERROR_ID.DOIP_CLOSE))
+                this.pendingRecv = null
+                clearTimeout(this.recvTimer)
+            }
+            const val = this.recvBuffer.shift()
+            if (val) {
+                if (val instanceof DoipError) {
+                    reject(val)
+                } else {
+                    resolve(val)
+                }
+            } else {
+                this.pendingRecv = { resolve, reject }
+                this.recvTimer = setTimeout(() => {
+                    if (this.pendingRecv) {
+                        reject(new DoipError(DOIP_ERROR_ID.DOIP_DIAG_TIMEOUT))
+                        this.pendingRecv = null
+                    }
+                }, timeout)
+            }
+        })
     }
-
+    close() {
+        if (this.mode == 'client') {
+            this.doip.event.off(`client-${this.testerAddr.testerLogicalAddr}-${this.ta}`, this.cb)
+        } else {
+            this.doip.event.off(`server-${this.testerAddr.testerLogicalAddr}-${this.entityAddr.logicalAddr}`, this.cb)
+        }
+        this.abortController.abort()
+        this.closed = true
+    }
 }
 
 
