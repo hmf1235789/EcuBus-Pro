@@ -116,7 +116,8 @@
     </el-form>
 
     <div v-if="data.address && data.address.length > 0">
-      <el-tabs tab-position="left" v-model="activeTabName" style="height: 660px" closable @tab-remove="removeTab">
+      <el-tabs tab-position="left" v-model="activeTabName" v-if="props.type == 'can'" style="height: 660px" closable
+        @tab-remove="removeTab">
         <el-tab-pane :name="`index${index}`" :label="getAddrName(item, index)" v-for="item, index in data.address"
           :key="index">
           <template #label>
@@ -128,8 +129,27 @@
               }">{{ item.canAddr?.name ? item.canAddr.name : `Addr${index}` }}</span>
             </span>
           </template>
-          <canAddr :index="index" v-if="props.type=='can'&&data.address[index].canAddr" :addrs="data.address"
+          <canAddr :index="index" :addrs="data.address" v-if="data.address[index].canAddr"
             :ref="(e) => addrRef[index] = e" v-model="data.address[index].canAddr" />
+
+        </el-tab-pane>
+      </el-tabs>
+      <el-tabs tab-position="left" v-else-if="props.type == 'eth'" v-model="activeTabName" style="height: 320px" closable
+        @tab-remove="removeTab">
+        <el-tab-pane :name="`index${index}`" :label="getAddrName(item, index)" v-for="item, index in data.address"
+          :key="index">
+          <template #label>
+            <span class="custom-tabs-label">
+
+              <span :class="{
+                addrError: errors[index]
+
+              }">{{ item.canAddr?.name ? item.canAddr.name : `Addr${index}` }}</span>
+            </span>
+          </template>
+
+          <EthAddr :index="index" v-if="data.address[index].ethAddr" :addrs="data.address"
+            :ref="(e) => addrRef[index] = e" v-model="data.address[index].ethAddr" />
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -166,6 +186,7 @@ import refreshIcon from '@iconify/icons-material-symbols/refresh'
 import newIcon from '@iconify/icons-material-symbols/new-window'
 import buildError from "./buildError.vue";
 import dangerIcon from '@iconify/icons-material-symbols/dangerous-outline-rounded'
+import EthAddr from "./ethAddr.vue";
 
 const globalStart = toRef(window, 'globalStart')
 const ruleFormRef = ref<FormInstance>();
@@ -403,12 +424,13 @@ function addCanAddress() {
       type: 'eth',
       ethAddr: {
         name: `Addr${data.value.address.length}`,
-        nodeType: "node",
-        vin: "",
-        eid: "",
-        gid: "",
-        sendSync: false,
-        logicalAddr: 0
+        vin: "ecubus-pro eth000",
+        eid: "00-00-00-00-00-00",
+        gid: "00-00-00-00-00-00",
+        logicalAddr: 0,
+        taType: 'physical',
+        virReqType: "broadcast",
+        virReqAddr: ""
       }
     })
   }

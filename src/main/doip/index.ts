@@ -357,11 +357,11 @@ export class DOIP {
         this.tcpClientMap.delete(key)
     }
     async createClient(testerAddr: EthAddr, entityAddr: EntityAddr): Promise<clientTcp> {
-        const allowRequest = testerAddr.entityNotFoundBehavior || 'no'
+        const allowRequest = entityAddr.entityNotFoundBehavior || 'no'
         let ip: string | undefined
-        if (testerAddr.virReqType == 'omit') {
+        if (entityAddr.virReqType == 'omit') {
             this.udsLog.systemMsg('omit vin find, connect special ip', getTsUs() - this.startTs, 'info')
-            ip = testerAddr.virReqAddr
+            ip = entityAddr.virReqAddr
 
         } else {
             //find in entityMap,
@@ -425,7 +425,7 @@ export class DOIP {
                 pendingBuffer: Buffer.alloc(0),
                 payloadLen: 0,
             }
-            item.testerAddr.virReqAddr = ip
+            item.entityAddr.virReqAddr = ip
             const timeout = setTimeout(() => {
                 reject(new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, 'tcp connect timeout'))
                 socket.destroy()
@@ -455,7 +455,7 @@ export class DOIP {
             socket.on('data', (val) => {
 
                 if (this.eth.handle != socket.remoteAddress) {
-                    this.log.ipBase('tcp', 'IN', testerAddr.virReqAddr, socket.localPort, 13400, val)
+                    this.log.ipBase('tcp', 'IN', entityAddr.virReqAddr, socket.localPort, 13400, val)
                 }
                 this.parseDataClient(socket, item, val)
             })
@@ -476,7 +476,7 @@ export class DOIP {
                 if (err) {
                     reject(new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, err.toString()))
                 } else {
-                    this.log.ipBase('tcp', 'OUT', client.testerAddr.virReqAddr, client.socket.localPort, 13400, allData)
+                    this.log.ipBase('tcp', 'OUT', client.entityAddr.virReqAddr, client.socket.localPort, 13400, allData)
                 }
             })
             client.timeout = setTimeout(() => {
@@ -504,7 +504,7 @@ export class DOIP {
             }
             data.copy(buffer, 4)
             const val = this.buildMessage(PayloadType.DoIP_DiagnosticMessage, buffer)
-            this.log.ipBase('tcp', 'OUT', item.testerAddr.virReqAddr, item.socket.localPort, 13400, val)
+            this.log.ipBase('tcp', 'OUT', item.entityAddr.virReqAddr, item.socket.localPort, 13400, val)
             item.socket.write(val, (err) => {
                 if (err) {
                     reject(new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, err.toString()))
@@ -541,7 +541,7 @@ export class DOIP {
                     if (err) {
                         reject(new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, err.toString()))
                     } else {
-                        this.log.ipBase('tcp', 'OUT', testerAddr.virReqAddr, sitem.socket.localPort, sitem.socket.remotePort, val)
+                        this.log.ipBase('tcp', 'OUT', sitem.socket.localAddress, sitem.socket.localPort, sitem.socket.remotePort, val)
                         resolve({ ts: getTsUs() - this.startTs, data: val })
                     }
                 })
@@ -603,7 +603,7 @@ export class DOIP {
                 recvState: 'header',
                 pendingBuffer: Buffer.alloc(0),
                 payloadLen: 0,
-                remoteIp: testerAddr.virReqAddr,
+                remoteIp: entityAddr.virReqAddr,
                 remotePort: 13400
             }
             socket.on('message', (msg, rinfo) => {
@@ -642,7 +642,7 @@ export class DOIP {
                 if (this.ethAddr) {
                     this.ethAddr.udpLocalPort = udpData.localPort
                 }
-                if (testerAddr.virReqType == 'broadcast') {
+                if (entityAddr.virReqType == 'broadcast') {
                     socket.setBroadcast(true)
                     socket.send(data, 13400, '255.255.255.255', (err) => {
                         if (err) {
@@ -653,17 +653,17 @@ export class DOIP {
                         }
 
                     })
-                } else if (testerAddr.virReqType == 'unicast') {
-                    socket.send(data, 13400, testerAddr.virReqAddr, (err) => {
+                } else if (entityAddr.virReqType == 'unicast') {
+                    socket.send(data, 13400, entityAddr.virReqAddr, (err) => {
                         if (err) {
                             reject(new DoipError(DOIP_ERROR_ID.DOIP_UDP_SEND_ERR, data, err.toString()))
                         } else {
-                            this.log.ipBase('udp', 'OUT', testerAddr.virReqAddr, socket.address().port, 13400, data)
+                            this.log.ipBase('udp', 'OUT', entityAddr.virReqAddr, socket.address().port, 13400, data)
 
                         }
 
                     })
-                } else if (testerAddr.virReqType == 'omit') {
+                } else if (entityAddr.virReqType == 'omit') {
                     reject(new DoipError(DOIP_ERROR_ID.DOIP_PARAM_ERR, undefined, 'omit ignore'))
                     clearTimeout(timeout)
                     socket.close()
@@ -671,7 +671,7 @@ export class DOIP {
                 }
                 else {
                     clearTimeout(timeout)
-                    reject(new DoipError(DOIP_ERROR_ID.DOIP_PARAM_ERR, undefined, `unknown virReqType:${testerAddr.virReqType}`))
+                    reject(new DoipError(DOIP_ERROR_ID.DOIP_PARAM_ERR, undefined, `unknown virReqType:${entityAddr.virReqType}`))
                     socket.close()
                 }
 
@@ -1060,7 +1060,9 @@ is in the state “Registered [Routing Active]”.*/
                             ...vin,
                             ip: item.remoteIp,
                             localPort: item.localPort,
-
+                            taType: 'physical',
+                            virReqType: 'broadcast',
+                            virReqAddr: ''
                         }
                         this.entityMap.set(`${item.remoteIp}-${item.remotePort}`, entityAddr)
                     }

@@ -19,11 +19,8 @@ export interface EthAddr {
   name: string
   desc?: string
   routeActiveTime: number
-  taType: 'physical' | 'functional'
   testerLogicalAddr: number
-  virReqType:'unicast'|'omit'|'broadcast'|'multicast'
-  virReqAddr: string
-  entityNotFoundBehavior?: 'no' | 'normal' | 'withVin' | 'withEid' | 'forceNormal' | 'forceWithVin' | 'forceWithEid'
+  
 }
 
 export interface VinInfo {
@@ -37,6 +34,7 @@ export interface VinInfo {
 
 export interface EntityAddr extends VinInfo {
   name?:string,
+  taType: 'physical' | 'functional'
   nodeType?:'node'|'gateway'
   ta?: string
   ip?: string
@@ -47,4 +45,8 @@ export interface EntityAddr extends VinInfo {
   localPort?: number
   sendSync?: boolean
   udpLocalPort?: number
+
+  virReqType:'unicast'|'omit'|'broadcast'|'multicast'
+  virReqAddr: string
+  entityNotFoundBehavior?: 'no' | 'normal' | 'withVin' | 'withEid' | 'forceNormal' | 'forceWithVin' | 'forceWithEid'
 }
