@@ -15,13 +15,28 @@ export interface EthBaseInfo {
 }
 
 export interface EthAddr {
-  id:string
-  name: string
-  desc?: string
-  routeActiveTime: number
-  testerLogicalAddr: number
-  
+  name:string
+  entity:EntityAddr
+  tester:TesterAddr
 }
+
+export interface TesterAddr{
+  routeActiveTime: number
+  createConnectDelay: number
+  testerLogicalAddr: number
+}
+
+
+export interface EthNode{
+  type:'eth'
+  disabled?:boolean
+  id:string
+  name:string
+  channel:string[]
+  script?:string
+  attachTester?:string
+}
+
 
 export interface VinInfo {
   vin: string,
@@ -33,7 +48,6 @@ export interface VinInfo {
 }
 
 export interface EntityAddr extends VinInfo {
-  name?:string,
   taType: 'physical' | 'functional'
   nodeType?:'node'|'gateway'
   ta?: string

@@ -6,6 +6,7 @@ import { TesterInfo } from 'nodeCan/tester'
 import { CanInterAction, CanNode } from 'nodeCan/can'
 import { ElMessageBox } from 'element-plus'
 import { useProjectStore } from './project'
+import { EthNode } from 'nodeCan/doip'
 
 
 export interface CanInter{
@@ -30,10 +31,10 @@ export interface State {
   devices: Record<string, UdsDevice>
   tester:Record<string, TesterInfo>
   subFunction: Record<string, { name: string; subFunction: string }[]>
-  nodes: Record<string, CanNode>
+  nodes: Record<string, NodeItem>
   ia: Record<string, Inter>
 }
-export type NodeItem=CanNode
+export type NodeItem=CanNode|EthNode
 
 
 export const useDataStore = defineStore('useDataStore', {

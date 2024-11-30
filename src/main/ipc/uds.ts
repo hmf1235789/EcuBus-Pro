@@ -1,5 +1,5 @@
 import { BrowserWindow, ipcMain, shell } from 'electron'
-import scriptIndex from '../../../resources/docs/scriptApi/index.html?asset&asarUnpack'
+import scriptIndex from '../../../resources/docs/.gitkeep?asset&asarUnpack'
 // #v-ifdef IGNORE_NODE!='1'
 import { PEAK_TP } from '../docan/peak'
 import { ZLG_CAN } from '../docan/zlg'
@@ -17,7 +17,8 @@ import { TesterInfo } from '../share/tester'
 import log from 'electron-log'
 import { NodeItem } from '../docan/nodeItem'
 import { UdsLOG } from '../log'
-import {getEthDevices} from './../doip'
+import { DOIP, getEthDevices } from './../doip'
+import { EthBaseInfo } from '../share/doip'
 
 
 const libPath = path.dirname(dllLib)
@@ -32,7 +33,7 @@ KVASER_CAN.loadDllPath(libPath)
 
 
 ipcMain.on('ipc-open-script-api', (event, arg) => {
-    shell.openPath(scriptIndex)
+    shell.openPath(path.join(path.dirname(scriptIndex), 'scriptApi', 'index.html'))
 })
 
 
@@ -127,11 +128,11 @@ ipcMain.handle('ipc-get-can-devices', async (event, ...arg) => {
 
 ipcMain.handle('ipc-get-eth-devices', async (event, ...arg) => {
     const vendor = arg[0].toUpperCase()
-    if(vendor=='SIMULATE'){
+    if (vendor == 'SIMULATE') {
         return getEthDevices()
     }
     return []
-    
+
 })
 
 
@@ -156,22 +157,14 @@ interface Subscription {
 
 
 const canBaseMap = new Map<string, CanBase>()
+const ethBaseMap = new Map<string, EthBaseInfo>()
 const udsTesterMap = new Map<string, UDSTesterMain>()
 const nodeMap = new Map<string, NodeItem>()
 let cantps: CAN_TP[] = []
+let doips: DOIP[] = []
 
-ipcMain.handle('ipc-global-start', async (event, ...arg) => {
-    let i = 0
-    const projectInfo = arg[i++] as {
-        path: string,
-        name: string
-    }
-    const devices = arg[i++] as Record<string, UdsDevice>
-    const testers = arg[i++] as Record<string, TesterInfo>
-    const nodes = arg[i++] as Record<string, CanNode>
-    const sub = arg[i++] as Subscription[] || []
 
-    
+async function globalStart(devices: Record<string, UdsDevice>, testers: Record<string, TesterInfo>, nodes: Record<string, CanNode>, projectInfo: { path: string, name: string }, sub: Subscription[]) {
     let activeKey = ''
     try {
         for (const key in devices) {
@@ -201,6 +194,9 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
                     })
                     canBaseMap.set(key, canBase)
                 }
+            } else if (device.type == 'eth' && device.ethDevice) {
+                const ethDevice = device.ethDevice
+                ethBaseMap.set(key, ethDevice)
             }
         }
     } catch (err: any) {
@@ -222,11 +218,12 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
 
     }
     //testes
+
     for (const key in testers) {
         const tester = testers[key]
         if (tester.type == 'can') {
             for (const val of canBaseMap.values()) {
-                const cantp = new CAN_TP(val,true)
+                const cantp = new CAN_TP(val, true)
                 for (const addr of tester.address) {
                     if (addr.type == 'can' && addr.canAddr) {
                         const id = cantp.getReadId(addr.canAddr)
@@ -262,7 +259,56 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
                 }
             }
         }
+        else if (tester.type == 'eth') {
+            for (const val of ethBaseMap.values()) {
+                const doip = new DOIP(val)
+                doips.push(doip)
+                const list = []
+                for (const addr of tester.address) {
+                    if (addr.type == 'eth' && addr.ethAddr) {
+                        list.push(doip.createClient(addr.ethAddr))
+
+
+
+
+                    }
+                }
+
+                Promise.allSettled(list).then((e) => {
+                    for (const [index, r] of e.entries()) {
+                        if (r.status == 'rejected') {
+
+
+                            sysLog.warn(`Tester(${tester.name})-Addr(${tester.address[index].ethAddr?.name}) ${r.reason.toString()}, send diag will retry`)
+
+
+                        } else {
+                            console.log(r.value)
+                        }
+                    }
+                })
+            }
+        }
     }
+}
+ipcMain.handle('ipc-global-start', async (event, ...arg) => {
+    let i = 0
+    const projectInfo = arg[i++] as {
+        path: string,
+        name: string
+    }
+    const devices = arg[i++] as Record<string, UdsDevice>
+    const testers = arg[i++] as Record<string, TesterInfo>
+    const nodes = arg[i++] as Record<string, CanNode>
+    const sub = arg[i++] as Subscription[] || []
+
+    try {
+        await globalStart(devices, testers, nodes, projectInfo, sub)
+    } catch (err: any) {
+        globalStop(true)
+        throw err
+    }
+
 
 })
 interface timerType {
@@ -292,6 +338,15 @@ export function globalStop(emit = false) {
         value.close()
     })
     cantps = []
+
+    doips.forEach((value) => {
+        value.close()
+    })
+    doips = []
+
+
+
+
     if (emit) {
         BrowserWindow.getAllWindows().forEach((win) => {
             win.webContents.send('ipc-global-stop')
@@ -331,6 +386,16 @@ ipcMain.handle('ipc-run-sequence', async (event, ...arg) => {
                 await uds.runSequence(seqIndex, cycle)
             } else {
                 throw new Error(`can device ${device.canDevice.vendor}-${device.canDevice.handle} not found`)
+            }
+        } else if (device.type == 'eth' && device.ethDevice) {
+            const id=device.ethDevice.id
+            const ethBase = doips.find((e) => e.base.id == id)
+            if (ethBase) {
+                uds.setDoip(ethBase)
+                udsTesterMap.set(tester.id, uds)
+                await uds.runSequence(seqIndex, cycle)
+            } else {
+                throw new Error(`eth device ${device.ethDevice.vendor}-${device.ethDevice.device.handle} not found`)
             }
         }
     } catch (err: any) {

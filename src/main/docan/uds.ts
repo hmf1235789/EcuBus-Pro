@@ -96,6 +96,7 @@ import tsconfig from './ts.json'
 import json5 from 'json5'
 import { v4 } from 'uuid'
 import { glob } from 'glob'
+import { DOIP, DOIP_SOCKET } from '../doip'
 const NRCMsg: Record<number, string> = {
   0x10: 'General Reject',
   0x11: 'Service Not Supported',
@@ -188,6 +189,7 @@ export class UDSTesterMain {
 
   project: ProjectConfig
   runningCanBase?: CanBase
+  runningDoip?:DOIP
   services: Record<string, ServiceItem> = {}
   constructor(project: ProjectConfig, tester: TesterInfo, private device: UdsDevice) {
     this.project = project
@@ -223,6 +225,10 @@ export class UDSTesterMain {
   setCanBase(base?: CanBase) {
     this.runningCanBase = base
     this.closeBase = false
+  }
+  setDoip(doip?:DOIP){
+    this.runningDoip=doip
+    this.closeBase=false
   }
   async runSequence(seqIndex: number, cycle?: number) {
     this.ac = new AbortController()
@@ -274,7 +280,26 @@ export class UDSTesterMain {
           if (this.runningCanBase) {
             await this.runCanSequenceWithBase(this.runningCanBase, seqIndex, log, cycleCount)
           } else {
-            await this.runCanSequence(targetDevice.canDevice, seqIndex, log, cycleCount)
+            // await this.runCanSequence(targetDevice.canDevice, seqIndex, log, cycleCount)
+            throw new Error('can base not found')
+          }
+        } catch (e: any) {
+          if (this.ac.signal.aborted) {
+            null
+          } else {
+            log.error(e.message, this.lastActiveTs, undefined)
+            log.close()
+            throw e
+          }
+        }
+      }else if (targetDevice.type == 'eth' && targetDevice.ethDevice) {
+
+        try {
+          if (this.runningDoip) {
+            await this.runEthSequenceWithBase(this.runningDoip, seqIndex, log, cycleCount)
+          } else {
+            // await this.runCanSequence(targetDevice.canDevice, seqIndex, log, cycleCount)
+            throw new Error('eth base not found')
           }
         } catch (e: any) {
           if (this.ac.signal.aborted) {
@@ -293,42 +318,68 @@ export class UDSTesterMain {
   }
   private async runCanSequenceWithBase(base: CanBase, seqIndex: number, log: UdsLOG, cycleCount: number) {
     const tp = new CAN_TP(base)
-    await this.runCanTp(tp, seqIndex, log, cycleCount).finally(() => {
+    await this.runCanTp({
+      createSocket:async (addr:UdsAddress)=>{
+        if(addr.canAddr==undefined){
+          throw new Error('address not found')
+        }
+        return new CAN_TP_SOCKET(tp,addr.canAddr)
+      },
+      close:(base:boolean)=>{
+        if(base){
+          tp.close()
+        }
+      }
+    }, seqIndex, log, cycleCount).finally(() => {
       tp.close(this.closeBase)
     })
   }
-  private async runCanSequence(device: CanBaseInfo, seqIndex: number, log: UdsLOG, cycleCount: number) {
-    if (device.vendor == 'peak') {
-      const peak = new PEAK_TP(device)
-      const peakTp = new CAN_TP(peak)
-      await this.runCanTp(peakTp, seqIndex, log, cycleCount).finally(() => {
-
-        peakTp.close(this.closeBase)
-      })
-    } else if (device.vendor == 'kvaser') {
-      const kvaser = new KVASER_CAN(device)
-      const kvaserTp = new CAN_TP(kvaser)
-      await this.runCanTp(kvaserTp, seqIndex, log, cycleCount).finally(() => {
-
-        kvaserTp.close(this.closeBase)
-      })
-    } else if (device.vendor == 'zlg') {
-      const zlg = new ZLG_CAN(device)
-      const canTp = new CAN_TP(zlg)
-      await this.runCanTp(canTp, seqIndex, log, cycleCount).finally(() => {
-
-        canTp.close(this.closeBase)
-      })
-    } else if (device.vendor == 'simulate') {
-      const simulate = new SIMULATE_CAN(device)
-      const canTp = new CAN_TP(simulate)
-      await this.runCanTp(canTp, seqIndex, log, cycleCount).finally(() => {
-        canTp.close(this.closeBase)
-      })
-    } else {
-      throw new Error(`vendor(${device.vendor}) not support`)
-    }
+  private async runEthSequenceWithBase(base: DOIP, seqIndex: number, log: UdsLOG, cycleCount: number) {
+ 
+    await this.runCanTp({
+      createSocket:async (addr:UdsAddress)=>{
+        if(addr.ethAddr==undefined){
+          throw new Error('address not found')
+        }
+        return await DOIP_SOCKET.create(base,addr.ethAddr,'client')
+      },
+      close:(base:boolean)=>{
+        null
+      }
+    }, seqIndex, log, cycleCount)
   }
+  // private async runCanSequence(device: CanBaseInfo, seqIndex: number, log: UdsLOG, cycleCount: number) {
+  //   if (device.vendor == 'peak') {
+  //     const peak = new PEAK_TP(device)
+  //     const peakTp = new CAN_TP(peak)
+  //     await this.runCanTp(peakTp, seqIndex, log, cycleCount).finally(() => {
+
+  //       peakTp.close(this.closeBase)
+  //     })
+  //   } else if (device.vendor == 'kvaser') {
+  //     const kvaser = new KVASER_CAN(device)
+  //     const kvaserTp = new CAN_TP(kvaser)
+  //     await this.runCanTp(kvaserTp, seqIndex, log, cycleCount).finally(() => {
+
+  //       kvaserTp.close(this.closeBase)
+  //     })
+  //   } else if (device.vendor == 'zlg') {
+  //     const zlg = new ZLG_CAN(device)
+  //     const canTp = new CAN_TP(zlg)
+  //     await this.runCanTp(canTp, seqIndex, log, cycleCount).finally(() => {
+
+  //       canTp.close(this.closeBase)
+  //     })
+  //   } else if (device.vendor == 'simulate') {
+  //     const simulate = new SIMULATE_CAN(device)
+  //     const canTp = new CAN_TP(simulate)
+  //     await this.runCanTp(canTp, seqIndex, log, cycleCount).finally(() => {
+  //       canTp.close(this.closeBase)
+  //     })
+  //   } else {
+  //     throw new Error(`vendor(${device.vendor}) not support`)
+  //   }
+  // }
   private buildObj() {
     const obj: Record<string, any> = {}
 
@@ -345,7 +396,15 @@ export class UDSTesterMain {
     obj['ProName'] = this.project.projectName
     return obj
   }
-  private async runCanTp(canTp: CAN_TP, seqIndex: number, log: UdsLOG, cycleCount: number) {
+  private async runCanTp(canTp: {
+    createSocket:(addr:UdsAddress)=>Promise<{
+      write:(data:Buffer)=>Promise<number>
+      read:(timeout:number)=>Promise<{ts:number,data:Buffer}>
+      close:()=>void
+    }>
+    close:(base:boolean)=>void
+
+  }, seqIndex: number, log: UdsLOG, cycleCount: number) {
 
     const values = this.buildObj()
     const targetSeq = this.tester.seqList[seqIndex]
@@ -362,7 +421,7 @@ export class UDSTesterMain {
           break
         }
 
-        const addrItem = this.tester.address[service.addressIndex]?.canAddr
+        const addrItem = this.tester.address[service.addressIndex]
         if (addrItem == undefined) {
           throw new Error('address not found')
         }
@@ -381,7 +440,7 @@ export class UDSTesterMain {
               await this.delay(service.delay)
               return true
             }
-            const socket = new CAN_TP_SOCKET(canTp, addrItem)
+            const socket = await canTp.createSocket(addrItem)
             this.activeId = s.id
             const sentTs = await socket.write(txBuffer)
             this.lastActiveTs = sentTs

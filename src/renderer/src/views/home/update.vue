@@ -95,7 +95,6 @@ const props = defineProps<{
 const mainH = toRef(props, 'height')
 
 onMounted(() => {
-    console.log(document.getElementById('release_note'),'xxx')
     document.getElementById('release_note')?.addEventListener('click', (e) => {
         //if e is <a> tag
         console.log((e.target as HTMLElement).tagName)

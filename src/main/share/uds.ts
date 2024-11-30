@@ -357,13 +357,15 @@ export interface UdsInfo{
 export interface UdsAddress {
   type: HardwareType
   canAddr?:CanAddr
-  ethAddr?:EntityAddr
+  ethAddr?:EthAddr
 }
 
 export function getUdsAddrName(item?:UdsAddress){
   if(item){
     if(item.type=='can'){
       return item.canAddr?.name||''
+    }else if(item.type=='eth'){
+      return item.ethAddr?.name||''
     }
   }
   return ''

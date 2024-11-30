@@ -30,15 +30,15 @@
       <Icon :icon="deviceIcon" style="color:var(--el-color-info)" />
       <el-select v-model="tester.targetDeviceId" placeholder="Device" clearable style="width: 300px;margin-left: 10px"
         size="small">
-        <el-option v-for="item, key in devices" :key="key" :label="item.canDevice?.name" :value="key">
-          <span style="float: left">{{ item.canDevice?.name }}</span>
+        <el-option v-for="item, key in devices" :key="key"  :label="getName(item)" :value="key">
+          <span style="float: left">{{ getName(item)}}</span>
           <span style="
           float: right;
           color: var(--el-text-color-secondary);
           font-size: 12px;
          
         ">
-            {{ item.canDevice?.vendor.toLocaleUpperCase() }}
+            {{ getVendor(item) }}
           </span>
         </el-option>
       </el-select>
@@ -111,6 +111,21 @@ const devices = computed(() => {
   }
   return devicesList
 })
+
+function getName(device: UdsDevice) {
+ if(device.type=='can'){
+    return device.canDevice?.name
+ }else if(device.type=='eth'){
+   return device.ethDevice?.name
+ }
+}
+function getVendor(device: UdsDevice) {
+  if(device.type=='can'){
+    return device.canDevice?.vendor.toLocaleUpperCase()
+ }else if(device.type=='eth'){
+   return device.ethDevice?.vendor.toLocaleUpperCase()
+ }
+}
 const subSeqRef = ref<Record<number, any>>({})
 
 const start = ref(false)

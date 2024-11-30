@@ -109,6 +109,23 @@ function addChild(parent: Tree) {
       }
 
     }
+  }else if(parent.type=='eth'){
+    for (const key of Object.keys(dataBase.devices)) {
+      const item = dataBase.devices[key]
+      if (item.type == 'eth' && item.ethDevice) {
+        const cc: Tree = {
+          type: 'device',
+          label: item.ethDevice.name,
+          canAdd: false,
+          children: [],
+          icon: deviceIcon,
+          contextMenu: true,
+          id: key
+        }
+        c.children.push(cc)
+      }
+
+    }
   }
   parent.children.push(c)
   //interactive
@@ -138,7 +155,9 @@ function addChild(parent: Tree) {
 
     }
   }
-  parent.children.push(i)
+  if(parent.type!='eth'){
+    parent.children.push(i)
+  }
   //node
   const n: Tree = {
     type: 'node',
@@ -186,9 +205,18 @@ const tData = computed(() => {
     children: [],
     id: 'lin'
   }
+  const eth: Tree = {
+    type: 'eth',
+    label: 'Ethernet',
+    canAdd: false,
+    icon: networkNode,
+    children: [],
+    id: 'eth'
+  }
   addChild(can)
   addChild(lin)
-  return [can, lin]
+  addChild(eth)
+  return [can, lin,eth]
 
 })
 
@@ -362,6 +390,8 @@ watchEffect(() => {
       udsView.addDevice(key, dataBase.devices[key])
       if (dataBase.devices[key].type == 'can' && dataBase.devices[key].canDevice) {
         udsView.changeName(key, dataBase.devices[key].canDevice.name)
+      }else if(dataBase.devices[key].type == 'eth' && dataBase.devices[key].ethDevice){
+        udsView.changeName(key, dataBase.devices[key].ethDevice.name)
       }
     }
     //check link
@@ -477,7 +507,7 @@ function removeNode(data: Tree) {
 
 function addNode(type: string, parent?: Tree) {
   // layout.addWin(type, v4())
-  console.log(type)
+ 
   if (type == 'interactive') {
     const id = v4()
     if (parent?.type == 'can') {
@@ -518,6 +548,27 @@ function addNode(type: string, parent?: Tree) {
       dataBase.nodes[id] = {
         name: `Node ${Object.keys(dataBase.nodes).length + 1}`,
         type: 'can',
+        id: id,
+        channel: devices, // Add an empty array for devices,
+      
+      }
+      udsView.addNode(id, dataBase.nodes[id])
+      // add link
+      for (const key of devices) {
+        udsView.addLink(id, key)
+      }
+
+    }else if (parent?.type == 'eth') {
+      const devices: string[] = []
+      for (const key of Object.keys(dataBase.devices)) {
+        const item = dataBase.devices[key]
+        if (item.type == 'eth' && item.ethDevice) {
+          devices.push(key)
+        }
+      }
+      dataBase.nodes[id] = {
+        name: `Node ${Object.keys(dataBase.nodes).length + 1}`,
+        type: 'eth',
         id: id,
         channel: devices, // Add an empty array for devices,
       

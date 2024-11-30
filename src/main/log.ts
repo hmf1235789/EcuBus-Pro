@@ -3,9 +3,10 @@ import { BrowserWindow } from 'electron'
 import { transport, createLogger, format, Logger } from 'winston'
 import Transport from 'winston-transport'
 import log from 'electron-log/main';
-import { CAN_ERROR_ID, CanAddr, CanMessage, CanMsgType } from './share/can'
+import { CAN_ERROR_ID, CanAddr, CanMessage, CanMsgType, getTsUs } from './share/can'
 import EventEmitter from 'events'
 import { Sequence, ServiceItem } from './share/uds'
+import { PayloadType } from './doip';
 
 declare global {
     var sysLog: Logger
@@ -275,7 +276,8 @@ export class DoipLOG {
   vendor: string
   log: Logger
   logTp: Logger
-  constructor(vendor: string, instance: string, private event: EventEmitter) {
+
+  constructor(vendor: string, instance: string, private event: EventEmitter,private ts:number) {
     this.vendor = vendor
     const et1 = externalTransport.map((t) => t())
     this.log = createLogger({
@@ -304,14 +306,71 @@ export class DoipLOG {
     this.event.removeAllListeners()
 
   }
-  ipBase(type:'tcp'|'udp',dir:'OUT'|'IN',ip:string|undefined,localPort:number|undefined,port:number|undefined,data:Buffer) {
+  ipBase(type:'tcp'|'udp',dir:'OUT'|'IN',local:{address?:string,port?:number},remote:{address?:string,port?:number},data:Buffer) {
+    const payloadType = data.readUint16BE(2)
+    let name=''
+    switch(payloadType){
+      case PayloadType.DoIP_HeaderNegativeAcknowledge:
+        name='Generic DoIP header negative acknowledge'
+        break
+      case PayloadType.DoIP_VehicleIdentificationRequest:
+        name='Vehicle identification request message'
+        break
+      case PayloadType.DoIP_VehicleIdentificationRequestWithVIN:
+        name='Vehicle identification request message with VIN'
+        break
+      case PayloadType.DoIP_VehicleIdentificationRequestWithEID:
+        name='Vehicle identification request message with EID'
+        break
+      case PayloadType.DoIP_VehicleAnnouncementResponse:
+        name='Vehicle announcement message/vehicle identification response message'
+        break
+      case PayloadType.DoIP_RouteActivationRequest:
+        name='Routing activation request'
+        break
+      case PayloadType.DoIP_RouteActivationResponse:
+        name='Routing activation response'
+        break
+      case PayloadType.DoIP_AliveRequest:
+        name='Alive check request'
+        break
+      case PayloadType.DoIP_AliveResponse:
+        name='Alive check response'
+        break
+      case PayloadType.DoIP_EntityStateRequest:
+        name='DoIP entity status request'
+        break
+      case PayloadType.DoIP_EntityStateResponse:
+        name='DoIP entity status response'
+        break
+      case PayloadType.DoIP_PowerModeInfoRequest:
+        name='Diagnostic power mode information request'
+        break
+      case PayloadType.DoIP_PowerModeInfoResponse:
+        name='Diagnostic power mode information response'
+        break
+      case PayloadType.DoIP_DiagnosticMessage:
+        name='Diagnostic message'
+        break
+      case PayloadType.DoIP_DiagnosticMessagePositiveAcknowledge:
+        name='Diagnostic message positive acknowledgement'
+        break
+      case PayloadType.DoIP_DiagnosticMessageNegativeAcknowledge:
+        name='Diagnostic message negative acknowledgement'
+        break
+
+
+
+    }
+      
     const val={
       dir,
       type,
-      ip,
-      localPort,
-      port,
+      local:`${local.address}:${local.port}`,
+      remote:`${remote.address}:${remote.port}`,
       data,
+      ts:getTsUs()-this.ts,
+      name:name,
     }
     this.log.info({
       method: 'ipBase',

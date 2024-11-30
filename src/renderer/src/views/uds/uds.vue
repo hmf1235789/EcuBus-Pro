@@ -709,7 +709,7 @@ watch([contentH, contentW], (val) => {
   display: flex;
   height: 28px;
   left: 0px;
-  z-index: 100000000;
+  z-index: 1000;
   flex-direction: row;
 
   /* 使子元素从右到左排列 */

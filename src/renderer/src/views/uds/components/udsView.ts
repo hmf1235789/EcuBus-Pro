@@ -8,7 +8,7 @@ import { ElMessageBox } from 'element-plus'
 import { UdsDevice } from 'nodeCan/uds'
 import { Layout } from '../layout'
 import { el } from 'element-plus/es/locale'
-import { Inter, useDataStore } from '@r/stores/data'
+import { Inter, NodeItem, useDataStore } from '@r/stores/data'
 import nodeConfig from './config/node/nodeConfig.vue'
 import { h } from 'vue'
 import { useProjectStore } from '@r/stores/project'
@@ -339,6 +339,8 @@ export class udsHardware extends udsCeil {
     let name = 'Device'
     if (device.type == 'can' && device.canDevice) {
       name = device.canDevice.name
+    }else if(device.type=='eth'&& device.ethDevice ){
+      name= device.ethDevice.name
     }
     super(
       paper,
@@ -401,7 +403,7 @@ export class Node extends udsCeil {
     paper: joint.dia.Paper,
     graph: joint.dia.Graph,
     id: string,
-    ig: CanNode,
+    ig: NodeItem,
     x: number,
     y: number
   ) {
@@ -491,7 +493,7 @@ export class UDSView {
       deviceYOffset += 200
       this.ceilMap.set(id, element)
       element.on('edit', (ceil) => {
-        this.layout.addWin('hardware', 'device', {
+        this.layout.addWin('hardware', 'hardware', {
           params: {
             deviceId: ceil.getId()
           }
@@ -537,7 +539,7 @@ export class UDSView {
 
     return element
   }
-  addNode(id: string, data: CanNode) {
+  addNode(id: string, data: NodeItem) {
     /* check name exist*/
     const e = this.ceilMap.get(id)
     if (e) {
@@ -559,7 +561,7 @@ export class UDSView {
       const dataBase = useDataStore()
       const id = ceil.getId()
       const item=dataBase.nodes[id]
-      if (item.type == 'can') {
+     
         ElMessageBox({
           buttonSize: 'small',
           showConfirmButton:false,
@@ -567,17 +569,18 @@ export class UDSView {
           showClose: true,
           customStyle:{
             width:'600px',
-            maxWidth:'none'
+            maxWidth:'none',
+          
           },
           message:()=>h(nodeConfig,{
            editIndex:id,
-           type:'can'
+           type:item.type
           })
         }).catch(null).finally(()=>{
           //modify name
           ceil.changeName(dataBase.nodes[id].name)
         })
-      }
+      
 
     })
     this.ceilMap.set(id, element)

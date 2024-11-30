@@ -269,10 +269,15 @@ const allDeviceLabel = computed(() => {
     return dd
 })
 const allDevices = computed(() => {
-    const dd: Record<string, CanBaseInfo> = {}
+    const dd: Record<string, {
+        name: string
+    }> = {}
     for (const d in dataBase.devices) {
         if (dataBase.devices[d].type == 'can' && dataBase.devices[d].canDevice) {
             dd[d] = dataBase.devices[d].canDevice
+        }
+        if (dataBase.devices[d].type == 'eth' && dataBase.devices[d].ethDevice) {
+            dd[d] = dataBase.devices[d].ethDevice
         }
     }
     return dd

@@ -32,7 +32,7 @@
       <el-form :disabled="globalStart" v-if="activeService" :model="model" label-width="140px" size="small"
         class="hardware" ref="ruleFormRef" :rules="rules" hide-required-asterisk>
         <el-form-item label="Name" prop="name" required>
-          <el-input v-model="model.name" style="width: calc(100% - 200px)" @change="reqParamChange" />
+          <el-input v-model="model.name" style="width: 100%" @change="reqParamChange" />
         </el-form-item>
         <!-- <el-form-item label="Sub Function" prop="subfunc" v-if="model.serviceId != 'Job'"
           :disabled="!serviceDetail[model.serviceId].hasSubFunction">

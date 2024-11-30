@@ -2,7 +2,7 @@
    <div>
       <VxeGrid ref="xGrid" v-bind="gridOptions" class="sequenceTable" @menu-click="menuClick" :height="tableHeight">
          <template #default_type="{ row }">
-            <Icon :icon="email" v-if="row.method == 'canBase'" style="font-size: 14px" />
+            <Icon :icon="email" v-if="row.method == 'canBase'||row.method=='ipBase'" style="font-size: 14px" />
             <Icon :icon="emailFill" v-else-if="row.method == 'udsSent' || row.method == 'udsRecv'|| row.method =='udsNegRecv' "
                style="font-size: 14px" />
             <Icon :icon="systemIcon" v-else-if="row.method == 'udsSystem'" style="font-size: 14px" />
@@ -27,6 +27,7 @@
                         <el-checkbox-group v-model="checkList" size="small" style="width: 200px;margin:10px">
                            <el-checkbox label="CAN" value="canBase" @change="filterChange('canBase', $event)" />
                            <el-checkbox label="UDS" value="uds" @change="filterChange('uds', $event)" />
+                           <el-checkbox label="ETH" value="ipBase" @change="filterChange('ipBase', $event)" />
 
                         </el-checkbox-group>
                      </el-dropdown-menu>
@@ -94,11 +95,16 @@ const xGrid = ref()
 // const logData = ref<LogData[]>([])
 const checkList = ref<string[]>([
    'canBase',
+   'ipBase',
    'uds',
 ])
 interface CanBaseLog {
    method: 'canBase',
    data: { dir: 'OUT' | 'IN'; data: Uint8Array; ts: number; id: number; msgType: CanMsgType }
+}
+interface IpBaseLog {
+   method: 'ipBase',
+   data: { dir: 'OUT' | 'IN'; data: Uint8Array; ts: number; local:string,remote:string ,type:'udp'|'tcp',name:string}
 }
 interface UdsLog {
    method: 'udsSent' | 'udsRecv' | 'udsNegRecv',
@@ -111,7 +117,7 @@ interface UdsErrorLog {
 }
 
 interface LogItem {
-   message: CanBaseLog | UdsLog | UdsErrorLog,
+   message: CanBaseLog | UdsLog | UdsErrorLog|IpBaseLog,
    level: string,
    instance: string,
    label: string,
@@ -188,7 +194,28 @@ function _logDisplay(vals: LogItem[]) {
             name: name
 
          })
-      } else if (val.message.method == 'udsSent') {
+      } 
+      if (val.message.method == 'ipBase') {
+        
+      
+        
+        insertData({
+           method: val.message.method,
+           dir: val.message.data.dir == 'OUT' ? 'Tx' : 'Rx',
+           data: data2str(val.message.data.data),
+           ts: (val.message.data.ts / 1000000).toFixed(3),
+           id: `${val.message.data.local}=>${val.message.data.remote}`,
+           dlc: val.message.data.data.length,
+           len: val.message.data.data.length,
+           device: val.label,
+           channel: val.instance,
+           msgType: val.message.data.type.toLocaleUpperCase(),
+           name: val.message.data.name
+
+        })
+     } 
+      
+      else if (val.message.method == 'udsSent') {
          let testerName=val.message.data.service.name
          if(val.message.id){
             testerName=`${database.tester[val.message.id]?.name}.${val.message.data.service.name}`
@@ -299,7 +326,7 @@ defineExpose({
 })
 
 let list: Record<string, () => void>={}
-function filterChange(method: 'uds' | 'canBase', val: boolean) {
+function filterChange(method: 'uds' | 'canBase'|'ipBase', val: boolean) {
    if (method == 'uds') {
       if(list['udsSent']){
          list['udsSent']()
@@ -324,6 +351,17 @@ function filterChange(method: 'uds' | 'canBase', val: boolean) {
       if (val) {
          window.electron.ipcRenderer.on(`ipc-log-canBase`, logDisplay)
          window.electron.ipcRenderer.on(`ipc-log-canError`, logDisplay)
+      }
+   } else if (method == 'ipBase') {
+      if(list['ipBase']){
+         list['ipBase']()
+      }
+      if(list['ipError']){
+         list['ipError']()
+      }
+      if (val) {
+         window.electron.ipcRenderer.on(`ipc-log-ipBase`, logDisplay)
+         window.electron.ipcRenderer.on(`ipc-log-ipError`, logDisplay)
       }
    }
 
@@ -432,8 +470,9 @@ onMounted(() => {
       } else if (item == 'uds') {
          list['udsSent']=window.electron.ipcRenderer.on(`ipc-log-udsSent`, logDisplay)
          list['udsRecv']=window.electron.ipcRenderer.on(`ipc-log-udsRecv`, logDisplay)
-       
-         
+      } else if (item == 'ipBase') {
+         list['ipBase']=window.electron.ipcRenderer.on(`ipc-log-ipBase`, logDisplay)
+         list['ipError']=window.electron.ipcRenderer.on(`ipc-log-ipError`, logDisplay)
       }
    }
    timer = setInterval(() => {
@@ -460,6 +499,10 @@ onUnmounted(() => {
 <style>
 .canBase {
    color: var(--el-color-primary);
+}
+
+.ipBase {
+   color: var(--el-color-primary-dark-2);
 }
 
 .udsSent {
