@@ -5,7 +5,7 @@
       <el-input v-model="data.name" />
     </el-form-item>
     <el-form-item label="Address Type" required prop="entity.taType">
-      <el-select v-model="data.entity.taType">
+      <el-select v-model="data.taType">
         <el-option value="physical" label="Physical"></el-option>
         <el-option value="functional" label="Functional"></el-option>
       </el-select>
@@ -72,8 +72,8 @@
     <el-divider content-position="left">
       Vehicle Identify Request Behavior
     </el-divider>
-    <el-form-item label="VIN Request method" required prop="entity.virReqType">
-        <el-select v-model="data.entity.virReqType">
+    <el-form-item label="VIN Request method" required prop="virReqType">
+        <el-select v-model="data.virReqType">
           <el-option value="unicast" label="Unicast VIN Request"></el-option>
           <el-option value="omit" label="Omit VIN, tcp connect directly"></el-option>
           <el-option value="broadcast" label="Broadcast UDP4"></el-option>
@@ -83,13 +83,13 @@
     <el-form-item label-width="0">
      
       <el-col :span="12">
-        <el-form-item label="Request Address" prop="entity.virReqAddr">
-          <el-input v-model="data.entity.virReqAddr" />
+        <el-form-item label="Request Address" prop="virReqAddr">
+          <el-input v-model="data.virReqAddr" />
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="Entity Miss Behavior" prop="entity.entityNotFoundBehavior">
-          <el-select v-model="data.entity.entityNotFoundBehavior">
+        <el-form-item label="Entity Miss Behavior" prop="entityNotFoundBehavior">
+          <el-select v-model="data.entityNotFoundBehavior">
             <!-- <el-option value="no" label="Report Error"></el-option> -->
             <el-option value="normal" label="Send Normal Request"></el-option>
             <el-option value="withVin" label="Send VIN Request"></el-option>
@@ -189,7 +189,7 @@ const taddrCheck = (rule: any, value: any, callback: any) => {
   }
 };
 const vaddrCheck = (rule: any, value: any, callback: any) => {
-  if(data.value.entity.virReqType == "unicast"||data.value.entity.virReqType == "omit"){
+  if(data.value.virReqType == "unicast"||data.value.virReqType == "omit"){
     if(value){
       //must be ip address
       const reg=/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
@@ -257,7 +257,7 @@ const rules: FormRules<EthAddr> = {
       max: 17,
     },
   ],
-  "entity.virReqAddr": [
+  "virReqAddr": [
     {
       trigger: "change",
       validator: vaddrCheck,

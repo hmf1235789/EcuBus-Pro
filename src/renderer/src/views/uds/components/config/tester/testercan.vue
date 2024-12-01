@@ -134,8 +134,8 @@
 
         </el-tab-pane>
       </el-tabs>
-      <el-tabs tab-position="left" v-else-if="props.type == 'eth'" v-model="activeTabName" style="height: 450px" closable
-        @tab-remove="removeTab">
+      <el-tabs tab-position="left" v-else-if="props.type == 'eth'" v-model="activeTabName" style="height: 450px"
+        closable @tab-remove="removeTab">
         <el-tab-pane :name="`index${index}`" :label="getAddrName(item, index)" v-for="item, index in data.address"
           :key="index">
           <template #label>
@@ -422,20 +422,21 @@ function addCanAddress() {
   } else if (props.type == 'eth') {
     data.value.address.push({
       type: 'eth',
+
       ethAddr: {
         name: `Addr${data.value.address.length}`,
-        entity:{
+        taType: 'physical',
+        virReqType: "broadcast",
+        virReqAddr: "",
+        entityNotFoundBehavior: 'normal',
+        entity: {
           vin: "ecubus-pro eth000",
           eid: "00-00-00-00-00-00",
           gid: "00-00-00-00-00-00",
-          logicalAddr: 100+data.value.address.length,
-          taType: 'physical',
-          virReqType: "broadcast",
-          virReqAddr: "",
-          entityNotFoundBehavior:'normal',
+          logicalAddr: 100 + data.value.address.length,
         },
-        tester:{
-          testerLogicalAddr: 200+data.value.address.length,
+        tester: {
+          testerLogicalAddr: 200 + data.value.address.length,
           routeActiveTime: 0,
           createConnectDelay: 1000,
         }
@@ -448,7 +449,7 @@ function addCanAddress() {
 
 }
 function removeTab(targetName: string) {
-  const index=parseInt(targetName.replace('index',''))
+  const index = parseInt(targetName.replace('index', ''))
   data.value.address.splice(index, 1)
   nextTick(() => {
     delete addrRef.value[index]

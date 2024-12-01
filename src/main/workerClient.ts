@@ -7,6 +7,7 @@ import { UdsLOG } from './log'
 import { TesterInfo } from './share/tester'
 import { CanMessage, formatError } from './share/can'
 import { ServiceId } from './share/service'
+import { VinInfo } from './share/doip'
 type HandlerMap = {
   sendCanFrame: (pool: UdsTester, data: CanMessage) => Promise<number>
   sendDiag: (pool: UdsTester, data: {
@@ -15,6 +16,10 @@ type HandlerMap = {
     service: ServiceItem
     isReq: boolean
   }) => Promise<number>
+  registerEthVirtualEntity: (pool: UdsTester, data: {
+    entity:VinInfo,
+    ip?:string,
+  }) => Promise<void>
 };
 
 type EventHandlerMap = {
@@ -141,7 +146,6 @@ export default class UdsTester {
               }]).catch(reject)
             })
           }).catch((e) => {
-            console.log('crash',e)
             this.worker.exec('__eventDone', [id, {
               err: e.toString()
             }]).catch(reject)

@@ -85,7 +85,6 @@ ipcMain.handle('ipc-create-example', async (event, ...args) => {
         //copy folder
         const targetFolder=f.filePaths[0]
         const sourceFolder=e.folderPath
-        console.log(sourceFolder,targetFolder)
         await fsP.cp(sourceFolder, targetFolder, {recursive:true,force:true})
         return path.join(targetFolder, path.basename(e.filePath))
     }else{

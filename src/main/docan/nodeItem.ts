@@ -114,7 +114,6 @@ export class NodeItem {
 
   }
   async sendFrame(pool: UdsTester, frame: CanMessage): Promise<number> {
-    console.log('xxx')
     frame.msgType.uuid = this.nodeItem.id
     if (this.nodeItem.channel.length == 1) {
       const baseItem = this.canBaseMap.get(this.nodeItem.channel[0])

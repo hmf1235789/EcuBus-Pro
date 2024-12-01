@@ -12,13 +12,14 @@ import path from 'path'
 import { compileTsc, createProject, deleteNode, deleteTester, findService, getBuildStatus, refreshProject, UDSTesterMain } from '../docan/uds'
 import { CAN_ID_TYPE, CAN_SOCKET, CanBase, CanInterAction, CanNode, formatError, swapAddr } from '../share/can'
 import { CAN_TP, TpError } from '../docan/cantp'
-import { UdsDevice } from '../share/uds'
+import { UdsAddress, UdsDevice } from '../share/uds'
 import { TesterInfo } from '../share/tester'
 import log from 'electron-log'
 import { NodeItem } from '../docan/nodeItem'
 import { UdsLOG } from '../log'
-import { DOIP, getEthDevices } from './../doip'
-import { EthBaseInfo } from '../share/doip'
+import { clientTcp, DOIP, getEthDevices } from './../doip'
+import { EthAddr, EthBaseInfo, EthNode } from '../share/doip'
+import { NodeEthItem } from '../doip/nodeItem'
 
 
 const libPath = path.dirname(dllLib)
@@ -155,16 +156,20 @@ interface Subscription {
     state: string;
 }
 
+interface NodeItemA{
+    close:()=>void
+}
+
 
 const canBaseMap = new Map<string, CanBase>()
 const ethBaseMap = new Map<string, EthBaseInfo>()
 const udsTesterMap = new Map<string, UDSTesterMain>()
-const nodeMap = new Map<string, NodeItem>()
+const nodeMap = new Map<string, NodeItemA>()
 let cantps: CAN_TP[] = []
 let doips: DOIP[] = []
 
 
-async function globalStart(devices: Record<string, UdsDevice>, testers: Record<string, TesterInfo>, nodes: Record<string, CanNode>, projectInfo: { path: string, name: string }, sub: Subscription[]) {
+async function globalStart(devices: Record<string, UdsDevice>, testers: Record<string, TesterInfo>, nodes: Record<string, CanNode|EthNode>, projectInfo: { path: string, name: string }, sub: Subscription[]) {
     let activeKey = ''
     try {
         for (const key in devices) {
@@ -203,22 +208,12 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
         sysLog.error(`${activeKey} - ${err.toString()}`)
         throw err
     }
-    //nodes
-    for (const key in nodes) {
-        const node = nodes[key]
-        const nodeItem = new NodeItem(node, canBaseMap, projectInfo.path, projectInfo.name, testers)
-        try {
-            await nodeItem.start()
-            nodeMap.set(key, nodeItem)
-        } catch (err: any) {
-            nodeItem.log?.systemMsg(formatError(err), 0, 'error')
-            nodeItem.close()
-
-        }
-
-    }
     //testes
-
+    const doipConnectList:{
+        tester:TesterInfo,
+        addr:UdsAddress,
+        connect:()=>Promise<clientTcp>
+    }[] = []
     for (const key in testers) {
         const tester = testers[key]
         if (tester.type == 'can') {
@@ -263,10 +258,16 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
             for (const val of ethBaseMap.values()) {
                 const doip = new DOIP(val)
                 doips.push(doip)
-                const list = []
+                
                 for (const addr of tester.address) {
                     if (addr.type == 'eth' && addr.ethAddr) {
-                        list.push(doip.createClient(addr.ethAddr))
+                        doipConnectList.push(
+                            {
+                                tester:tester,
+                                addr:addr,
+                                connect:()=>doip.createClient(addr.ethAddr!),
+                            }
+                        )
 
 
 
@@ -274,22 +275,55 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
                     }
                 }
 
-                Promise.allSettled(list).then((e) => {
-                    for (const [index, r] of e.entries()) {
-                        if (r.status == 'rejected') {
-
-
-                            sysLog.warn(`Tester(${tester.name})-Addr(${tester.address[index].ethAddr?.name}) ${r.reason.toString()}, send diag will retry`)
-
-
-                        } else {
-                            console.log(r.value)
-                        }
-                    }
-                })
+                
             }
         }
     }
+
+
+    //nodes
+    for (const key in nodes) {
+        const node = nodes[key]
+        if(node.type=='can'){
+            const nodeItem = new NodeItem(node, canBaseMap, projectInfo.path, projectInfo.name, testers)
+        
+            try {
+                await nodeItem.start()
+                nodeMap.set(key, nodeItem)
+            } catch (err: any) {
+                nodeItem.log?.systemMsg(formatError(err), 0, 'error')
+                nodeItem.close()
+
+            }
+        }else if(node.type=='eth'){
+            const nodeItem = new NodeEthItem(node, doips,ethBaseMap ,projectInfo.path, projectInfo.name, testers)
+            try {
+                await nodeItem.start()
+                nodeMap.set(key, nodeItem)
+            } catch (err: any) {
+                nodeItem.log?.systemMsg(formatError(err), 0, 'error')
+                nodeItem.close()
+            }
+        }
+
+    }
+
+    //doip connect list
+    const list=doipConnectList.map((e)=>{
+        return e.connect()
+    })
+    Promise.allSettled(list).then((e) => {
+        for (const [index, r] of e.entries()) {
+            if (r.status == 'rejected') {
+
+
+                sysLog.warn(`Tester(${doipConnectList[index].tester.name})-Addr(${doipConnectList[index].addr.ethAddr?.name}) ${r.reason.toString()}, send diag will retry`)
+
+
+            }
+        }
+    })
+   
 }
 ipcMain.handle('ipc-global-start', async (event, ...arg) => {
     let i = 0

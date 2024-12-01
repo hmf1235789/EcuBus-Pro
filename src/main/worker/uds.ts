@@ -9,6 +9,7 @@ import { v4 } from 'uuid'
 import { ServiceId, SupportServiceId } from '../share/service'
 import { CanMessage } from '../share/can'
 import SecureAccessDll from './secureAccess'
+import { EntityAddr, VinInfo } from '../share/doip'
 export { SecureAccessDll }
 
 
@@ -54,7 +55,7 @@ class Service {
   service: ServiceItem
   private params: Param[]
   private isRequest: boolean
-  
+
   constructor(service: ServiceItem, isRequest: boolean) {
     this.service = service
     this.isRequest = isRequest
@@ -65,7 +66,7 @@ class Service {
     }
   }
   valueOf() {
-    return this.isRequest?getTxPdu(this.service).toString('hex'):getRxPdu(this.service).toString('hex')
+    return this.isRequest ? getTxPdu(this.service).toString('hex') : getRxPdu(this.service).toString('hex')
   }
   /**
    * Sync service params to tester sequence, after change, the sequence params will be updated.
@@ -88,12 +89,12 @@ class Service {
    * })
    * ```
    */
-  async changeService(){
+  async changeService() {
     await this.asyncEmit('set', {
       service: this.service,
-      isRequest:this.isRequest
+      isRequest: this.isRequest
     })
-    serviceMap.set(this.getServiceName(),this.service)
+    serviceMap.set(this.getServiceName(), this.service)
   }
   /**
    * Subscribe to an event. When the event occurs, the listener function will be invoked.
@@ -158,7 +159,7 @@ class Service {
   }
   private async asyncEmit(event: string, data: any): Promise<any> {
     return new Promise((resolve, reject) => {
-     
+
       workerpool.workerEmit({
         id: id,
         event: event,
@@ -494,20 +495,20 @@ class Service {
    * @returns The diagnostic output timestamp.
    */
   async outputDiag(deviceName?: string, addressName?: string): Promise<number> {
-    try{
-      const ts=await this.asyncEmit('sendDiag', {
+    try {
+      const ts = await this.asyncEmit('sendDiag', {
         device: deviceName,
         address: addressName,
         service: this.service,
         isReq: this.isRequest
       })
       return ts
-    }catch(e:any){
-      const err=new Error('outputDiag error:'+e.toString())
+    } catch (e: any) {
+      const err = new Error('outputDiag error:' + e.toString())
       //pop stack
       //just got 0,2,3
-      const stack=err.stack?.split('\n')||[]
-      err.stack=[stack[0],stack[2],stack[3]].join('\n')
+      const stack = err.stack?.split('\n') || []
+      err.stack = [stack[0], stack[2], stack[3]].join('\n')
       throw err
     }
   }
@@ -582,9 +583,9 @@ class Service {
  */
 export class DiagJob extends Service {
   constructor(service: ServiceItem) {
-    
-      super(service, true)
-    
+
+    super(service, true)
+
   }
   from(jobName: keyof Jobs) {
     const service = serviceMap.get(jobName)
@@ -599,7 +600,7 @@ export class DiagJob extends Service {
 export class DiagResponse extends Service {
   constructor(service: ServiceItem) {
     super(cloneDeep(service), false)
-    
+
   }
   /**
    * @param {string} serviceName
@@ -774,9 +775,9 @@ export class UDSClass {
   private async workerOn(event: ServiceNameAll, data: any): Promise<boolean> {
     if (this.event.listenerCount(event) > 0) {
       await this.event.emit(event, data)
-      if(event.endsWith('.send')||event.endsWith('.recv')){
-        const eventArray=event.split('.')
-        eventArray[1]='*'
+      if (event.endsWith('.send') || event.endsWith('.recv')) {
+        const eventArray = event.split('.')
+        eventArray[1] = '*'
         await this.event.emit(eventArray.join('.') as any, data)
       }
       return true
@@ -1050,7 +1051,7 @@ global.UDS = UDS
  * @returns {Promise<number>} - Returns a promise that resolves to sent timestamp.
  */
 export async function outputCan(msg: CanMessage): Promise<number> {
-  const p:Promise<number>=new Promise((resolve, reject) => {
+  const p: Promise<number> = new Promise((resolve, reject) => {
 
     workerpool.workerEmit({
       id: id,
@@ -1060,14 +1061,56 @@ export async function outputCan(msg: CanMessage): Promise<number> {
     emitMap.set(id, { resolve, reject })
     id++
   })
-  try{
+  try {
     return await p
-  }catch(e:any){
-    const err=new Error('outputCan error:'+e.toString())
-      //pop stack
-      //just got 0,2,3
-      const stack=err.stack?.split('\n')||[]
-      err.stack=[stack[0],stack[2],stack[3]].join('\n')
-      throw err
+  } catch (e: any) {
+    const err = new Error('outputCan error:' + e.toString())
+    //pop stack
+    //just got 0,2,3
+    const stack = err.stack?.split('\n') || []
+    err.stack = [stack[0], stack[2], stack[3]].join('\n')
+    throw err
+  }
+}
+
+let rightEntity: EntityAddr | undefined
+
+
+
+/**
+ * Register a virtual entity
+ * 
+ * @param {EntityAddr} entity - The entity to be registered.
+ * @param {string} ip - The IP address of the entity, if node connected to multiple devices.
+ * @returns {Promise<void>} - Returns a promise that resolves when the entity is registered.
+ */
+export async function RegisterEthVirtualEntity(entity: VinInfo,ip?: string, ) {
+  if (rightEntity) {
+    throw new Error('only one entity can be registered')
+  } else {
+    rightEntity = entity
+  }
+  const p: Promise<void> = new Promise((resolve, reject) => {
+
+    workerpool.workerEmit({
+      id: id,
+      event: 'registerEthVirtualEntity',
+      data: {
+        entity,
+        ip,
+      }
+    })
+    emitMap.set(id, { resolve, reject })
+    id++
+  })
+  try {
+    return await p
+  } catch (e: any) {
+    const err = new Error('RegisterEthVirtualEntity error:' + e.toString())
+    //pop stack
+    //just got 0,2,3
+    const stack = err.stack?.split('\n') || []
+    err.stack = [stack[0], stack[2], stack[3]].join('\n')
+    throw err
   }
 }

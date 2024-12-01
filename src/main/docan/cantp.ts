@@ -142,6 +142,9 @@ export class CAN_TP_SOCKET {
     return this.inst.writeTp(this.addr, data)
   }
   close() {
+    if(this.pendingRecv){
+      this.pendingRecv.reject(this.error(TP_ERROR_ID.TP_BUS_CLOSED))
+    }
     this.inst.event.off(this.recvId, this.cb)
     this.abortController.abort()
     this.closed = true

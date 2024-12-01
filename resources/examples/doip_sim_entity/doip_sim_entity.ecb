@@ -67,7 +67,9 @@
                 "testerLogicalAddr": 200,
                 "routeActiveTime": 0,
                 "createConnectDelay": "1000"
-              }
+              },
+              "virReqType": "broadcast",
+              "entityNotFoundBehavior": "normal"
             }
           }
         ],
@@ -147,7 +149,9 @@
         "id": "aacaa592-6ccf-48cd-a8dc-a591bc89a7be",
         "channel": [
           "9a159bbd-c196-4a83-b866-45fa1ac1aed4"
-        ]
+        ],
+        "attachTester": "4c92bfff-29ef-424c-93f0-f8d2224668f3",
+        "script": "node.ts"
       }
     }
   },
@@ -169,32 +173,6 @@
         "layoutType": "bottom",
         "hide": true
       },
-      "network": {
-        "pos": {
-          "x": 280,
-          "y": 80,
-          "w": 900,
-          "h": 420
-        },
-        "title": "network",
-        "label": "Network",
-        "id": "network",
-        "options": {},
-        "hide": true
-      },
-      "tester": {
-        "pos": {
-          "x": 340,
-          "y": 140,
-          "w": 940,
-          "h": 480
-        },
-        "title": "tester",
-        "label": "UDS Tester",
-        "id": "tester",
-        "options": {},
-        "hide": true
-      },
       "trace": {
         "pos": {
           "x": 143.99998474121094,
@@ -208,29 +186,23 @@
         "options": {},
         "hide": true
       },
-      "4c92bfff-29ef-424c-93f0-f8d2224668f3_services": {
+      "network": {
         "pos": {
-          "x": 378,
+          "x": 351.5,
           "y": 130,
-          "w": 700,
+          "w": 600,
           "h": 400
         },
-        "title": "testerService",
-        "label": "Service",
-        "id": "4c92bfff-29ef-424c-93f0-f8d2224668f3_services",
-        "options": {
-          "params": {
-            "edit-index": "4c92bfff-29ef-424c-93f0-f8d2224668f3"
-          },
-          "name": "Tester_eth_1"
-        },
-        "hide": true
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
       },
       "4c92bfff-29ef-424c-93f0-f8d2224668f3_sequence": {
         "pos": {
-          "x": 100,
-          "y": 20,
-          "w": 1020,
+          "x": 260,
+          "y": 80,
+          "w": 700,
           "h": 400
         },
         "title": "testerSequence",
@@ -241,15 +213,7 @@
             "edit-index": "4c92bfff-29ef-424c-93f0-f8d2224668f3"
           },
           "name": "Tester_eth_1"
-        },
-        "hide": false,
-        "backupPos": {
-          "x": 80,
-          "y": 40,
-          "w": 700,
-          "h": 400
-        },
-        "isMax": false
+        }
       }
     }
   }
