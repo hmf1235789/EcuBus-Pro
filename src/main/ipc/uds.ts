@@ -256,7 +256,7 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
         }
         else if (tester.type == 'eth') {
             for (const val of ethBaseMap.values()) {
-                const doip = new DOIP(val)
+                const doip = new DOIP(val,tester)
                 doips.push(doip)
                 
                 for (const addr of tester.address) {
@@ -309,20 +309,20 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
     }
 
     //doip connect list
-    const list=doipConnectList.map((e)=>{
-        return e.connect()
-    })
-    Promise.allSettled(list).then((e) => {
-        for (const [index, r] of e.entries()) {
-            if (r.status == 'rejected') {
+    // const list=doipConnectList.map((e)=>{
+    //     return e.connect()
+    // })
+    // Promise.allSettled(list).then((e) => {
+    //     for (const [index, r] of e.entries()) {
+    //         if (r.status == 'rejected') {
 
 
-                sysLog.warn(`Tester(${doipConnectList[index].tester.name})-Addr(${doipConnectList[index].addr.ethAddr?.name}) ${r.reason.toString()}, send diag will retry`)
+    //             sysLog.warn(`Tester(${doipConnectList[index].tester.name})-Addr(${doipConnectList[index].addr.ethAddr?.name}) ${r.reason.toString()}, send diag will retry`)
 
 
-            }
-        }
-    })
+    //         }
+    //     }
+    // })
    
 }
 ipcMain.handle('ipc-global-start', async (event, ...arg) => {

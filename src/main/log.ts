@@ -362,21 +362,22 @@ export class DoipLOG {
 
 
     }
-      
+    const ts=getTsUs()-this.ts
     const val={
       dir,
       type,
       local:`${local.address}:${local.port}`,
       remote:`${remote.address}:${remote.port}`,
       data,
-      ts:getTsUs()-this.ts,
+      ts:ts,
       name:name,
     }
     this.log.info({
       method: 'ipBase',
       data:val
     })
-    this.event.emit('ip-frame', val)
+    // this.event.emit('ip-frame', val)
+    return ts
   }
   // doipTp(data: { dir: 'OUT' | 'IN'; data: Buffer; ts: number; addr: CanAddr }) {
   //   this.logTp.info(

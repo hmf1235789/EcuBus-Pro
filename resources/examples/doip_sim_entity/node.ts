@@ -10,3 +10,7 @@ UDS.Init(async () => {
         logicalAddr:100
     })
 })
+
+UDS.On("Tester_eth_1.DiagnosticSessionControl160.send",()=>{
+    console.log('DiagnosticSessionControl160 send')
+})

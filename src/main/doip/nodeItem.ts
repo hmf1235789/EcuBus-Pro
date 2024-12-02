@@ -57,7 +57,7 @@ export class NodeEthItem {
                   if (addr.type == 'eth' && addr.ethAddr) {
                     const idT = baseItem.getId(addr.ethAddr, 'client')
                     const cbT = (data: { data: Buffer, ts: number } | DoipError) => {
-                      console.log('xxxx',data)
+                      console.log('client',data)
                       if (data instanceof DoipError) {
                         //TODO:
                       } else {
@@ -84,7 +84,7 @@ export class NodeEthItem {
 
                     const idR = baseItem.getId(addr.ethAddr, 'server')
                     const cbR = (data: { data: Buffer, ts: number } | DoipError) => {
-                      console.log('xxxx',data)
+                      console.log('server',data)
                       if (data instanceof DoipError) {
                         //TODO:
                       } else {

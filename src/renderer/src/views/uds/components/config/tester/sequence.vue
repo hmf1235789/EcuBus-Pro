@@ -117,6 +117,8 @@ function getName(device: UdsDevice) {
     return device.canDevice?.name
  }else if(device.type=='eth'){
    return device.ethDevice?.name
+ }else{
+  return ''
  }
 }
 function getVendor(device: UdsDevice) {
@@ -124,6 +126,8 @@ function getVendor(device: UdsDevice) {
     return device.canDevice?.vendor.toLocaleUpperCase()
  }else if(device.type=='eth'){
    return device.ethDevice?.vendor.toLocaleUpperCase()
+ }else{
+  return ''
  }
 }
 const subSeqRef = ref<Record<number, any>>({})

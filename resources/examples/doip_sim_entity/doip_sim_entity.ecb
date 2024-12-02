@@ -175,8 +175,8 @@
       },
       "trace": {
         "pos": {
-          "x": 143.99998474121094,
-          "y": 0,
+          "x": 140,
+          "y": 300,
           "w": 1120,
           "h": 400
         },
@@ -196,12 +196,13 @@
         "title": "network",
         "label": "Network",
         "id": "network",
-        "options": {}
+        "options": {},
+        "hide": false
       },
       "4c92bfff-29ef-424c-93f0-f8d2224668f3_sequence": {
         "pos": {
           "x": 260,
-          "y": 80,
+          "y": 20,
           "w": 700,
           "h": 400
         },
@@ -213,7 +214,20 @@
             "edit-index": "4c92bfff-29ef-424c-93f0-f8d2224668f3"
           },
           "name": "Tester_eth_1"
-        }
+        },
+        "hide": false
+      },
+      "hardware": {
+        "pos": {
+          "x": 351.5,
+          "y": 130,
+          "w": 600,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
       }
     }
   }
