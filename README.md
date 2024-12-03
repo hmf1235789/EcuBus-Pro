@@ -43,6 +43,9 @@ You can also consider sponsoring us to get extra technical support services. If 
 - [X] One-to-one technical consulting service
 - [X] Help to write addon code to access 0x27,0x29 dll functions
 
+## Star History
+[![Star History Chart](https://api.star-history.com/svg?repos=ecubus/EcuBus-Pro&type=Date)](https://star-history.com/#ecubus/EcuBus-Pro&Date)
+
 ## License
 Apache-2.0
 
