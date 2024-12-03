@@ -61,4 +61,8 @@ export default defineConfig({
     'README.md': 'index.md',
     'resources/examples/:pkg/:slug*': 'examples/:pkg/:slug*'
   },
+  sitemap:{
+    hostname: 'https://app.whyengineer.com'
+  }
+  
 })

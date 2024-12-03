@@ -1,11 +1,3 @@
----
-head:
-  - - meta
-    - name: baidu-site-verification
-      content: codeva-BvGrKN1ZtL
----
-
-
 <div align="center">
   <a href="https://app.whyengineer.com">
     <img width="160" height="160" src="https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png">
