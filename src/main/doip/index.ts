@@ -1251,6 +1251,10 @@ is in the state “Registered [Routing Active]”.*/
         this.tcpServer?.close()
         this.udp4Server?.close()
         this.server?.close()
+        //close tcp client
+        this.tcpClientMap.forEach((item) => {
+            item.socket.destroy()
+        })
     }
     buildMessage(payloadType: PayloadType, data: Buffer): Buffer {
         const len = data.length
@@ -1595,10 +1599,10 @@ export class DOIP_SOCKET {
     setSpecialTa(ta: number) {
         if (this.mode == 'client') {
 
-            this.doip.event.off(`client-${this.addr.tester.testerLogicalAddr}-${this.ta}`, this.cb)
+            this.doip.event.off(`server-${this.addr.tester.testerLogicalAddr}-${this.ta}`, this.cb)
 
 
-            this.doip.event.on(`client-${this.addr.tester.testerLogicalAddr}-${ta}`, this.cb)
+            this.doip.event.on(`server-${this.addr.tester.testerLogicalAddr}-${ta}`, this.cb)
             this.ta = ta
 
         }
@@ -1671,9 +1675,9 @@ export class DOIP_SOCKET {
         }
 
         if (this.mode == 'client') {
-            this.doip.event.off(`client-${this.addr.tester.testerLogicalAddr}-${this.ta}`, this.cb)
+            this.doip.event.off(`server-${this.addr.tester.testerLogicalAddr}-${this.ta}`, this.cb)
         } else {
-            this.doip.event.off(`server-${this.addr.tester.testerLogicalAddr}-${this.addr.entity.logicalAddr}`, this.cb)
+            this.doip.event.off(`client-${this.addr.tester.testerLogicalAddr}-${this.addr.entity.logicalAddr}`, this.cb)
         }
         this.abortController.abort()
         this.closed = true
