@@ -10,4 +10,4 @@ cache
 !/build
 .env
 .ScriptBuild
-resources/docs
+resources/docs/scriptApi
