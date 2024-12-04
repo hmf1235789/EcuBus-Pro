@@ -1,4 +1,4 @@
-import {RegisterEthVirtualEntity} from 'ECB'
+import {DiagResponse, RegisterEthVirtualEntity} from 'ECB'
 
 
 UDS.Init(async () => {
@@ -11,6 +11,7 @@ UDS.Init(async () => {
     })
 })
 
-UDS.On("Tester_eth_1.DiagnosticSessionControl160.send",()=>{
-    console.log('DiagnosticSessionControl160 send')
+UDS.On("Tester_eth_1.DiagnosticSessionControl160.send",async (req)=>{
+    const resp=DiagResponse.fromDiagRequest(req)
+    await resp.outputDiag()
 })

@@ -1,29 +1,36 @@
 
 
 import { test, expect, describe, beforeAll,afterAll} from 'vitest'
-import { EntityAddr, EthAddr, EthDevice } from '../../src/main/share/doip'
+import { EntityAddr, EthAddr, EthBaseInfo, EthDevice } from '../../src/main/share/doip'
 import { clientTcp, DOIP,DOIP_ERROR_ID, DoipError } from '../../src/main/doip'
 import { cloneDeep } from 'lodash'
-const eth: EthDevice = {
-    label: '',
+const eth: EthBaseInfo = {
+    device:{
+        label: '',
     id: '',
     handle: '127.0.0.1'
+    },
+    name: 'localhost',
+    vendor: 'simulate',
+    id: 'localhost'
 }
+
 const ethAddr: EthAddr = {
     name: '',
     taType: 'physical',
-    id: '',
-    routeActiveTime: 0,
-    testerLogicalAddr: 0,
-    virReqType: 'broadcast',
-    virReqAddr: '',
-    entityNotFoundBehavior:'normal'
-}
-const entity: EntityAddr = {
-    vin: 'ecubus-pro111111111111111111111',
-    logicalAddr: 0,
-    eid: '00-00-00-00-00-00-00-00',
-    gid: ''
+    tester: {
+        routeActiveTime: 0,
+        createConnectDelay: 0,
+        testerLogicalAddr: 0
+    },
+    entity: {
+        vin: 'ecubus-pro111111111111111111111',
+        logicalAddr: 1,
+        eid: '00-00-00-00-00-00-00-00',
+        gid: '00-00-00-00-00-00-00-00'
+    },
+    virReqType: 'omit',
+    virReqAddr: ''
 }
 describe('vin request', () => {
     let doip:DOIP
@@ -33,18 +40,18 @@ describe('vin request', () => {
         })
     test('vin request', async () => {
       
-        const r = await doip.sendVehicleIdentificationRequest(ethAddr, entity)
+        const r = await doip.sendVehicleIdentificationRequest(ethAddr)
         expect(r.length).toBe(0)
     })
     test('vin request with vin', async () => {
        
-        const r = await doip.sendVehicleIdentificationRequestWithVIN(ethAddr, entity)
+        const r = await doip.sendVehicleIdentificationRequestWithVIN(ethAddr)
         expect(r.length).toBe(0)
     })
 
     test('vin request with eid', async () => {
        
-        const r = await doip.sendVehicleIdentificationRequestWithEID(ethAddr, entity)
+        const r = await doip.sendVehicleIdentificationRequestWithEID(ethAddr)
         expect(r.length).toBe(0)
     })
     afterAll(()=>{
@@ -55,24 +62,24 @@ describe('vin request with resp', () => {
     let doip:DOIP
         beforeAll(async()=>{
             doip = new DOIP(eth)
-            await doip.registerEntity(entity,false)
+            await doip.registerEntity(ethAddr.entity,false)
            
         })
     test('vin request', async () => {
       
-        const r = await doip.sendVehicleIdentificationRequest(ethAddr, entity)
+        const r = await doip.sendVehicleIdentificationRequest(ethAddr)
         expect(r.length).toBe(1)
     })
     test('vin request with vin', async () => {
        
-        const r = await doip.sendVehicleIdentificationRequestWithVIN(ethAddr, entity)
+        const r = await doip.sendVehicleIdentificationRequestWithVIN(ethAddr)
         //TODO:
         expect(r.length).toBe(1)
     })
 
     test('vin request with eid', async () => {
        
-        const r = await doip.sendVehicleIdentificationRequestWithEID(ethAddr, entity)
+        const r = await doip.sendVehicleIdentificationRequestWithEID(ethAddr)
         expect(r.length).toBe(1)
     })
     afterAll(()=>{
@@ -83,7 +90,7 @@ describe('announce check',()=>{
     let doip:DOIP
     beforeAll(async()=>{
         doip = new DOIP(eth)
-        await doip.registerEntity(entity,true)
+        await doip.registerEntity(ethAddr.entity,true)
     })
     test('entry found',()=>{
         const e = doip.entityMap
@@ -98,11 +105,11 @@ describe('doip client with self entity',()=>{
     let doip:DOIP
     beforeAll(async()=>{
         doip = new DOIP(eth)
-        await doip.registerEntity(entity,false)
+        await doip.registerEntity(ethAddr.entity,false)
     })
     test('connect entity',async ()=>{
         
-        const e =await doip.createClient(ethAddr,entity)
+        const e =await doip.createClient(ethAddr)
         await doip.routeActiveRequest(e)
         expect(e.state).toBe('active')
     })
@@ -116,10 +123,10 @@ describe('doip diag 0x10',()=>{
     let client:clientTcp
     beforeAll(async()=>{
         doip = new DOIP(eth)
-        await doip.registerEntity(entity,false)
+        await doip.registerEntity(ethAddr.entity,false)
     })
     test('connect entity',async ()=>{
-        const e =await doip.createClient(ethAddr,entity)
+        const e =await doip.createClient(ethAddr)
         await doip.routeActiveRequest(e)
         expect(e.state).toBe('active')
         client = e
@@ -128,7 +135,7 @@ describe('doip diag 0x10',()=>{
        await doip.writeTpReq(client,Buffer.from([0x10,0x02]))
     })
     test('write diag response',async ()=>{
-        await doip.writeTpResp(ethAddr,Buffer.from([0x50,0x02]))
+        await doip.writeTpResp(ethAddr.tester,Buffer.from([0x50,0x02]))
     })
 
     afterAll(()=>{
@@ -142,7 +149,7 @@ describe.skip('doip client without entity',()=>{
     })
     test('connect entity',async ()=>{
         try{
-            const e =await doip.createClient(ethAddr,entity)
+            const e =await doip.createClient(ethAddr)
             await doip.routeActiveRequest(e)
             expect(true).toBe(false)
         }catch(e:any){
@@ -162,16 +169,11 @@ describe.skip('doip client directly',()=>{
     })
     test('connect entity',async ()=>{
         try{
-            const ethAddr1: EthAddr = {
-                name: '',
-                taType: 'physical',
-                id: '',
-                routeActiveTime: 0,
-                testerLogicalAddr: 0,
-                virReqType: 'omit',
-                virReqAddr: '192.168.1.1'
-            }
-            const e =await doip.createClient(ethAddr1,entity)
+           
+            const ethAddr1=cloneDeep(ethAddr)
+            ethAddr1.virReqType='omit'
+            ethAddr1.virReqAddr='192.168.1.1'
+            const e =await doip.createClient(ethAddr1)
             await doip.routeActiveRequest(e)
             expect(true).toBe(false)
         }catch(e:any){
@@ -188,17 +190,17 @@ describe('doip client twice with same tester',()=>{
     let doip:DOIP
     beforeAll(async()=>{
         doip = new DOIP(eth)
-        await doip.registerEntity(entity,false)
+        await doip.registerEntity(ethAddr.entity,false)
     })
     test('connect entity',async ()=>{
-        const e =await doip.createClient(ethAddr,entity)
+        const e =await doip.createClient(ethAddr)
         await doip.routeActiveRequest(e)
         expect(e.state).toBe('active') 
     })
     test('connect entity again with same tester',async ()=>{
         const ethAddr1=cloneDeep(ethAddr)
-        ethAddr1.id='1'
-        const e =await doip.createClient(ethAddr1,entity)
+    
+        const e =await doip.createClient(ethAddr1)
         try{
             await doip.routeActiveRequest(e)
             expect(e.state).toBe('active') 
@@ -215,24 +217,17 @@ describe.skip('doip client twice with diff tester',()=>{
     let doip:DOIP
     beforeAll(async()=>{
         doip = new DOIP(eth)
-        await doip.registerEntity(entity,false)
+        await doip.registerEntity(ethAddr.entity)
     })
     test('connect entity',async ()=>{
-        const e =await doip.createClient(ethAddr,entity)
+        const e =await doip.createClient(ethAddr)
         await doip.routeActiveRequest(e)
         expect(e.state).toBe('active') 
     })
     test('connect entity again with diff tester',async ()=>{
-        const ethAddr1: EthAddr = {
-            name: '',
-            taType: 'physical',
-            id: '1',
-            routeActiveTime: 0,
-            testerLogicalAddr: 1,
-            virReqType: 'broadcast',
-            virReqAddr: ''
-        }
-        const e =await doip.createClient(ethAddr1,entity)
+        const ethAddr1=cloneDeep(ethAddr)
+        ethAddr1.tester.testerLogicalAddr=3
+        const e =await doip.createClient(ethAddr1)
         await doip.routeActiveRequest(e)
         expect(e.state).toBe('active') 
         expect(doip.connectTable.length).toBe(2)
