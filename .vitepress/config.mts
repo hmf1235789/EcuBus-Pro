@@ -34,14 +34,17 @@ export default defineConfig({
       },
       {
         text: 'Example',
-        collapsed:true,
+        
         items: [
           { text: 'NXP UDS Bootloader', link: '/examples/nxp_bootloader/readme' },
           { text: 'Secure Access dll', link: '/examples/secure_access_dll/readme' },
+          { text: 'DoIP Tester', link: '/examples/doip/readme' },
+          { text: 'DoIP Simulate Entity', link: '/examples/doip_sim_entity/readme' },
         ]
       },
       {
         text: 'Developer Manual',
+        collapsed:true,
         items: [
           { text: 'Arch', link: '/docs/dev/arch' },
           { text: 'Setup', link: '/docs/dev/setup' },

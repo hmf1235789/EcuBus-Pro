@@ -2,7 +2,7 @@
 
 * Interface: `CAN`
 * Vendor Device: `Simulate`
-* 
+
 ## Build The DLL
 
 You can do it with yourself method, or you can cmake. (only support x64 platform)
@@ -17,6 +17,7 @@ You can do it with yourself method, or you can cmake. (only support x64 platform
 `dll` folder contains the pre-built dll file.
 
 ## Use The DLL
+
 The project setup a simulate device, which can be used to test the dll. A node item attach the script(`node.ts`)
 > [!TIP]
 > Need x64 platform dll file
@@ -34,15 +35,11 @@ console.log(seed)
 ```
 
 ## Steps
+
 ![alt text](image.png)
 ![alt text](image-1.png)
 ![alt text](image-2.png)
 
-
 ## Others
 
 The default dll warper follow the [Guide](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf), if you want to use other interface, you can build the wrapper by yourself. See the [source code](https://github.com/ecubus/EcuBus-Pro/tree/master/src/main/worker/secureAccess) for more information.
-
-
-
-

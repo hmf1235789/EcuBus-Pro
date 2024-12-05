@@ -61,7 +61,8 @@
                 "taType": "physical",
                 "virReqType": "broadcast",
                 "virReqAddr": "",
-                "entityNotFoundBehavior": "normal"
+                "entityNotFoundBehavior": "normal",
+                "nodeType": "node"
               },
               "tester": {
                 "testerLogicalAddr": 200,
@@ -69,7 +70,8 @@
                 "createConnectDelay": "1000"
               },
               "virReqType": "broadcast",
-              "entityNotFoundBehavior": "normal"
+              "entityNotFoundBehavior": "normal",
+              "taType": "physical"
             }
           }
         ],
@@ -171,7 +173,7 @@
         "label": "Message",
         "id": "message",
         "layoutType": "bottom",
-        "hide": false
+        "hide": true
       },
       "trace": {
         "pos": {
@@ -184,12 +186,12 @@
         "label": "Trace",
         "id": "trace",
         "options": {},
-        "hide": false
+        "hide": true
       },
       "network": {
         "pos": {
-          "x": 950,
-          "y": 100,
+          "x": 1160,
+          "y": 420,
           "w": 600,
           "h": 400
         },
@@ -197,7 +199,7 @@
         "label": "Network",
         "id": "network",
         "options": {},
-        "hide": false
+        "hide": true
       },
       "4c92bfff-29ef-424c-93f0-f8d2224668f3_sequence": {
         "pos": {
@@ -215,8 +217,31 @@
           },
           "name": "Tester_eth_1"
         },
-        "hide": false
+        "hide": true
+      },
+      "tester": {
+        "pos": {
+          "x": 0,
+          "y": -28,
+          "w": 2560,
+          "h": 1063
+        },
+        "title": "tester",
+        "label": "UDS Tester",
+        "id": "tester",
+        "options": {},
+        "hide": false,
+        "backupPos": {
+          "x": 1180,
+          "y": 440,
+          "w": 600,
+          "h": 400
+        },
+        "isMax": true
       }
     }
+  },
+  "example":{
+    "catalog":"Ethernet"
   }
 }
