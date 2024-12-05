@@ -113,10 +113,12 @@ watchEffect(() => {
 })
 
 
-onKeyStroke(['ctrl', 's'], (e) => {
-  e.preventDefault()
-  if (project.open) {
-    project.saveProject()
+onKeyStroke('s', (e) => {
+  if(e.ctrlKey){
+    e.preventDefault()
+    if (project.open) {
+      project.saveProject()
+    }
   }
 })
 
