@@ -1,10 +1,3 @@
----
-head:
-  - - meta
-    - name: google-site-verification
-      content: 8p_3SCSQGHvWlpmik3zhY902wyQ0QwxQsHaBJocrxfA
----
-
 <div align="center">
   <a href="https://app.whyengineer.com">
     <img width="160" height="160" src="https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png">
