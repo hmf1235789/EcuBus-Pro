@@ -144,7 +144,7 @@
     "subFunction": {},
     "nodes": {
       "aacaa592-6ccf-48cd-a8dc-a591bc89a7be": {
-        "name": "3333",
+        "name": "sim_entity",
         "type": "eth",
         "id": "aacaa592-6ccf-48cd-a8dc-a591bc89a7be",
         "channel": [
@@ -160,7 +160,7 @@
       "message": {
         "pos": {
           "x": 383,
-          "y": 219,
+          "y": 191,
           "w": 1280,
           "h": 200
         },
@@ -171,12 +171,12 @@
         "label": "Message",
         "id": "message",
         "layoutType": "bottom",
-        "hide": true
+        "hide": false
       },
       "trace": {
         "pos": {
-          "x": 140,
-          "y": 300,
+          "x": 800,
+          "y": 191,
           "w": 1120,
           "h": 400
         },
@@ -184,12 +184,12 @@
         "label": "Trace",
         "id": "trace",
         "options": {},
-        "hide": true
+        "hide": false
       },
       "network": {
         "pos": {
-          "x": 351.5,
-          "y": 130,
+          "x": 950,
+          "y": 100,
           "w": 600,
           "h": 400
         },
@@ -216,18 +216,6 @@
           "name": "Tester_eth_1"
         },
         "hide": false
-      },
-      "hardware": {
-        "pos": {
-          "x": 351.5,
-          "y": 130,
-          "w": 600,
-          "h": 400
-        },
-        "title": "hardware",
-        "label": "Devices",
-        "id": "hardware",
-        "options": {}
       }
     }
   }

@@ -75,7 +75,7 @@ import { useDataStore } from '@r/stores/data';
 
 
 interface LogData {
-   dir?: 'Tx' | 'Rx',
+   dir?: 'Tx' | 'Rx'|'--',
    data: string,
    ts: string,
    id: string,
@@ -223,7 +223,7 @@ function _logDisplay(vals: LogItem[]) {
    
          insertData({
             method: val.message.method,
-            dir: 'Tx',
+            dir: '--',
             name: testerName,
             data: `${data2str(val.message.data.recvData ? val.message.data.recvData : new Uint8Array(0))}`.trim(),
             ts: (val.message.data.ts / 1000000).toFixed(3),
@@ -252,7 +252,7 @@ function _logDisplay(vals: LogItem[]) {
          }
          insertData({
             method: method,
-            dir: 'Rx',
+            dir: '--',
             name: testerName,
             data: `${data2str(val.message.data.recvData ? val.message.data.recvData : new Uint8Array(0))}`.trim(),
             ts: (val.message.data.ts / 1000000).toFixed(3),

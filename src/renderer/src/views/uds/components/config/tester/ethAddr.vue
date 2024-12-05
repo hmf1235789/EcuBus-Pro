@@ -4,7 +4,7 @@
     <el-form-item label="Address name" required prop="name">
       <el-input v-model="data.name" />
     </el-form-item>
-    <el-form-item label="Address Type" required prop="entity.taType">
+    <el-form-item label="Address Type" required prop="taType">
       <el-select v-model="data.taType">
         <el-option value="physical" label="Physical"></el-option>
         <el-option value="functional" label="Functional"></el-option>
@@ -38,7 +38,7 @@
       ECU
     </el-divider>
     <el-form-item label-width="0">
-      <el-row>
+     
       <el-col :span="12">
         <el-form-item label="logical address" required prop="entity.logicalAddr">
           <el-input v-model.number="data.entity.logicalAddr" placeholder="0"/>
@@ -51,7 +51,25 @@
         </el-form-item>
 
       </el-col>
-    </el-row>
+  
+    </el-form-item>
+    <el-form-item label-width="0">
+     
+      <el-col :span="12">
+        <el-form-item label="Entity Type" required prop="entity.nodeType">
+          <el-select v-model.number="data.entity.nodeType" placeholder="Node">
+            <el-option value="node" label="Node"></el-option>
+            <el-option value="gateway" label="Gateway"></el-option>
+          </el-select>
+        </el-form-item>
+
+      </el-col>
+      <el-col :span="12">
+        <el-form-item label="node address" :required="data.entity.nodeType=='gateway'" prop="entity.nodeAddr">
+          <el-input v-model.number="data.entity.nodeAddr" placeholder="0" :disabled="data.entity.nodeType=='node'"/>
+        </el-form-item>
+      </el-col>
+    
     </el-form-item>
     <el-form-item label-width="0">
    
@@ -153,10 +171,20 @@ const nameCheck = (rule: any, value: any, callback: any) => {
 const addrCheck = (rule: any, value: any, callback: any) => {
   if (value.toString().length > 0) {
     for (let i = 0; i < addrs.value.length; i++) {
-      const hasName = addrs.value[i].ethAddr?.entity.logicalAddr;
-      if (hasName == value && i != editIndex.value) {
-        callback(new Error("The address already exists"));
+      if(data.value.entity.nodeType == "gateway"){
+        const hasName = `${addrs.value[i].ethAddr?.entity.logicalAddr}.${addrs.value[i].ethAddr?.entity.nodeAddr}`;
+        const selfValue = `${data.value.entity.logicalAddr}.${data.value.entity.nodeAddr}`;
+        if (hasName == selfValue && i != editIndex.value) {
+          callback(new Error("The address already exists"));
+        }
+      }else{
+        const hasName = addrs.value[i].ethAddr?.entity.logicalAddr;
+        if (hasName == value && i != editIndex.value) {
+          callback(new Error("The address already exists"));
+        }
       }
+
+     
     }
     if(value < 0 || value > 0xFFFF){
       callback(new Error("0 ~ 0xFFFF"));

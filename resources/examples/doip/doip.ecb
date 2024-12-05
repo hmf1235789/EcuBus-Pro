@@ -61,7 +61,9 @@
                 "taType": "physical",
                 "virReqType": "broadcast",
                 "virReqAddr": "",
-                "entityNotFoundBehavior": "normal"
+                "entityNotFoundBehavior": "normal",
+                "nodeType": "gateway",
+                "nodeAddr": 57345
               },
               "tester": {
                 "testerLogicalAddr": 20000,
@@ -69,7 +71,8 @@
                 "createConnectDelay": "1000"
               },
               "virReqType": "broadcast",
-              "entityNotFoundBehavior": "normal"
+              "entityNotFoundBehavior": "normal",
+              "taType": "physical"
             }
           }
         ],
@@ -223,8 +226,8 @@
         "pos": {
           "x": 0,
           "y": -28,
-          "w": 1303,
-          "h": 690
+          "w": 2560,
+          "h": 1061
         },
         "title": "tester",
         "label": "UDS Tester",

@@ -428,11 +428,13 @@ function addCanAddress() {
         taType: 'physical',
         virReqType: "broadcast",
         virReqAddr: "",
+        
         entityNotFoundBehavior: 'normal',
         entity: {
           vin: "ecubus-pro eth000",
           eid: "00-00-00-00-00-00",
           gid: "00-00-00-00-00-00",
+          nodeType: "node",
           logicalAddr: 100 + data.value.address.length,
         },
         tester: {
