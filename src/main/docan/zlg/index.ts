@@ -249,7 +249,7 @@ export class ZLG_CAN extends CanBase {
     }
    
   }
-  callbackFd(num: number) {
+  async callbackFd(num: number) {
     if(num==0){
       return
     }
@@ -277,6 +277,11 @@ export class ZLG_CAN extends CanBase {
         }
         this._read(jsFrame, frame.timestamp)
         //让出时间片
+        await new Promise((resolve) => {
+          setImmediate(() => {
+            resolve(null)
+          })
+        })
       }
       // setImmediate(()=>{this.callbackFd(100)})
     }
