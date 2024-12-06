@@ -47,7 +47,7 @@
       </el-col>
       <el-col :span="12">
         <el-form-item label="EID" required prop="entity.eid">
-          <el-input v-model.number="data.entity.eid" />
+          <el-input v-model="data.entity.eid" />
         </el-form-item>
 
       </el-col>
