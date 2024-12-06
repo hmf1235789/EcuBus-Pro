@@ -142,7 +142,7 @@ export class CAN_TP_SOCKET {
     return this.inst.writeTp(this.addr, data)
   }
   close() {
-    if(this.pendingRecv){
+    if (this.pendingRecv) {
       this.pendingRecv.reject(this.error(TP_ERROR_ID.TP_BUS_CLOSED))
     }
     this.inst.event.off(this.recvId, this.cb)
@@ -166,7 +166,8 @@ export class CAN_TP implements CanTp {
     string,
     { ts: number; bs: number; stMin: number; bc: number; leftLen: number; curBs: number, crTimer?: NodeJS.Timeout }
   > = {}
-  constructor(base: CanBase,private listenOnly=false) {
+  lastWriteError?: TpError
+  constructor(base: CanBase, private listenOnly = false) {
     this.base = base
     //close peak tp default handle
 
@@ -207,59 +208,62 @@ export class CAN_TP implements CanTp {
       }
     }
   }
-  async sendCanFrame(pci: Buffer, addr: CanAddr, data: Buffer) {
-    return new Promise<{ ts: number; usedLen: number }>((resolve, reject) => {
-      const maxLen = getLenByDlc(addr.dlc, addr.canfd)
-      const allLen = pci.length + data.length
-      let usedLen = 0
-      if (allLen > maxLen) {
-        usedLen = maxLen - pci.length
-      } else {
-        usedLen = data.length
+  getSendData(pci: Buffer, addr: CanAddr, data: Buffer) {
+    const maxLen = getLenByDlc(addr.dlc, addr.canfd)
+    const allLen = pci.length + data.length
+    let usedLen = 0
+    if (allLen > maxLen) {
+      usedLen = maxLen - pci.length
+    } else {
+      usedLen = data.length
+    }
+    if (usedLen > 0) {
+      let sendData = Buffer.concat([pci, data.subarray(0, usedLen)])
+      let newLen = sendData.length
+      if (sendData.length < 8 && addr.padding) {
+        newLen = 8
       }
-      if (usedLen > 0) {
-        let sendData = Buffer.concat([pci, data.subarray(0, usedLen)])
-        let newLen=sendData.length
-        if(sendData.length<8&&addr.padding){
-          newLen=8
+      if (addr.canfd && sendData.length < maxLen) {
+        if (sendData.length > 8 && sendData.length <= 12) {
+          newLen = 12
+        } else if (sendData.length > 12 && sendData.length <= 16) {
+          newLen = 16
+        } else if (sendData.length > 16 && sendData.length <= 20) {
+          newLen = 20
+        } else if (sendData.length > 20 && sendData.length <= 24) {
+          newLen = 24
+        } else if (sendData.length > 24 && sendData.length <= 32) {
+          newLen = 32
+        } else if (sendData.length > 32 && sendData.length <= 48) {
+          newLen = 48
+        } else if (sendData.length > 48) {
+          newLen = 64
         }
-        if(addr.canfd&&sendData.length<maxLen){
-          if (sendData.length > 8 && sendData.length <= 12) {
-            newLen = 12
-          } else if (sendData.length > 12 && sendData.length <= 16) {
-            newLen = 16
-          } else if (sendData.length > 16 && sendData.length <= 20) {
-            newLen = 20
-          } else if (sendData.length > 20 && sendData.length <= 24) {
-            newLen = 24
-          } else if (sendData.length > 24 && sendData.length <= 32) {
-            newLen = 32
-          } else if (sendData.length > 32 && sendData.length <= 48) {
-            newLen = 48
-          } else if (sendData.length > 48) {
-            newLen = 64
-          }
-        }
-        if(sendData.length<newLen){
-          sendData=Buffer.concat([sendData,Buffer.alloc(newLen-sendData.length).fill(Number(addr.paddingValue))])
-        }
+      }
+      if (sendData.length < newLen) {
+        sendData = Buffer.concat([sendData, Buffer.alloc(newLen - sendData.length).fill(Number(addr.paddingValue))])
+      }
+      return {sendData,usedLen}
+    } else {
+      throw new TpError(TP_ERROR_ID.TP_LEN_ERROR, addr, data)
+    }
+  }
+  async sendCanFrame(addr: CanAddr, data: Buffer) {
+    return new Promise<{ ts: number }>((resolve, reject) => {
 
-        const timer = setTimeout(() => {
-          reject(new TpError(TP_ERROR_ID.TP_TIMEOUT_A, addr, data))
-        }, addr.nAs)
-        this.base
-          .writeBase(addrToId(addr), addr, sendData)
-          .then((ts) => {
-            clearTimeout(timer)
-            resolve({ usedLen, ts })
-          })
-          .catch((err) => {
-            clearTimeout(timer)
-            reject(new TpError(TP_ERROR_ID.TP_BUS_ERROR, addr, data, err.message))
-          })
-      } else {
-        reject(new TpError(TP_ERROR_ID.TP_LEN_ERROR, addr, data))
-      }
+      const timer = setTimeout(() => {
+        reject(new TpError(TP_ERROR_ID.TP_TIMEOUT_A, addr, data))
+      }, addr.nAs)
+      this.base
+        .writeBase(addrToId(addr), addr, data)
+        .then((ts) => {
+          clearTimeout(timer)
+          resolve({ ts })
+        })
+        .catch((err) => {
+          clearTimeout(timer)
+          reject(new TpError(TP_ERROR_ID.TP_BUS_ERROR, addr, data, err.message))
+        })
 
       this.abortAllController.signal.onabort = () => {
 
@@ -269,7 +273,7 @@ export class CAN_TP implements CanTp {
   }
   async sendFC(addr: CanAddr, fs: number) {
     return new Promise<{ ts: number; bs: number; stMin: number }>((resolve, reject) => {
-      
+
       const extAddr = []
       if (addr.addrFormat == CAN_ADDR_FORMAT.EXTENDED || addr.addrFormat == CAN_ADDR_FORMAT.MIXED) {
         if (addr.addrFormat == CAN_ADDR_FORMAT.EXTENDED) {
@@ -283,9 +287,9 @@ export class CAN_TP implements CanTp {
         stMin = 127
       }
       const bs = addr.bs
-      if(this.listenOnly){
+      if (this.listenOnly) {
         resolve({
-          ts:0,
+          ts: 0,
           bs,
           stMin
         })
@@ -293,18 +297,18 @@ export class CAN_TP implements CanTp {
       }
       const sendData = Buffer.from([...extAddr, 0x30 | (fs & 0xf), bs, stMin])
       const maxLen = getLenByDlc(addr.dlc, addr.canfd)
-      let padding=addr.padding
-      if(maxLen<sendData.length){
-        padding=false
+      let padding = addr.padding
+      if (maxLen < sendData.length) {
+        padding = false
       }
-      const paddingData=Buffer.alloc(8).fill(Number(addr.paddingValue))
+      const paddingData = Buffer.alloc(8).fill(Number(addr.paddingValue))
       //copy senddata to paddingData
-      sendData.copy(paddingData,0,0,sendData.length)
+      sendData.copy(paddingData, 0, 0, sendData.length)
       const timer = setTimeout(() => {
         reject(new TpError(TP_ERROR_ID.TP_TIMEOUT_A, addr, sendData))
       }, addr.nAr)
       this.base
-        .writeBase(addrToId(addr), addr, padding?paddingData:sendData)
+        .writeBase(addrToId(addr), addr, padding ? paddingData : sendData)
         .then((ts) => {
           clearTimeout(timer)
           resolve({
@@ -433,7 +437,7 @@ export class CAN_TP implements CanTp {
     })
   }
   async writeTp(addr: CanAddr, data: Buffer) {
-
+    this.lastWriteError = undefined
     if (data.length == 0 || data.length > 4095) {
       throw new TpError(TP_ERROR_ID.TP_PARAM_ERROR, addr, data, 'data length error')
     }
@@ -458,7 +462,8 @@ export class CAN_TP implements CanTp {
       } else {
         pci = Buffer.from([...prefixBuffer, data.length])
       }
-      const { ts } = await this.sendCanFrame(pci, addr, data)
+      const {sendData}= this.getSendData(pci, addr, data)
+      const { ts } = await this.sendCanFrame(addr, sendData)
       return ts
     } else {
       if (addr.addrType == CAN_ADDR_TYPE.FUNCTIONAL) {
@@ -477,12 +482,16 @@ export class CAN_TP implements CanTp {
         data.length % 256
       ])
       //ff
-      const { usedLen, ts } = await this.sendCanFrame(pci, addr, data)
+      const {sendData,usedLen}= this.getSendData(pci, addr, data)
+      const {  ts } = await this.sendCanFrame(addr, sendData)
       lastFrameSentTs = ts
       sendLen = usedLen
       const recvId = addrToId(swapAddr(addr))
       const socket = new CAN_SOCKET(this.base, recvId, addr)
       while (sendLen < data.length) {
+        if (this.lastWriteError) {
+          throw this.lastWriteError
+        }
         if (waitFlowControl) {
 
           const { stMin, bs, recvTs } = await this.waitFlowControl(socket, addr)
@@ -504,12 +513,19 @@ export class CAN_TP implements CanTp {
           await this.delay(sessionStMin, addr)
         }
         const snData = Buffer.from([...prefixBuffer, 0x20 | (sn & 0xf)])
-        const { usedLen, ts } = await this.sendCanFrame(snData, addr, data.subarray(sendLen))
-        lastFrameSentTs = ts
+        const {sendData,usedLen}= this.getSendData(snData, addr, data.subarray(sendLen))
+        this.sendCanFrame(addr,sendData).then(({ ts }) => {
+          lastFrameSentTs = ts
+        }).catch((e) => {
+          this.lastWriteError = e
+        })
+
         sendLen += usedLen
 
         sn++
-        await this.delay(sessionStMin, addr)
+        if (sessionStMin > 0) {
+          await this.delay(sessionStMin, addr)
+        }
         if (sn == 0x10) {
           sn = 0
         }
@@ -573,10 +589,10 @@ export class CAN_TP implements CanTp {
     )
   }
 
- 
+
 }
 
-function  baseHandle(val: CanMessage) {
+function baseHandle(val: CanMessage) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //@ts-ignore
   const _this = this as { addr: CanAddr; id: number; inst: CAN_TP }
@@ -625,10 +641,12 @@ function  baseHandle(val: CanMessage) {
           const data = val.data.subarray(index, index + len)
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           //@ts-ignore
-          this.inst.event.emit(tpCmdId, { data, ts: val.ts, addr:{
-            ..._this.addr,
-            uuid:val.msgType.uuid
-          } })
+          this.inst.event.emit(tpCmdId, {
+            data, ts: val.ts, addr: {
+              ..._this.addr,
+              uuid: val.msgType.uuid
+            }
+          })
         } else {
           if (val.data[index] != 0) {
             return
@@ -647,10 +665,12 @@ function  baseHandle(val: CanMessage) {
           }
           index++
 
-          _this.inst.event.emit(tpCmdId, { addr:{
-            ..._this.addr,
-            uuid:val.msgType.uuid
-          }, data: val.data.subarray(index, index + len), ts: val.ts })
+          _this.inst.event.emit(tpCmdId, {
+            addr: {
+              ..._this.addr,
+              uuid: val.msgType.uuid
+            }, data: val.data.subarray(index, index + len), ts: val.ts
+          })
         }
         delete _this.inst.tpStatus[tpCmdId]
       } else if (pci == 1) {
@@ -748,9 +768,9 @@ shall ignore the received FF N_PDU and not transmit a FC N_PDU.*/
             //finish
 
             _this.inst.event.emit(tpCmdId, {
-              addr:{
+              addr: {
                 ..._this.addr,
-                uuid:val.msgType.uuid
+                uuid: val.msgType.uuid
               },
               data: Buffer.concat([_this.inst.tpDataBuffer[tpCmdId], data]),
               ts: val.ts

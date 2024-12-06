@@ -357,10 +357,9 @@ export class PEAK_TP extends CanBase implements CanTp {
       msgType: CanMsgType
       data: Buffer
       msg: any
-    }
+    }[]
   >()
   writeQueueMap = new Map<string, QueueObject<{ addr: CanAddr, data: Buffer, resolve: (ts: number) => void, reject: (err: TpError) => void }>>()
-  writeBaseQueueMap = new Map<string, QueueObject<{ msgType: CanMsgType, data: Buffer, resolve: (ts: number) => void, reject: (err: CanError) => void }>>()
   rejectMap = new Map<number, {
     reject: (reason: TpError) => void
     addr: CanAddr
@@ -544,39 +543,34 @@ export class PEAK_TP extends CanBase implements CanTp {
       this.readAbort.abort()
       for (const [key, value] of this.pendingCmds) {
         peak.CANTP_MsgDataFree_2016(value.msg)
-        value.reject(new TpError(TP_ERROR_ID.TP_BUS_CLOSED, value.addr, value.data))
+        value.reject(new TpError(isReset ? TP_ERROR_ID.TP_BUS_ERROR : TP_ERROR_ID.TP_BUS_CLOSED, value.addr, value.data, msg))
       }
       this.pendingCmds.clear()
       for (const [key, value] of this.rejectMap) {
-        value.reject(new TpError(TP_ERROR_ID.TP_BUS_CLOSED, value.addr))
+        value.reject(new TpError(isReset ? TP_ERROR_ID.TP_BUS_ERROR : TP_ERROR_ID.TP_BUS_CLOSED, value.addr, undefined, msg))
       }
       this.rejectMap.clear()
       //handle writeQueueMap
       for (const [key, value] of this.writeQueueMap) {
         const list = value.workersList()
         for (const item of list) {
-          item.data.reject(new TpError(TP_ERROR_ID.TP_BUS_CLOSED, item.data.addr))
+          item.data.reject(new TpError(isReset ? TP_ERROR_ID.TP_BUS_ERROR : TP_ERROR_ID.TP_BUS_CLOSED, item.data.addr, undefined, msg))
         }
       }
       this.writeQueueMap.clear()
       for (const [key, value] of this.rejectBaseMap) {
-        value.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, value.msgType))
+        value.reject(new CanError(isReset ? CAN_ERROR_ID.CAN_BUS_ERROR : CAN_ERROR_ID.CAN_BUS_CLOSED, value.msgType, undefined, msg))
       }
       this.rejectBaseMap.clear()
       //pendingBaseCmds
-      for (const [key, value] of this.pendingBaseCmds) {
-        peak.CANTP_MsgDataFree_2016(value.msg)
-        value.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, value.msgType))
-      }
-      this.pendingBaseCmds.clear()
-      //handle writeBaseQueueMap
-      for (const [key, value] of this.writeBaseQueueMap) {
-        const list = value.workersList()
-        for (const item of list) {
-          item.data.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, item.data.msgType))
+      for (const [key, values] of this.pendingBaseCmds) {
+        for (const value of values) {
+          peak.CANTP_MsgDataFree_2016(value.msg)
+          value.reject(new CanError(isReset ? CAN_ERROR_ID.CAN_BUS_ERROR : CAN_ERROR_ID.CAN_BUS_CLOSED, value.msgType, undefined, msg))
         }
       }
-      this.writeBaseQueueMap.clear()
+      this.pendingBaseCmds.clear()
+
       if (!isReset) {
         this.closed = true
         this.log.close()
@@ -718,12 +712,16 @@ export class PEAK_TP extends CanBase implements CanTp {
             if (flags == peak.PCANTP_MSGFLAG_LOOPBACK) {
               const canId = msg.canInfo.canId
               const id = `writeBase-${canId}-${msg.canInfo.canMsgType}`
-              const item = this.pendingBaseCmds.get(id)
+              const items = this.pendingBaseCmds.get(id)
 
-              if (item) {
+              if (items) {
+                
+                const item = items.shift()!
                 //tx notification, item always exists
                 peak.CANTP_MsgDataFree_2016(item.msg)
-                this.pendingBaseCmds.delete(id)
+                if(items.length==0){
+                  this.pendingBaseCmds.delete(id)
+                }
                 const message: CanMessage = {
                   dir: 'OUT',
                   id: msg.canInfo.canId,
@@ -1063,22 +1061,7 @@ export class PEAK_TP extends CanBase implements CanTp {
       throw new CanError(CAN_ERROR_ID.CAN_PARAM_ERROR, msgType, data)
     }
     const cmdId = `writeBase-${id}-${msgTypeNum}`
-    //queue
-    let q = this.writeBaseQueueMap.get(cmdId)
-    if (!q) {
-      q = queue<any>((task: { resolve: any; reject: any; data: Buffer }, cb) => {
-        this._writeBase(id, msgType, msgTypeNum, cmdId, task.data)
-          .then(task.resolve)
-          .catch(task.reject)
-          .finally(cb) // 确保队列继续执行
-      }, 1) // 并发数设为 1 确保顺序执行
 
-      this.writeBaseQueueMap.set(cmdId, q)
-
-      q.drain(() => {
-        this.writeBaseQueueMap.delete(cmdId)
-      })
-    }
 
     if (msgType.canfd) {
       //detect data.length range by dlc
@@ -1103,15 +1086,7 @@ export class PEAK_TP extends CanBase implements CanTp {
 
 
     }
-    return new Promise<number>((resolve, reject) => {
-      // 将任务推入队列
-      q?.push({
-        msgType,
-        data,
-        resolve,
-        reject
-      })
-    })
+    return this._writeBase(id, msgType, msgTypeNum, cmdId, data)
   }
   _writeBase(id: number, msgTypeE: CanMsgType, msgType: number, cmdId: string, data: Buffer) {
     return new Promise<number>(
@@ -1138,15 +1113,16 @@ export class PEAK_TP extends CanBase implements CanTp {
         }
         const item = this.pendingBaseCmds.get(cmdId)
         if (item) {
-          peak.CANTP_MsgDataFree_2016(msg)
-          reject(new CanError(CAN_ERROR_ID.CAN_BUS_BUSY, msgTypeE, data))
-          return
+
+          item.push({ resolve, reject, msg, data, msgType: msgTypeE })
         } else {
-          this.pendingBaseCmds.set(cmdId, { resolve, reject, msg, data, msgType: msgTypeE })
+          this.pendingBaseCmds.set(cmdId, [{ resolve, reject, msg, data, msgType: msgTypeE }])
         }
         res = peak.CANTP_Write_2016(this.handle, msg)
         if (!statusIsOk(res, false)) {
-          this.pendingBaseCmds.delete(cmdId)
+          // this.pendingBaseCmds.delete(cmdId)
+          // pop last one
+          this.pendingBaseCmds.get(cmdId)?.pop()
           peak.CANTP_MsgDataFree_2016(msg)
           const eStr = err2str(res)
           reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgTypeE, data, eStr))

@@ -14,7 +14,6 @@ import {
 import { EventEmitter } from 'events'
 import { cloneDeep, set } from 'lodash'
 import { addrToId, CanError } from '../../share/can'
-import { queue, QueueObject } from 'async'
 import { CanLOG } from '../../log'
 import ZLG from './../build/Release/zlg.node'
 
@@ -49,17 +48,9 @@ export class ZLG_CAN extends CanBase {
       reject: (reason: CanError) => void
       msgType: CanMsgType
       data: Buffer
-    }
+    }[]
   >()
-  writeBaseQueueMap = new Map<
-    string,
-    QueueObject<{
-      msgType: CanMsgType
-      data: Buffer
-      resolve: (ts: number) => void
-      reject: (err: CanError) => void
-    }>
-  >()
+  
   rejectBaseMap = new Map<
     number,
     {
@@ -183,10 +174,14 @@ export class ZLG_CAN extends CanBase {
     const cmdId = this.getReadBaseId(frame.canId, frame.msgType)
     if (frame.isEcho) {
       //tx confirm
-      const item = this.pendingBaseCmds.get(cmdId)
-      if (item) {
+      const items = this.pendingBaseCmds.get(cmdId)
+      if (items) {
+        const item = items.shift()!
         frame.msgType.uuid = item.msgType.uuid
-        this.pendingBaseCmds.delete(cmdId)
+        if(items.length==0){
+          this.pendingBaseCmds.delete(cmdId)
+        }
+        console.log('writeBase', items.length)
         const message:CanMessage = {
           device: this.info.name,
           dir: 'OUT',
@@ -215,7 +210,10 @@ export class ZLG_CAN extends CanBase {
     }
     // console.log('read',id.value(),dlc.value(),flag.value(),time.value())
   }
-  callback(num: number) {
+  async callback(num: number) {
+    if(num==0){
+      return
+    }
     const frames = new ZLG.ReceiveDataArray(num)
     const ret = ZLG.ZCAN_Receive(this.channel, frames.cast(), num, 0)
     if (ret > 0) {
@@ -239,11 +237,22 @@ export class ZLG_CAN extends CanBase {
           isEcho: frame.frame.__pad & 0x20 ? true : false
         }
         this._read(jsFrame, frame.timestamp)
+        //让出时间片
+        await new Promise((resolve) => {
+          setImmediate(() => {
+            resolve(null)
+          })
+        })
         // console.log(jsFrame)
       }
+      // setImmediate(()=>{this.callback(100)})
     }
+   
   }
   callbackFd(num: number) {
+    if(num==0){
+      return
+    }
     const frames = new ZLG.ReceiveFDDataArray(num)
     const ret = ZLG.ZCAN_ReceiveFD(this.channel, frames.cast(), num, 0)
     if (ret > 0) {
@@ -267,7 +276,9 @@ export class ZLG_CAN extends CanBase {
           isEcho: frame.frame.flags & 0x20 ? true : false
         }
         this._read(jsFrame, frame.timestamp)
+        //让出时间片
       }
+      // setImmediate(()=>{this.callbackFd(100)})
     }
   }
   setOption(cmd: string, val: any): void {
@@ -312,16 +323,12 @@ export class ZLG_CAN extends CanBase {
       value.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, value.msgType))
     }
     this.rejectBaseMap.clear()
-    for (const [key, val] of this.writeBaseQueueMap) {
-      const list = val.workersList()
-      for (const item of list) {
-        item.data.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, item.data.msgType))
-      }
-    }
-    this.writeBaseQueueMap.clear()
+    
     //pendingBaseCmds
-    for (const [key, val] of this.pendingBaseCmds) {
-      val.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, val.msgType))
+    for (const [key, vals] of this.pendingBaseCmds) {
+      for(const val of vals){
+        val.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, val.msgType))
+      }
     }
     this.pendingBaseCmds.clear()
 
@@ -335,19 +342,19 @@ export class ZLG_CAN extends CanBase {
     } else {
       this.closed = true
       this.log.close()
-      ZLG.FreeTSFN(this.id)
+  
       const target = deviceMap.get(`${this.deviceType}_${this.index}`)
       if (target) {
         //remove this channel
 
         target.channel = target.channel.filter((item) => item != this)
-
         if (target.channel.length == 0) {
           //close device
           ZLG.ZCAN_CloseDevice(this.handle)
           deviceMap.delete(`${this.deviceType}_${this.index}`)
         }
       }
+      ZLG.FreeTSFN(this.id)
     }
   }
 
@@ -383,42 +390,16 @@ export class ZLG_CAN extends CanBase {
    
     const cmdId = this.getReadBaseId(id, msgType)
     //queue
-    let q = this.writeBaseQueueMap.get(cmdId)
-    if (!q) {
-      q = queue<any>((task: { resolve: any; reject: any; data: Buffer }, cb) => {
-        this._writeBase(id, msgType, cmdId, task.data)
-          .then(task.resolve)
-          .catch(task.reject)
-          .finally(cb) // 确保队列继续执行
-      }, 1) // 并发数设为 1 确保顺序执行
-
-      this.writeBaseQueueMap.set(cmdId, q)
-
-      q.drain(() => {
-        this.writeBaseQueueMap.delete(cmdId)
-      })
-    }
-
-   
-    return new Promise<number>((resolve, reject) => {
-      // 将任务推入队列
-      q?.push({
-        msgType,
-        data,
-        resolve,
-        reject
-      })
-    })
+    return this._writeBase(id, msgType, cmdId, data)
   }
   _writeBase(id: number, msgType: CanMsgType, cmdId: string, data: Buffer) {
     return new Promise<number>(
       (resolve: (value: number) => void, reject: (reason: CanError) => void) => {
         const item = this.pendingBaseCmds.get(cmdId)
         if (item) {
-          reject(new CanError(CAN_ERROR_ID.CAN_BUS_BUSY, msgType, data))
-          return
+          item.push({ resolve, reject, data, msgType })
         } else {
-          this.pendingBaseCmds.set(cmdId, { resolve, reject, data, msgType })
+          this.pendingBaseCmds.set(cmdId, [{ resolve, reject, data, msgType }])
         }
 
         if (msgType.canfd) {
@@ -446,7 +427,7 @@ export class ZLG_CAN extends CanBase {
           }
           const len = ZLG.ZCAN_TransmitFD(this.channel, frame, 1)
           if (len != 1) {
-            this.pendingBaseCmds.delete(cmdId)
+            this.pendingBaseCmds.get(cmdId)?.pop()
             // const err = this.getError()
             // this.close(true)
             reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data))
@@ -476,7 +457,7 @@ export class ZLG_CAN extends CanBase {
           }
           const len = ZLG.ZCAN_Transmit(this.channel, frame, 1)
           if (len != 1) {
-            this.pendingBaseCmds.delete(cmdId)
+            this.pendingBaseCmds.get(cmdId)?.pop()
             // const msg = this.getError()
             reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data))
             // this.close(true)

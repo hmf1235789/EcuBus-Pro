@@ -90,7 +90,6 @@ void FreeTSFN(const Napi::CallbackInfo &info) {
     context->tsfnfd.Release();
     context->tserror.Release();
 
-    
     delete context;
     tsfnContextMap.erase(it);
   }
@@ -134,7 +133,10 @@ void threadEntry(TsfnContext *context) {
         ret=err.error_code;
         ZCAN_ResetCAN(context->channel);
       }
-    }while(err.error_code!=0);
+    }while(err.error_code!=0&&context->closed==false);
+
+
+
     if(ret!=0){
       UINT* retPtr = new UINT;
       *retPtr=ret;

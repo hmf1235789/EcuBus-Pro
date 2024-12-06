@@ -11,3 +11,4 @@ cache
 .env
 .ScriptBuild
 resources/docs/scriptApi
+resources/lib/kerneldlls/devices_property/*.xml

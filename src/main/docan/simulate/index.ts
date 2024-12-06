@@ -3,7 +3,6 @@ import { EventEmitter } from 'events'
 import { cloneDeep, set } from 'lodash'
 import { addrToId, CanError } from '../../share/can'
 import { TpError, CanTp } from '../cantp'
-import { queue, QueueObject } from 'async'
 import { CanLOG } from '../../log'
 const vBusCount = 8
 
@@ -26,7 +25,7 @@ export class SIMULATE_CAN extends CanBase {
   busCb: any
   startTime = getTsUs()
   private readAbort = new AbortController()
-  writeBaseQueueMap = new Map<string, QueueObject<{ msgType: CanMsgType, data: Buffer, resolve: (ts: number) => void, reject: (err: CanError) => void }>>()
+
   rejectBaseMap = new Map<number, {
     reject: (reason: CanError) => void
     msgType: CanMsgType
@@ -77,15 +76,10 @@ export class SIMULATE_CAN extends CanBase {
       val.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, val.msgType))
     }
     this.rejectBaseMap.clear()
-    for (const [key, val] of this.writeBaseQueueMap) {
-      const list = val.workersList()
-      for (const item of list) {
-        item.data.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, item.data.msgType))
-      }
-    }
+
     this.log.close()
     this.event.off('bus', this.busCb)
-    this.writeBaseQueueMap.clear()
+
     busInitStatus[this.info.handle] = false
   }
   writeBase(
@@ -99,22 +93,7 @@ export class SIMULATE_CAN extends CanBase {
     }
     const cmdId = `writeBase-${this.getReadBaseId(id, msgType)}`
     //queue
-    let q = this.writeBaseQueueMap.get(cmdId)
-    if (!q) {
-      q = queue<any>((task: { resolve: any; reject: any; data: Buffer }, cb) => {
-        this._writeBase(id, msgType, cmdId, task.data)
-          .then(task.resolve)
-          .catch(task.reject)
-          .finally(cb) // 确保队列继续执行
-      }, 1) // 并发数设为 1 确保顺序执行
-
-      this.writeBaseQueueMap.set(cmdId, q)
-
-      q.drain(() => {
-        this.writeBaseQueueMap.delete(cmdId)
-      })
-    }
-
+    
     if (msgType.canfd) {
       //detect data.length range by dlc
       if (data.length > 8 && data.length <= 12) {
@@ -138,15 +117,7 @@ export class SIMULATE_CAN extends CanBase {
 
 
     }
-    return new Promise<number>((resolve, reject) => {
-      // 将任务推入队列
-      q?.push({
-        msgType,
-        data,
-        resolve,
-        reject
-      })
-    })
+    return this._writeBase(id, msgType, cmdId, data)
   }
   _writeBase(id: number, msgType: CanMsgType, cmdId: string, data: Buffer) {
     return new Promise<number>(

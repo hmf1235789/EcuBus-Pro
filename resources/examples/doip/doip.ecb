@@ -55,7 +55,7 @@
               "name": "Addr0",
               "entity": {
                 "vin": "12345678901234567",
-                "eid": "e1-e2-e3-e4-e5-e6",
+                "eid": "e1-e2-e3-e4-e5-e0",
                 "gid": "a1-a2-a3-a4-a5-a6",
                 "logicalAddr": 57344,
                 "taType": "physical",
@@ -243,8 +243,5 @@
         "isMax": true
       }
     }
-  },
-  "example":{
-    "catalog":"Ethernet"
   }
 }
