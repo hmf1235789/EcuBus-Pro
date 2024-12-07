@@ -1,77 +1,48 @@
 /* eslint-disable no-var */
-import { BrowserWindow } from 'electron'
-import { transport, createLogger, format, Logger } from 'winston'
+import { transport, createLogger, format, Logger, } from 'winston'
+import type { Format } from 'logform'
 import Transport from 'winston-transport'
-import log from 'electron-log/main';
 import { CAN_ERROR_ID, CanAddr, CanMessage, CanMsgType, getTsUs } from './share/can'
 import EventEmitter from 'events'
 import { Sequence, ServiceItem } from './share/uds'
 import { PayloadType } from './doip';
 
 declare global {
-    var sysLog: Logger
-    var scriptLog: Logger
+  var sysLog: Logger
+  var scriptLog: Logger
 }
 
 
-const isDev=process.env.NODE_ENV !== 'production'
+const isDev = process.env.NODE_ENV !== 'production'
 
 
+type LogFunc = () => Transport
 
-class ElectronLog extends Transport {
-    win: BrowserWindow
-    constructor(win: BrowserWindow, opts?: Transport.TransportStreamOptions) {
-        super(opts)
-        this.win = win
-    }
+export function createLogs(logs: LogFunc[], formats: Format[]) {
 
-    log(info: any, callback: () => void) {
-        let send=true
-      
-        if(info.level=='debug'&&!isDev){
-            send=false
-        }
-        let ipcc='ipc-log-main'
-        if (info.message?.method){
-            ipcc=`ipc-log-${info.message.method}`
-        }
-        if(send){
-            this.win.webContents.send(ipcc, info)
-        }
-        if (info.level == 'error') {
-            log.error(info)
-        }
-        
+  globalThis.sysLog = createLogger({
+    transports: logs.map((t) => t()),
+    format: format.combine(
+      format.json(),
+      format.label({ label: 'System' }), 
+      ...formats
+    ),
+  })
+  globalThis.scriptLog = createLogger({
+    transports: logs.map((t) => t()),
+    format: format.combine(
+      format.json(),
+      format.label({ label: 'Script' }
+      ), ...formats
+    ),
+  })
 
-
-      
-        
-        callback()
-    }
-}
-
-
-export function createLogs(win: BrowserWindow) {
-    const logTransport = new ElectronLog(win)
-    globalThis.sysLog = createLogger({
-        transports: [logTransport],
-        format: format.combine(
-            format.json(),
-            format.label({ label: 'System' }
-            )
-        ),
-    })
-    globalThis.scriptLog = createLogger({
-        transports: [logTransport],
-        format: format.combine(
-            format.json(),
-            format.label({ label: 'Script' }
-            )
-        ),
-    })
-    addTransport(()=>{
-        return new ElectronLog(win)
-    })
+  for (const l of logs) {
+    addTransport(l)
+  }
+  for (const f of formats) {
+    addFormat(f)
+  }
 }
 
 
@@ -88,14 +59,14 @@ class Base extends Transport {
 
   log(info: any, callback: () => void) {
     if (process.env.VITEST) {
-      
+
       console.table(info.message)
     }
     // Perform the writing to the remote service
     callback()
   }
 }
-const instanceFormat = format((info, opts) => {
+const instanceFormat = format((info, opts: any) => {
   info.instance = opts.instance
   return info
 })
@@ -112,8 +83,8 @@ export class CanLOG {
       format: format.combine(
         format.json(),
         instanceFormat({ instance: instance }),
-
-        format.label({ label: `Can-${vendor}` })
+        format.label({ label: `Can-${vendor}` }),
+        ...externalFormat
       ),
 
     })
@@ -123,7 +94,8 @@ export class CanLOG {
       format: format.combine(
         format.json(),
         instanceFormat({ instance: instance }),
-        format.label({ label: `CanTp-${vendor}` })
+        format.label({ label: `CanTp-${vendor}` }),
+        ...externalFormat
       ),
     })
   }
@@ -134,7 +106,7 @@ export class CanLOG {
 
   }
   canBase(data: CanMessage) {
-    this.log.info({
+    this.log.debug({
       method: 'canBase',
       data
     })
@@ -167,10 +139,19 @@ export function addTransport(t: () => Transport) {
   externalTransport.push(t)
 }
 
-
 export function clearTransport() {
   externalTransport.splice(0, externalTransport.length)
 }
+
+const externalFormat: Format[] = []
+export function addFormat(f: Format) {
+  externalFormat.push(f)
+}
+export function clearFormat() {
+  externalFormat.splice(0, externalFormat.length)
+}
+
+
 export class UdsLOG {
   log: Logger
   startTime = Date.now()
@@ -180,12 +161,12 @@ export class UdsLOG {
       transports: [new Base(), ...et],
       format: format.combine(
         format.json(),
-
-        format.label({ label: name })
+        format.label({ label: name }),
+        ...externalFormat
       ),
     })
   }
-  sent(service: ServiceItem, ts: number,recvData?: Buffer, msg?: string) {
+  sent(service: ServiceItem, ts: number, recvData?: Buffer, msg?: string) {
     this.log.info({
       method: 'udsSent',
       id: this.id,
@@ -253,11 +234,13 @@ export class UdsLOG {
       }
     })
   }
-  udsIndex(index: number, action: 'start' | 'finished' | 'progress', percent?: number) {
-    this.log.info({
+  udsIndex(index: number, serviceName:string,action: 'start' | 'finished' | 'progress', percent?: number) {
+    const l=action=='start'?'debug':'info'
+    this.log[l]({
       method: 'udsIndex',
       id: this.id,
       data: {
+        serviceName,
         index,
         action,
         percent
@@ -277,7 +260,7 @@ export class DoipLOG {
   log: Logger
   logTp: Logger
 
-  constructor(vendor: string, instance: string, private event: EventEmitter,private ts:number) {
+  constructor(vendor: string, instance: string, private event: EventEmitter, private ts: number) {
     this.vendor = vendor
     const et1 = externalTransport.map((t) => t())
     this.log = createLogger({
@@ -285,8 +268,8 @@ export class DoipLOG {
       format: format.combine(
         format.json(),
         instanceFormat({ instance: instance }),
-
-        format.label({ label: `IP-${vendor}` })
+        format.label({ label: `IP-${vendor}` }),
+        ...externalFormat
       ),
 
     })
@@ -306,75 +289,75 @@ export class DoipLOG {
     this.event.removeAllListeners()
 
   }
-  ipBase(type:'tcp'|'udp',dir:'OUT'|'IN',local:{address?:string,port?:number},remote:{address?:string,port?:number},data:Buffer) {
+  ipBase(type: 'tcp' | 'udp', dir: 'OUT' | 'IN', local: { address?: string, port?: number }, remote: { address?: string, port?: number }, data: Buffer) {
     const payloadType = data.readUint16BE(2)
-    let name=''
-    switch(payloadType){
+    let name = ''
+    switch (payloadType) {
       case PayloadType.DoIP_HeaderNegativeAcknowledge:
-        name='Generic DoIP header negative acknowledge'
+        name = 'Generic DoIP header negative acknowledge'
         break
       case PayloadType.DoIP_VehicleIdentificationRequest:
-        name='Vehicle identification request message'
+        name = 'Vehicle identification request message'
         break
       case PayloadType.DoIP_VehicleIdentificationRequestWithVIN:
-        name='Vehicle identification request message with VIN'
+        name = 'Vehicle identification request message with VIN'
         break
       case PayloadType.DoIP_VehicleIdentificationRequestWithEID:
-        name='Vehicle identification request message with EID'
+        name = 'Vehicle identification request message with EID'
         break
       case PayloadType.DoIP_VehicleAnnouncementResponse:
-        name='Vehicle announcement message/vehicle identification response message'
+        name = 'Vehicle announcement message/vehicle identification response message'
         break
       case PayloadType.DoIP_RouteActivationRequest:
-        name='Routing activation request'
+        name = 'Routing activation request'
         break
       case PayloadType.DoIP_RouteActivationResponse:
-        name='Routing activation response'
+        name = 'Routing activation response'
         break
       case PayloadType.DoIP_AliveRequest:
-        name='Alive check request'
+        name = 'Alive check request'
         break
       case PayloadType.DoIP_AliveResponse:
-        name='Alive check response'
+        name = 'Alive check response'
         break
       case PayloadType.DoIP_EntityStateRequest:
-        name='DoIP entity status request'
+        name = 'DoIP entity status request'
         break
       case PayloadType.DoIP_EntityStateResponse:
-        name='DoIP entity status response'
+        name = 'DoIP entity status response'
         break
       case PayloadType.DoIP_PowerModeInfoRequest:
-        name='Diagnostic power mode information request'
+        name = 'Diagnostic power mode information request'
         break
       case PayloadType.DoIP_PowerModeInfoResponse:
-        name='Diagnostic power mode information response'
+        name = 'Diagnostic power mode information response'
         break
       case PayloadType.DoIP_DiagnosticMessage:
-        name='Diagnostic message'
+        name = 'Diagnostic message'
         break
       case PayloadType.DoIP_DiagnosticMessagePositiveAcknowledge:
-        name='Diagnostic message positive acknowledgement'
+        name = 'Diagnostic message positive acknowledgement'
         break
       case PayloadType.DoIP_DiagnosticMessageNegativeAcknowledge:
-        name='Diagnostic message negative acknowledgement'
+        name = 'Diagnostic message negative acknowledgement'
         break
 
 
 
     }
-    const ts=getTsUs()-this.ts
-    const val={
+    const ts = getTsUs() - this.ts
+    const val = {
       dir,
       type,
-      local:`${local.address}:${local.port}`,
-      remote:`${remote.address}:${remote.port}`,
+      local: `${local.address}:${local.port}`,
+      remote: `${remote.address}:${remote.port}`,
       data,
-      ts:ts,
-      name:name,
+      ts: ts,
+      name: name,
     }
     this.log.info({
       method: 'ipBase',
-      data:val
+      data: val
     })
     // this.event.emit('ip-frame', val)
     return ts

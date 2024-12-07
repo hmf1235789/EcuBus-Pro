@@ -8,6 +8,9 @@ import log from 'electron-log/main';
 import { createLogs } from './log';
 import './update'
 import { globalStop } from './ipc/uds';
+import Transport from 'winston-transport'
+
+
 
 log.initialize()
 
@@ -20,7 +23,7 @@ const ProtocolRegExp = new RegExp(`^${protocol}://`);
 const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) {
   app.quit()
-} 
+}
 
 function registerLocalResourceProtocol() {
   eProtocol.registerFileProtocol('local-resource', (request, callback) => {
@@ -62,6 +65,41 @@ ipcMain.on('electron-store-set', async (event, key, val) => {
   store.set(key, val);
 });
 
+
+class ElectronLog extends Transport {
+  win: BrowserWindow
+  constructor(win: BrowserWindow, opts?: Transport.TransportStreamOptions) {
+    super(opts)
+    this.win = win
+  }
+
+  log(info: any, callback: () => void) {
+    let send = true
+
+    if (info.level == 'debug' && !isDev) {
+      send = false
+    }
+    let ipcc = 'ipc-log-main'
+    if (info.message?.method) {
+      ipcc = `ipc-log-${info.message.method}`
+    }
+    if (send) {
+      this.win.webContents.send(ipcc, info)
+    }
+    if (info.level == 'error') {
+      log.error(info)
+    }
+
+
+
+
+
+    callback()
+  }
+}
+
+
+
 function createWindow(): void {
   // Create the browser window.
   mainWindow = new BrowserWindow({
@@ -76,7 +114,7 @@ function createWindow(): void {
       contextIsolation: true
     }
   })
-  createLogs(mainWindow)
+  createLogs([() => new ElectronLog(mainWindow)], [])
   ipcMain.on('minimize', () => {
     mainWindow?.minimize()
   })

@@ -4,7 +4,7 @@ import './uds'
 import './fs'
 import './examples'
 import { ipcMain, shell } from 'electron'
-import { getCanVersion } from './uds'
+import { getCanVersion } from '../docan/can'
 
 
 interface EcuBusPro {

@@ -126,6 +126,9 @@ export class KVASER_CAN extends CanBase {
     KV.LoadDll(dllPath)
     KV.canInitializeLibrary()
   }
+  static unloadDll() {
+    KV.canUnloadLibrary()
+  }
   callback() {
     while (!this.closed) {
       const dlc = new KV.JSUINT32()

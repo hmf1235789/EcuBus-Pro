@@ -18,6 +18,8 @@ import { ElectronAPI } from '@electron-toolkit/preload'
 import type { Api } from './api'
 import type { Ref } from 'vue'
 import path from 'path'
+import { Logger} from 'winston'
+
 
 declare global {
   interface Window {

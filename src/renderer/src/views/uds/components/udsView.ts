@@ -8,11 +8,12 @@ import { ElMessageBox } from 'element-plus'
 import { UdsDevice } from 'nodeCan/uds'
 import { Layout } from '../layout'
 import { el } from 'element-plus/es/locale'
-import { Inter, NodeItem, useDataStore } from '@r/stores/data'
+import { useDataStore } from '@r/stores/data'
 import nodeConfig from './config/node/nodeConfig.vue'
 import { h } from 'vue'
 import { useProjectStore } from '@r/stores/project'
 import { cloneDeep } from 'lodash'
+import {Inter, NodeItem} from 'src/preload/data'
 
 export interface udsBase {
   name: string

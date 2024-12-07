@@ -1,44 +1,16 @@
 // stores/counter.js
 import { defineStore } from 'pinia'
-import { UdsDevice } from 'nodeCan/uds'
 import { cloneDeep } from 'lodash'
-import { TesterInfo } from 'nodeCan/tester'
-import { CanInterAction, CanNode } from 'nodeCan/can'
 import { ElMessageBox } from 'element-plus'
 import { useProjectStore } from './project'
-import { EthNode } from 'nodeCan/doip'
+import { DataSet } from 'src/preload/data'
+export type {DataSet}
 
 
-export interface CanInter{
-  type:'can',
-  id:string,
-  name:string,
-  devices:string[],
-  action:CanInterAction[]
-}
-
-export interface LinInter{
-  id:string,
-  name:string,
-  devices:string[],
-  type:'lin',
-  action:any[]
-}
-
-export type Inter=CanInter|LinInter
-
-export interface State {
-  devices: Record<string, UdsDevice>
-  tester:Record<string, TesterInfo>
-  subFunction: Record<string, { name: string; subFunction: string }[]>
-  nodes: Record<string, NodeItem>
-  ia: Record<string, Inter>
-}
-export type NodeItem=CanNode|EthNode
 
 
 export const useDataStore = defineStore('useDataStore', {
-  state: (): State => ({
+  state: (): DataSet => ({
     devices: {},
     ia: {},
     tester:{},

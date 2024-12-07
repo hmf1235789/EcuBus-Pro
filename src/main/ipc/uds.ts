@@ -1,12 +1,5 @@
 import { BrowserWindow, ipcMain, shell } from 'electron'
 import scriptIndex from '../../../resources/docs/.gitkeep?asset&asarUnpack'
-// #v-ifdef IGNORE_NODE!='1'
-import { PEAK_TP } from '../docan/peak'
-import { ZLG_CAN } from '../docan/zlg'
-import { KVASER_CAN } from '../docan/kvaser'
-import { SIMULATE_CAN } from '../docan/simulate'
-// #v-endif
-import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
 import esbuildWin from '../../../resources/bin/esbuild.exe?asset&asarUnpack'
 import path from 'path'
 import { compileTsc, createProject, deleteNode, deleteTester, findService, getBuildStatus, refreshProject, UDSTesterMain } from '../docan/uds'
@@ -20,15 +13,12 @@ import { UdsLOG } from '../log'
 import { clientTcp, DOIP, getEthDevices } from './../doip'
 import { EthAddr, EthBaseInfo, EthNode } from '../share/doip'
 import { NodeEthItem } from '../doip/nodeItem'
-
+import { getCanDevices, openCanDevice } from '../docan/can'
+import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
 
 const libPath = path.dirname(dllLib)
 log.info('dll lib path:', libPath)
-// #v-ifdef IGNORE_NODE!='1'
-PEAK_TP.loadDllPath(libPath)
-ZLG_CAN.loadDllPath(libPath)
-KVASER_CAN.loadDllPath(libPath)
-// #v-endif
+
 
 
 
@@ -84,44 +74,7 @@ ipcMain.handle('ipc-delete-tester', async (event, ...arg) => {
     // return await deleteTester(projectPath, projectName, node)
 })
 
-export function getCanVersion(vendor: string) {
-    // #v-ifdef IGNORE_NODE!='1'
-    vendor = vendor.toUpperCase()
-    if (vendor === 'PEAK') {
-        return PEAK_TP.getLibVersion()
-    } else if (vendor === 'ZLG') {
-        return ZLG_CAN.getLibVersion()
-    } else if (vendor === 'KVASER') {
-        return KVASER_CAN.getLibVersion()
-    } else if (vendor === 'SIMULATE') {
-        return SIMULATE_CAN.getLibVersion()
-    }
-    else
-    // #v-endif
-    {
-        return 'unknown'
-    }
 
-}
-
-function getCanDevices(vendor: string) {
-    vendor = vendor.toUpperCase()
-    // #v-ifdef IGNORE_NODE!='1'
-    if (vendor === 'PEAK') {
-        return PEAK_TP.getValidDevices()
-    } else if (vendor === 'ZLG') {
-        return ZLG_CAN.getValidDevices()
-    } else if (vendor === 'KVASER') {
-        return KVASER_CAN.getValidDevices()
-    } else if (vendor === 'SIMULATE') {
-        return SIMULATE_CAN.getValidDevices()
-    }
-    else
-    // #v-endif
-    {
-        return []
-    }
-}
 
 ipcMain.handle('ipc-get-can-devices', async (event, ...arg) => {
     return getCanDevices(arg[0])
@@ -176,20 +129,9 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
             const device = devices[key]
             if (device.type == 'can' && device.canDevice) {
                 const canDevice = device.canDevice
-                let canBase: CanBase | undefined
+                const canBase = openCanDevice(canDevice)
                 activeKey = canDevice.name
-                // #v-ifdef IGNORE_NODE!='1'
-                if (canDevice.vendor == 'peak') {
-                    canBase = new PEAK_TP(canDevice)
-                } else if (canDevice.vendor == 'zlg') {
-                    canBase = new ZLG_CAN(canDevice)
-                } else if (canDevice.vendor == 'kvaser') {
-                    canBase = new KVASER_CAN(canDevice)
-                } else if (canDevice.vendor == 'simulate') {
-                    canBase = new SIMULATE_CAN(canDevice)
-                }
                 sysLog.info(`start can device ${canDevice.vendor}-${canDevice.handle} success`)
-                // #v-endif
                 if (canBase) {
                     canBase.event.on('close', (errMsg) => {
                         if (errMsg) {

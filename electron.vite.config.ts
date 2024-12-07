@@ -7,8 +7,13 @@ import ConditionalCompile from "vite-plugin-conditional-compiler";
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin(),ConditionalCompile(),
-      ],
+    resolve: {
+      alias: {
+        'src': resolve(__dirname, 'src'),
+      }
+    },
+    plugins: [externalizeDepsPlugin(), ConditionalCompile(),
+    ],
   },
   preload: {
     plugins: [externalizeDepsPlugin()]
@@ -20,13 +25,13 @@ export default defineConfig({
         'nodeCan': resolve(__dirname, 'src/main/share'),
       }
     },
-    plugins: [vue(),vueJsx(),
-      nodePolyfills({
-        include:['buffer'],
-        globals:{
-          Buffer:true
-        }
-      })
+    plugins: [vue(), vueJsx(),
+    nodePolyfills({
+      include: ['buffer'],
+      globals: {
+        Buffer: true
+      }
+    })
 
     ]
   }

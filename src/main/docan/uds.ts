@@ -326,9 +326,9 @@ export class UDSTesterMain {
         return new CAN_TP_SOCKET(tp,addr.canAddr)
       },
       close:(base:boolean)=>{
-        if(base){
-          tp.close()
-        }
+      
+          tp.close(base)
+        
       }
     }, seqIndex, log, cycleCount).finally(() => {
       tp.close(this.closeBase)
@@ -340,6 +340,9 @@ export class UDSTesterMain {
       createSocket:async (addr:UdsAddress)=>{
         if(addr.ethAddr==undefined){
           throw new Error('address not found')
+        }
+        if(this.ac.signal.aborted){
+          throw new Error('aborted')
         }
         return await DOIP_SOCKET.create(base,addr.ethAddr,'client')
       },
@@ -433,6 +436,9 @@ export class UDSTesterMain {
         if (service.enable && addrItem && targetService) {
 
           const baseRun = async (seqName: string, s: ServiceItem, fromJob = false) => {
+            if(this.ac.signal.aborted){
+              throw new Error('aborted')
+            }
             // await this.pool?.triggerPreSend(s.name)
             const txBuffer = getTxPdu(s)
             if (txBuffer.length == 0) {
@@ -467,6 +473,9 @@ export class UDSTesterMain {
               let rxData = undefined
               try {
                 const curUs = getTsUs()
+                if(this.ac.signal.aborted){
+                  throw new Error('aborted')
+                }
                 rxData = await socket.read(this.tester.udsTime.pTime).catch((e) => {
                   this.lastActiveTs += (getTsUs() - curUs)
                   throw e
@@ -543,7 +552,7 @@ export class UDSTesterMain {
 
             return true
           }
-          log.udsIndex(serviceIndex, 'start')
+          log.udsIndex(serviceIndex,targetService.name, 'start')
           if (targetService.serviceId === 'Job') {
             if (this.pool) {
               const params: (string | number)[] = []
@@ -578,17 +587,18 @@ export class UDSTesterMain {
                     }
                   }
                   percent += step
-                  log.udsIndex(serviceIndex, 'progress', percent)
+                  log.udsIndex(serviceIndex,ser.name,'progress', percent)
                 }
 
               }
-              log.udsIndex(serviceIndex, 'finished')
+              log.udsIndex(serviceIndex, targetService.name,'finished')
             } else {
               throw new Error('the pool has been terminated')
             }
           } else {
             // eslint-disable-next-line no-constant-condition
             while (true) {
+              
               const r = await baseRun(targetSeq.name, targetService)
 
               if (r) {
@@ -596,7 +606,7 @@ export class UDSTesterMain {
               }
               await this.delay(service.delay)
             }
-            log.udsIndex(serviceIndex, 'finished')
+            log.udsIndex(serviceIndex,targetService.name,'finished')
 
           }
           await this.delay(service.delay)

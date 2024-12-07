@@ -20,8 +20,13 @@ Feel free to contact us for more details on sponsorship.
 ### OpenCollective
 [Become a sponsor](https://opencollective.com/ecubus)
 
+### WeChat
+![alipay](wechat.jpg){width=200px}
+
 ### Alipay
 ![alipay](alipay.jpg){width=200px}
+
+
 
 ## Sponsor tiers
 

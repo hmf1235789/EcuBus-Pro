@@ -407,7 +407,7 @@ import interIcon from '@iconify/icons-material-symbols/interactive-space-outline
 import logo from '@r/assets/logo64.png'
 import { v4 } from 'uuid'
 import { cloneDeep } from 'lodash'
-import { Inter, useDataStore } from '@r/stores/data'
+import { useDataStore } from '@r/stores/data'
 import * as joint from '@joint/core'
 import { UDSView } from './components/udsView'
 import { ElMessage, ElMessageBox } from 'element-plus'
