@@ -1,6 +1,5 @@
 import EventEmitter from 'events'
 import { cloneDeep } from 'lodash'
-import log from 'electron-log'
 
 
 export interface CanBitrate {
@@ -105,7 +104,6 @@ export interface CanInterAction{
 } 
 export function formatError(error:Error) {
   // 获取错误堆栈
-  log.error(error)
   const stack = error.stack || '';
   
   // 获取第一个堆栈行（通常包含错误位置）

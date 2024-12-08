@@ -1,0 +1,14 @@
+{
+    "name": "ecb_cli",
+    "author": "frankie.zengfu@gmail.com",
+    "description": "EcbBus-Pro CLI Tool",
+    "bin":"out/index.js",
+    "pkg": {
+      "assets": "./out/chunks/*.node",
+      "outputPath": "./../resources/bin"
+    },
+    "scripts": {
+      "linux": "pkg . -t node20-linux",
+      "win": "pkg . -t node20-win"
+    }
+  }

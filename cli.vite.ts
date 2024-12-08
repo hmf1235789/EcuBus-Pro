@@ -1,13 +1,11 @@
 import { resolve } from 'path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
-import vue from '@vitejs/plugin-vue'
-import vueJsx from '@vitejs/plugin-vue-jsx'
-import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import ConditionalCompile from "vite-plugin-conditional-compiler";
+
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin(),ConditionalCompile(),
+    plugins: [externalizeDepsPlugin(),ConditionalCompile()
       ],
       resolve:{
         // src
@@ -16,6 +14,7 @@ export default defineConfig({
         }
       },
       build: {
+        target:'node18',
         rollupOptions: {
           input: {
             index: resolve(__dirname, 'src/cli/index.ts'),
@@ -24,7 +23,7 @@ export default defineConfig({
           output:{
             entryFileNames: 'index.js',
             format: 'cjs',
-            dir: resolve(__dirname, 'out/cli')
+            dir: resolve(__dirname, 'cli/out/')
           }
         }
       }

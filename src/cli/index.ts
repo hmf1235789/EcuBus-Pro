@@ -11,7 +11,7 @@ import { exit } from 'process';
 import { format } from 'winston'
 import { createLogs } from 'src/main/log';
 import Transport from 'winston-transport'
-import chalk from 'chalk';
+import colors from 'colors';
 import { CanMessage } from 'src/main/share/can';
 import { ServiceItem } from 'src/main/share/uds';
 
@@ -50,13 +50,13 @@ async function parseProject(projectPath: string): Promise<{
 
 const myFormat = format.printf(({ level, message, label, timestamp }) => {
     const map:Record<string,any>={
-        'info':chalk.green,
-        'warn':chalk.yellow,
-        'error':chalk.red,
-        'debug':chalk.gray
+        'info':colors.green,
+        'warn':colors.yellow,
+        'error':colors.red,
+        'debug':colors.gray
     }
     let msg=message as any
-    const fn=map[level]||chalk.white
+    const fn=map[level]||colors.white
    
     if (typeof msg === 'object') {
       

@@ -5,6 +5,7 @@
   "main": "./out/main/index.js",
   "author": "frankie.zengfu@gmail.com",
   "homepage": "https://app.whyengineer.com",
+  "license": "Apache-2.0",
   "ecubusPro": {
     "support": [
       "can"
@@ -28,8 +29,9 @@
     "dev": "electron-vite dev",
     "test": "vitest --config vitest.config.ts",
     "build": "npm run typecheck && electron-vite build",
-    "cli:dev": "electron-vite dev -c cli.vite.ts -w --entry out/cli/index2.js",
+    "cli:dev": "electron-vite dev -c cli.vite.ts -w --entry cli/out/index2.js",
     "cli:build": "electron-vite build -c cli.vite.ts",
+    "cli:build:win": "electron-vite build -c cli.vite.ts && cd cli && npm run win",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
@@ -55,7 +57,7 @@
     "async": "^3.2.6",
     "axios": "^1.7.7",
     "broadcast-channel": "^7.0.0",
-    "chalk": "^4.1.2",
+    "colors": "^1.4.0",
     "commander": "^12.1.0",
     "dayjs": "^1.11.13",
     "electron-log": "^5.1.2",
@@ -96,6 +98,7 @@
     "@iconify/icons-material-symbols": "^1.2.58",
     "@iconify/icons-ph": "^1.2.5",
     "@iconify/vue": "^4.1.1",
+    "@liudonghua123/pkg": "^6.0.1",
     "@rollup/plugin-node-resolve": "^15.3.0",
     "@rushstack/eslint-patch": "^1.7.1",
     "@types/async": "^3.2.24",

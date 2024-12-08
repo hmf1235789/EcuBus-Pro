@@ -24,11 +24,16 @@ async function runSeq(projectPath:string,projectName:string,tester:TesterInfo,de
         //find sequence index
         let seqIndex=0
         if(seqName){
+            let found=false
             for (let i = 0; i < tester.seqList.length; i++) {
                 if (tester.seqList[i].name == seqName) {
                     seqIndex = i
+                    found=true
                     break
                 }
+            }
+            if(!found){
+                throw new Error(`sequence name ${seqName} not found`)
             }
         }
         if(tester.seqList[seqIndex]){

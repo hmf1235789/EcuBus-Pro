@@ -19,7 +19,6 @@ import { KVASER_CAN } from './kvaser'
 import { ZLG_CAN } from './zlg'
 // #v-endif
 import path from 'path'
-import { ModuleKind, ModuleResolutionKind, ScriptTarget, Project as TSProject, FileSystemHost } from 'ts-morph'
 import Handlebars from 'handlebars'
 import fsP from 'fs/promises'
 import fs from 'fs'
@@ -1037,7 +1036,9 @@ export async function compileTsc(projectPath: string, projectName: string, teste
         code: -1, message: 'script file not exist', file: entry, start: 0, line: 0
       }]
     }
-    const project = new TSProject({
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const tt=require('ts-morph')
+    const project = new tt.TSProject({
       tsConfigFilePath: path.join(projectPath, 'tsconfig.json'),
     });
     // await project.emit()
