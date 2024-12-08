@@ -29,7 +29,7 @@
     "dev": "electron-vite dev",
     "test": "vitest --config vitest.config.ts",
     "build": "npm run typecheck && electron-vite build",
-    "cli:dev": "electron-vite dev -c cli.vite.ts -w --entry cli/out/index2.js",
+    "cli:dev": "electron-vite dev -c cli.vite.ts -w --entry cli/out/ecb_cli2.js",
     "cli:build": "electron-vite build -c cli.vite.ts",
     "cli:build:win": "electron-vite build -c cli.vite.ts && cd cli && npm run win",
     "postinstall": "electron-builder install-app-deps",

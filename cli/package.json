@@ -2,7 +2,7 @@
     "name": "ecb_cli",
     "author": "frankie.zengfu@gmail.com",
     "description": "EcbBus-Pro CLI Tool",
-    "bin":"out/index.js",
+    "bin":"out/ecb_cli.js",
     "pkg": {
       "assets": "./out/chunks/*.node",
       "outputPath": "./../resources/bin"

@@ -21,7 +21,7 @@ export default defineConfig({
             fake: resolve(__dirname, 'src/cli/fake.ts'),
           },
           output:{
-            entryFileNames: 'index.js',
+            entryFileNames: 'ecb_cli.js',
             format: 'cjs',
             dir: resolve(__dirname, 'cli/out/')
           }

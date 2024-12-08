@@ -38,6 +38,7 @@ async function runSeq(projectPath:string,projectName:string,tester:TesterInfo,de
         }
         if(tester.seqList[seqIndex]){
             await uds.runSequence(seqIndex, cycle)
+            canBase.close()
         }else{
             if(seqName){
                 throw new Error(`sequence ${seqName} not found`)
@@ -65,6 +66,7 @@ export default async function main(projectPath:string,projectName:string,data:Da
             throw new Error(`tester device not found`)
         }
         await runSeq(projectPath,projectName,tester,device,seqName,cycle)
+
     }else{
         throw new Error(`tester ${testerName} has no target device`)
     }
