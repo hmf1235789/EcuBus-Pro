@@ -83,7 +83,7 @@
     "vite-raw-plugin": "^1.0.2",
     "vue-router": "^4.2.5",
     "vxe-pc-ui": "^4.2.53",
-    "vxe-table": "^4.9.4",
+    "vxe-table": "4.9.4",
     "winston": "^3.17.0",
     "workerpool": "https://github.com/frankie-zeng/workerpool.git#efa4bab"
   },
