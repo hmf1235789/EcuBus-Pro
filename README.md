@@ -5,10 +5,14 @@
 
   <h1>EcuBus-Pro</h1>
 
-   <div style="margin:5px">
+   <div style="margin:5px; display: flex; justify-content: center; align-items: center;gap:4px">
     <a href="https://github.com/ecubus/EcuBus-Pro/releases">
       <img src="https://github.com/ecubus/EcuBus-Pro/actions/workflows/build.yml/badge.svg" alt="github-ci" />
     </a>
+    <a href="https://github.com/ecubus/EcuBus-Pro">
+       <img src="https://img.shields.io/github/stars/ecubus/EcuBus-Pro"/>
+    </a>
+   
   </div>
   <b style="font-size:16px">A powerful automotive ECU development tool</b><br/>
   <i>Easy of use, Cross platform, Multi dongle, Powerful script ability, CLI support</i><br/>
@@ -25,11 +29,17 @@
 * powerful script ability, based on typescript
 * CLI ability support
 
-### Snapshot
+### GUI Snapshot
 
 ![base1](./docs/about/base1.gif)
 ---
 ![base1](./docs/about/uds.gif)
+
+### CLI Ability
+
+run uds sequence by cli
+![alt text](./docs/about/seq.png)
+
 
 ## Support this project
 
@@ -42,9 +52,6 @@ You can also consider sponsoring us to get extra technical support services. If 
 - [X] Handling Issues with higher priority
 - [X] One-to-one technical consulting service
 - [X] Help to write addon code to access 0x27,0x29 dll functions
-
-## Star History
-[![Star History Chart](https://api.star-history.com/svg?repos=ecubus/EcuBus-Pro&type=Date)](https://star-history.com/#ecubus/EcuBus-Pro&Date)
 
 ## License
 Apache-2.0

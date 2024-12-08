@@ -6,7 +6,9 @@ export default defineConfig({
   description: "A VitePress Site",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
-   
+    outline:{
+      level:[2,3]
+    },
     search: {
       provider: 'algolia',
       options: {
