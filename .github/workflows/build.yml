@@ -1,4 +1,4 @@
-name: Build
+name: Build-Windows
 
 
 on: 
@@ -31,5 +31,7 @@ jobs:
         run: npm run worker
       - name: Build api
         run: npm run api
+      - name: Build cli
+        run: npm run cli:build:win
       - name: Build APP
         run: npm run build:win
