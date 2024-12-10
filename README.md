@@ -12,7 +12,6 @@
     <a href="https://github.com/ecubus/EcuBus-Pro">
        <img src="https://img.shields.io/github/stars/ecubus/EcuBus-Pro"/>
     </a>
-   
   </div>
   <b style="font-size:16px">A powerful automotive ECU development tool</b><br/>
   <i>Easy of use, Cross platform, Multi dongle, Powerful script ability, CLI support</i><br/>
