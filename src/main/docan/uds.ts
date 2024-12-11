@@ -1038,7 +1038,7 @@ export async function compileTsc(projectPath: string, projectName: string, teste
     }
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const tt=require('ts-morph')
-    const project = new tt.TSProject({
+    const project = new tt.Project({
       tsConfigFilePath: path.join(projectPath, 'tsconfig.json'),
     });
     // await project.emit()
@@ -1112,6 +1112,7 @@ async function compileTscEntry(
       '--platform=node',
       '--format=cjs',
       `--alias:${vendor}=${libPath}`,
+      `--alias:@serialport/bindings-cpp=${libPath}/bindings-cpp`,
       `--outdir=${outputDir}`,
       `--inject:${path.join(libPath, 'uds.js')}`,
     ],
