@@ -3,6 +3,7 @@ import './dialog'
 import './uds'
 import './fs'
 import './examples'
+import './key'
 import { ipcMain, shell } from 'electron'
 import { getCanVersion } from '../docan/can'
 

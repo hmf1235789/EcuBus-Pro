@@ -74,8 +74,8 @@ import close from '@iconify/icons-material-symbols/close';
 import home from '@iconify/icons-material-symbols/home-outline';
 import lightIcon from '@iconify/icons-material-symbols/play-circle-outline-rounded'
 import stopIcon from '@iconify/icons-material-symbols/stop-circle-outline'
-import { onKeyStroke } from '@vueuse/core'
-import { useDataStore } from "@r/stores/data";
+import { onKeyStroke,onKeyDown} from '@vueuse/core'
+import { useDataStore} from "@r/stores/data";
 
 const project = useProjectStore()
 const router = useRouter()
@@ -122,6 +122,10 @@ onKeyStroke('s', (e) => {
   }
 })
 
+onKeyDown(true,(e)=>{
+  console.log(e.key)
+  window.electron.ipcRenderer.send('ipc-key-down',e.key)
+})
 
 // onMounted(() => {
 //   caclTitle()

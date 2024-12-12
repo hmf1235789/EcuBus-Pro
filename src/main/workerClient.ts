@@ -91,6 +91,11 @@ export default class UdsTester {
         this.log.systemMsg(str, this.ts, 'error')
       }
     })
+    globalThis.keyEvent.on('keydown', (key: string) => {
+      this.workerEmit('__keyDown', key).catch((e:any) => {
+        this.log.systemMsg(e.toString(), this.ts, 'error')
+      })
+    })
   }
   updateTs(ts: number) {
     this.ts = ts

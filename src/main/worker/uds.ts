@@ -811,7 +811,31 @@ export class UDSClass {
       this.event.off(`can.${id}` as any, fc)
     }
   }
-
+  /**
+   * Registers an event listener for a specific key.
+   *
+   * @param key - The key to listen for. Only the first character of the key is used, * is a wildcard.
+   * @param fc - The callback function to be executed when the event is triggered. 
+   *             This can be a synchronous function or a function returning a Promise.
+   */
+  OnKey(key: string, fc: () => void | Promise<void>) {
+    key = key.slice(0,1)
+    if(key){
+      this.event.on(`keyDown${key}` as any, fc)
+    }
+  }
+  /**
+   * Unsubscribes from an event listener for a specific key.
+   *
+   * @param key - The key to unsubscribe from. Only the first character of the key is used, * is a wildcard.
+   * @param fc - The callback function to remove from the event listeners.
+   */
+  OffKey(key: string, fc: () => void | Promise<void>) {
+    key = key.slice(0,1)
+    if(key){
+      this.event.off(`keyDown${key}` as any, fc)
+    }
+  }
   /**
    * Subscribe to an event, invoking the registered function when the event is emitted.
    * @param eventName 
@@ -919,6 +943,10 @@ export class UDSClass {
     await this.event.emit(`can.${msg.id}` as any, msg)
     await this.event.emit('can' as any, msg)
   }
+  private async keyDown(key:string){
+    await this.event.emit(`keyDown${key}` as any, key)
+    await this.event.emit(`keyDown*` as any, key)
+  }
   private evnetDone(id: number, resp?: {
     err?: string,
     data?: any
@@ -945,6 +973,7 @@ export class UDSClass {
         __eventDone: this.evnetDone.bind(this),
       })
       this.event.on('__canMsg' as any, this.canMsg.bind(this))
+      this.event.on('__keyDown' as any, this.keyDown.bind(this))
     }
   }
 
@@ -1041,6 +1070,11 @@ export class UDSClass {
  */
 export const UDS = new UDSClass()
 global.UDS = UDS
+
+global.OnKey = UDS.OnKey.bind(UDS)
+global.OffKey = UDS.OffKey.bind(UDS)
+global.OnCan = UDS.OnCan.bind(UDS)
+global.OffCan = UDS.OffCan.bind(UDS)
 
 
 

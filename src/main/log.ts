@@ -7,10 +7,6 @@ import EventEmitter from 'events'
 import { Sequence, ServiceItem } from './share/uds'
 import { PayloadType } from './doip';
 
-declare global {
-  var sysLog: Logger
-  var scriptLog: Logger
-}
 
 
 const isDev = process.env.NODE_ENV !== 'production'
@@ -20,7 +16,7 @@ type LogFunc = () => Transport
 
 export function createLogs(logs: LogFunc[], formats: Format[]) {
 
-  globalThis.sysLog = createLogger({
+  global.sysLog = createLogger({
     transports: logs.map((t) => t()),
     format: format.combine(
       format.json(),
@@ -28,7 +24,7 @@ export function createLogs(logs: LogFunc[], formats: Format[]) {
       ...formats
     ),
   })
-  globalThis.scriptLog = createLogger({
+  global.scriptLog = createLogger({
     transports: logs.map((t) => t()),
     format: format.combine(
       format.json(),
