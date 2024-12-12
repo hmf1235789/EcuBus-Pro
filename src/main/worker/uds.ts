@@ -1,3 +1,6 @@
+/**
+ * @module Util
+ */
 import Emittery from 'emittery'
 import { getRxPdu, getTxPdu, Param, paramSetVal, paramSetSize, paramSetValRaw, Sequence, ServiceItem, applyBuffer, } from '../share/uds'
 export type { CanMessage, CanMsgType, CAN_ID_TYPE, CAN_ADDR_TYPE, CAN_ADDR_FORMAT } from '../share/can'
@@ -45,12 +48,16 @@ const serviceMap = new Map<string, ServiceItem>()
 let testerName: string | undefined
 
 let id = 0
-
+/**
+ * @category UDS
+ */
 export type ServiceEvent = {
   'send': DiagRequest,
   'recv': DiagResponse,
 }
-
+/**
+ * @category UDS
+ */
 class Service {
   service: ServiceItem
   private params: Param[]
@@ -77,7 +84,7 @@ class Service {
    * @example
    * 
    * ```ts
-   * UDS.Init(async () => {
+   * Util.Init(async () => {
    *    const testService0 = DiagRequest.from('Can.testService')
    *    testService.diagSetParameter('key', 0x01)
    *    const testService1 = DiagRequest.from('Can.testService')
@@ -109,7 +116,7 @@ class Service {
    * @example
    * 
    * ```ts
-   * UDS.Init(()=>{
+   * Util.Init(()=>{
    *     const testService = DiagRequest.from('Can.testService')
    *     testService.On('send', ()=>{
    *         console.log('send event happened.')
@@ -125,7 +132,7 @@ class Service {
     event: T,
     listener: (data: ServiceEvent[T]) => void | Promise<void>
   ) {
-    UDS.On(`${this.getServiceName()}.${event}` as any, listener)
+    Util.On(`${this.getServiceName()}.${event}` as any, listener)
   }
   /**
    * Unsubscribe from an event.
@@ -136,7 +143,7 @@ class Service {
    * @example
    * 
    * ```ts
-   * UDS.Init(() => {
+   * Util.Init(() => {
    *     const testService = DiagRequest.from('Can.testService');
    *     testService.On('send', () => {
    *         console.log('send event happened.');
@@ -155,7 +162,7 @@ class Service {
     event: T,
     listener: (data: ServiceEvent[T]) => void | Promise<void>
   ) {
-    UDS.Off(`${this.getServiceName()}.${event}` as any, listener)
+    Util.Off(`${this.getServiceName()}.${event}` as any, listener)
   }
   private async asyncEmit(event: string, data: any): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -175,7 +182,7 @@ class Service {
    * @example
    * 
    * ```ts
-   * UDS.Init(()=>{
+   * Util.Init(()=>{
    *     const testService = DiagRequest.from('Can.testService');
    *     console.log('ServiceName:', testService.getServiceName())
    * })
@@ -192,7 +199,7 @@ class Service {
    * @example
    * 
    * ```ts
-   * UDS.Init(()=>{
+   * Util.Init(()=>{
    *     const testService = DiagRequest.from('Can.testService');
    *     console.log('Desc:', testService.getServiceDesc())
    * })
@@ -210,7 +217,7 @@ class Service {
    * @example
    * 
    * ```ts
-   * UDS.Init(()=>{
+   * Util.Init(()=>{
    *     const testService = DiagRequest.from('Can.testService');
    *     console.log('SERVICE-ID Buffer:', testService.diagGetParameter('SERVICE-ID'))
    * })
@@ -233,7 +240,7 @@ class Service {
    * @example
    * 
    * ```ts
-   * UDS.Init(()=>{
+   * Util.Init(()=>{
    *     const testService = DiagRequest.from('Can.testService');
    *     console.log('SERVICE-ID:', testService.diagGetParameterRaw('SERVICE-ID'))
    * })
@@ -256,7 +263,7 @@ class Service {
    * @example
    * 
    * ```ts
-   * UDS.Init(()=>{
+   * Util.Init(()=>{
    *     const testService = DiagRequest.from('Can.testService');
    *     console.log('SERVICE-ID Size:', testService.diagGetParameterSize('SERVICE-ID'))
    * })
@@ -277,7 +284,7 @@ class Service {
    * 
    * @example
    * 
-   * UDS.Init(()=>{
+   * Util.Init(()=>{
    *     const testService = DiagRequest.from('Can.testService');
    *     console.log('parameter names:', testService.diagGetParameterNames())
    * })
@@ -296,7 +303,7 @@ class Service {
    * > It is only advisable to specify the size of num and array parameters.
    * 
    * ```ts
-   * UDS.Init(()=>{
+   * Util.Init(()=>{
    *     const testService = DiagRequest.from('Can.testService')
    * 
    *     // array parameter
@@ -337,7 +344,7 @@ class Service {
    * 1. **array parameter**
    * 
    *     ```ts
-   *     UDS.Init(()=>{
+   *     Util.Init(()=>{
    *         // add param arrayParam in Service.
    *         const testService = DiagRequest.from('Can.testService')
    *         
@@ -350,7 +357,7 @@ class Service {
    * 2. **num parameter**
    * 
    *     ```ts
-   *     UDS.Init(()=>{
+   *     Util.Init(()=>{
    *         // add param arrayParam in Service.
    *         const testService = DiagRequest.from('Can.testService')
    *     
@@ -376,7 +383,7 @@ class Service {
    *     > The ascii parameter formats the input value into a string. It is advisable to avoid using numbers as input.
    * 
    *     ```ts
-   *     UDS.Init(()=>{
+   *     Util.Init(()=>{
    *         // add param arrayParam in Service.
    *         const testService = DiagRequest.from('Can.testService')
    *     
@@ -396,7 +403,7 @@ class Service {
    * 4. **unicode parameter** 
    *
    *     ```ts
-   *     UDS.Init(()=>{
+   *     Util.Init(()=>{
    *         // add param arrayParam in Service.
    *         const testService = DiagRequest.from('Can.testService')
    *     
@@ -417,7 +424,7 @@ class Service {
    * 5. **float parameter**
    * 
    *     ```ts
-   *     UDS.Init(()=>{
+   *     Util.Init(()=>{
    *         // add param arrayParam in Service.
    *         const testService = DiagRequest.from('Can.testService')
    *     
@@ -464,7 +471,7 @@ class Service {
    * To modify an array parameter, you can use the following example:
    * 
    * ```ts
-   * UDS.Init(() => {
+   * Util.Init(() => {
   
    *     const testService = DiagRequest.from('Can.testService');
    *     
@@ -525,7 +532,7 @@ class Service {
    * This function is typically used by a job to modify all data of a service. The following code demonstrates how to generate a new service and set its raw data:
    * 
    * ```ts
-   * UDS.Register('Can.testJob', async (v) => {
+   * Util.Register('Can.testJob', async (v) => {
    *     //create a new DiagRequest in Can tester
    *     const testService = new DiagRequest('Can');
    *     const newData = Buffer.from([0x10, 0x01, 0x00, 0x01, 0x02]);
@@ -540,7 +547,7 @@ class Service {
    * You can also modify the raw data of an existing service with the following code:
    * 
    * ```ts
-   * UDS.Init(() => {
+   * Util.Init(() => {
   
    *     const testService = DiagRequest.from('Can.testService');
    *     const newData = Buffer.from([0x10, 0x02]);
@@ -563,7 +570,7 @@ class Service {
    * @example
    * 
    * ```ts
-   * UDS.Init(()=>{
+   * Util.Init(()=>{
   
    *     const testService = DiagRequest.from('Can.testService')
    *     console.log('get raw data:', testService.diagGetRaw())
@@ -596,7 +603,9 @@ export class DiagJob extends Service {
     }
   }
 }
-
+/**
+ * @category UDS
+ */
 export class DiagResponse extends Service {
   constructor(service: ServiceItem) {
     super(cloneDeep(service), false)
@@ -610,7 +619,7 @@ export class DiagResponse extends Service {
    * @example
    * 
    *     ```ts
-   *     UDS.Init(async ()=>{
+   *     Util.Init(async ()=>{
    *         // add param arrayParam in Service.
    *         const testService = DiagRequest.from('Can.testService')
    *         testService.On('send', ()=>{
@@ -637,7 +646,7 @@ export class DiagResponse extends Service {
    * @example
    * 
    * ```ts
-   * UDS.On('Can.testService.send', (v)=>{
+   * Util.On('Can.testService.send', (v)=>{
    *     const response = DiagResponse.fromDiagRequest(v)
    * })
    * ```
@@ -652,7 +661,7 @@ export class DiagResponse extends Service {
    * @example
    * 
    * ```ts
-   * UDS.On('Can.testService.recv', (v)=>{
+   * Util.On('Can.testService.recv', (v)=>{
    *     console.log('response is positive:', v.diagIsPositiveResponse())
    * })
    * ```
@@ -678,7 +687,7 @@ export class DiagResponse extends Service {
    * @example
    * 
    * // here testService2 is a RequestDownload(0x34) service
-   * UDS.On('Can.testService2.recv', (v)=>{
+   * Util.On('Can.testService2.recv', (v)=>{
    *     console.log('response code', v.diagGetResponseCode())
    * })
    *
@@ -695,7 +704,9 @@ export class DiagResponse extends Service {
   }
 }
 
-
+/**
+ * @category UDS
+ */
 export class DiagRequest extends Service {
 
   constructor(service: ServiceItem) {
@@ -709,7 +720,7 @@ export class DiagRequest extends Service {
    * @example
    * 
    *     ```ts
-   *     UDS.Init(async ()=>{
+   *     Util.Init(async ()=>{
    *         // add param arrayParam in Service.
    *         const testService = DiagRequest.from('Can.testService')
    *         testService.On('send', ()=>{
@@ -730,7 +741,7 @@ export class DiagRequest extends Service {
 }
 
 
-export class UDSClass {
+export class UtilClass {
   private isMain = workerpool.isMainThread
   private event = new Emittery<EventMap>()
   private funcMap = new Map<Function, any>()
@@ -744,7 +755,7 @@ export class UDSClass {
    * @example
    * 
    * ```ts
-   * UDS.Register('Can.testJob', async (v) => {
+   * Util.Register('Can.testJob', async (v) => {
   
    *     const testService = new DiagRequest();
    *     const newData = Buffer.from([0x10, 0x01, 0x00, 0x01, 0x02]);
@@ -818,9 +829,9 @@ export class UDSClass {
    * @param fc - The callback function to be executed when the event is triggered. 
    *             This can be a synchronous function or a function returning a Promise.
    */
-  OnKey(key: string, fc: () => void | Promise<void>) {
-    key = key.slice(0,1)
-    if(key){
+  OnKey(key: string, fc: (key: string) => void | Promise<void>) {
+    key = key.slice(0, 1)
+    if (key) {
       this.event.on(`keyDown${key}` as any, fc)
     }
   }
@@ -830,9 +841,9 @@ export class UDSClass {
    * @param key - The key to unsubscribe from. Only the first character of the key is used, * is a wildcard.
    * @param fc - The callback function to remove from the event listeners.
    */
-  OffKey(key: string, fc: () => void | Promise<void>) {
-    key = key.slice(0,1)
-    if(key){
+  OffKey(key: string, fc: (key: string) => void | Promise<void>) {
+    key = key.slice(0, 1)
+    if (key) {
       this.event.off(`keyDown${key}` as any, fc)
     }
   }
@@ -851,7 +862,7 @@ export class UDSClass {
    * 1. *send functions*
    * 
    *     ```ts
-   *     UDS.On('Can.testService.send', async (req) => {
+   *     Util.On('Can.testService.send', async (req) => {
    *        // The req is a `DiagRequest`
    *        console.log(req.getServiceName(), ': send');
    *     });
@@ -859,7 +870,7 @@ export class UDSClass {
    * 2. *recv function*
    * 
    *     ```ts
-   *     UDS.On('Can.testService.recv', async (req) => {
+   *     Util.On('Can.testService.recv', async (req) => {
    *        // The req is a `DiagResponse`
    *        console.log(req.getServiceName(), ':recv');
    *     });
@@ -905,11 +916,11 @@ export class UDSClass {
    * @example
    * 
    * ```ts
-   * UDS.On('Can.testService.send', ()=>{
+   * Util.On('Can.testService.send', ()=>{
    *     console.log('this function will not be Off')
    * })
    * 
-   * UDS.Off('Can.testService.send', ()=>{
+   * Util.Off('Can.testService.send', ()=>{
    *     console.log('this function will not be Off')
    * })
    * 
@@ -943,7 +954,7 @@ export class UDSClass {
     await this.event.emit(`can.${msg.id}` as any, msg)
     await this.event.emit('can' as any, msg)
   }
-  private async keyDown(key:string){
+  private async keyDown(key: string) {
     await this.event.emit(`keyDown${key}` as any, key)
     await this.event.emit(`keyDown*` as any, key)
   }
@@ -985,14 +996,14 @@ export class UDSClass {
    * 
    * - Perform actions following UDS initialization using a normal function.
    *     ```ts
-   *     UDS.Init(()=>{
+   *     Util.Init(()=>{
    *       console.log('Hello UDS!')
    *     })
    *     ```
    *
    * - Perform actions following UDS initialization using an async function.
    *     ```ts
-   *     UDS.Init(async ()=>{
+   *     Util.Init(async ()=>{
    *       const file=await fs.readFile(path.join(process.env.PROJECT_ROOT,'file.bin'))
    *       let length=file.length
    *       console.log('Hello UDS file! file length is', length)
@@ -1002,12 +1013,12 @@ export class UDSClass {
    * - The last registered function will override the previous ones.
    *     ```ts
    *     // The following code will be ignored
-   *     UDS.Init(async ()=>{
+   *     Util.Init(async ()=>{
    *         console.log('1')
    *     })
    *     
    *     // The following code will take effect
-   *     UDS.Init(async ()=>{
+   *     Util.Init(async ()=>{
    *         console.log('2')
    *     })
    *     ```
@@ -1022,21 +1033,21 @@ export class UDSClass {
  * Global instance of UDSClass, providing access to UDS functionality throughout the application.
  * Use this instance to interact with UDS features and services.
  * 
- * @category UDS
+ * @category Util
  * @type {UDSClass}
  * 
  * @example 
  * 1. *Init function*
  *     - Perform actions following UDS initialization using a normal function.
  *         ```ts
- *         UDS.Init(()=>{
+ *         Util.Init(()=>{
  *           console.log('Hello UDS!')
  *         })
  *         ```
  *   
  *     - Perform actions following UDS initialization using an async function.
  *         ```ts
- *         UDS.Init(async ()=>{
+ *         Util.Init(async ()=>{
  *           const file=await fs.readFile(path.join(process.env.PROJECT_ROOT,'file.bin'))
  *           let length=file.length
  *           console.log('Hello UDS file! file length is', length)
@@ -1048,7 +1059,7 @@ export class UDSClass {
  *     > * Please replace `Can.DiagRequest.send` with your own service item name. The format is `<tester name>.<service item name>.send`
  * 
  *     ```ts
- *     UDS.On('Can.DiagRequest.send', async (req) => {
+ *     Util.On('Can.DiagRequest.send', async (req) => {
  *        // The req is a `DiagRequest`
  *        console.log(req.getServiceName(), ': send');
  *     });
@@ -1059,7 +1070,7 @@ export class UDSClass {
  *     > * Please replace `Can.DiagRequest.recv` with your own service item name. The format is `<tester name>.<service item name>.recv`
  * 
  *     ```ts
- *     UDS.On('Can.DiagRequest.recv', async (req) => {
+ *     Util.On('Can.DiagRequest.recv', async (req) => {
  *        // The req is a `DiagResponse`
  *        console.log(req.getServiceName(), ':recv');
  *     });
@@ -1068,15 +1079,8 @@ export class UDSClass {
  * 4. **More**
  *     > For more details, please refer to {@link UDSClass | `UDSClass`} class.
  */
-export const UDS = new UDSClass()
-global.UDS = UDS
-
-global.OnKey = UDS.OnKey.bind(UDS)
-global.OffKey = UDS.OffKey.bind(UDS)
-global.OnCan = UDS.OnCan.bind(UDS)
-global.OffCan = UDS.OffCan.bind(UDS)
-
-
+export const Util = new UtilClass()
+global.Util = Util
 
 /**
  * Sends a CAN message
@@ -1118,7 +1122,7 @@ let rightEntity: EntityAddr | undefined
  * @param {string} ip - The IP address of the entity, if node connected to multiple devices.
  * @returns {Promise<void>} - Returns a promise that resolves when the entity is registered.
  */
-export async function RegisterEthVirtualEntity(entity: VinInfo,ip?: string, ) {
+export async function RegisterEthVirtualEntity(entity: VinInfo, ip?: string,) {
   if (rightEntity) {
     throw new Error('only one entity can be registered')
   } else {

@@ -31,7 +31,8 @@ export default defineConfig({
       {
         text: 'User Manual',
         items: [
-          { text: 'Concept', link: '/docs/um/concept' },
+          { text: 'Introduce', link: '/docs/um/concept' },
+          { text: 'Script', link: '/docs/um/script' },
         ]
       },
       {
