@@ -51,3 +51,35 @@ Util.OnKey('s', () => {
 });
 
 ```
+
+#### OnCan
+
+listen to the can message, you can use it to do some work when the can message is received.
+
+```typescript
+// listen to the can message
+Util.OnCan(0x1, (msg) => {
+    console.log(msg);
+});
+// listen all can message
+Util.OnCan(true, (msg) => {
+    console.log(msg);
+});
+
+```
+
+#### On
+listen to the uds message.
+`<tester name>.<service item name>.recv` is used to listen to the uds message received.
+`<tester name>.<service item name>.send` is used to listen to the uds message send.
+```typescript
+// listen to the uds message
+Util.On('Can.DiagRequest.recv', (msg) => {
+   //receive diag response
+});
+Util.On('Can.DiagRequest.send', (msg) => {
+   //receive diag request
+});
+
+
+```
