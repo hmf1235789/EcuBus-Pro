@@ -98,7 +98,6 @@ class Service {
   /**
    * Sync service params to tester sequence, after change, the sequence params will be updated.
    * 
-   * @async
    * @returns {Promise<void>} A promise that resolves when the event has been emitted.
    * 
    * @example
