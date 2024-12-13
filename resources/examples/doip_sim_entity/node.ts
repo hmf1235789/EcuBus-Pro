@@ -1,7 +1,7 @@
 import {DiagResponse, RegisterEthVirtualEntity} from 'ECB'
 
 
-UDS.Init(async () => {
+Util.Init(async () => {
     console.log('Registering virtual entity')
     await RegisterEthVirtualEntity('127.0.0.1',{
         vin:'123456789',
@@ -11,7 +11,7 @@ UDS.Init(async () => {
     })
 })
 
-UDS.On("Tester_eth_1.DiagnosticSessionControl160.send",async (req)=>{
+Util.On("Tester_eth_1.DiagnosticSessionControl160.send",async (req)=>{
     const resp=DiagResponse.fromDiagRequest(req)
     await resp.outputDiag()
 })

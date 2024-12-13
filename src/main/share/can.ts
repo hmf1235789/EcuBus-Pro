@@ -25,25 +25,80 @@ export interface CanBaseInfo {
 }
 
 
-export interface CanMessage{
-  device:string
-  dir:'IN'|'OUT'
-  data:Buffer
-  ts:number
-  id:number
-  msgType:CanMsgType
-  isSimulate?:boolean
+/**
+ * Represents a CAN (Controller Area Network) message.
+ * 
+ * @category CAN
+ */
+export interface CanMessage {
+  /**
+   * The device associated with the CAN message.
+   */
+  device: string;
+
+  /**
+   * The direction of the CAN message, either 'IN' for incoming or 'OUT' for outgoing.
+   */
+  dir: 'IN' | 'OUT';
+
+  /**
+   * The data payload of the CAN message.
+   */
+  data: Buffer;
+
+  /**
+   * The timestamp of when the CAN message was created.
+   */
+  ts: number;
+
+  /**
+   * The identifier of the CAN message.
+   */
+  id: number;
+
+  /**
+   * The type of the CAN message.
+   */
+  msgType: CanMsgType;
+
+  /**
+   * Indicates whether the CAN message is simulated.
+   * This property is optional.
+   */
+  isSimulate?: boolean;
 }
 
+/**
+ * Enumeration representing different CAN (Controller Area Network) ID types.
+ * 
+ * @category CAN
+ * @enum {string}
+ * @readonly
+ */
 export enum CAN_ID_TYPE {
   STANDARD = 'STANDARD',
   EXTENDED = 'EXTENDED'
 }
 
+/**
+ * Enumeration representing different CAN (Controller Area Network) address types.
+ * 
+ * @category CAN-TP
+ * @enum {string}
+ * @readonly
+ */
 export enum CAN_ADDR_TYPE {
   PHYSICAL = 'PHYSICAL',
   FUNCTIONAL = 'FUNCTIONAL'
 }
+
+/**
+ * Enumeration representing different CAN (Controller Area Network) address formats.
+ * 
+ * @category CAN-TP
+ * @enum {string}
+ * @readonly
+ */
 export enum CAN_ADDR_FORMAT {
   NORMAL = 'NORMAL',
   FIXED_NORMAL = 'NORMAL_FIXED',
@@ -52,12 +107,36 @@ export enum CAN_ADDR_FORMAT {
   ENHANCED = 'ENHANCED'
 }
 
-export interface CanMsgType{
-  idType: CAN_ID_TYPE
-  brs: boolean
-  canfd: boolean
-  remote: boolean
-  uuid?:string
+/**
+ * Represents a CAN (Controller Area Network) message type.
+ * @category CAN
+
+ */
+export interface CanMsgType {
+  /**
+   * The type of CAN ID.
+   */
+  idType: CAN_ID_TYPE;
+
+  /**
+   * Indicates if Bit Rate Switching (BRS) is enabled.
+   */
+  brs: boolean;
+
+  /**
+   * Indicates if CAN FD (Flexible Data-rate) is used.
+   */
+  canfd: boolean;
+
+  /**
+   * Indicates if the message is a remote frame.
+   */
+  remote: boolean;
+
+  /**
+   * Optional unique identifier for the message.
+   */
+  uuid?: string;
 }
 
 export enum CAN_ERROR_ID {

@@ -20,7 +20,7 @@ const fileList:{
     }
 ]
 
-UDS.Init(async ()=>{
+Util.Init(async ()=>{
     //change routineControlType
     const req=DiagRequest.from('Tester_1.RoutineControl491')
     req.diagSetParameter('routineControlType',1)
@@ -32,7 +32,7 @@ UDS.Init(async ()=>{
 
 })
 
-UDS.On('Tester_1.SecurityAccess390.recv',async (v)=>{
+Util.On('Tester_1.SecurityAccess390.recv',async (v)=>{
 
     const data=v.diagGetParameterRaw('securitySeed')
     const cipher = crypto.createCipheriv('aes-128-cbc', Buffer.from([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]), Buffer.alloc(16, 0));
@@ -45,7 +45,7 @@ UDS.On('Tester_1.SecurityAccess390.recv',async (v)=>{
 })
 
 
-UDS.Register("Tester_1.JobFunction0",async ()=>{
+Util.Register("Tester_1.JobFunction0",async ()=>{
     const item=fileList.shift()
     if(item){
         const r34=DiagRequest.from("Tester_1.RequestDownload520")
@@ -69,7 +69,7 @@ UDS.Register("Tester_1.JobFunction0",async ()=>{
         return []
     }
 })
-UDS.Register("Tester_1.JobFunction1",()=>{
+Util.Register("Tester_1.JobFunction1",()=>{
    
     if(maxChunkSize==undefined||maxChunkSize<=2){
         throw new Error('maxNumberOfBlockLength is undefined or too small')

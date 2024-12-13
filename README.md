@@ -34,10 +34,15 @@
 ---
 ![base1](./docs/about/uds.gif)
 
+### Script Ability
+
+Script Engine is based on `nodejs`, you can use almost all nodejs functions in your script, Also, we provide  a lot of APIs to interact with EcuBus-Pro, such as:
+![cli](./docs/um/script1.gif)
+
 ### CLI Ability
 
 run uds sequence by cli
-![alt text](./docs/about/seq.png)
+![cli](./docs/about/seq.png)
 
 
 ## Support this project

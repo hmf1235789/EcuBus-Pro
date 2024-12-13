@@ -1,13 +1,46 @@
-import { defineConfig } from 'vitepress'
+import { createRequire } from 'module'
+import { defineConfig, type DefaultTheme } from 'vitepress'
+const require = createRequire(import.meta.url)
+const pkg = require('../package.json')
+function nav(): DefaultTheme.NavItem[] {
+  return [
 
+    {
+      text: pkg.version,
+      items: [
+        {
+          text: 'Changelog',
+          link: 'https://github.com/ecubus/EcuBus-Pro/blob/master/docs/dev/releases_note.md'
+        },
+
+      ]
+    }
+  ]
+}
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "EcuBus-Pro",
-  description: "A VitePress Site",
+  description: 'A powerful automotive ECU development tool',
+  head: [
+    ['link', { rel: 'icon', type: 'image/png', href: 'https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:locale', content: 'en' }],
+    ['meta', { property: 'og:title', content: 'EcuBus-Pro | A powerful automotive ECU development tool' }],
+    ['meta', { property: 'og:site_name', content: 'EcuBus-Pro' }],
+    ['meta', { property: 'og:image', content: 'https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png' }],
+    ['meta', { property: 'og:url', content: 'https://app.whyengineer.com' }],
+  ],
+  lastUpdated: true,
+
   themeConfig: {
+    nav: nav(),
     // https://vitepress.dev/reference/default-theme-config
-    outline:{
-      level:[2,3]
+    outline: {
+      level: [2, 3]
+    },
+    editLink: {
+      pattern: 'https://github.com/ecubus/EcuBus-Pro/edit/master/:path',
+      text: 'Edit this page on GitHub'
     },
     search: {
       provider: 'algolia',
@@ -37,7 +70,7 @@ export default defineConfig({
       },
       {
         text: 'Example',
-        
+
         items: [
           { text: 'NXP UDS Bootloader', link: '/examples/nxp_bootloader/readme' },
           { text: 'Secure Access dll', link: '/examples/secure_access_dll/readme' },
@@ -47,7 +80,7 @@ export default defineConfig({
       },
       {
         text: 'Developer Manual',
-        collapsed:true,
+        collapsed: true,
         items: [
           { text: 'Arch', link: '/docs/dev/arch' },
           { text: 'Setup', link: '/docs/dev/setup' },
@@ -61,14 +94,14 @@ export default defineConfig({
     socialLinks: [
       { icon: 'github', link: 'https://github.com/ecubus/EcuBus-Pro' }
     ],
-    
+
   },
   rewrites: {
     'README.md': 'index.md',
     'resources/examples/:pkg/:slug*': 'examples/:pkg/:slug*'
   },
-  sitemap:{
+  sitemap: {
     hostname: 'https://app.whyengineer.com'
   }
-  
+
 })

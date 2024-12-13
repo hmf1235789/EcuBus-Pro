@@ -22,11 +22,31 @@ const allServicesSend = ['{{{serviceName}}}.send'] as const
 const allServicesRecv = ['{{{serviceName}}}.recv'] as const
 
 interface Jobs { string: (data: Buffer) => string }
-
+/**
+ * All services name config in Diagnostic Service.
+ * @category UDS
+ */
 export type ServiceName = (typeof serviceList)[number]
+/**
+ * All testers name config in Diagnostic Service.
+ * @category UDS
+ */
 export type TesterName = (typeof testerList)[number]
+/**
+ * All services name(.send) config in Diagnostic Service.
+ * @category UDS
+ */
 export type ServiceNameSend = (typeof allServicesSend)[number]
+/**
+ * All services name(.recv) config in Diagnostic Service.
+ * @category UDS
+ */
 export type ServiceNameRecv = (typeof allServicesRecv)[number]
+
+/**
+ * All jobs name config in Diagnostic Service.
+ * @category UDS
+ */
 export type JobName = keyof Jobs
 type ServiceNameAll = ServiceNameSend | ServiceNameRecv
 
@@ -740,7 +760,9 @@ export class DiagRequest extends Service {
   }
 }
 
-
+/**
+ * @category Util
+ */
 export class UtilClass {
   private isMain = workerpool.isMainThread
   private event = new Emittery<EventMap>()
@@ -1085,6 +1107,7 @@ global.Util = Util
 /**
  * Sends a CAN message
  * 
+ * @category CAN
  * @param {CanMessage} msg - The CAN message to be sent.
  * @returns {Promise<number>} - Returns a promise that resolves to sent timestamp.
  */
@@ -1118,6 +1141,7 @@ let rightEntity: EntityAddr | undefined
 /**
  * Register a virtual entity
  * 
+ * @category DOIP
  * @param {EntityAddr} entity - The entity to be registered.
  * @param {string} ip - The IP address of the entity, if node connected to multiple devices.
  * @returns {Promise<void>} - Returns a promise that resolves when the entity is registered.
