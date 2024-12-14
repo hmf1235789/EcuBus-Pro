@@ -169,7 +169,6 @@ onBeforeMount(() => {
   getDevice(true);
   if (editIndex.value) {
     const editData = devices.devices[editIndex.value]
-    console.log(editData)
     if (editData && editData.type == 'eth' && editData.ethDevice) {
       data.value = cloneDeep(editData.ethDevice);
     } else {

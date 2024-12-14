@@ -74,18 +74,13 @@ class ElectronLog extends Transport {
   }
 
   log(info: any, callback: () => void) {
-    let send = true
-
-    if (info.level == 'debug' && !isDev) {
-      send = false
-    }
+    
+    
     let ipcc = 'ipc-log-main'
     if (info.message?.method) {
       ipcc = `ipc-log-${info.message.method}`
     }
-    if (send) {
-      this.win.webContents.send(ipcc, info)
-    }
+    this.win.webContents.send(ipcc, info)
     if (info.level == 'error') {
       log.error(info)
     }
@@ -114,7 +109,9 @@ function createWindow(): void {
       contextIsolation: true
     }
   })
-  createLogs([() => new ElectronLog(mainWindow)], [])
+  createLogs([() => new ElectronLog(mainWindow,{
+    level:'debug'
+  })], [])
   ipcMain.on('minimize', () => {
     mainWindow?.minimize()
   })

@@ -123,8 +123,12 @@ onKeyStroke('s', (e) => {
 })
 
 onKeyDown(true,(e)=>{
-  console.log(e.key)
-  window.electron.ipcRenderer.send('ipc-key-down',e.key)
+  if(window.globalStart.value){
+    if(e.key=='s'&&e.ctrlKey){
+      return
+    }
+    window.electron.ipcRenderer.send('ipc-key-down',e.key)
+  }
 })
 
 // onMounted(() => {

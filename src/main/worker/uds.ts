@@ -3,7 +3,8 @@
  */
 import Emittery from 'emittery'
 import { getRxPdu, getTxPdu, Param, paramSetVal, paramSetSize, paramSetValRaw, Sequence, ServiceItem, applyBuffer, } from '../share/uds'
-export type { CanMessage, CanMsgType, CAN_ID_TYPE, CAN_ADDR_TYPE, CAN_ADDR_FORMAT } from '../share/can'
+export { CAN_ID_TYPE, CAN_ADDR_TYPE, CAN_ADDR_FORMAT } from '../share/can'
+
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
 import workerpool, { worker } from 'workerpool'
@@ -14,7 +15,8 @@ import { CanMessage } from '../share/can'
 import SecureAccessDll from './secureAccess'
 import { EntityAddr, VinInfo } from '../share/doip'
 export { SecureAccessDll }
-
+export type {CanMessage}
+export type {CanMsgType} from '../share/can'
 
 const testerList = ['{{{testerName}}}'] as const
 const serviceList = ['{{{serviceName}}}'] as const

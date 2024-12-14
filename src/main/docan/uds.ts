@@ -907,9 +907,9 @@ export async function createProject(projectPath: string, projectName: string, te
   // await fsP.mkdir(vendorPath)
   await fsP.writeFile(path.join(vendorPath, 'index.d.ts'), `
     export as namespace ${vendor};
-import { UDSClass} from './uds'
+import { UtilClass} from './uds'
 declare global {
-    var UDS: UDSClass
+    var Util: UtilClass
 }
 export * from './uds'
 export * from './crc'

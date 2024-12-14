@@ -23,6 +23,15 @@ You can open the `API` window to get the API info.
 
 ### Node.js Ability
 
+#### Init
+Init function is the entry of the script, it will be called when the script is loaded.
+
+```typescript
+Util.Init(()=>{
+    console.log('Init');
+})
+```
+
 #### Timer
 
 Timer is node.js built-in feature, you can use it to do some periodical work. more details about the timer, please refer to [Timer](https://nodejs.org/api/timers.html)

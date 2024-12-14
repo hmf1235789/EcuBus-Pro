@@ -34,7 +34,7 @@ export interface CanMessage {
   /**
    * The device associated with the CAN message.
    */
-  device: string;
+  device?: string;
 
   /**
    * The direction of the CAN message, either 'IN' for incoming or 'OUT' for outgoing.
@@ -47,9 +47,9 @@ export interface CanMessage {
   data: Buffer;
 
   /**
-   * The timestamp of when the CAN message was created.
+   * The timestamp of when the CAN message was sent/recv.
    */
-  ts: number;
+  ts?: number;
 
   /**
    * The identifier of the CAN message.
