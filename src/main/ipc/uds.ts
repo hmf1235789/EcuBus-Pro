@@ -458,9 +458,9 @@ ipcMain.on('ipc-send-can', (event, ...arg) => {
 
         })
         const b = Buffer.alloc(len)
-        const d = Buffer.from(ia.data.join(''), 'hex')
-        //copy d to b
-        d.copy(b)
+        for(const [index,d] of ia.data.entries()){
+            b[index] = parseInt(d,16)
+        }
         socket.write(b).catch(null).finally(() => {
             socket.close()
         })
@@ -487,9 +487,9 @@ ipcMain.on('ipc-send-can-period', (event, ...arg) => {
 
         })
         const b = Buffer.alloc(len)
-        const d = Buffer.from(ia.data.join(''), 'hex')
-        //copy d to b
-        d.copy(b)
+        for(const [index,d] of ia.data.entries()){
+            b[index] = parseInt(d,16)
+        }
         //if timer exist, clear it
         const timer = timerMap.get(id)
         if (timer) {
