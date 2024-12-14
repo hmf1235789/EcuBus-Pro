@@ -155,5 +155,8 @@
         "options": {}
       }
     }
+  },
+  "example":{
+    "catalog":"Script"
   }
 }
