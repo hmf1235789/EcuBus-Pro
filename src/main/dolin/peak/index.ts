@@ -1,4 +1,4 @@
-import { LinChecksumType, LinDevice, LinDirection } from '../../share/lin'
+import { LinChecksumType, LinDevice, LinDirection, LinMode } from '../../share/lin'
 import LIN from '../build/Release/peakLin.node'
 import { v4 } from 'uuid'
 
@@ -36,10 +36,10 @@ export class PeakLin {
             throw new Error(err2Str(result))
         }
     }
-    constructor(private device: LinDevice, private master: boolean, private baud: number) {
+    constructor(private device: LinDevice, private mode: LinMode, private baud: number) {
         this.client = this.registerClient()
         this.connectClient(this.client, device)
-        this.initHardware(device, this.client, master, baud)
+        this.initHardware(device, this.client, mode==LinMode.MASTER, baud)
         LIN.CreateTSFN(this.client, this.device.label, this.callback.bind(this))
     }
     callback() {
@@ -65,7 +65,7 @@ export class PeakLin {
             msg.Data = data
 
         }
-        if (this.master) {
+        if (this.mode==LinMode.MASTER) {
             result = LIN.LIN_CalculateChecksum(msg)
             if (result != 0) {
                 throw new Error(err2Str(result))
@@ -86,7 +86,15 @@ export class PeakLin {
     }
 
 
-
+    slaveWakeup(){
+        const result=LIN.LIN_XmtWakeUp(this.client,this.device.handle)
+        if(result!=0){
+            throw new Error(err2Str(result))
+        }
+    }
+    getStatus(){
+        return LIN.LIN_GetStatus(this.client,this.device.handle)
+    }
 
     static getValidDevices(): LinDevice[] {
         const devices: LinDevice[] = []
