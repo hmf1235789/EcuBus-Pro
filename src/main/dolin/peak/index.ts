@@ -1,5 +1,5 @@
 import { LinChecksumType, LinDevice, LinDirection } from '../../share/lin'
-import LIN from './../../build/Release/peakLin.node'
+import LIN from '../build/Release/peakLin.node'
 import { v4 } from 'uuid'
 
 

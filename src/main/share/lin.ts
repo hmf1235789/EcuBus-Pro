@@ -15,6 +15,11 @@ export enum LinDirection {
     RECV
 }
 
+export enum LinMode{
+    MASTER,
+    SLAVE
+}
+
 
 export enum LinChecksumType {
     CLASSIC,
