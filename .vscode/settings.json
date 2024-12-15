@@ -11,5 +11,8 @@
   "python.analysis.extraPaths": [
     "./resources/python/Lib/site-packages",
     "./src/main"
+  ],
+  "cSpell.words": [
+    "whyengineer"
   ]
 }
