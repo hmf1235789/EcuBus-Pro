@@ -57,6 +57,7 @@
     "async": "^3.2.6",
     "axios": "^1.7.7",
     "broadcast-channel": "^7.0.0",
+    "chevrotain": "^11.0.3",
     "colors": "^1.4.0",
     "commander": "^12.1.0",
     "dayjs": "^1.11.13",
