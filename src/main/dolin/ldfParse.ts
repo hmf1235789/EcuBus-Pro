@@ -1154,6 +1154,27 @@ class LdfVistor extends visitor {
         this.ldf.nodeAttrs = {}
         for (const [index, i] of ctx.Identifier.entries()) {
             const t = i as IToken
+            // console.log(ctx.configurable_framesClause[index].children.frameDefinition)
+            const configFrames=(ctx.configurable_framesClause[index] as any)?.children?.frameDefinition
+            
+            const configFramesVal:string[]=[]
+            for(const f of configFrames){
+              
+                const name=f.children.Identifier[0].image
+                if(f.children.Interger){
+                    const number=Number(f.children.Interger[0].image)
+                    configFramesVal[number]=name
+                }else{
+                    configFramesVal.push(name)
+                }
+            }
+            //check empty in configFramesVal
+            for(let i=0;i<configFramesVal.length;i++){
+                if(configFramesVal[i]==undefined){
+                    throw new Error(`configurable_frames [${configFramesVal}] must be continuous, and start from 0`)
+                }
+            }
+
             this.ldf.nodeAttrs[t.image] = {
                 LIN_protocol: (((ctx.LIN_protocolClause[index] as CstNode).children.CharString[0]) as IToken).image.replace(/"+/g, ''),
                 configured_NAD: Number((((ctx.configured_NADClause[index] as CstNode).children.Interger[0]) as IToken).image),
@@ -1168,8 +1189,9 @@ class LdfVistor extends visitor {
                 N_As_timeout: (ctx.N_As_timeoutClause && ctx.N_As_timeoutClause[index]) ? Number((((ctx.N_As_timeoutClause[index] as CstNode).children.Interger[0]) as IToken).image) : undefined,
                 N_Cr_timeout: (ctx.N_Cr_timeoutClause && ctx.N_Cr_timeoutClause[index]) ? Number((((ctx.N_Cr_timeoutClause[index] as CstNode).children.Interger[0]) as IToken).image) : undefined,
 
+               
                 //TODO:
-                configFrames: [...(ctx.configurable_framesClause && ctx.configurable_framesClause[index]) ? (((ctx.configurable_framesClause[index] as CstNode).children.Identifier as IToken[]).map((i) => i.image)) : []],
+                configFrames: configFramesVal
             }
         }
         // console.log(this.ldf.nodeAttrs)
