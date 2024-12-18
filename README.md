@@ -21,12 +21,34 @@
 ## Introduction
 
 `CAN-OE` is the best tool, but it's expensive. We still need another tool to develop our ECU code. EcuBus-Pro is a powerful automotive ECU development tool, it contains the following features:
+
 * open source and free
 * easy of use
 * cross platform
 * add multi USB dongle (PEAK, Kvaser, ZLG, etc)  
 * powerful script ability, based on typescript
 * CLI ability support
+
+### Detailed features
+
+See the User Manual for more detailed features: [User Manual](./docs/um/concept.md)
+
+* CAN/CAN-FD
+  * PEAK
+  * Kvaser
+  * ZLG
+  * Simulation
+* DOIP
+  * PC Adapter
+* UDS
+  * Over CAN/CAN-FD
+  * Over DoIP
+* Script
+  * UDS
+  * CAN
+  * KeyBoard
+  * SerialPort
+
 
 ### GUI Snapshot
 
@@ -43,6 +65,14 @@ Script Engine is based on `nodejs`, you can use almost all nodejs functions in y
 
 run uds sequence by cli
 ![cli](./docs/about/seq.png)
+
+## Thanks
+This project exists thanks to all the people who have contributed:
+<a href="https://github.com/ecubus/EcuBus-Pro/graphs/contributors"><img src="https://opencollective.com/ecubus/contributors.svg?width=890&amp;button=false"></a>
+
+Your contributions are always welcome! Please have a look at the [contribution guidelines](.github/contributing.md) first. 
+
+Your logo will show up here with a link to your github profile.
 
 
 ## Support this project
