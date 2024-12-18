@@ -20,6 +20,7 @@ function nav(): DefaultTheme.NavItem[] {
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "EcuBus-Pro",
+  ignoreDeadLinks: true,
   description: 'A powerful automotive ECU development tool',
   head: [
     ['link', { rel: 'icon', type: 'image/png', href: 'https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png' }],

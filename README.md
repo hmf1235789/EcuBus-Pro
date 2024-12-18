@@ -70,7 +70,7 @@ run uds sequence by cli
 This project exists thanks to all the people who have contributed:
 <a href="https://github.com/ecubus/EcuBus-Pro/graphs/contributors"><img src="https://opencollective.com/ecubus/contributors.svg?width=890&amp;button=false"></a>
 
-Your contributions are always welcome! Please have a look at the [contribution guidelines](.github/contributing.md) first. 
+Your contributions are always welcome! Please have a look at the [contribution guidelines](./.github/contributing.md) first. 
 
 Your logo will show up here with a link to your github profile.
 
