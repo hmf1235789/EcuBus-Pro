@@ -44,7 +44,7 @@ describe('peak lin master', () => {
             checksumType: LinChecksumType.CLASSIC
         })
         await Promise.all([w1, w2])
-
+        console.log(client.read(3))
 
 
 

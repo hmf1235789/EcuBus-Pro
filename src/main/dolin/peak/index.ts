@@ -2,6 +2,8 @@ import { getPID, LIN_ERROR_ID, LinChecksumType, LinDevice, LinDirection, LinErro
 import LIN from '../build/Release/peakLin.node'
 import { v4 } from 'uuid'
 import { queue, QueueObject } from 'async'
+import { LinLOG } from 'src/main/log'
+import EventEmitter from 'events'
 
 
 
@@ -23,10 +25,11 @@ function buf2str(buf: Buffer) {
 
 
 export class PeakLin {
-    private queue=queue((task:{ resolve: any; reject: any; data: LinMsg },cb)=>{
+    private queue = queue((task: { resolve: any; reject: any; data: LinMsg }, cb) => {
         this._write(task.data).then(task.resolve).catch(task.reject).finally(cb)
-    },1)
+    }, 1)
     private client: number
+    private lastFrame:Map<number,LinMsg>=new Map()
     private entryTable: Record<number, {
         frameId: number
         dir: number
@@ -34,6 +37,7 @@ export class PeakLin {
         length: number
 
     }> = {}
+    event = new EventEmitter()
     pendingPromise?: {
         resolve: (msg: LinMsg, ts: number) => void
         reject: (error: LinError) => void
@@ -51,13 +55,14 @@ export class PeakLin {
             throw new Error(err2Str(result))
         }
     }
+    log: LinLOG
     constructor(private device: LinDevice, private mode: LinMode, private baud: number) {
         this.client = this.registerClient()
         this.connectClient(this.client, device)
         this.initHardware(device, this.client, mode == LinMode.MASTER, baud)
         LIN.LIN_RegisterFrameId(this.client, this.device.handle, 0, 0x3F)
         LIN.CreateTSFN(this.client, this.device.label, this.callback.bind(this))
-
+        this.log = new LinLOG('PEAK', this.device.label, this.event)
         // this.getEntrys()
         // this.wakeup()
     }
@@ -84,6 +89,7 @@ export class PeakLin {
         const recvMsg = new LIN.TLINRcvMsg()
         const ret = LIN.LIN_Read(this.client, recvMsg)
         if (ret == 0) {
+            const ts = recvMsg.TimeStamp
             if (recvMsg.Type == 0) {
                 //mstStandard
                 const a = new LIN.ByteArray.frompointer(recvMsg.Data)
@@ -99,56 +105,79 @@ export class PeakLin {
                     data: data,
                     direction: recvMsg.Direction == 1 ? LinDirection.SEND : (recvMsg.Direction == 2 ? LinDirection.RECV : LinDirection.RECV_AUTO_LEN),
                     checksumType: recvMsg.ChecksumType == 1 ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED,
-                    checksum: recvMsg.Checksum
-
+                    checksum: recvMsg.Checksum,
+                    ts: ts
                 }
-                const ts = recvMsg.TimeStamp
-            
-                if (this.pendingPromise&&this.pendingPromise.sendMsg.frameId == (msg.frameId&0x3f)) {
+                if(recvMsg.ErrorFlags==0){
+                    this.lastFrame.set(msg.frameId,msg)
+                }
+                const error: string[] = []
+                const handle = () => {
+
+                    if (recvMsg.ErrorFlags & 1) {
+                        error.push('Error on Synchronization field')
+                    }
+                    if (recvMsg.ErrorFlags & 2) {
+                        error.push('Wrong parity Bit 0')
+                    }
+                    if (recvMsg.ErrorFlags & 4) {
+                        error.push('Wrong parity Bit 1')
+                    }
+                    if (recvMsg.ErrorFlags & 8) {
+                        error.push('Slave not responding error')
+                    }
+                    if (recvMsg.ErrorFlags & 16) {
+                        error.push('A timeout was reached')
+                    }
+                    if (recvMsg.ErrorFlags & 32) {
+                        error.push('Wrong checksum')
+                    }
+                    if (recvMsg.ErrorFlags & 64) {
+                        error.push('Bus shorted to ground')
+                    }
+                    if (recvMsg.ErrorFlags & 128) {
+                        error.push('Bus shorted to Vbat')
+                    }
+                    if (recvMsg.ErrorFlags & 256) {
+                        error.push('A slot time (delay) was too smallt')
+                    }
+                    if (recvMsg.ErrorFlags & 512) {
+                        error.push(' Response was received from other station')
+                    }
+                }
+
+                if (this.pendingPromise && this.pendingPromise.sendMsg.frameId == (msg.frameId & 0x3f)) {
                     if (recvMsg.ErrorFlags != 0) {
-                        console.log('error', recvMsg.ErrorFlags)
-                        const error = []
-                        if (recvMsg.ErrorFlags & 1) {
-                            error.push('Error on Synchronization field')
-                        }
-                        if (recvMsg.ErrorFlags & 2) {
-                            error.push('Wrong parity Bit 0')
-                        }
-                        if (recvMsg.ErrorFlags & 4) {
-                            error.push('Wrong parity Bit 1')
-                        }
-                        if (recvMsg.ErrorFlags & 8) {
-                            error.push('Slave not responding error')
-                        }
-                        if (recvMsg.ErrorFlags & 16) {
-                            error.push('A timeout was reached')
-                        }
-                        if (recvMsg.ErrorFlags & 32) {
-                            error.push('Wrong checksum')
-                        }
-                        if (recvMsg.ErrorFlags & 64) {
-                            error.push('Bus shorted to ground')
-                        }
-                        if (recvMsg.ErrorFlags & 128) {
-                            error.push('Bus shorted to Vbat')
-                        }
-                        if (recvMsg.ErrorFlags & 256) {
-                            error.push('A slot time (delay) was too smallt')
-                        }
-                        if (recvMsg.ErrorFlags & 512) {
-                            error.push(' Response was received from other station')
-                        }
+                        handle()
+                        this.log.error(ts, error.join(', '))
                         this.pendingPromise.reject(new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, msg, error.join(', ')))
                     } else {
+                        this.log.linBase(msg)
+                        this.event.emit(`${msg.frameId}`, msg)
                         this.pendingPromise.resolve(msg, ts)
                     }
                     this.pendingPromise = undefined
+                } else {
+                    if (recvMsg.ErrorFlags != 0) {
+                        handle()
+                        this.log.error(ts, error.join(', '))
+                    } else {
+                        this.log.linBase(msg)
+                        this.event.emit(`${msg.frameId}`, msg)
+                    }
                 }
+
+            } else if (recvMsg.Type == 1) {
+                this.log.linBase('busSleep')
+            } else if (recvMsg.Type == 2) {
+                this.log.linBase('busWakeUp')
+            } else {
+                this.log.error(ts, 'internal error')
             }
             //让出时间片
             await new Promise((resolve) => {
                 setImmediate(() => {
-                  resolve(null)
+                    resolve(null)
                 })
             })
             await this.callback()
@@ -174,15 +203,13 @@ export class PeakLin {
         msg.ChecksumType = m.checksumType == LinChecksumType.CLASSIC ? 1 : 2
         return new Promise<number>((resolve, reject) => {
             let result = 0
-           
+
             if (this.mode == LinMode.MASTER) {
-                if(this.pendingPromise!=undefined){
-                    reject(new LinError(LIN_ERROR_ID.LIN_BUS_BUSY,m))
+                if (this.pendingPromise != undefined) {
+                    reject(new LinError(LIN_ERROR_ID.LIN_BUS_BUSY, m))
                     return
                 }
                 if (m.direction == LinDirection.SEND) {
-                    //apply data
-
                     const a = new LIN.ByteArray.frompointer(msg.Data)
                     for (let i = 0; i < msg.Length; i++) {
                         // msg.Data.setitem(i,data[i])
@@ -195,8 +222,6 @@ export class PeakLin {
                         return
                     }
                 }
-                //set entry
-
                 result = LIN.LIN_Write(this.client, this.device.handle, msg)
 
                 if (result != 0) {
@@ -212,7 +237,25 @@ export class PeakLin {
 
 
             } else {
-                //checkentry
+                //set entry
+                
+                const entry = new LIN.TLINFrameEntry()
+                entry.FrameId = m.frameId
+                entry.Direction = m.direction == LinDirection.SEND ? 1 : (m.direction == LinDirection.RECV ? 2 : 3)
+                entry.ChecksumType = m.checksumType == LinChecksumType.CLASSIC ? 1 : 2
+                entry.Length = m.data.length
+                entry.Flags=LIN.FRAME_FLAG_RESPONSE_ENABLE|LIN.FRAME_FLAG_IGNORE_INIT_DATA
+                result = LIN.LIN_SetFrameEntry(this.device.handle, entry)
+                if (result != 0) {
+                    reject(new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, m, err2Str(result)))
+                    return
+                }
+                //update entry
+                const a=new LIN.ByteArray(m.data.length)
+                for(let i=0;i<m.data.length;i++){
+                    a.setitem(i,m.data[i])
+                }
+                result = LIN.LIN_UpdateByteArray(this.client, this.device.handle, m.frameId,0,m.data.length,a.cast())
             }
         })
 
@@ -225,11 +268,12 @@ export class PeakLin {
     }
     async write(m: LinMsg): Promise<number> {
         return new Promise<number>((resolve, reject) => {
-            this.queue.push({resolve,reject,data:m})
+            this.queue.push({ resolve, reject, data: m })
         })
     }
-
-
+    read(frameId:number){
+        return this.lastFrame.get(frameId)
+    }
     wakeup() {
 
         const result = LIN.LIN_XmtWakeUp(this.client, this.device.handle)

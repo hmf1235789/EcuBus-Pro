@@ -54,6 +54,7 @@ export interface LinMsg{
     direction:LinDirection
     checksumType:LinChecksumType
     checksum?:number
+    ts?:number
 }
 
 export class LinError extends Error {

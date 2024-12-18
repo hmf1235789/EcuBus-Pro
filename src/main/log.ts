@@ -6,6 +6,7 @@ import { CAN_ERROR_ID, CanAddr, CanMessage, CanMsgType, getTsUs } from './share/
 import EventEmitter from 'events'
 import { Sequence, ServiceItem } from './share/uds'
 import { PayloadType } from './doip';
+import { LinMsg } from './share/lin'
 
 
 
@@ -370,6 +371,52 @@ export class DoipLOG {
     this.log.error(
       {
         method: 'ipError',
+        data: {
+          ts: ts,
+          msg: msg
+        }
+      }
+    )
+  }
+}
+
+export class LinLOG {
+  vendor: string
+  log: Logger
+  
+  constructor(vendor: string, instance: string, private event: EventEmitter) {
+    this.vendor = vendor
+    const et1 = externalTransport.map((t) => t())
+    this.log = createLogger({
+      transports: [new Base(), ...et1],
+      format: format.combine(
+        format.json(),
+        instanceFormat({ instance: instance }),
+        format.label({ label: `Lin-${vendor}` }),
+        ...externalFormat
+      ),
+
+    })
+    
+  }
+  close() {
+    this.log.close()
+   
+    this.event.removeAllListeners()
+
+  }
+  linBase(data: LinMsg|'busSleep'|'busWakeUp') {
+    this.log.debug({
+      method: 'linBase',
+      data
+    })
+    this.event.emit('lin-frame', data)
+  }
+  
+  error(ts: number, msg?: string) {
+    this.log.error(
+      {
+        method: 'linError',
         data: {
           ts: ts,
           msg: msg
