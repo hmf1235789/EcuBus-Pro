@@ -1,14 +1,14 @@
-import { LinChecksumType, LinDevice, LinDirection, LinMode } from '../../share/lin'
+import { getPID, LIN_ERROR_ID, LinChecksumType, LinDevice, LinDirection, LinError, LinMode, LinMsg } from '../../share/lin'
 import LIN from '../build/Release/peakLin.node'
 import { v4 } from 'uuid'
-
+import { queue, QueueObject } from 'async'
 
 
 
 
 function err2Str(result: number): string {
     const buffer = Buffer.alloc(256)
-    LIN.LIN_GetErrorString(result, 9, buffer)
+    LIN.LIN_GetErrorText(result, 9, buffer)
     return buffer.toString()
 }
 
@@ -23,7 +23,22 @@ function buf2str(buf: Buffer) {
 
 
 export class PeakLin {
+    private queue=queue((task:{ resolve: any; reject: any; data: LinMsg },cb)=>{
+        this._write(task.data).then(task.resolve).catch(task.reject).finally(cb)
+    },1)
     private client: number
+    private entryTable: Record<number, {
+        frameId: number
+        dir: number
+        checksumType: number
+        length: number
+
+    }> = {}
+    pendingPromise?: {
+        resolve: (msg: LinMsg, ts: number) => void
+        reject: (error: LinError) => void
+        sendMsg: LinMsg
+    }
     static loadDllPath(dllPath: string) {
         LIN.LoadDll(dllPath)
     }
@@ -39,61 +54,197 @@ export class PeakLin {
     constructor(private device: LinDevice, private mode: LinMode, private baud: number) {
         this.client = this.registerClient()
         this.connectClient(this.client, device)
-        this.initHardware(device, this.client, mode==LinMode.MASTER, baud)
+        this.initHardware(device, this.client, mode == LinMode.MASTER, baud)
+        LIN.LIN_RegisterFrameId(this.client, this.device.handle, 0, 0x3F)
         LIN.CreateTSFN(this.client, this.device.label, this.callback.bind(this))
+
+        // this.getEntrys()
+        // this.wakeup()
     }
-    callback() {
-        console.log('callback')
+    getEntrys() {
+        //get entry
+        for (let i = 0; i < 0x3F; i++) {
+            const entry = new LIN.TLINFrameEntry()
+            entry.FrameId = i
+            const result = LIN.LIN_GetFrameEntry(this.device.handle, entry)
+            if (result != 0) {
+                throw new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, undefined, err2Str(result))
+            }
+            this.entryTable[i] = {
+                frameId: entry.FrameId,
+                dir: entry.Direction,
+                checksumType: entry.ChecksumType,
+                length: entry.Length
+            }
+        }
+        console.log('entryTable', this.entryTable)
+    }
+    async callback() {
+
+        const recvMsg = new LIN.TLINRcvMsg()
+        const ret = LIN.LIN_Read(this.client, recvMsg)
+        if (ret == 0) {
+            if (recvMsg.Type == 0) {
+                //mstStandard
+                const a = new LIN.ByteArray.frompointer(recvMsg.Data)
+                const data = Buffer.alloc(recvMsg.Length)
+                for (let i = 0; i < recvMsg.Length; i++) {
+                    data[i] = a.getitem(i)
+                }
+
+
+
+                const msg: LinMsg = {
+                    frameId: recvMsg.FrameId,
+                    data: data,
+                    direction: recvMsg.Direction == 1 ? LinDirection.SEND : (recvMsg.Direction == 2 ? LinDirection.RECV : LinDirection.RECV_AUTO_LEN),
+                    checksumType: recvMsg.ChecksumType == 1 ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED,
+                    checksum: recvMsg.Checksum
+
+                }
+                const ts = recvMsg.TimeStamp
+            
+                if (this.pendingPromise&&this.pendingPromise.sendMsg.frameId == (msg.frameId&0x3f)) {
+                    if (recvMsg.ErrorFlags != 0) {
+                        console.log('error', recvMsg.ErrorFlags)
+                        const error = []
+                        if (recvMsg.ErrorFlags & 1) {
+                            error.push('Error on Synchronization field')
+                        }
+                        if (recvMsg.ErrorFlags & 2) {
+                            error.push('Wrong parity Bit 0')
+                        }
+                        if (recvMsg.ErrorFlags & 4) {
+                            error.push('Wrong parity Bit 1')
+                        }
+                        if (recvMsg.ErrorFlags & 8) {
+                            error.push('Slave not responding error')
+                        }
+                        if (recvMsg.ErrorFlags & 16) {
+                            error.push('A timeout was reached')
+                        }
+                        if (recvMsg.ErrorFlags & 32) {
+                            error.push('Wrong checksum')
+                        }
+                        if (recvMsg.ErrorFlags & 64) {
+                            error.push('Bus shorted to ground')
+                        }
+                        if (recvMsg.ErrorFlags & 128) {
+                            error.push('Bus shorted to Vbat')
+                        }
+                        if (recvMsg.ErrorFlags & 256) {
+                            error.push('A slot time (delay) was too smallt')
+                        }
+                        if (recvMsg.ErrorFlags & 512) {
+                            error.push(' Response was received from other station')
+                        }
+                        this.pendingPromise.reject(new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, msg, error.join(', ')))
+                    } else {
+                        this.pendingPromise.resolve(msg, ts)
+                    }
+                    this.pendingPromise = undefined
+                }
+            }
+            //让出时间片
+            await new Promise((resolve) => {
+                setImmediate(() => {
+                  resolve(null)
+                })
+            })
+            await this.callback()
+
+        }
     }
     close() {
-        LIN.LIN_ResetHardwareConfig(this.client, this.device.handle)
-        LIN.LIN_DisconnectClient(this.client, this.device.handle)
-        LIN.LIN_RemoveClient(this.client)
+
         LIN.FreeTSFN(this.device.label)
+        LIN.LIN_ResetHardwareConfig(this.client, this.device.handle)
+
+        LIN.LIN_DisconnectClient(this.client, this.device.handle)
+
+        LIN.LIN_RemoveClient(this.client)
+
+
     }
-    async write(frameId: number, data: Buffer, dir: LinDirection, checksumType: LinChecksumType) {
+    async _write(m: LinMsg): Promise<number> {
         const msg = new LIN.TLINMsg()
-        msg.FrameId = frameId
-        msg.Length = Math.min(data.length, 8)
-        msg.Direction = dir == LinDirection.SEND ? 1 : 2
-        msg.ChecksumType = checksumType == LinChecksumType.CLASSIC ? 1 : 2
+        msg.FrameId = getPID(m.frameId)
+        msg.Length = Math.min(m.data.length, 8)
+        msg.Direction = m.direction == LinDirection.SEND ? 1 : (m.direction == LinDirection.RECV ? 2 : 3)
+        msg.ChecksumType = m.checksumType == LinChecksumType.CLASSIC ? 1 : 2
+        return new Promise<number>((resolve, reject) => {
+            let result = 0
+           
+            if (this.mode == LinMode.MASTER) {
+                if(this.pendingPromise!=undefined){
+                    reject(new LinError(LIN_ERROR_ID.LIN_BUS_BUSY,m))
+                    return
+                }
+                if (m.direction == LinDirection.SEND) {
+                    //apply data
+
+                    const a = new LIN.ByteArray.frompointer(msg.Data)
+                    for (let i = 0; i < msg.Length; i++) {
+                        // msg.Data.setitem(i,data[i])
+                        a.setitem(i, m.data[i])
+                    }
+
+                    result = LIN.LIN_CalculateChecksum(msg)
+                    if (result != 0) {
+                        reject(new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, m, err2Str(result)))
+                        return
+                    }
+                }
+                //set entry
+
+                result = LIN.LIN_Write(this.client, this.device.handle, msg)
+
+                if (result != 0) {
+                    reject(new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, m, err2Str(result)))
+                    return
+                }
+
+                this.pendingPromise = {
+                    resolve: (msg, ts) => resolve(ts),
+                    reject,
+                    sendMsg: m
+                }
 
 
-        let result = 0
-        if (dir == LinDirection.SEND) {
-            //apply data
-            msg.Data = data
-
-        }
-        if (this.mode==LinMode.MASTER) {
-            result = LIN.LIN_CalculateChecksum(msg)
-            if (result != 0) {
-                throw new Error(err2Str(result))
+            } else {
+                //checkentry
             }
-        }else{
-            //update
-        }
-        result = LIN.LIN_Write(this.client, this.device.handle, msg)
+        })
+
+
+
+
+
+
+
+    }
+    async write(m: LinMsg): Promise<number> {
+        return new Promise<number>((resolve, reject) => {
+            this.queue.push({resolve,reject,data:m})
+        })
+    }
+
+
+    wakeup() {
+
+        const result = LIN.LIN_XmtWakeUp(this.client, this.device.handle)
         if (result != 0) {
-            throw new Error(err2Str(result))
+            throw new LinError(LIN_ERROR_ID.LIN_INTERNAL_ERROR, undefined, err2Str(result))
         }
 
-
-
-
-
-
     }
-
-
-    slaveWakeup(){
-        const result=LIN.LIN_XmtWakeUp(this.client,this.device.handle)
-        if(result!=0){
-            throw new Error(err2Str(result))
+    getStatus() {
+        const status = new LIN.TLINHardwareStatus()
+        LIN.LIN_GetStatus(this.device.handle, status)
+        return {
+            master: status.Mode == 2,
+            status: status.Status,
         }
-    }
-    getStatus(){
-        return LIN.LIN_GetStatus(this.client,this.device.handle)
     }
 
     static getValidDevices(): LinDevice[] {
@@ -123,7 +274,7 @@ export class PeakLin {
         const client = new LIN.HLINCLIENT_JS()
         const result = LIN.LIN_RegisterClient(clientName, 0, client.cast())
         if (result != 0) {
-            throw new Error(err2Str(result))
+            throw new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, undefined, err2Str(result))
         }
         return client.value()
 
@@ -133,13 +284,13 @@ export class PeakLin {
     private connectClient(client: number, device: LinDevice) {
         const result = LIN.LIN_ConnectClient(client, device.handle)
         if (result != 0) {
-            throw new Error(err2Str(result))
+            throw new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, undefined, err2Str(result))
         }
     }
     private initHardware(device: LinDevice, client: number, master: boolean, baud: number) {
         const result = LIN.LIN_InitializeHardware(client, device.handle, master ? 2 : 1, baud)
         if (result != 0) {
-            throw new Error(err2Str(result))
+            throw new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, undefined, err2Str(result))
         }
     }
 }
