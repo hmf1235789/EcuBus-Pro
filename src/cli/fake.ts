@@ -1,5 +1,5 @@
 //fake unused file
-console.log(process.env)
+// console.log(process.env)
 // console.log(process.env)
 process.stdin.resume();
 process.stdin.on('data', (data) => {

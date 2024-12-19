@@ -14,6 +14,9 @@ import Transport from 'winston-transport'
 import colors from 'colors';
 import { CanMessage } from 'src/main/share/can';
 import { ServiceItem } from 'src/main/share/uds';
+import vm from 'vm'
+import pnpmScript from '../../resources/bin/pnpm/pnpm.cjs?asset&asarUnpack'
+
 
 declare global {
     var sysLog: Logger
@@ -140,7 +143,39 @@ seq.action(async (project, testerName, options) => {
         exit(1)
     }
 })
-program.parse();
+
+const npm=program.command('pnpm').description('run pnpm command, see "https://pnpm.io/" or ecb_cli pnpm --help for more information')
+npm.argument('<command>', 'pnpm command')
+// npm.option('-i, --install <package>', 'Prints the location of the globally installed executables.')
+// npm.action(async (command)=>{
+//     console.log('run npm command',command)
+    
+    
+// })
+if(process.argv[1]=='pnpm'||process.argv[2]=='pnpm'){
+    const vmModule = { exports: {} };
+    const context=vm.createContext({
+        exports: vmModule.exports,
+        module: vmModule,
+        process: process,
+        require: require,
+        global: global,
+        Buffer: Buffer,
+        URLSearchParams: URLSearchParams,
+        console: console,
+        __dirname: __dirname,
+        setTimeout: setTimeout,
+        clearTimeout: clearTimeout,
+      })
+    const content=fs.readFileSync(pnpmScript,'utf-8')
+    const script=new vm.Script(content)
+    script.runInContext(context)
+   
+}else{
+    program.parse();
+}
+// console.log(process.argv)
+
 
 
 
