@@ -16,7 +16,7 @@ import { CanMessage } from 'src/main/share/can';
 import { ServiceItem } from 'src/main/share/uds';
 import vm from 'vm'
 import pnpmScript from '../../resources/bin/pnpm/pnpm.cjs?asset&asarUnpack'
-
+import glob from 'glob';
 
 declare global {
     var sysLog: Logger
@@ -153,6 +153,37 @@ npm.argument('<command>', 'pnpm command')
     
 // })
 if(process.argv[1]=='pnpm'||process.argv[2]=='pnpm'){
+    const index=process.argv.findIndex((v)=>v=='pnpm')
+    if(process.argv[index+1]=='init'){
+        if(fs.existsSync('package.json')){
+            console.log('package.json already exists')
+            exit(0)
+        }
+        //create package.json
+        //read *.ecb in current folder
+        const files=glob.globSync('*.ecb')
+        let name='EcuBus-Pro'
+        if(files.length>0){
+            name=path.parse(files[0]).name
+        }
+        const packageJson={
+            name,
+            version: '1.0.0',
+            description: 'EcuBus-Pro project',
+            scripts: {
+                test: 'echo "Error: no test specified" && exit 1'
+            },
+            keywords: [
+                'EcuBus-Pro'
+            ],
+        }
+        fs.writeFileSync('package.json',JSON.stringify(packageJson,null,2));
+        console.log(`created package.json to ${path.join(process.cwd(),'package.json')}`)
+        exit(0)
+
+    }
+
+
     const vmModule = { exports: {} };
     const context=vm.createContext({
         exports: vmModule.exports,

@@ -1,5 +1,14 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.11
+Changes from v0.8.10 to v0.8.11:
+
+ 
+* [feat]:add pnpm ability to cli 
+* [feat]:add ldfParse code 
+* [bug]:fix can-ia data length!=2 issue
+---
+
 ## v0.8.10
 Changes from v0.8.9 to v0.8.10:
 

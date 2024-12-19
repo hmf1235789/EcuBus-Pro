@@ -23,3 +23,22 @@ ecb_cli seq -h
 ```
 ecb_cli seq xx.ecb Tester_1 --log-level=debug
 ```
+
+
+### PNPM command
+`pnpm` is a package manager for JavaScript, which is a fast, disk space efficient, and optimized for monorepos. More details can be found [here](https://pnpm.io/). 
+We integrated `pnpm` into the EcuBus-Pro CLI, you can use the `pnpm` command to install the dependencies of your project.
+
+
+*run pnpm command by cli*
+
+```bash
+ecb_cli pnpm -h
+
+ecb_cli pnpm init
+
+ecb_cli pnpm install package_name
+```
+
+#### Example:
+![alt text](pnpm.gif)

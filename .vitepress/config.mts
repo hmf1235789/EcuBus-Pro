@@ -57,7 +57,7 @@ export default defineConfig({
         items: [
           { text: 'Introduce', link: '/' },
           { text: 'Install', link: '/docs/about/install' },
-          { text: 'CLI', link: '/docs/about/cli' },
+        
           { text: 'Sponsor ❤️', link: '/docs/about/sponsor' },
           { text: 'Contact', link: '/docs/about/contact' }
         ]
@@ -66,7 +66,10 @@ export default defineConfig({
         text: 'User Manual',
         items: [
           { text: 'Introduce', link: '/docs/um/concept' },
-          { text: 'Script', link: '/docs/um/script' },
+          { text: 'CLI', link: '/docs/um/cli' },
+          { text: 'Script', link: '/docs/um/script',items:[
+            { text: 'Use External Package', link: '/docs/um/scriptSerialPort' },
+          ]},
         ]
       },
       {
