@@ -2,7 +2,7 @@ import type { CanInterAction, CanNode } from 'src/main/share/can';
 import type { UdsDevice } from 'src/main/share/uds';
 import type { TesterInfo } from 'src/main/share/tester';
 import type { EthNode } from 'src/main/share/doip';
-
+import type {LDF} from 'src/main/dolin/ldfParse'
 
 
 
@@ -34,4 +34,7 @@ export interface DataSet {
     subFunction: Record<string, { name: string; subFunction: string }[]>
     nodes: Record<string, NodeItem>
     ia: Record<string, Inter>
+    database?:{
+        lin?:Record<string,LDF>
+    }
 }

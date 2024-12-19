@@ -15,7 +15,10 @@ export const useDataStore = defineStore('useDataStore', {
     ia: {},
     tester:{},
     subFunction: {},
-    nodes: {}
+    nodes: {},
+    database:{
+      lin:{}
+    }
   }),
   actions: {
     globalRun(type: 'start' | 'stop') {

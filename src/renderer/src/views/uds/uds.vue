@@ -57,7 +57,7 @@
               <Icon :icon="deviceIcon" style="font-size: 24px; " />
               <span>Devices</span>
             </div>
-           
+
             <div class="grid girdenable">
               <Icon :icon="interIcon" style="font-size: 24px; " />
               <el-dropdown @command="openIA">
@@ -70,14 +70,14 @@
                 <template #dropdown>
                   <el-dropdown-menu size="small">
                     <el-dropdown-item v-for="item, key in dataBase.ia" :command="key" :key="key">{{ item.name }}
-                      </el-dropdown-item>
+                    </el-dropdown-item>
                     <el-dropdown-item disabled v-if="Object.keys(dataBase.ia).length == 0">No
                       Interaction</el-dropdown-item>
 
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
-           
+
             </div>
 
           </div>
@@ -106,7 +106,7 @@
                 <template #dropdown>
                   <el-dropdown-menu size="small">
                     <el-dropdown-item v-for="item, key in dataBase.tester" :command="key" :key="key">{{ item.name }}
-                      </el-dropdown-item>
+                    </el-dropdown-item>
                     <el-dropdown-item disabled v-if="Object.keys(dataBase.tester).length == 0">No
                       Tester</el-dropdown-item>
 
@@ -127,7 +127,7 @@
                 <template #dropdown>
                   <el-dropdown-menu size="small">
                     <el-dropdown-item v-for="item, key in dataBase.tester" :command="key" :key="key">{{ item.name }}
-                      </el-dropdown-item>
+                    </el-dropdown-item>
                     <el-dropdown-item disabled v-if="Object.keys(dataBase.tester).length == 0">No
                       Tester</el-dropdown-item>
 
@@ -161,13 +161,49 @@
             </span>
           </template>
           <div style="display:flex;gap:5px;padding:15px">
-         
-            
+            <div class="grid girdenable">
+              <Icon :icon="dataBaseIcon" style="font-size: 24px; " />
+              <el-dropdown trigger="click" ref="operationDropdownMenuRef">
+                <span class="lr">
+                  Database
+                  <el-icon class="el-icon--right">
+                    <arrow-down />
+                  </el-icon>
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu size="small">
+                    <!-- <el-dropdown-item v-for="item, key in dataBase.database" :command="key" :key="key">{{ item.name }}
+                      </el-dropdown-item> -->
+                    <el-dropdown-item icon="Plus">Add Lin (LDF)
+                    </el-dropdown-item>
+                    <el-dropdown-item icon="Plus" disabled>Add CAN (DBC)
+                    </el-dropdown-item>
+                    <el-dropdown-item divider>
+                      <el-dropdown placement="right-start" trigger="click">
+                        <span style="float: right;" @click="operationDropdownShow()">LIN-></span>
+                        <template #dropdown>
+                          <el-dropdown-menu>
+                            <div @click="operationDropdownShow()">
+                              <el-dropdown-item>The Action 1st</el-dropdown-item>
+                              <el-dropdown-item>The Action 2st</el-dropdown-item>
+                              <el-dropdown-item>The Action 3st</el-dropdown-item>
+                            </div>
+
+                          </el-dropdown-menu>
+                        </template>
+                      </el-dropdown>
+                    </el-dropdown-item>
+
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
             <!-- <div class="grid girdenable" @click="handleSelect(['script'])">
               <Icon :icon="codeIcon" style="font-size: 24px; " />
               <span>Edit Script</span>
             </div> -->
             <div class="grid girdenable" @click="openApi()">
+
               <Icon :icon="apiIcon" style="font-size: 24px; " />
               <span>Script Api</span>
             </div>
@@ -205,7 +241,7 @@
         </span>
       </div>
     </div>
-    <div class="windows" v-if="!maxWinId&&hideLayout.length>0">
+    <div class="windows" v-if="!maxWinId && hideLayout.length > 0">
       <div v-for="item in hideLayout" :key="item.id" class="littleWin">
         <Icon v-if="layoutMaster.validLayout[item.title].icon" :icon="layoutMaster.validLayout[item.title].icon || ''"
           style="margin-right: 5px; font-size: 14px" />
@@ -237,9 +273,8 @@
       <div class="right" v-if="layoutMaster.right.value"></div>
       <div class="right1" v-if="layoutMaster.right1.value"></div>
       <div class="right2" v-if="layoutMaster.right2.value"></div>
-      <div v-for="item in project.project.wins" :key="item.id" style="position: absolute; padding: 1px"
-        >
-        
+      <div v-for="item in project.project.wins" :key="item.id" style="position: absolute; padding: 1px">
+
         <div v-show="!item.hide" v-if="item.layoutType == undefined" :id="`win${item.id}`" class="uds-window" :style="{
           transform: `translate(${item.pos.x}px, ${item.pos.y}px)`,
           width: `${item.pos.w}px`,
@@ -314,7 +349,7 @@
     </div>
     <div class="footer">
       <div v-for="item in project.project.wins" :key="item.id">
-        <div v-if="item.layoutType == 'bottom'"  :id="`win${item.id}`">
+        <div v-if="item.layoutType == 'bottom'" :id="`win${item.id}`">
           <div class="titleBar" :style="{
             width: `${contentW}px`,
             height: '25px',
@@ -404,6 +439,7 @@ import logoutIcon from '@iconify/icons-material-symbols/logout'
 import codeIcon from '@iconify/icons-material-symbols/code-blocks-outline'
 import pinIcon from '@iconify/icons-material-symbols/push-pin-outline'
 import interIcon from '@iconify/icons-material-symbols/interactive-space-outline'
+import dataBaseIcon from '@iconify/icons-material-symbols/database'
 import logo from '@r/assets/logo64.png'
 import { v4 } from 'uuid'
 import { cloneDeep } from 'lodash'
@@ -421,11 +457,21 @@ const graph = new joint.dia.Graph()
 const dataBase = useDataStore();
 const project = useProjectStore();
 const layoutMaster = new Layout()
-const udsView = new UDSView(graph,layoutMaster)
+const udsView = new UDSView(graph, layoutMaster)
 const globalStart = toRef(window, 'globalStart')
 
 provide('udsView', udsView)
-
+const operationDropdownMenuRef = ref(null)
+const operationDropdownShow = () => {
+  operationDropdownMenuRef.value?.popperRef.onOpen()
+  // 如果是vue2的写法.show()
+  // this.$ref.operationDropdownMenuRef.show()
+}
+const restoreDefault = () => {
+  operationDropdownMenuRef.value?.popperRef.onClose()
+  // 同上 .hide()
+  // this.$ref.operationDropdownMenuRef.hide()
+}
 
 function firstByteUpper(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1)
@@ -441,8 +487,8 @@ function openService(testerIndex: string) {
   })
 }
 function openIA(testerIndex: string) {
-  const item=dataBase.ia[testerIndex]
-  if(item.type=='can'){
+  const item = dataBase.ia[testerIndex]
+  if (item.type == 'can') {
     layoutMaster.addWin('cani', `${testerIndex}_ia`, {
       name: dataBase.ia[testerIndex].name,
       params: {
@@ -502,7 +548,7 @@ const handleSelect = (keyPath: string[]) => {
 }
 
 const hideLayout = computed(() => {
-  return Object.values(project.project.wins).filter((item) => item.hide&&item.layoutType==undefined)
+  return Object.values(project.project.wins).filter((item) => item.hide && item.layoutType == undefined)
 })
 
 const heightOffset = computed(() => {
@@ -731,7 +777,7 @@ watch([contentH, contentW], (val) => {
 /* 上下布局 */
 .grid {
   display: flex;
-  gap:2px;
+  gap: 2px;
   align-items: center;
   flex-direction: column;
   justify-content: center;
