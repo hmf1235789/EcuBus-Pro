@@ -1,5 +1,5 @@
 import { test } from 'vitest'
-import parse from '../../src/main/dolin/ldfParse'
+import parse from '../../src/renderer/src/database/ldfParse'
 import fs from 'fs'
 import path from 'path'
 

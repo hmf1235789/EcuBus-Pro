@@ -163,7 +163,7 @@
           <div style="display:flex;gap:5px;padding:15px">
             <div class="grid girdenable">
               <Icon :icon="dataBaseIcon" style="font-size: 24px; " />
-              <el-dropdown trigger="click" ref="operationDropdownMenuRef">
+              <el-dropdown @command="openDatabase">
                 <span class="lr">
                   Database
                   <el-icon class="el-icon--right">
@@ -174,24 +174,14 @@
                   <el-dropdown-menu size="small">
                     <!-- <el-dropdown-item v-for="item, key in dataBase.database" :command="key" :key="key">{{ item.name }}
                       </el-dropdown-item> -->
-                    <el-dropdown-item icon="Plus">Add Lin (LDF)
+                    <el-dropdown-item icon="Plus" command="addLin">Add Lin (LDF)
                     </el-dropdown-item>
-                    <el-dropdown-item icon="Plus" disabled>Add CAN (DBC)
+                    <el-dropdown-item icon="Plus" disabled command="addCan">Add CAN (DBC)
                     </el-dropdown-item>
-                    <el-dropdown-item divider>
-                      <el-dropdown placement="right-start" trigger="click">
-                        <span style="float: right;" @click="operationDropdownShow()">LIN-></span>
-                        <template #dropdown>
-                          <el-dropdown-menu>
-                            <div @click="operationDropdownShow()">
-                              <el-dropdown-item>The Action 1st</el-dropdown-item>
-                              <el-dropdown-item>The Action 2st</el-dropdown-item>
-                              <el-dropdown-item>The Action 3st</el-dropdown-item>
-                            </div>
+                    <el-dropdown-item divider v-for="item, index in dataBaseList" :command="item.url" :key="item.url"
+                      :disabled="item.disabled" :divided="index == 0">
+                      {{ item.url }}
 
-                          </el-dropdown-menu>
-                        </template>
-                      </el-dropdown>
                     </el-dropdown-item>
 
                   </el-dropdown-menu>
@@ -449,6 +439,7 @@ import { UDSView } from './components/udsView'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Layout } from './layout'
 import { useProjectStore } from '@r/stores/project'
+import ldfParse from '@r/database/ldfParse'
 
 const activeMenu = ref('')
 const pined = ref(true)
@@ -461,17 +452,7 @@ const udsView = new UDSView(graph, layoutMaster)
 const globalStart = toRef(window, 'globalStart')
 
 provide('udsView', udsView)
-const operationDropdownMenuRef = ref(null)
-const operationDropdownShow = () => {
-  operationDropdownMenuRef.value?.popperRef.onOpen()
-  // 如果是vue2的写法.show()
-  // this.$ref.operationDropdownMenuRef.show()
-}
-const restoreDefault = () => {
-  operationDropdownMenuRef.value?.popperRef.onClose()
-  // 同上 .hide()
-  // this.$ref.operationDropdownMenuRef.hide()
-}
+
 
 function firstByteUpper(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1)
@@ -508,6 +489,81 @@ function openSequence(testerIndex: string) {
 //watch width and height change
 
 
+const dataBaseList = computed(() => {
+  const list: { url: string, disabled: boolean }[] = []
+  if (dataBase.database) {
+    for (const key in dataBase.database) {
+     
+      for (const key1 of Object.values(dataBase.database[key])) {
+        const item= key1 as any
+        list.push({
+          url: `${key}.${item.name}`,
+          disabled: false
+        })
+      }
+    }
+  }
+  if (list.length == 0) {
+    list.push({
+      url: 'No Database',
+      disabled: true
+    })
+  }
+  console.log(list)
+  return list
+})
+async function openDatabase(testerIndex: string) {
+  // layoutMaster.addWin('testerSequence', `${testerIndex}_sequence`, {
+  //   name: dataBase.tester[testerIndex].name,
+  //   params: {
+  //     'edit-index': testerIndex,
+  //   }
+  // })
+  const fileExtMap = {
+    'lin': 'ldf',
+    'can': 'dbc'
+  }
+  if (testerIndex.startsWith('add')) {
+    const type = testerIndex.split('add')[1].toLocaleLowerCase()
+    const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+      title: 'Open Database File', properties: ['openFile '], filters: [
+        { name: `Database File`, extensions: [fileExtMap[type]] },
+      ]
+
+    })
+    const file = r.filePaths[0]
+    if (file == undefined) {
+      return
+    }
+    const content = await window.electron.ipcRenderer.invoke('ipc-fs-readFile', file)
+    try {
+      if (type == 'lin') {
+        const result = ldfParse(content)
+        const id = v4()
+        layoutMaster.addWin('ldf', `${id}`, {
+
+          params: {
+            'edit-index': id,
+            'ldf': result,
+          }
+        })
+
+
+      }
+
+    } catch (e: any) {
+      ElMessageBox.alert('Invalid Database File', 'Error', {
+        confirmButtonText: 'OK',
+        type: 'error',
+        message: e.message
+      })
+    }
+
+
+
+  }
+
+}
 const maxWinId = toRef(layoutMaster, 'maxWinId')
 const modify = computed(() => layoutMaster.modify.value)
 provide('layout', layoutMaster)

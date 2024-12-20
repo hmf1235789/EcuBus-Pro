@@ -6,15 +6,10 @@ export interface GlobalDef {
     LIN_speed: number,
     schTimeout?: number,
     Channel_name?: string,/* If signal name is "signal1" and Channel_name = "net1" in the LDF, then generated signal name will be "signal1_net1".*/
-    hwInst:string,
-    maxIdleTimeoutMs:number,
-    coreErrCb:string,
-    supportId:number[],
-    diagClass:number,
-    targetNode:string
-    tpEnable: boolean,
-    tpTxQueueSize: number,
-    tpRxQueueSize: number,
+    
+    
+
+   
 }
 
 export interface SlaveNode {
@@ -190,6 +185,7 @@ export interface SignalEncodeType {
 
 
 export interface LDF {
+    name:string,
     global: GlobalDef,
     node: NodeDef,
     nodeAttrs: Record<string, NodeAttrDef>,
@@ -1106,15 +1102,8 @@ class LdfVistor extends visitor {
             LIN_protocol_version: '',
             LIN_language_version: '',
             LIN_speed: 0,
-            diagClass:1,
-            maxIdleTimeoutMs:4000,
-            supportId:[],
-            hwInst:'',
-            coreErrCb:'NULL',
-            targetNode:'',
-            tpEnable:false,
-            tpRxQueueSize:10,
-            tpTxQueueSize:10,
+          
+         
         }
     }
     VersionClause(ctx: CstChildrenDictionary) {

@@ -135,6 +135,17 @@ const layoutMap: Record<string, LayoutItem> = {
     component: defineAsyncComponent(() => import('./cani.vue')),
     icon: interIcon
   },
+  ldf:{
+    i: 'LDF',
+    x: 0,
+    y: 0,
+    w: 700,
+    h: 400,
+    label: 'LDF',
+    key: 'LDF',
+    component: defineAsyncComponent(() => import('../../database/ldf/index.vue')),
+    icon: database
+  }
   // script: {
   //   i: 'Script',
   //   x: 0,
@@ -563,7 +574,7 @@ export class Layout {
     id: string,
     options?: {
       name?: string
-      params?: Record<string, string>
+      params?: Record<string, any>
     },
     switchHide = true
   ) {
