@@ -12,6 +12,41 @@ export interface GlobalDef {
    
 }
 
+export function getConfigFrames(ldfObj: LDF, nodeName: string): string[] {
+    const list: string[] = []
+    for (const sig of Object.keys(ldfObj.signals)) {
+        if (ldfObj.signals[sig].punishedBy == nodeName) {
+            list.push(sig)
+        } else if (ldfObj.signals[sig].subscribedBy.indexOf(nodeName) != -1) {
+            list.push(sig)
+        }
+    }
+    const frames: string[] = []
+    for (const frame of Object.keys(ldfObj.frames)) {
+        const sigs = ldfObj.frames[frame].signals
+        for (const s of list) {
+            sigs.forEach((sig) => {
+                if (sig.name == s) {
+                    frames.push(frame)
+                }
+            });
+        }
+    }
+
+    const lastFrames = [...new Set(frames)]
+    for (const e of Object.keys(ldfObj.eventTriggeredFrames)) {
+        for (const f of ldfObj.eventTriggeredFrames[e].frameNames) {
+            lastFrames.forEach((frame) => {
+                if (frame == f) {
+                    lastFrames.push(e)
+                }
+            })
+        }
+
+    }
+    return [...new Set(lastFrames)]
+}
+
 export interface SlaveNode {
     nodeName: string
 }
@@ -1487,7 +1522,44 @@ class LdfVistor extends visitor {
 }
 
 
+export function getFrameSize(ldfObj: LDF, frameName: string): number {
+    if (frameName in ldfObj.frames) {
+        const frame = ldfObj.frames[frameName]
+        if (frame.signals.length == 0) {
+            return 0
+        }
+        return frame.frameSize
+    }
 
+    if (frameName in ldfObj.eventTriggeredFrames) {
+        const frames = ldfObj.eventTriggeredFrames[frameName].frameNames
+        let maxbit = 0;
+        for (const fn of frames) {
+            const bits = getFrameSize(ldfObj, fn)
+            if (bits > maxbit) {
+                maxbit = bits
+            }
+        }
+
+        return maxbit
+    }
+
+    if (frameName in ldfObj.sporadicFrames) {
+        const frames = ldfObj.sporadicFrames[frameName].frameNames
+        let maxbit = 0;
+        for (const fn of frames) {
+            const bits = getFrameSize(ldfObj, fn)
+            if (bits > maxbit) {
+                maxbit = bits
+            }
+        }
+
+        return maxbit
+    }
+    return 0
+    // if(frameName in ldfObj.value.)
+
+}
 export default function parseInput(text: string){
     text=text.replace(/\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/gm, '$1').replace(/^\s*\n/gm, ''); // 删除空行
     

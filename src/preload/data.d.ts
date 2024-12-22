@@ -34,7 +34,7 @@ export interface DataSet {
     subFunction: Record<string, { name: string; subFunction: string }[]>
     nodes: Record<string, NodeItem>
     ia: Record<string, Inter>
-    database?:{
-        lin?:Record<string,LDF>
+    database:{
+        lin:Record<string,LDF>
     }
 }

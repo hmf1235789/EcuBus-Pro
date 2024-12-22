@@ -2,7 +2,7 @@
 import { Action, ElMessage, ElMessageBox } from 'element-plus'
 import { defineStore } from 'pinia'
 import { useDataStore } from './data'
-import { sortBy, toPairs, fromPairs, cloneDeep } from 'lodash'
+import { sortBy, toPairs, fromPairs, cloneDeep, assign } from 'lodash'
 import { error,info} from 'electron-log'
 
 
@@ -119,9 +119,7 @@ export const useProjectStore = defineStore('project', {
           const rdata = JSON.parse(r)
           const data = useDataStore()
           data.$patch((ss) => {
-            for (const key of Object.keys(rdata.data)) {
-              ss[key] = rdata.data[key]
-            }
+            assign(ss,rdata.data)
           })
           this.project = rdata.project
           const info=window.path.parse(example)
@@ -170,9 +168,7 @@ export const useProjectStore = defineStore('project', {
             const data = useDataStore()
 
             data.$patch((ss) => {
-              for (const key of Object.keys(rdata.data)) {
-                ss[key] = rdata.data[key]
-              }
+              assign(ss,rdata.data)
             })
             this.project = rdata.project
             this.open = true

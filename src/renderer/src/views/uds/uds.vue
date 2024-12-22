@@ -180,7 +180,7 @@
                     </el-dropdown-item>
                     <el-dropdown-item divider v-for="item, index in dataBaseList" :command="item.url" :key="item.url"
                       :disabled="item.disabled" :divided="index == 0">
-                      {{ item.url }}
+                      <Icon :icon="dataBaseIcon" style="margin-right: 5px;" />{{ item.url }}
 
                     </el-dropdown-item>
 
@@ -493,11 +493,11 @@ const dataBaseList = computed(() => {
   const list: { url: string, disabled: boolean }[] = []
   if (dataBase.database) {
     for (const key in dataBase.database) {
-     
+
       for (const key1 of Object.values(dataBase.database[key])) {
-        const item= key1 as any
+        const item = key1 as any
         list.push({
-          url: `${key}.${item.name}`,
+          url: `${key.toUpperCase()}.${item.name}`,
           disabled: false
         })
       }
@@ -509,7 +509,6 @@ const dataBaseList = computed(() => {
       disabled: true
     })
   }
-  console.log(list)
   return list
 })
 async function openDatabase(testerIndex: string) {
@@ -561,6 +560,22 @@ async function openDatabase(testerIndex: string) {
 
 
 
+  } else if (testerIndex.startsWith('LIN.')) {
+    const name = testerIndex.split('.')[1]
+    //findDb
+    for (const key of Object.keys(dataBase.database.lin)) {
+      if (dataBase.database.lin[key].name == name) {
+        layoutMaster.addWin('ldf', key, {
+          name: dataBase.database.lin[key].name,
+          params: {
+            'edit-index': key,
+            'ldf': dataBase.database.lin[key],
+
+          }
+        })
+        break
+      }
+    }
   }
 
 }

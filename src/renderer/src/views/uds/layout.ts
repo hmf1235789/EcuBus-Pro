@@ -679,6 +679,9 @@ export class Layout {
         delete this.winEl[key]
         delete this.data.project.wins[key]
         this.data.projectDirty = true
+        if(key==this.maxWinId.value){
+          this.maxWinId.value = undefined
+        }
       }
 
       if (this.modify.value[key] && !force) {
