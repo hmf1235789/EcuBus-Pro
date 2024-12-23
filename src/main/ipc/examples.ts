@@ -37,7 +37,7 @@ ipcMain.handle('ipc-examples', async (event, ...args) => {
             const ecbContent = JSON.parse(await fsP.readFile(ecbPath, 'utf-8'))
             {
                 //find same catalog
-                const catalog = ecbContent.example?.catalog || 'normal'
+                const catalog = ecbContent.project.example?.catalog || 'normal'
                 let catalogNode = examples.find(e => e.data.level === 1 && e.data.catalog === catalog)
                 if (!catalogNode) {
                     catalogNode = {

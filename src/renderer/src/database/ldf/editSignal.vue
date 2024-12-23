@@ -8,12 +8,12 @@
             <el-form-item label-width="0px">
                 <el-col :span="12">
                     <el-form-item label="Signal Size [bits]" prop="signalSizeBits" required>
-                        <el-input-number v-model="signal.signalSizeBits" :min="1" />
+                        <el-input-number v-model="signal.signalSizeBits" :min="1" @change="signalBitChange"/>
                     </el-form-item>
                 </el-col>
                 <el-col :span=12>
                     <el-form-item label="Signal Type" prop="singleType" required>
-                        <el-select v-model="signal.singleType" style="width: 100%;">
+                        <el-select v-model="signal.singleType" style="width: 100%;" @change="signalTypeChange"> 
                             <el-option v-for="item in ['Scalar', 'ByteArray']" :key="item" :label="item"
                                 :value="item" />
                         </el-select>
@@ -26,8 +26,8 @@
                 <el-input v-model.number="signal.initValue" style="width: 100px;" />
             </el-form-item>
             <div v-else>
-                <el-form-item label="Init Value">
-                    <el-form-item :prop="`initValue.${i - 1}`" label-width="0px"
+                <el-form-item label="Init Value" prop="initValue">
+                    <el-form-item  label-width="0px"
                         v-for="i in Math.ceil(signal.signalSizeBits / 8)" :key="i">
                         <el-input v-model.number="signal.initValue[i - 1]" style="width: 100px;" />
                     </el-form-item>
@@ -96,7 +96,21 @@ onMounted(()=>{
 const singleEncodeTypes = computed(() => {
     return Object.keys(ldfObj.value.signalRep)
 })
-
+function signalTypeChange(){
+    if(signal.value.singleType=='ByteArray'){
+        signal.value.initValue=new Array(Math.ceil(signal.value.signalSizeBits/8)).fill(0)
+    }
+    else{
+        signal.value.initValue=0
+    }
+}
+function signalBitChange(){
+    if(signal.value.singleType=='ByteArray'){
+        if(Array.isArray(signal.value.initValue)){
+            signal.value.initValue=signal.value.initValue.slice(0,Math.ceil(signal.value.signalSizeBits/8))
+        }
+    }
+}
 function encodeChange(){
     const val=encode.value
 
@@ -115,7 +129,13 @@ function encodeChange(){
     }
 
 }
+function validate(){
+    ruleFormRef.value.validate()
+}
 
+defineExpose({
+    validate
+})
 
 const nodeList = computed(() => {
     const list: string[] = []

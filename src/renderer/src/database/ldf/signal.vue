@@ -55,7 +55,7 @@
         </VxeGrid>
         <el-dialog v-if="editSig" v-model="editSig" :title="`${editNodeName} Signal`" width="70%" align-center
             :close-on-click-modal="false" :append-to="`#win${editIndex}`">
-            <EditSignal v-model="ldfObj.signals[editNodeName]" :edit-index="editIndex" :ldf="ldfObj" :rules="rules">
+            <EditSignal ref="editRef" v-model="ldfObj.signals[editNodeName]" :edit-index="editIndex" :ldf="ldfObj" :rules="rules">
                 :ldf="ldfObj">
             </EditSignal>
         </el-dialog>
@@ -82,7 +82,7 @@ const props = defineProps<{
 const ldfObj = defineModel<LDF>({
     required: true
 })
-
+const editRef = ref()
 interface signalTable {
     name: string
     publish: string
@@ -93,7 +93,7 @@ interface signalTable {
     encoding?: string
     frames: string[]
 }
-
+const ErrorList=ref<boolean[]>([])
 const popoverIndex = ref(-1)
 const editSig = ref(false)
 const editNodeName = ref('')
@@ -248,6 +248,9 @@ const gridOptions = computed<VxeGridProps<signalTable>>(() => {
                 return true
             }
         },
+        rowClassName: ({ rowIndex }) => {
+            return ErrorList.value[rowIndex] ? 'ldf-danger-row' : ''
+        },
         toolbarConfig: {
             slots: {
                 tools: 'toolbar'
@@ -323,9 +326,9 @@ const rules: FormRules<SignalDef> = {
         { required: true, message: 'Please select signal type' }
     ],
     initValue: [
-        { required: true, message: 'Please enter initial value' },
         {
             validator: (rule: any, value: any, callback: any) => {
+
                 if (ldfObj.value.signals[editNodeName1].singleType === 'Scalar') {
                     if (typeof value !== 'number') {
                         callback(new Error('Initial value must be a number'))
@@ -403,13 +406,16 @@ async function validate() {
         field: string,
         message: string
     }[] = []
+
+    ErrorList.value=[]
     for (const key of Object.keys(ldfObj.value.signals)) {
         const schema = new Schema(rules as any)
         editNodeName1 = key
         try {
             await schema.validate(ldfObj.value.signals[key])
+            ErrorList.value.push(false)
         } catch (e: any) {
-
+            ErrorList.value.push(true)
             for (const key in e.fields) {
                 for (const error of e.fields[key]) {
                     errors.push({
@@ -422,6 +428,8 @@ async function validate() {
 
         }
     }
+    editNodeName1=editNodeName.value
+    editRef.value?.validate()
     if (errors.length > 0) {
         throw {
             tab: 'Signals',
@@ -434,7 +442,8 @@ defineExpose({ validate })
 
 </script>
 <style>
-.el-table .danger-row {
-    --el-table-tr-bg-color: var(--el-color-danger);
+.ldf-danger-row {
+    color:var(--el-color-danger)!important;
+    font-weight: bolder;
 }
 </style>

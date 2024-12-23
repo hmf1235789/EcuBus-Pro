@@ -239,9 +239,10 @@
         },
         "isMax": true
       }
+    },
+    "example":{
+      "catalog":"Ethernet"
     }
-  },
-  "example":{
-    "catalog":"Ethernet"
   }
+  
 }

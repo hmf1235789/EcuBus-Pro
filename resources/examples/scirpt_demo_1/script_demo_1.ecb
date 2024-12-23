@@ -94,9 +94,15 @@
         ],
         "script": "node.ts"
       }
+    },
+    "database": {
+      "lin": {}
     }
   },
   "project": {
+    "example": {
+      "catalog": "Script"
+    },
     "wins": {
       "message": {
         "pos": {
@@ -162,8 +168,8 @@
         "pos": {
           "x": 0,
           "y": -28,
-          "w": 1512,
-          "h": 358
+          "w": 1707,
+          "h": 608
         },
         "title": "ldf",
         "label": "LDF",

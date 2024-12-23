@@ -13,7 +13,6 @@ export interface ProjectInfo {
 }
 
 export interface Project {
-  catalog?: string,
   displayName?: string,
   desc?: string,
   wins:Record<string,{
@@ -31,6 +30,9 @@ export interface Project {
     hide?:boolean
    
   }>
+  example?:{
+    catalog:string,
+  }
 }
 
 export interface ProjectList {

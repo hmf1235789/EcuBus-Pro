@@ -33,7 +33,7 @@
         </VxeGrid>
         <el-dialog v-if="editFrameV" v-model="editFrameV" :title="`Edit Frame: ${editFrameName}`" :close-on-click-modal="false"
         width="70%" align-center :append-to="`#win${editIndex}`">
-            <EditFrame v-model="ldfObj.frames[editFrameName]" :edit-index="editIndex" :ldf="ldfObj">
+            <EditFrame v-model="ldfObj.frames[editFrameName]" :edit-index="editIndex" ref="editRef" :ldf="ldfObj" :rules="rules">
             </EditFrame>
         </el-dialog>
     </div>
@@ -41,7 +41,7 @@
 
 <script lang="ts" setup>
 import { ref, watch, inject, Ref, computed, nextTick, toRaw, onMounted, h, toRef } from 'vue'
-import { LDF, getFrameSize } from '../ldfParse';
+import { Frame, LDF, SignalDef, getFrameSize } from '../ldfParse';
 import { ElNotification, ElSelect, ElMessageBox, ElOption, ElInput } from 'element-plus';
 import {
     ArrowUpBold,
@@ -56,6 +56,8 @@ import fileOpenOutline from '@iconify/icons-material-symbols/file-open-outline'
 import editIcon from '@iconify/icons-material-symbols/edit-square-outline'
 import deleteIcon from '@iconify/icons-material-symbols/delete'
 import EditFrame from './editFrame.vue'
+import { FormRules } from 'element-plus'
+import Schema from 'async-validator'
 
 interface frameTable {
     name: string
@@ -137,87 +139,6 @@ const frameTables = computed(() => {
     }
     return schTables
 })
-
-const expandTable = ref<string[]>([])
-function expandChange(a, b) {
-    expandTable.value = []
-    for (const item of b) {
-        expandTable.value.push(item.name)
-    }
-}
-
-function idUpdate(v: string, frame: frameTable) {
-    const targetFrame = ldfObj.value.frames[frame.name]
-    if (targetFrame) {
-        targetFrame.id = parseInt(v)
-    }
-}
-
-function frameSizeUpdate(v: number, frame: frameTable) {
-    const targetFrame = ldfObj.value.frames[frame.name]
-    if (targetFrame) {
-        targetFrame.frameSize = v
-    }
-}
-
-function startBitUpdate(v: number, index: number, frame: frameTable) {
-    const targetFrame = ldfObj.value.frames[frame.name]
-    if (targetFrame) {
-        const targetSignal = targetFrame.signals[index]
-        if (targetSignal) {
-            targetSignal.offset = v
-            autoUpdateOffset(frame.name)
-        }
-    }
-}
-
-function autoUpdateOffset(frameName: string) {
-    const targetFrame = ldfObj.value.frames[frameName]
-    if (targetFrame) {
-        ElMessageBox.confirm('Do you want to update the offset of the following signals?', 'Update offset', {
-            confirmButtonText: 'Yes',
-            cancelButtonText: 'No',
-            type: 'warning',
-            buttonSize: 'small'
-        }).then(() => {
-            for (const [index, s] of targetFrame.signals.entries()) {
-                if (s.name in ldfObj.value.signals) {
-                    s.offset = index == 0 ? targetFrame.signals[0].offset : targetFrame.signals[index - 1].offset + ldfObj.value.signals[targetFrame.signals[index - 1].name].signalSizeBits
-                }
-            }
-            //frameSize update
-            let frameSizeBits = targetFrame.signals.length > 0 ? targetFrame.signals[0].offset : 0
-            for (const s of targetFrame.signals) {
-                if (s.name in ldfObj.value.signals) {
-                    frameSizeBits += ldfObj.value.signals[s.name].signalSizeBits
-                }
-            }
-            targetFrame.frameSize = Math.ceil(frameSizeBits / 8)
-        }).catch(() => {
-            //do nothing
-        });
-    }
-}
-
-function moveFrame(index: number, frame: frameTable, dir: 'up' | 'down') {
-    const targetFrame = ldfObj.value.frames[frame.name]
-    if (targetFrame) {
-        const targetIndex = targetFrame.signals[index]
-        targetFrame.signals.splice(index, 1)
-        if (dir == 'up') {
-            if (index == 0)
-                targetFrame.signals.unshift(targetIndex)
-            else
-                targetFrame.signals.splice(index - 1, 0, targetIndex)
-        } else {
-            if (index == targetFrame.signals.length)
-                targetFrame.signals.push(targetIndex)
-            else
-                targetFrame.signals.splice(index + 1, 0, targetIndex)
-        }
-        autoUpdateOffset(frame.name)
-    }
-}
 
 const popoverIndex = ref(-1)
 
@@ -334,6 +255,9 @@ const gridOptions = computed<VxeGridProps<frameTable>>(() => {
                 tools: 'toolbar'
             }
         },
+        rowClassName: ({ rowIndex }) => {
+            return ErrorList.value[rowIndex] ? 'ldf-danger-row' : ''
+        },
         align: 'center',
         columns: [
             {
@@ -362,18 +286,154 @@ function cellClick({ rowIndex }) {
 
 const editFrameV = ref(false)
 const editFrameName = ref('')
+let editFrameName1=''
 
 function editFrame() {
     if (popoverIndex.value >= 0) {
         editFrameName.value = frameTables.value[popoverIndex.value].name
+        editFrameName1=editFrameName.value
         nextTick(() => {
             editFrameV.value = true
         })
     }
 }
+
+const ErrorList=ref<boolean[]>([])
+
+// Add validation rules
+const rules: FormRules<Frame> = {
+    signals: [
+        {
+            validator: (rule: any, value: any, callback: any) => {
+                if (!Array.isArray(value)) {
+                    callback(new Error('Signals must be an array'))
+                    return
+                }
+                // Check for duplicate signals
+                const signalNames = value.map(s => s.name)
+                const hasDuplicates = signalNames.length !== new Set(signalNames).size
+                if (hasDuplicates) {
+                    callback(new Error('Duplicate signals are not allowed'))
+                    return
+                }
+                // Check signal offsets and sizes
+                let lastOffset = 0
+                for (let i = 0; i < value.length; i++) {
+                    const signal = value[i]
+                    if (signal.offset < lastOffset) {
+                        callback(new Error(`Signal ${signal.name} offset must be greater than or equal to ${lastOffset}`))
+                        return
+                    }
+                    if (!(signal.name in ldfObj.value.signals)) {
+                        callback(new Error(`Signal ${signal.name} not found in LDF`))
+                        return
+                    }
+                    const signalSize = ldfObj.value.signals[signal.name].signalSizeBits
+                    lastOffset = signal.offset + signalSize
+                }
+                const frame=ldfObj.value.frames[editFrameName1]
+                // Check if total size exceeds frame size
+                if (lastOffset > frame.frameSize * 8) {
+                    callback(new Error(`Total signal size exceeds frame size`))
+                    return
+                }
+                callback()
+            }
+        }
+    ],
+    id: [
+        {
+            validator: (rule: any, value: any, callback: any) => {
+                if (typeof value !== 'number') {
+                    callback(new Error('Frame ID must be a number'))
+                    return
+                }
+                if (value < 0 || value > 0x3F) {
+                    callback(new Error('Frame ID must be between 0 and 0x3F'))
+                    return
+                }
+                const frame=ldfObj.value.frames[editFrameName1]
+                // Check for duplicate frame IDs
+                for (const otherFrame of Object.values(ldfObj.value.frames)) {
+                    if (otherFrame.name !== frame.name && otherFrame.id === value) {
+                        callback(new Error('Frame ID is already used by another frame'))
+                        return
+                    }
+                }
+                callback()
+            }
+        }
+    ],
+    frameSize: [
+        {
+            validator: (rule: any, value: any, callback: any) => {
+                if (typeof value !== 'number') {
+                    callback(new Error('Frame size must be a number'))
+                    return
+                }
+                if (value <= 0 || value > 8) {
+                    callback(new Error('Frame size must be between 1 and 8 bytes'))
+                    return
+                }
+                // Check if size is sufficient for signals
+                let maxOffset = 0
+                const frame=ldfObj.value.frames[editFrameName1]
+                for (const signal of frame.signals) {
+                    if (signal.name in ldfObj.value.signals) {
+                        const signalSize =ldfObj.value.signals[signal.name].signalSizeBits
+                        maxOffset = Math.max(maxOffset, signal.offset + signalSize)
+                    }
+                }
+                if (maxOffset > value * 8) {
+                    callback(new Error(`Frame size too small for signals (needs at least ${Math.ceil(maxOffset/8)} bytes)`))
+                    return
+                }
+                callback()
+            }
+        }
+    ]
+}
+
+const editRef=ref()
+async function validate() {
+    const errors: {
+        field: string,
+        message: string
+    }[] = []
+    ErrorList.value=[]
+    for(const key of Object.keys(ldfObj.value.frames)){
+        const frame=ldfObj.value.frames[key]
+        const schema = new Schema(rules as any)
+        editFrameName1=key
+        try {
+            await schema.validate(frame)
+            ErrorList.value.push(false)
+        } catch (e: any) {
+            ErrorList.value.push(true)
+            for (const key in e.fields) {
+                for (const error of e.fields[key]) {
+                    errors.push({
+                        field: `Frame ${frame.name}: ${key}`,
+                        message: error.message
+                 })
+                }
+            }
+            ErrorList.value.push(false)
+        }
+    }
+    editFrameName1=editFrameName.value
+    editRef.value?.validate()
+    if (errors.length > 0) {
+        throw {
+            tab: 'Frames',
+            error: errors,
+        }
+    }
+    
+}
+
+defineExpose({ validate })
 </script>
 <style>
-.el-table .danger-row {
-    --el-table-tr-bg-color: var(--el-color-danger);
-}
+
 </style>

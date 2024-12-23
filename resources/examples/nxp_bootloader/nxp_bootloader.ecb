@@ -1212,19 +1212,9 @@
         },
         "isMax": false
       }
+    },
+    "example":{
+      "catalog":"CAN"
     }
-  },
-  "example":{
-    "catalog":"CAN",
-    "displayName":"NXP CAN Boatloader",
-    "attachment":[
-      {
-        "path":"bin/S32K344_CAN_App_RTD200.bin"
-      },
-      {
-        "path":"bin/S32K344_FlsDrvRTD100.bin"
-      }
-    ],
-    "desc":"CAN 500k, CAN-FD 2000K with PEAK-CAN 1 channel"
   }
 }

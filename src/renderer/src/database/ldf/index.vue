@@ -49,10 +49,10 @@
                 <Frame v-model="ldfObj" ref="FrameRef" :edit-index="props.editIndex" />
             </el-tab-pane>
             <el-tab-pane name="Schedule Tables" label="Schedule Tables">
-                <Sch v-model="ldfObj" ref="FrameRef" :edit-index="props.editIndex" />
+                <Sch v-model="ldfObj" ref="SchRef" :edit-index="props.editIndex" />
             </el-tab-pane>
             <el-tab-pane name="Encodings" label="Encodings">
-                <Encode v-model="ldfObj" ref="FrameRef" :edit-index="props.editIndex" />
+                <Encode v-model="ldfObj" ref="EncodeRef" :edit-index="props.editIndex" />
             </el-tab-pane>
             <el-tab-pane name="LDF File" label="LDF File">
                 <File :ldf-obj="ldf" :edit-index="props.editIndex" />
@@ -96,7 +96,7 @@ const editableTabsValue = ref('General')
 provide('height', h)
 const database = useDataStore()
 
-const ldfObj = ref(props.ldf)
+const ldfObj = ref(cloneDeep(props.ldf))
 
 
 const existed = computed(() => {
@@ -156,16 +156,18 @@ const errorGridOptions = computed<VxeGridProps>(() => ({
 }))
 
 const SignalRef = ref()
+const FrameRef = ref()
 async function valid() {
     const list: Promise<void>[] = []
 
     list.push(generateRef.value.validate())
     list.push(nodeRef.value.validate())
     list.push(SignalRef.value.validate())
+    list.push(FrameRef.value.validate())
     const result = await Promise.allSettled(list)
     errorList.value = []
     for (const [index, r] of result.entries()) {
-        console.log('r', r)
+      
         if (r.status == 'rejected') {
             const errors = r.reason as {
                 tab: string,
@@ -174,11 +176,11 @@ async function valid() {
                     message: string
                 }[]
             }
-            console.log('errors', errors)
+            
 
 
             for (const [field, error] of Object.entries(errors.error)) {
-                console.log('error', error)
+               
 
                 errorList.value.push({
                     tab: errors.tab,

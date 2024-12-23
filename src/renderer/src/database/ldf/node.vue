@@ -64,8 +64,8 @@
 
         <el-dialog v-if="editAttr" v-model="editAttr" :title="`${editNodeName} Attributes`" width="70%" align-center
             :close-on-click-modal="false" :append-to="`#win${editIndex}`">
-            <EditNode v-model="ldfObj.nodeAttrs[editNodeName]" :edit-index="editIndex" :node-name="editNodeName"
-                :ldf="ldfObj" :rules="rules">
+            <EditNode v-model="ldfObj.nodeAttrs[editNodeName]" ref="editRef" :edit-index="editIndex"
+                :node-name="editNodeName" :ldf="ldfObj" :rules="rules">
             </EditNode>
         </el-dialog>
     </div>
@@ -92,6 +92,7 @@ const props = defineProps<{
 const ldfObj = defineModel<LDF>({
     required: true
 })
+const editRef = ref()
 
 const rules: FormRules<NodeAttrDef> = {
     LIN_protocol: [
@@ -292,6 +293,9 @@ const gridOptions = computed<VxeGridProps>(() => ({
     toolbarConfig: {
         slots: { tools: 'toolbar' }
     },
+    rowClassName: ({ rowIndex }) => {
+        return ErrorList.value[rowIndex] ? 'ldf-danger-row' : ''
+    },
     columns: [
         {
             type: 'seq',
@@ -480,20 +484,22 @@ function getVariant(nodeName: string) {
 function getProtocol(nodeName: string) {
     return ldfObj.value.nodeAttrs[nodeName]?.LIN_protocol || 'N/A'
 }
-
+const ErrorList = ref<boolean[]>([])
 async function validate() {
     //schema valid the data
     const errors: {
         field: string,
         message: string
     }[] = []
+    ErrorList.value = []
     for (const key of Object.keys(ldfObj.value.nodeAttrs)) {
         const schema = new Schema(rules as any)
         editNodeName1 = key
         try {
             await schema.validate(ldfObj.value.nodeAttrs[key])
+            ErrorList.value.push(false)
         } catch (e: any) {
-
+            ErrorList.value.push(true)
 
             for (const key in e.fields) {
                 for (const error of e.fields[key]) {
@@ -507,9 +513,11 @@ async function validate() {
         }
 
     }
+    editNodeName1 = editNodeName.value
+    editRef.value?.validate()
     if (errors.length > 0) {
         throw {
-            tab: 'Node',
+            tab: 'Nodes',
             error: errors
         }
     }
@@ -520,7 +528,5 @@ defineExpose({ validate })
 </script>
 
 <style>
-.el-table .danger-row {
-    --el-table-tr-bg-color: var(--el-color-danger);
-}
+
 </style>

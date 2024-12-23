@@ -95,7 +95,6 @@
 import { toRef, ref, computed, watch, onMounted, onBeforeUnmount, nextTick, inject, Ref } from 'vue'
 import {getConfigFrames, LDF, NodeAttrDef,} from '../ldfParse';
 import { ElMessageBox, ElNotification, ElOption, ElSelect, FormRules } from 'element-plus';
-import {Rules} from 'async-validator'
 
 const h = inject('height') as Ref<number>
 const fh = computed(() => Math.ceil(h.value * 2 / 3) + 'px')
@@ -120,6 +119,13 @@ onMounted(()=>{
     ruleFormRef.value.validate()    
 })
 
+function validate(){
+    ruleFormRef.value.validate()
+}
+
+defineExpose({
+    validate
+})
 
 
 const frames=computed(()=>{

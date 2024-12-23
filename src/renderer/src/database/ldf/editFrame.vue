@@ -26,7 +26,9 @@
                     <el-divider direction="vertical" />
                     
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <span>Frame ID:</span>
+                        <span :class="{
+                            'ldf-danger-row': errors.includes('id')
+                        }">Frame ID:</span>
                         <el-input 
                             v-model="frameId" 
                             style="width: 100px"
@@ -39,7 +41,9 @@
                     <el-divider direction="vertical" />
                     
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <span>Frame Size:</span>
+                        <span :class="{
+                            'ldf-danger-row': errors.includes('frameSize')
+                        }">Frame Size:</span>
                         <el-input-number
                             v-model="frame.frameSize"
                             :min="1"
@@ -112,8 +116,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, nextTick, inject, Ref, h, watch } from 'vue'
-import { ElMessageBox, ElOption, ElSelect } from 'element-plus';
+import { ref, computed, nextTick, inject, Ref, h, watch, onMounted } from 'vue'
+import { ElMessageBox, ElOption, ElSelect, FormRules } from 'element-plus';
 import { Icon } from '@iconify/vue'
 import fileOpenOutline from '@iconify/icons-material-symbols/file-open-outline';
 import editIcon from '@iconify/icons-material-symbols/edit-square-outline';
@@ -125,10 +129,12 @@ import { VxeGrid, VxeGridProps } from 'vxe-table'
 import EditSignal from './editSignal.vue';
 import { Grid } from '@element-plus/icons-vue'
 import Sortable from 'sortablejs'
+import Schema from 'async-validator';
 
 const props = defineProps<{
     editIndex: string
     ldf:LDF
+    rules:FormRules
 }>();
 
 const frame = defineModel<Frame>({
@@ -282,15 +288,6 @@ function deleteSignal() {
 }
 
 
-
-function showInitHex(vv: number | number[]) {
-    if (Array.isArray(vv)) {
-        const r = vv.map((v) => '0x' + v.toString(16)).join(', ')
-        return r
-    } else {
-        return '0x' + vv.toString(16)
-    }
-}
 const height=inject('height') as Ref<number>
 
 const tableId = computed(() => {
@@ -344,6 +341,13 @@ const gridOptions = computed<VxeGridProps<FrameSignalItem>>(() => {
             showIcon: false,
             beforeEditMethod({ rowIndex }) {
                 return true
+            }
+        },
+        rowClassName:() => {
+            if(errors.value.includes('signals')){
+                return 'ldf-danger-row'
+            }else{
+                return ''
             }
         },
         toolbarConfig: {
@@ -418,6 +422,31 @@ function ceilClick(val: any) {
 function menuClick(val: any) {
     // Handle menu click
 }
+
+const errors=ref<string[]>([])
+async function validate(){
+    errors.value=[]
+    const schema = new Schema(props.rules as any)
+    try {
+        await schema.validate(frame.value)
+    } catch (e: any) {
+        for (const key in e.fields) {
+                for (const error of e.fields[key]) {
+                    errors.value.push(key)
+                }
+            }
+    }
+    console.log(errors.value)
+}
+
+onMounted(()=>{
+    validate()
+})
+
+
+defineExpose({
+    validate
+})
 
 </script>
 <style scoped>
