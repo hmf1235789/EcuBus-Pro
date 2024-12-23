@@ -8,19 +8,30 @@
                 </el-input>
                 
             </el-form-item>
-
-
             <el-divider />
-            <el-form-item label="LIN Version" prop="global.LIN_protocol_version">
+            <el-form-item label="Master Node Name" prop="node.master.nodeName" required>
+                    <el-input v-model="ldfObj.node.master.nodeName" style="width: 200px;" />
+                </el-form-item>
+            <el-divider />
+            <el-form-item label-width="0">
+                <el-col :span="12">
+                    <el-form-item label="LIN Version" prop="global.LIN_protocol_version">
                 <el-select v-model="ldfObj.global.LIN_protocol_version" style="width: 200px;">
-                    <el-option v-for="item in ['2.2']" :key="item" :label="item" :value="item" />
+                    <el-option v-for="item in ['2.2','2.1']" :key="item" :label="item" :value="item" />
                 </el-select>
             </el-form-item>
-            <el-form-item label="LIN Lang Version" prop="global.LIN_language_version">
+            </el-col>
+            <el-col :span="12">
+                <el-form-item label="LIN Lang Version" prop="global.LIN_language_version">
                 <el-select v-model="ldfObj.global.LIN_language_version" style="width: 200px;">
-                    <el-option v-for="item in ['2.2']" :key="item" :label="item" :value="item" />
+                    <el-option v-for="item in ['2.2','2.1']" :key="item" :label="item" :value="item" />
                 </el-select>
             </el-form-item>
+            </el-col>
+
+            </el-form-item>
+            
+          
             <el-form-item label="LIN Speed(kbps)" prop="global.LIN_speed">
                 <el-select v-model="ldfObj.global.LIN_speed" style="width: 200px;">
                     <el-option v-for="item in [19.2, 9.6]" :key="item" :label="item" :value="item" />
@@ -81,22 +92,36 @@ const props = defineProps<{
 
 const database = useDataStore()
 
-const existed = computed(() => {
-    let existed = false
-    if (database.database && database.database.lin) {
-        existed = database.database.lin[props.editIndex] ? true : false
-    }
-    return existed
-})
+
 
 
 async function validate() {
     return new Promise((resolve, reject) => {
-        ruleFormRef.value.validate(async (valid) => {
+        ruleFormRef.value.validate(async (valid,invalidFields) => {
             if (valid) {
                 resolve(true)
             } else {
-                reject(false)
+                /*error: {
+                    field: string,
+                    message: string
+                }[] */
+             
+               const errors:{
+                    field: string,
+                    message: string
+                }[]=[]
+                for(const key of Object.keys(invalidFields)){
+                   for(const field of invalidFields[key]){
+                       errors.push({
+                           field:key,
+                           message:field.message
+                       })
+                   }
+                }
+                reject({
+                    tab:'General',
+                    error: errors
+                })
             }
         })
     })
@@ -126,6 +151,24 @@ const rules = ref({
             }, trigger: "blur"
         }
     ],
+    "node.master.nodeName": [
+        {
+            validator: (rule, value, callback) => {
+                if (value) {
+                    //master node can't be the same as slave node
+                    for (const node of ldfObj.value.node.salveNode) {
+                        if (node == value) {
+                            callback(new Error("Master node can't be the same as slave node"))
+                            return
+                        }
+                    }
+                    callback()
+                } else {
+                    callback(new Error("Please input the master node name"))
+                }
+            }
+        }   
+    ]
 })
 const ruleFormRef = ref()
 

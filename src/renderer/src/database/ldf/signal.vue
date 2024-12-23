@@ -2,7 +2,8 @@
     <div>
         <VxeGrid ref="xGrid" v-bind="gridOptions" class="signalTable" @menu-click="menuClick" @cell-click="ceilClick">
             <template #toolbar>
-                <div style="justify-content: flex-start;display: flex;align-items: center;gap:2px;margin-left: 5px;padding: 8px;">
+                <div
+                    style="justify-content: flex-start;display: flex;align-items: center;gap:2px;margin-left: 5px;padding: 8px;">
                     <el-button-group>
                         <el-tooltip effect="light" content="Add Signal" placement="bottom" :show-after="1000">
                             <el-button link @click="addNewSignal">
@@ -20,8 +21,7 @@
                             </el-button>
                         </el-tooltip>
                         <el-tooltip effect="light" content="Delete Signal" placement="bottom" :show-after="1000">
-                            <el-button link type="danger" @click="deleteSignal"
-                                :disabled="popoverIndex < 0">
+                            <el-button link type="danger" @click="deleteSignal" :disabled="popoverIndex < 0">
                                 <Icon :icon="deleteIcon" style="font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
@@ -53,18 +53,18 @@
                 {{ row.frames.join(', ') }}
             </template>
         </VxeGrid>
-        <el-dialog v-if="editSig" v-model="editSig" :title="`${editNodeName} Signal`"  width="70%" align-center :close-on-click-modal="false"
-                :append-to="`#win${editIndex}`">
-                <EditSignal v-model="ldfObj.signals[editNodeName]" :edit-index="editIndex" :ldf="ldfObj">
-                    :ldf="ldfObj">
-                </EditSignal>
-            </el-dialog>
+        <el-dialog v-if="editSig" v-model="editSig" :title="`${editNodeName} Signal`" width="70%" align-center
+            :close-on-click-modal="false" :append-to="`#win${editIndex}`">
+            <EditSignal v-model="ldfObj.signals[editNodeName]" :edit-index="editIndex" :ldf="ldfObj" :rules="rules">
+                :ldf="ldfObj">
+            </EditSignal>
+        </el-dialog>
     </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, nextTick, inject, Ref } from 'vue'
-import { ElMessageBox } from 'element-plus';
+import { ElMessageBox, FormRules } from 'element-plus';
 import { Icon } from '@iconify/vue'
 import fileOpenOutline from '@iconify/icons-material-symbols/file-open-outline';
 import editIcon from '@iconify/icons-material-symbols/edit-square-outline';
@@ -74,6 +74,7 @@ import { cloneDeep } from 'lodash';
 import { LDF, SignalDef } from '../ldfParse';
 import { VxeGrid, VxeGridProps } from 'vxe-table'
 import EditSignal from './editSignal.vue';
+import Schema from 'async-validator';
 const props = defineProps<{
     editIndex: string
 }>();
@@ -96,13 +97,14 @@ interface signalTable {
 const popoverIndex = ref(-1)
 const editSig = ref(false)
 const editNodeName = ref('')
+let editNodeName1 = ''
 function addNewSignal() {
     ElMessageBox.prompt('Please input signal name', 'Add Signal', {
         confirmButtonText: 'Add',
         cancelButtonText: 'Cancel',
         inputPattern: /^[a-zA-Z][a-zA-Z0-9_]+$/,
-        appendTo:`#win${props.editIndex}`,
-        buttonSize:'small',
+        appendTo: `#win${props.editIndex}`,
+        buttonSize: 'small',
         inputErrorMessage: 'signal name must be alphanumeric, and underscore',
         inputValidator: (val: string) => {
             if (val in ldfObj.value.signals) {
@@ -127,9 +129,9 @@ function copySignal() {
     ElMessageBox.prompt('Please input signal name', 'Copy Signal', {
         confirmButtonText: 'Confirm',
         cancelButtonText: 'Cancel',
-        buttonSize:'small',
+        buttonSize: 'small',
         inputPattern: /^[a-zA-Z][a-zA-Z0-9_]+$/,
-        appendTo:`#win${props.editIndex}`,
+        appendTo: `#win${props.editIndex}`,
         inputErrorMessage: 'signal name must be alphanumeric, and underscore',
         inputValidator: (val: string) => {
             if (val in ldfObj.value.signals) {
@@ -138,17 +140,19 @@ function copySignal() {
             return true
         }
     }).then(({ value }) => {
-        const c=cloneDeep(ldfObj.value.signals[signalTables.value[popoverIndex.value].name])
-        c.signalName=value
+        const c = cloneDeep(ldfObj.value.signals[signalTables.value[popoverIndex.value].name])
+        c.signalName = value
         ldfObj.value.signals[value] = c
     }).catch(() => {
         null
     });
 }
 function editSignal() {
+
     if (popoverIndex.value >= 0) {
         editNodeName.value = signalTables.value[popoverIndex.value].name
-        
+        editNodeName1 = editNodeName.value
+
         nextTick(() => {
             // Open edit dialog
             editSig.value = true
@@ -218,7 +222,7 @@ function showInitHex(vv: number | number[]) {
         return '0x' + vv.toString(16)
     }
 }
-const height=inject('height') as Ref<number>
+const height = inject('height') as Ref<number>
 
 const gridOptions = computed<VxeGridProps<signalTable>>(() => {
     return {
@@ -227,7 +231,7 @@ const gridOptions = computed<VxeGridProps<signalTable>>(() => {
         columnConfig: {
             resizable: true,
         },
-        height: height.value-40,
+        height: height.value - 40,
         showOverflow: true,
         scrollY: {
             enabled: true,
@@ -263,7 +267,7 @@ const gridOptions = computed<VxeGridProps<signalTable>>(() => {
             { field: 'publish', title: 'Publisher', width: 150, slots: { default: 'default_publish' } },
             { field: 'subscribe', title: 'Subscribers', width: 150, slots: { default: 'default_subscribe' } },
             { field: 'length', title: 'Length [Bit]', width: 100, slots: { default: 'default_length' } },
-            { field: 'initValue', title: 'Init Value',minWidth:150, slots: { default: 'default_initValue' } },
+            { field: 'initValue', title: 'Init Value', minWidth: 150, slots: { default: 'default_initValue' } },
             { field: 'unit', title: 'Unit', width: 100, slots: { default: 'default_unit' } },
             { field: 'encoding', title: 'Encoding', width: 150, slots: { default: 'default_encoding' } },
             { field: 'frames', title: 'Joined Frame', width: 200, slots: { default: 'default_frames' } },
@@ -279,6 +283,154 @@ function ceilClick(val: any) {
 function menuClick(val: any) {
     // Handle menu click
 }
+
+
+const nodeList = computed(() => {
+    const list: string[] = []
+    list.push(ldfObj.value.node.master.nodeName)
+    ldfObj.value.node.salveNode.forEach((item) => {
+        list.push(item)
+    })
+    return list
+})
+
+const rules: FormRules<SignalDef> = {
+    signalSizeBits: [
+        { required: true, message: 'Please enter signal size' },
+        {
+            validator: (rule: any, value: number | undefined, callback: any) => {
+                if (typeof value !== 'number') {
+                    callback(new Error('Signal size must be a number'))
+                    return
+                }
+                if (value <= 0) {
+                    callback(new Error('Signal size must be greater than 0'))
+                    return
+                }
+                if (ldfObj.value.signals[editNodeName1].singleType === 'Scalar' && value > 64) {
+                    callback(new Error('Scalar signal size cannot exceed 64 bits'))
+                    return
+                }
+                if (ldfObj.value.signals[editNodeName1].singleType === 'ByteArray' && value % 8 !== 0) {
+                    callback(new Error('ByteArray signal size must be multiple of 8'))
+                    return
+                }
+                callback()
+            }
+        }
+    ],
+    singleType: [
+        { required: true, message: 'Please select signal type' }
+    ],
+    initValue: [
+        { required: true, message: 'Please enter initial value' },
+        {
+            validator: (rule: any, value: any, callback: any) => {
+                if (ldfObj.value.signals[editNodeName1].singleType === 'Scalar') {
+                    if (typeof value !== 'number') {
+                        callback(new Error('Initial value must be a number'))
+                        return
+                    }
+                    const maxValue = Math.pow(2, ldfObj.value.signals[editNodeName1].signalSizeBits) - 1
+                    if (value < 0 || value > maxValue) {
+                        callback(new Error(`Value must be between 0 and ${maxValue}`))
+                        return
+                    }
+                } else {
+                    if (!Array.isArray(value)) {
+                        callback(new Error('ByteArray initial value must be an array'))
+                        return
+                    }
+                    const expectedLength = Math.ceil(ldfObj.value.signals[editNodeName1].signalSizeBits / 8)
+                    if (value.length !== expectedLength) {
+                        callback(new Error(`ByteArray must have ${expectedLength} elements`))
+                        return
+                    }
+                    for (let i = 0; i < value.length; i++) {
+                        if (typeof value[i] !== 'number' || value[i] < 0 || value[i] > 255) {
+                            callback(new Error(`Element ${i + 1} must be between 0 and 255`))
+                            return
+                        }
+                    }
+                }
+                callback()
+            }
+        }
+    ],
+    punishedBy: [
+        { required: true, message: 'Please select publisher' },
+        {
+            validator: (rule: any, value: string, callback: any) => {
+
+                if (!nodeList.value.includes(value)) {
+                    callback(new Error('Invalid publisher node'))
+                    return
+                }
+                callback()
+            }
+        }
+    ],
+    subscribedBy: [
+        { required: true, message: 'Please select at least one subscriber', type: 'array' },
+        {
+            validator: (rule: any, value: string[], callback: any) => {
+                if (!Array.isArray(value)) {
+                    callback(new Error('Subscribers must be an array'))
+                    return
+                }
+                if (value.length === 0) {
+                    callback(new Error('Please select at least one subscriber'))
+                    return
+                }
+                for (const node of value) {
+                    if (!nodeList.value.includes(node)) {
+                        callback(new Error(`Invalid subscriber node: ${node}`))
+                        return
+                    }
+                }
+                if (value.includes(ldfObj.value.signals[editNodeName1].punishedBy)) {
+                    callback(new Error('Publisher cannot be a subscriber'))
+                    return
+                }
+                callback()
+            }
+        }
+    ]
+}
+
+async function validate() {
+    const errors: {
+        field: string,
+        message: string
+    }[] = []
+    for (const key of Object.keys(ldfObj.value.signals)) {
+        const schema = new Schema(rules as any)
+        editNodeName1 = key
+        try {
+            await schema.validate(ldfObj.value.signals[key])
+        } catch (e: any) {
+
+            for (const key in e.fields) {
+                for (const error of e.fields[key]) {
+                    errors.push({
+                        field: `${editNodeName1} : ${key}`,
+                        message: error.message
+                    })
+                }
+            }
+
+
+        }
+    }
+    if (errors.length > 0) {
+        throw {
+            tab: 'Signals',
+            error: errors,
+        }
+    }
+}
+
+defineExpose({ validate })
 
 </script>
 <style>

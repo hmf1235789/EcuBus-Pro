@@ -1,25 +1,25 @@
 <template>
    
         <div :style="{height:fh,overflowY:'auto',padding:'5px'}" >
-            <el-form  ref="ruleFormRef" :model="attr" label-width="150px" size="small" :rules="rules">
+            <el-form  ref="ruleFormRef" :model="attr" label-width="150px" size="small" :rules="props.rules">
                
              
                 <el-form-item label="LIN Protocol" prop="LIN_protocol" required>
                     <el-select v-model="attr.LIN_protocol" style="width: 100%;">
-                        <el-option v-for="item in ['2.2']" :key="item" :label="item" :value="item" />
+                        <el-option v-for="item in ['2.2','2.1']" :key="item" :label="item" :value="item" />
                     </el-select>
                 </el-form-item>
 
                 <el-form-item label-width="0px">
                     <el-col :span="12">
                         <el-form-item label="NAD" prop="configured_NAD" required>
-                            <el-input v-model="attr.configured_NAD"
+                            <el-input v-model.number="attr.configured_NAD"
                                 />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="Init NAD" prop="initial_NAD">
-                            <el-input v-model="attr.initial_NAD"
+                            <el-input v-model.number="attr.initial_NAD"
                                 />
                         </el-form-item>
                     </el-col>
@@ -27,19 +27,19 @@
                 <el-form-item label-width="0px">
                     <el-col :span="12">
                         <el-form-item label="Supplier Id" prop="supplier_id" required>
-                            <el-input v-model="attr.supplier_id" 
+                            <el-input v-model.number="attr.supplier_id" 
                                />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="Function Id" prop="function_id" required>
-                            <el-input v-model="attr.function_id" 
+                            <el-input v-model.number="attr.function_id" 
                                />
                         </el-form-item>
                     </el-col>
                 </el-form-item>
                 <el-form-item label="Variant" prop="variant">
-                    <el-input v-model="attr.variant" />
+                    <el-input v-model.number="attr.variant" />
                 </el-form-item>
                 <el-form-item label="Response Error Signal" prop="response_error" required>
                     <el-select v-model.number="attr.response_error" style="width:100%">
@@ -94,8 +94,8 @@
 
 import { toRef, ref, computed, watch, onMounted, onBeforeUnmount, nextTick, inject, Ref } from 'vue'
 import {getConfigFrames, LDF, NodeAttrDef,} from '../ldfParse';
-import { ElMessageBox, ElNotification, ElOption, ElSelect } from 'element-plus';
-
+import { ElMessageBox, ElNotification, ElOption, ElSelect, FormRules } from 'element-plus';
+import {Rules} from 'async-validator'
 
 const h = inject('height') as Ref<number>
 const fh = computed(() => Math.ceil(h.value * 2 / 3) + 'px')
@@ -105,6 +105,7 @@ const fh = computed(() => Math.ceil(h.value * 2 / 3) + 'px')
 const props = defineProps<{
     editIndex: string
     nodeName:string
+    rules:FormRules
     ldf:LDF
 }>()
 
@@ -115,13 +116,9 @@ const attr=defineModel<NodeAttrDef>({
 
 const ruleFormRef = ref()
 
-
-
-
-
-
-const formErrors=ref({})
-const rules=ref({})
+onMounted(()=>{
+    ruleFormRef.value.validate()    
+})
 
 
 
@@ -129,11 +126,6 @@ const frames=computed(()=>{
     return getConfigFrames(props.ldf,props.nodeName)
 })
 
-
-
-function saveNodeAttr(){
-   
-}
 
 </script>
   

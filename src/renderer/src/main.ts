@@ -15,7 +15,7 @@ import 'vxe-pc-ui/lib/style.css'
 import enUS from 'vxe-pc-ui/lib/language/en-US'
 import VxeUIPluginRenderElement from '@vxe-ui/plugin-render-element'
 import { Router } from 'vue-router'
-
+import './helper'
 
 VxeUI.use(VxeUIPluginRenderElement)
 VxeUI.setI18n('en-US', enUS)

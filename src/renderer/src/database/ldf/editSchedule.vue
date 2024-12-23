@@ -83,6 +83,9 @@
 
                             <el-form-item>
                                 <el-button type="primary" @click="submitForm" plain>Add Frame</el-button>
+                                <el-button type="danger" @click="deleteFrame" plain :disabled="selectedIndex < 0">
+                                    <Icon :icon="deleteIcon" />
+                                </el-button>
                             </el-form-item>
                         </el-form>
                     </div>
@@ -90,12 +93,12 @@
             </template>
 
             <!-- 新增操作列模板 -->
-            <template #default_operate="{ row }">
+            <template #default_operate>
                 <el-button-group>
                     <el-button 
                         link 
                         type="danger" 
-                        @click="deleteFrame(row)"
+                        @click="deleteFrame"
                         title="Delete Frame">
                         <Icon :icon="deleteIcon" />
                     </el-button>
@@ -228,15 +231,7 @@ const gridOptions = computed<VxeGridProps<Entry>>(() => ({
             title: 'Max Time [ms]',
             width: 120,
             slots: { default: 'default_maxTime' }
-        },
-        {
-            field: 'operate',
-            title: 'Operation',
-            align:'center',
-            width: 80,
-            fixed: "right",
-            slots: { default: 'default_operate' }
-        },
+        }
     ],
     data: schedule.value.entries
 }))
@@ -454,23 +449,22 @@ function updateDelay(row: any) {
 }
 
 // 修改删除方法，直接接收行数据
-function deleteFrame(row: Entry) {
+function deleteFrame() {
+    if (selectedIndex.value < 0) return;
+
     ElMessageBox.confirm(
         'Are you sure to delete this frame?',
         'Warning',
         {
             confirmButtonText: 'OK',
             cancelButtonText: 'Cancel',
-            buttonSize: 'small',
             type: 'warning',
+            buttonSize: 'small',
             appendTo: `#win${props.editIndex}`
         }
     ).then(() => {
-        const index = schedule.value.entries.findIndex(entry => entry === row)
-        if (index !== -1) {
-            schedule.value.entries.splice(index, 1)
-            selectedIndex.value = -1
-        }
+        schedule.value.entries.splice(selectedIndex.value, 1);
+        selectedIndex.value = -1;
     })
 }
 

@@ -1,41 +1,61 @@
 <template>
-    <div id="app">
-        <el-tabs class="ldfTabs" type="card" v-model="editableTabsValue" >
+    <div>
+        <el-tabs class="ldfTabs" type="card" v-model="editableTabsValue" addable>
+            <template #add-icon>
+                <el-tooltip v-if="errorList.length == 0" effect="light" content="Save Database" placement="bottom"
+                    :show-after="1000">
+                    <el-button type="success" size="small" link @click="saveDataBase">
+                        <Icon :icon="saveIcon" />
+                    </el-button>
+                </el-tooltip>
+                <el-tooltip v-else effect="light" content="Fix errors to save the database" placement="bottom"
+                    :show-after="1000">
+
+                    <el-button type="danger" size="small" link @click="handleTabSwitch('General')">
+                        <Icon :icon="saveIcon" />
+                    </el-button>
+
+                </el-tooltip>
+
+
+            </template>
             <el-tab-pane name="General" label="General">
-                <General v-model="ldfObj" ref="generateRef" :edit-index="props.editIndex"  />
-                
+                <General v-model="ldfObj" ref="generateRef" :edit-index="props.editIndex" />
+
                 <!-- Add error section -->
-                <div class="error-section">
-                    <el-divider content-position="left">
-                        <el-button type="success" size="small" plain v-if="errorList.length==0" @click="saveDataBase">
-                            Save Database
-                        </el-button>
-                        <el-button v-else size="small" type="danger" plain disabled>
-                            Fix errors to save the database
-                        </el-button>
-                    </el-divider>
-                    
-                    <VxeGrid v-if="errorList.length>0" ref="errorGrid" v-bind="errorGridOptions" @cell-click="navigateToError">
-                        <template #type="{ row }">
-                            <span class="error-type">{{ row.type }}</span>
-                        </template>
-                    </VxeGrid>
-                </div>
+                <template v-if="errorList.length != 0">
+                    <div class="error-section">
+                        <el-divider />
+
+                        <VxeGrid v-if="errorList.length > 0" ref="errorGrid" v-bind="errorGridOptions">
+                            <template #message="{ row }">
+                                <span class="error-type">{{ row.message }}</span>
+                            </template>
+                            <template #tab="{ row }">
+                                <el-button link type="danger" size="small" @click="handleTabSwitch(row.tab)">{{ row.tab
+                                    }}</el-button>
+                            </template>
+                        </VxeGrid>
+                    </div>
+                </template>
             </el-tab-pane>
             <el-tab-pane name="Nodes" label="Nodes">
-                <Node v-model="ldfObj" ref="nodeRef" :edit-index="props.editIndex"/>
+                <Node v-model="ldfObj" ref="nodeRef" :edit-index="props.editIndex" />
             </el-tab-pane>
             <el-tab-pane name="Signals" label="Signals">
-                <Signal v-model="ldfObj" ref="SignalRef" :edit-index="props.editIndex"/>
+                <Signal v-model="ldfObj" ref="SignalRef" :edit-index="props.editIndex" />
             </el-tab-pane>
             <el-tab-pane name="Frames" label="Frames">
-                <Frame v-model="ldfObj" ref="FrameRef" :edit-index="props.editIndex"/>
+                <Frame v-model="ldfObj" ref="FrameRef" :edit-index="props.editIndex" />
             </el-tab-pane>
-            <el-tab-pane name="Sch" label="Schedule Tables">
-                <Sch v-model="ldfObj" ref="FrameRef" :edit-index="props.editIndex"/>
+            <el-tab-pane name="Schedule Tables" label="Schedule Tables">
+                <Sch v-model="ldfObj" ref="FrameRef" :edit-index="props.editIndex" />
             </el-tab-pane>
             <el-tab-pane name="Encodings" label="Encodings">
-                <Encode v-model="ldfObj" ref="FrameRef" :ldf-obj="ldf" :edit-index="props.editIndex"/>
+                <Encode v-model="ldfObj" ref="FrameRef" :edit-index="props.editIndex" />
+            </el-tab-pane>
+            <el-tab-pane name="LDF File" label="LDF File">
+                <File :ldf-obj="ldf" :edit-index="props.editIndex" />
             </el-tab-pane>
         </el-tabs>
     </div>
@@ -58,6 +78,8 @@ import Frame from "./frame.vue";
 import Sch from "./sch.vue";
 import Encode from "./encode.vue";
 import { VxeGrid, VxeGridProps } from 'vxe-table'
+import File from "./file.vue";
+
 
 const layout = inject('layout') as Layout
 
@@ -68,7 +90,7 @@ const props = defineProps<{
 }>()
 
 const generateRef = ref()
-const nodeRef=ref()
+const nodeRef = ref()
 const h = toRef(props, 'height')
 const editableTabsValue = ref('General')
 provide('height', h)
@@ -76,67 +98,35 @@ const database = useDataStore()
 
 const ldfObj = ref(props.ldf)
 
+
+const existed = computed(() => {
+    let existed = false
+    if (database.database && database.database.lin) {
+        existed = database.database.lin[props.editIndex] ? true : false
+    }
+    return existed
+})
+
+interface ValidateError {
+    message?: string;
+    field?: string;
+}
+
+type ValidateFieldsError = Record<string, ValidateError[]>;
 interface ErrorItem {
     tab: string
-    type: string
-    message: string
-    location: string
+    message?: string
     field?: string
 }
 
-const errorList = computed<ErrorItem[]>(() => {
-    const errors: ErrorItem[] = []
-    
-    // {
-    //     errors.push({
-    //         tab: 'General',
-    //         type: 'Missing',
-    //         message: 'LIN protocol version is required',
-    //         location: 'General Settings',
-    //         field: 'global.LIN_protocol_version'
-    //     })
-    // }
-    
-    // validateNodes(errors)
-    // validateSignals(errors)
-    // validateFrames(errors)
-    // validateSchedules(errors)
-    // validateEncodings(errors)
-    
-    return errors
-})
+const errorList = ref<ErrorItem[]>([])
 
-// function validateNodes(errors: ErrorItem[]) {
-//     if (!ldfObj.value.node.master.timeBase || ldfObj.value.node.master.timeBase <= 0) {
-//         errors.push({
-//             tab: 'Nodes',
-//             type: 'Invalid',
-//             message: 'Master timebase must be greater than 0',
-//             location: 'Master Node',
-//             field: 'node.master.timeBase'
-//         })
-//     }
-// }
 
-// function validateSignals(errors: ErrorItem[]) {
-//     Object.entries(ldfObj.value.signals).forEach(([signalName, signal]) => {
-//         if (!signal.size || signal.size <= 0) {
-//             errors.push({
-//                 tab: 'Signals',
-//                 type: 'Invalid',
-//                 message: `Signal size must be greater than 0`,
-//                 location: `Signal: ${signalName}`,
-//                 field: `signals.${signalName}.size`
-//             })
-//         }
-//     })
-// }
 
 const errorGridOptions = computed<VxeGridProps>(() => ({
     border: true,
     size: 'mini',
-    height: 'auto',
-    maxHeight: 300,
+    height: h.value-400,
     showOverflow: true,
     columnConfig: { resizable: true },
     rowConfig: {
@@ -148,49 +138,61 @@ const errorGridOptions = computed<VxeGridProps>(() => ({
             field: 'tab',
             title: 'Tab',
             width: 120,
-            className: 'error-cell'
-        },
-        {
-            field: 'type',
-            title: 'Type',
-            width: 120,
-            slots: { default: 'type' }
+            slots: { default: 'tab' },
+        }, {
+            field: 'field',
+            title: 'Field',
+            minWidth: 200,
+
         },
         {
             field: 'message',
             title: 'Error Message',
+            slots: { default: 'message' },
             minWidth: 200
-        },
-        {
-            field: 'location',
-            title: 'Location',
-            width: 200
         }
     ],
     data: errorList.value
 }))
 
-function navigateToError({ row }: { row: ErrorItem }) {
-    editableTabsValue.value = row.tab
-    
-    if (row.field) {
-        nextTick(() => {
-            const fieldElements = document.querySelectorAll(`[data-field="${row.field}"]`)
-            fieldElements.forEach(el => {
-                el.classList.add('error-highlight')
-                setTimeout(() => {
-                    el.classList.remove('error-highlight')
-                }, 2000)
-            })
-        })
-    }
-}
-
+const SignalRef = ref()
 async function valid() {
-    const list: Promise<boolean>[] = []
+    const list: Promise<void>[] = []
+
     list.push(generateRef.value.validate())
-    await Promise.all(list)
-    return errorList.value.length === 0
+    list.push(nodeRef.value.validate())
+    list.push(SignalRef.value.validate())
+    const result = await Promise.allSettled(list)
+    errorList.value = []
+    for (const [index, r] of result.entries()) {
+        console.log('r', r)
+        if (r.status == 'rejected') {
+            const errors = r.reason as {
+                tab: string,
+                error: {
+                    field: string,
+                    message: string
+                }[]
+            }
+            console.log('errors', errors)
+
+
+            for (const [field, error] of Object.entries(errors.error)) {
+                console.log('error', error)
+
+                errorList.value.push({
+                    tab: errors.tab,
+                    message: error.message,
+                    field: error.field
+                })
+
+
+            }
+        }
+    }
+    if (errorList.value.length > 0) {
+        throw new Error('Invalid')
+    }
 }
 
 function saveDataBase() {
@@ -199,25 +201,35 @@ function saveDataBase() {
             database.database.lin[props.editIndex] = cloneDeep(ldfObj.value)
         })
         layout.changeWinName(props.editIndex, ldfObj.value.name)
-        
+        layout.setWinModified(props.editIndex, false)
 
         ElNotification({
             offset: 50,
             type: 'success',
             message: "The database has been saved successfully",
-            appendTo:`#win${props.editIndex}`
+            appendTo: `#win${props.editIndex}`
         })
     }).catch(null)
 }
 function handleTabSwitch(tabName: string) {
     editableTabsValue.value = tabName
 }
+
+let timeout
 watch(ldfObj, (val) => {
-    valid().catch(null)
+    layout.setWinModified(props.editIndex, true)
+    clearTimeout(timeout)
+    timeout=setTimeout(() => {
+        valid().catch(null)
+    }, 500);
 }, { deep: true })
 
 onMounted(() => {
     // Add your onMounted logic here
+    if (!existed.value) {
+        layout.setWinModified(props.editIndex, true)
+    }
+    valid().catch(null)
 });
 
 
@@ -225,11 +237,14 @@ onMounted(() => {
 
 <style lang="scss">
 .ldfTabs {
+    padding-right: 5px;
+    margin-right: 5px;
+
     .el-tabs__header {
-        
-            margin-bottom: 0px !important;
-        }
-    
+
+        margin-bottom: 0px !important;
+    }
+
 }
 
 .error-section {
@@ -254,9 +269,12 @@ onMounted(() => {
 }
 
 @keyframes highlightError {
-    0%, 100% {
+
+    0%,
+    100% {
         background-color: transparent;
     }
+
     50% {
         background-color: var(--el-color-danger-light-8);
     }

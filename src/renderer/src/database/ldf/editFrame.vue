@@ -372,14 +372,14 @@ const gridOptions = computed<VxeGridProps<FrameSignalItem>>(() => {
             { 
                 field: 'offset', 
                 title: 'Offset [Bit]', 
-                width: 100,
+                minWidth: 150,
                 editRender: {},
                 slots: { edit: 'edit_offset' }
             },
             { 
                 field: 'length', 
                 title: 'Length [Bit]', 
-                width: 100,
+                width: 150,
                 slots: { default: 'default_length' }
             }
         ],

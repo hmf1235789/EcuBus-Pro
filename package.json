@@ -55,6 +55,7 @@
     "@xterm/xterm": "^5.5.0",
     "animate.css": "^4.1.1",
     "async": "^3.2.6",
+    "async-validator": "^4.2.5",
     "axios": "^1.7.7",
     "broadcast-channel": "^7.0.0",
     "chevrotain": "^11.0.3",

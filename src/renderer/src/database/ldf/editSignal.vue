@@ -1,7 +1,7 @@
 <template>
 
     <div :style="{ height: fh, overflowY: 'auto', padding: '5px' }">
-        <el-form ref="ruleFormRef" :model="signal" label-width="150px" size="small" :rules="rules">
+        <el-form ref="ruleFormRef" :model="signal" label-width="150px" size="small" :rules="props.rules">
             <!-- <el-form-item label="Signal Name" prop="signalName" required>
                 <el-input v-model="signal.signalName" @change="encodeChange"/>
             </el-form-item> -->
@@ -23,13 +23,13 @@
 
 
             <el-form-item label="Init Value" prop="initValue" v-if="signal.singleType == 'Scalar'" required>
-                <el-input v-model="signal.initValue" style="width: 100px;" />
+                <el-input v-model.number="signal.initValue" style="width: 100px;" />
             </el-form-item>
             <div v-else>
                 <el-form-item label="Init Value">
                     <el-form-item :prop="`initValue.${i - 1}`" label-width="0px"
                         v-for="i in Math.ceil(signal.signalSizeBits / 8)" :key="i">
-                        <el-input v-model="signal.initValue[i - 1]" style="width: 100px;" />
+                        <el-input v-model.number="signal.initValue[i - 1]" style="width: 100px;" />
                     </el-form-item>
 
                 </el-form-item>
@@ -63,7 +63,7 @@
 
 import { toRef, ref, computed, watch, onMounted, onBeforeUnmount, nextTick, inject, Ref } from 'vue'
 import { LDF, SignalDef } from '../ldfParse';
-import { ElMessageBox, ElNotification, ElOption, ElSelect } from 'element-plus';
+import { ElMessageBox, ElNotification, ElOption, ElSelect, FormRules } from 'element-plus';
 
 const h = inject('height') as Ref<number>
 const fh = computed(() => Math.ceil(h.value * 2 / 3) + 'px')
@@ -73,6 +73,7 @@ const signal = defineModel<SignalDef>({
 const props = defineProps<{
     ldf: LDF
     editIndex: string
+    rules:FormRules
 }>()
 
 
@@ -90,6 +91,7 @@ onMounted(()=>{
             break
         }
     }
+    ruleFormRef.value.validate()
 })
 const singleEncodeTypes = computed(() => {
     return Object.keys(ldfObj.value.signalRep)
@@ -123,14 +125,6 @@ const nodeList = computed(() => {
     })
     return list
 })
-
-
-const lastEncode = ref('')
-
-
-const formErrors = ref({})
-const rules = ref({})
-
 
 </script>
 

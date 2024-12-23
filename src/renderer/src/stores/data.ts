@@ -46,7 +46,8 @@ export const useDataStore = defineStore('useDataStore', {
         ia:this.ia,
         tester:this.tester,
         subFunction:this.subFunction,
-        nodes:this.nodes
+        nodes:this.nodes,
+        database:this.database
       }
     }
   }

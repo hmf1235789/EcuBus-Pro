@@ -118,7 +118,9 @@ function addEncode() {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
         inputPattern: /\S+/,
-        inputErrorMessage: 'Name is required'
+        inputErrorMessage: 'Name is required',
+        buttonSize:'small',
+        appendTo: `#win${props.editIndex}`
     }).then(({ value }) => {
         if (!value) return
         
@@ -135,6 +137,7 @@ function addEncode() {
             name: value,
             encodingTypes: []
         }
+        ldfObj.value.signalRep[value] = []
     })
 }
 
@@ -146,7 +149,7 @@ function deleteEncode() {
     ElMessageBox.confirm(
         'Are you sure to delete this encoding type?',
         'Warning',
-        { type: 'warning' }
+        { type: 'warning','buttonSize':'small', appendTo: `#win${props.editIndex}` }
     ).then(() => {
         delete ldfObj.value.signalEncodeTypes[encodeName]
         selectedIndex.value = -1

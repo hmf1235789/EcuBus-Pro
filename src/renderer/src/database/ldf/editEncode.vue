@@ -47,18 +47,13 @@
 
                             <el-form-item>
                                 <el-button type="primary" @click="submitForm" plain>Add Encode</el-button>
+                                <el-button type="danger" @click="deleteEncodeType" plain :disabled="selectedTypeIndex < 0">
+                                    <Icon :icon="deleteIcon" />
+                                </el-button>
                             </el-form-item>
                         </el-form>
                     </div>
                 </div>
-            </template>
-
-            <template #default_operate="{ row }">
-                <el-button-group>
-                    <el-button link type="danger" @click="deleteEncodeType(row)" title="Delete Type">
-                        <Icon :icon="deleteIcon" />
-                    </el-button>
-                </el-button-group>
             </template>
 
             <template #default_details="{ row }">
@@ -143,15 +138,7 @@ const typeGridOptions = computed<VxeGridProps>(() => ({
     },
     columns: [
         { field: 'type', title: 'Type', width: 120 },
-        { field: 'details', title: 'Details', minWidth: 300, slots: { default: 'default_details' } },
-        {
-            field: 'operate',
-            title: 'Operation',
-            align: 'center',
-            width: 80,
-            fixed: 'right',
-            slots: { default: 'default_operate' }
-        }
+        { field: 'details', title: 'Details', minWidth: 300, slots: { default: 'default_details' } }
     ],
     data: modelValue.value.encodingTypes
 }))
@@ -198,7 +185,10 @@ function submitForm() {
     })
 }
 
-function deleteEncodeType(row) {
+function deleteEncodeType() {
+    if (selectedTypeIndex.value < 0) return;
+    
+    const row = modelValue.value.encodingTypes[selectedTypeIndex.value];
     ElMessageBox.confirm(
         'Are you sure to delete this encoding type?',
         'Warning',
@@ -208,10 +198,8 @@ function deleteEncodeType(row) {
             appendTo: `#win${props.editIndex}`
         }
     ).then(() => {
-        const index = modelValue.value.encodingTypes.indexOf(row)
-        if (index > -1) {
-            modelValue.value.encodingTypes.splice(index, 1)
-        }
+        modelValue.value.encodingTypes.splice(selectedTypeIndex.value, 1);
+        selectedTypeIndex.value = -1;
     })
 }
 </script>
