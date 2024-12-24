@@ -41,7 +41,9 @@
                 v-if="editDialogVisible && editingSchedule"
                 v-model="editingSchedule"
                 :edit-index="editIndex"
+                ref="editRef"
                 :ldf="ldfObj"
+                :rules="rules"
             />
         </el-dialog>
     </div>
@@ -51,12 +53,13 @@
 import { ref, computed, inject, Ref, watch, nextTick } from 'vue'
 import { getFrameSize, LDF, SchTable } from '../ldfParse'
 import { VxeGrid, VxeGridProps } from 'vxe-table'
-import { ElMessageBox, ElNotification } from 'element-plus'
+import { ElMessageBox, ElNotification, FormRules } from 'element-plus'
 import { Icon } from '@iconify/vue'
 import fileOpenOutline from '@iconify/icons-material-symbols/file-open-outline'
 import editIcon from '@iconify/icons-material-symbols/edit-square-outline'
 import deleteIcon from '@iconify/icons-material-symbols/delete'
 import EditSchedule from './editSchedule.vue'
+import Schema from 'async-validator'
 
 const props = defineProps<{
     editIndex: string
@@ -75,7 +78,158 @@ const xGrid = ref()
 
 // 添加深度监听调度表变化
 
+// Add validation rules
+const rules: FormRules<SchTable> = {
+    name: [
+        {
+            validator: (rule: any, value: any, callback: any) => {
+                if (!value) {
+                    callback(new Error('Schedule name is required'))
+                    return
+                }
+                // Check for duplicate names
+                const count = ldfObj.value.schTables.filter(t => t.name === value).length
+                if (count > 1) {
+                    callback(new Error('Schedule table name must be unique'))
+                    return
+                }
+                callback()
+            }
+        }
+    ],
+    entries: [
+        {
+            validator: (rule: any, value: any, callback: any) => {
+                if (!Array.isArray(value)) {
+                    callback(new Error('Entries must be an array'))
+                    return
+                }
+                
+                for (const entry of value) {
+                    // 计算frame最大传输时间
+                    let maxFrameTime = 0
+                    if (entry.isCommand) {
+                        // 命令帧固定8字节
+                        const bytes = 8
+                        const baseTime = (bytes * 10 + 44) * (1 / ldfObj.value.global.LIN_speed)
+                        maxFrameTime = baseTime * 1.4 // 考虑1.4倍的容差
+                    } else {
+                        // 获取frame大小并计算最大传输时间
+                        const bytes = getFrameSize(ldfObj.value, entry.name)
+                        const baseTime = (bytes * 10 + 44) * (1 / ldfObj.value.global.LIN_speed)
+                        maxFrameTime = baseTime * 1.4 // 考虑1.4倍的容差
+                    }
 
+                    // Validate delay time - 必须大于frame的最大传输时间
+                    if (typeof entry.delay !== 'number' || entry.delay <= 0) {
+                        callback(new Error(`Invalid delay time in entry ${entry.name}`))
+                        return
+                    }
+                    
+                    if (entry.delay < maxFrameTime) {
+                        callback(new Error(`Delay time (${entry.delay}ms) for ${entry.name} must be greater than maximum frame time (${maxFrameTime.toFixed(2)}ms)`))
+                        return
+                    }
+
+                    if (entry.isCommand) {
+                        // Validate command structure
+                        if (!validateCommand(entry)) {
+                            callback(new Error(`Invalid command structure in entry ${entry.name}`))
+                            return
+                        }
+                    } else {
+                        // Validate frame reference
+                        if (!validateFrame(entry.name)) {
+                            callback(new Error(`Invalid frame reference: ${entry.name}`))
+                            return
+                        }
+                    }
+                }
+                callback()
+            }
+        }
+    ]
+}
+
+function validateCommand(entry: any): boolean {
+    // Validate specific command types
+    switch (entry.name) {
+        case 'AssignNAD':
+            return !!entry.AssignNAD?.nodeName
+        case 'ConditionalChangeNAD':
+            return validateConditionalChangeNAD(entry.ConditionalChangeNAD)
+        case 'DataDump':
+            return validateDataDump(entry.DataDump)
+        // Add more command validations as needed
+        default:
+            return true
+    }
+}
+
+function validateConditionalChangeNAD(cmd: any): boolean {
+    return cmd &&
+        typeof cmd.nad === 'number' &&
+        typeof cmd.id === 'number' &&
+        typeof cmd.byte === 'number' &&
+        typeof cmd.mask === 'number' &&
+        typeof cmd.inv === 'number' &&
+        typeof cmd.newNad === 'number'
+}
+
+function validateDataDump(cmd: any): boolean {
+    return cmd &&
+        cmd.nodeName &&
+        typeof cmd.D1 === 'number' &&
+        typeof cmd.D2 === 'number' &&
+        typeof cmd.D3 === 'number' &&
+        typeof cmd.D4 === 'number' &&
+        typeof cmd.D5 === 'number'
+}
+
+function validateFrame(frameName: string): boolean {
+    return frameName in ldfObj.value.frames ||
+        frameName in ldfObj.value.eventTriggeredFrames ||
+        frameName in ldfObj.value.sporadicFrames ||
+        ['DiagnosticMasterReq', 'DiagnosticSlaveResp'].includes(frameName)
+}
+
+const ErrorList = ref<boolean[]>([])
+const editRef=ref()
+async function validate() {
+    const errors: {
+        field: string,
+        message: string
+    }[] = []
+    
+    ErrorList.value = []
+    
+    for (const schedule of ldfObj.value.schTables) {
+        const schema = new Schema(rules as any)
+        try {
+            await schema.validate(schedule)
+            ErrorList.value.push(false)
+        } catch (e: any) {
+            ErrorList.value.push(true)
+            for (const key in e.fields) {
+                for (const error of e.fields[key]) {
+                    errors.push({
+                        field: `Schedule ${schedule.name}: ${key}`,
+                        message: error.message
+                    })
+                }
+            }
+        }
+    }
+    editRef.value?.validate()
+    if (errors.length > 0) {
+        throw {
+            tab: 'Schedule Tables',
+            error: errors,
+        }
+    }
+}
+
+// Update gridOptions to show error highlighting
 const gridOptions = computed<VxeGridProps<SchTable>>(() => ({
     border: true,
     size: 'mini',
@@ -102,7 +256,10 @@ const gridOptions = computed<VxeGridProps<SchTable>>(() => ({
             slots: { default: 'default_totalTime' }
         },
     ],
-    data: ldfObj.value.schTables
+    data: ldfObj.value.schTables,
+    rowClassName: ({ rowIndex }) => {
+        return ErrorList.value[rowIndex] ? 'ldf-danger-row' : ''
+    },
 }))
 
 function cellClick({ rowIndex }) {
@@ -120,6 +277,8 @@ function addSch() {
         
         if (ldfObj.value.schTables.some(t => t.name === value)) {
             ElNotification({
+                offset: 50,
+                appendTo: `#win${props.editIndex}`,
                 title: 'Error',
                 message: 'Schedule table name already exists',
                 type: 'error'
@@ -129,6 +288,8 @@ function addSch() {
 
         if (['MASTERREQ', 'SLAVERESP'].includes(value.toUpperCase())) {
             ElNotification({
+                offset: 50,
+                appendTo: `#win${props.editIndex}`,
                 title: 'Error',
                 message: `Name ${value} is reserved`,
                 type: 'error'
@@ -207,4 +368,13 @@ function calculateScheduleStats(schedule: SchTable) {
         totalTime: totalTime.toFixed(2)
     }
 }
+
+defineExpose({ validate })
 </script>
+
+<style>
+.ldf-danger-row {
+    color: var(--el-color-danger);
+    font-weight: bold;
+}
+</style>

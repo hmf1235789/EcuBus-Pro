@@ -46,12 +46,13 @@
 import { ref, computed, inject, Ref } from 'vue'
 import { LDF, SignalEncodeType } from '../ldfParse'
 import { VxeGrid, VxeGridProps } from 'vxe-table'
-import { ElMessageBox, ElNotification } from 'element-plus'
+import { ElMessageBox, ElNotification, FormRules } from 'element-plus'
 import { Icon } from '@iconify/vue'
 import fileOpenOutline from '@iconify/icons-material-symbols/file-open-outline'
 import editIcon from '@iconify/icons-material-symbols/edit-square-outline'
 import deleteIcon from '@iconify/icons-material-symbols/delete'
 import EditEncode from './editEncode.vue'
+import Schema from 'async-validator'
 
 const props = defineProps<{
     editIndex: string
@@ -85,6 +86,110 @@ function getEncodingTypeDetails(encode: SignalEncodeType) {
     })
     return details.join(', ')
 }
+
+// 添加验证规则
+const rules: FormRules<SignalEncodeType> = {
+    name: [{
+        required: true,
+        message: 'Name is required',
+        validator: (rule: any, value: any, callback: any) => {
+            if (!value) {
+                callback(new Error('Name is required'))
+                return
+            }
+            // 检查名称唯一性
+            if (Object.keys(ldfObj.value.signalEncodeTypes).filter(name => name === value).length > 1) {
+                callback(new Error('Encoding type name must be unique'))
+                return
+            }
+            callback()
+        }
+    }],
+    encodingTypes: [{
+        type: 'array',
+        required: true,
+        message: 'At least one encoding type is required',
+        validator: (rule: any, value: any, callback: any) => {
+            if (!Array.isArray(value) || value.length === 0) {
+                callback(new Error('At least one encoding type is required'))
+                return
+            }
+
+            // 验证每个编码类型的值
+            for (const encoding of value) {
+                if (!['logicalValue', 'physicalValue', 'bcdValue', 'asciiValue'].includes(encoding.type)) {
+                    callback(new Error('Invalid encoding type'))
+                    return
+                }
+
+                // 验证logical value
+                if (encoding.type === 'logicalValue') {
+                    if (!encoding.logicalValue || 
+                        typeof encoding.logicalValue.signalValue !== 'number') {
+                        callback(new Error('Invalid logical value'))
+                        return
+                    }
+                }
+
+                // 验证physical value
+                if (encoding.type === 'physicalValue') {
+                    if (!encoding.physicalValue ||
+                        typeof encoding.physicalValue.minValue !== 'number' ||
+                        typeof encoding.physicalValue.maxValue !== 'number' ||
+                        typeof encoding.physicalValue.scale !== 'number' ||
+                        typeof encoding.physicalValue.offset !== 'number' ||
+                        encoding.physicalValue.minValue > encoding.physicalValue.maxValue) {
+                        callback(new Error('Invalid physical value range'))
+                        return
+                    }
+                }
+            }
+            callback()
+        }
+    }]
+}
+
+// 添加错误列表
+const ErrorList = ref<boolean[]>([])
+
+// 修改validate函数
+async function validate() {
+    const errors: {
+        field: string,
+        message: string
+    }[] = []
+    
+    ErrorList.value = []
+    
+    for (const encodeName of Object.keys(ldfObj.value.signalEncodeTypes)) {
+        const encode = ldfObj.value.signalEncodeTypes[encodeName]
+        const schema = new Schema(rules as any)
+        try {
+            await schema.validate(encode)
+            ErrorList.value.push(false)
+        } catch (e: any) {
+            ErrorList.value.push(true)
+            for (const key in e.fields) {
+                for (const error of e.fields[key]) {
+                    errors.push({
+                        field: `Encoding ${encodeName}: ${key}`,
+                        message: error.message
+                    })
+                }
+            }
+        }
+    }
+
+    if (errors.length > 0) {
+        throw {
+            tab: 'Signal Encoding',
+            error: errors
+        }
+    }
+}
+
+// 修改grid options添加错误样式
+defineExpose({ validate })
 
 const gridOptions = computed<VxeGridProps<SignalEncodeType>>(() => ({
     border: true,
@@ -126,6 +231,8 @@ function addEncode() {
         
         if (value in ldfObj.value.signalEncodeTypes) {
             ElNotification({
+                offset: 50,
+                appendTo: `#win${props.editIndex}`,
                 title: 'Error',
                 message: 'Encoding type name already exists',
                 type: 'error'
@@ -152,6 +259,7 @@ function deleteEncode() {
         { type: 'warning','buttonSize':'small', appendTo: `#win${props.editIndex}` }
     ).then(() => {
         delete ldfObj.value.signalEncodeTypes[encodeName]
+        delete ldfObj.value.signalRep[encodeName]
         selectedIndex.value = -1
     })
 }

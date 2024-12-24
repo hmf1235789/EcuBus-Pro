@@ -225,8 +225,8 @@ const rules: FormRules<NodeAttrDef> = {
         }
     ],
     fault_state_signals: [
-        { type: 'array', required: true, message: 'Please select at least one fault state signal', },
         {
+            type: 'array',
             validator: (rule: any, value: any, callback: any) => {
                 if (!Array.isArray(value)) {
                     callback(new Error('Invalid signal selection'))
@@ -266,7 +266,6 @@ const rules: FormRules<NodeAttrDef> = {
                     return
                 }
                 const validFrames = getConfigFrames(ldfObj.value, editNodeName1)
-                console.log('validFrames', validFrames)
                 if (value.some(frame => !validFrames.includes(frame))) {
                     callback(new Error('One or more selected frames are invalid'))
                 } else {

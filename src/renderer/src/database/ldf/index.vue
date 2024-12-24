@@ -2,16 +2,22 @@
     <div>
         <el-tabs class="ldfTabs" type="card" v-model="editableTabsValue" addable>
             <template #add-icon>
+                <el-tooltip  effect="light" content="Delete Database" placement="bottom"
+                    :show-after="1000">
+                    <el-button type="info"  link @click="deleteDatabase">
+                        <Icon :icon="deleteIcon" />
+                    </el-button>
+                </el-tooltip>
                 <el-tooltip v-if="errorList.length == 0" effect="light" content="Save Database" placement="bottom"
                     :show-after="1000">
-                    <el-button type="success" size="small" link @click="saveDataBase">
+                    <el-button type="success"  link @click="saveDataBase">
                         <Icon :icon="saveIcon" />
                     </el-button>
                 </el-tooltip>
                 <el-tooltip v-else effect="light" content="Fix errors to save the database" placement="bottom"
                     :show-after="1000">
 
-                    <el-button type="danger" size="small" link @click="handleTabSwitch('General')">
+                    <el-button type="danger"  link  @click="handleTabSwitch('General')">
                         <Icon :icon="saveIcon" />
                     </el-button>
 
@@ -55,7 +61,7 @@
                 <Encode v-model="ldfObj" ref="EncodeRef" :edit-index="props.editIndex" />
             </el-tab-pane>
             <el-tab-pane name="LDF File" label="LDF File">
-                <File :ldf-obj="ldf" :edit-index="props.editIndex" />
+                <File :ldf-obj="ldfObj" :edit-index="props.editIndex" />
             </el-tab-pane>
         </el-tabs>
     </div>
@@ -69,10 +75,11 @@ import Node from "./node.vue";
 import Signal from "./signal.vue";
 import { LDF } from "../ldfParse";
 import saveIcon from '@iconify/icons-material-symbols/save'
+import deleteIcon from '@iconify/icons-material-symbols/delete'
 import { Icon } from '@iconify/vue'
 import { Layout } from "@r/views/uds/layout";
 import { useDataStore } from "@r/stores/data";
-import { ElMessage, ElNotification } from "element-plus";
+import { ElMessage, ElMessageBox, ElNotification } from "element-plus";
 import { assign, cloneDeep } from "lodash";
 import Frame from "./frame.vue";
 import Sch from "./sch.vue";
@@ -96,7 +103,7 @@ const editableTabsValue = ref('General')
 provide('height', h)
 const database = useDataStore()
 
-const ldfObj = ref(cloneDeep(props.ldf))
+const ldfObj = ref<LDF>(cloneDeep(props.ldf))
 
 
 const existed = computed(() => {
@@ -157,6 +164,8 @@ const errorGridOptions = computed<VxeGridProps>(() => ({
 
 const SignalRef = ref()
 const FrameRef = ref()
+const SchRef=ref()
+const EncodeRef=ref()
 async function valid() {
     const list: Promise<void>[] = []
 
@@ -164,6 +173,8 @@ async function valid() {
     list.push(nodeRef.value.validate())
     list.push(SignalRef.value.validate())
     list.push(FrameRef.value.validate())
+    list.push(SchRef.value.validate())
+    list.push(EncodeRef.value.validate())
     const result = await Promise.allSettled(list)
     errorList.value = []
     for (const [index, r] of result.entries()) {
@@ -197,6 +208,21 @@ async function valid() {
     }
 }
 
+
+function deleteDatabase(){
+    ElMessageBox.confirm('Are you sure you want to delete this database?', 'Warning', {
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel',
+        buttonSize: 'small',
+        appendTo: `#win${props.editIndex}`,
+        type: 'warning'
+    }).then(() => {
+        database.$patch(() => {
+            delete database.database.lin[props.editIndex]
+        })
+        layout.removeWin(props.editIndex,true)
+    }).catch(null)
+}
 function saveDataBase() {
     valid().then(() => {
         database.$patch(() => {
@@ -230,6 +256,8 @@ onMounted(() => {
     // Add your onMounted logic here
     if (!existed.value) {
         layout.setWinModified(props.editIndex, true)
+    }else{
+        ldfObj.value=cloneDeep(database.database.lin[props.editIndex])
     }
     valid().catch(null)
 });
@@ -245,6 +273,10 @@ onMounted(() => {
     .el-tabs__header {
 
         margin-bottom: 0px !important;
+    }
+    .el-tabs__new-tab{
+        width: 60px!important;
+        cursor: default !important;
     }
 
 }

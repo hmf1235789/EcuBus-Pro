@@ -2,64 +2,50 @@
     <div :id="tableId">
         <VxeGrid ref="xGrid" v-bind="gridOptions" class="signalTable" @menu-click="menuClick" @cell-click="ceilClick">
             <template #toolbar>
-                <div style="justify-content: flex-start;display: flex;align-items: center;gap:8px;margin-left: 5px;margin-bottom: 5px;">
+                <div
+                    style="justify-content: flex-start;display: flex;align-items: center;gap:8px;margin-left: 5px;margin-bottom: 5px;">
                     <el-button-group>
                         <el-tooltip effect="light" content="Add Signal" placement="bottom" :show-after="1000">
                             <el-button link @click="addNewSignal">
                                 <Icon :icon="fileOpenOutline" style="font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
-                      
+
                         <el-tooltip effect="light" content="Edit Signal" placement="bottom" :show-after="1000">
                             <el-button link type="success" @click="editSignal" :disabled="popoverIndex < 0">
                                 <Icon :icon="editIcon" style="font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
                         <el-tooltip effect="light" content="Delete Signal" placement="bottom" :show-after="1000">
-                            <el-button link type="danger" @click="deleteSignal"
-                                :disabled="popoverIndex < 0">
+                            <el-button link type="danger" @click="deleteSignal" :disabled="popoverIndex < 0">
                                 <Icon :icon="deleteIcon" style="font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
                     </el-button-group>
-                    
+
                     <el-divider direction="vertical" />
-                    
+
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <span :class="{
-                            'ldf-danger-row': errors.includes('id')
+                            'ldf-danger-row': idHasError
                         }">Frame ID:</span>
-                        <el-input 
-                            v-model="frameId" 
-                            style="width: 100px"
-                            size="small"
-                            @input="updateFrameId"
-                            placeholder="Hex"
-                        />
+                        <el-input v-model="frameId" style="width: 100px" size="small" @input="updateFrameId"
+                            placeholder="Hex" />
                     </div>
-                    
+
                     <el-divider direction="vertical" />
-                    
+
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <span :class="{
-                            'ldf-danger-row': errors.includes('frameSize')
+                            'ldf-danger-row': frameSizeHasError
                         }">Frame Size:</span>
-                        <el-input-number
-                            v-model="frame.frameSize"
-                            :min="1"
-                            :max="8"
-                            size="small"
-                            style="width: 100px"
-                        />
+                        <el-input-number v-model="frame.frameSize" :min="1" :max="8" size="small"
+                            style="width: 100px" />
                     </div>
-                    
+
                     <el-divider direction="vertical" />
-                    
-                    <el-checkbox 
-                        v-model="autoUpdateOffset"
-                        label="Auto Update Offset"
-                        size="small"
-                    />
+
+                    <el-checkbox v-model="autoUpdateOffset" label="Auto Update Offset" size="small" />
                 </div>
             </template>
             <template #default_name="{ row }">
@@ -89,21 +75,12 @@
             <template #edit_name="{ row }">
                 <el-select v-model="row.name" size="small" style="width: 100%;"
                     @change="(val) => handleSignalChange(row, val)">
-                    <el-option v-for="key in availableSignals" :value="key" :key="key" 
-                        :label="key"></el-option>
+                    <el-option v-for="key in availableSignals" :value="key" :key="key" :label="key"></el-option>
                 </el-select>
             </template>
             <template #edit_offset="{ row }">
-                <el-input-number 
-                    v-model="row.offset" 
-                    size="small" 
-                    style="width: 100%;" 
-                    :min="getMinOffset(row)"
-                 
-                    :step="1" 
-                    controls-position="right" 
-                  
-                />
+                <el-input-number v-model="row.offset" size="small" style="width: 100%;" :min="getMinOffset(row)"
+                    :step="1" controls-position="right" />
             </template>
             <template #default_drag>
                 <el-icon :id="'frameDragBtn' + editIndex" class="drag-btn" @mouseenter="rowDrop">
@@ -111,7 +88,7 @@
                 </el-icon>
             </template>
         </VxeGrid>
-      
+
     </div>
 </template>
 
@@ -133,14 +110,38 @@ import Schema from 'async-validator';
 
 const props = defineProps<{
     editIndex: string
-    ldf:LDF
-    rules:FormRules
+    ldf: LDF
+    rules: FormRules
 }>();
 
 const frame = defineModel<Frame>({
     required: true
 })
 
+const frameSizeHasError=computed(()=>{
+    for(const error of errors.value){
+        const ea=error.split(' ')
+      
+        const index=ea.indexOf('Frame')
+
+        if(index!==-1&&ea[index+1]==='size'){
+            return true
+        }
+      
+    }
+    return false
+})
+const idHasError=computed(()=>{
+    for(const error of errors.value){
+        const ea=error.split(' ')
+            const index=ea.indexOf('Frame')
+        if(index!==-1&&ea[index+1]==='ID'){
+            return true
+        }
+        
+    }
+    return false
+})
 
 interface FrameSignalItem {
     name: string
@@ -193,15 +194,15 @@ function addNewSignal() {
             }, () => {
                 const slist: any[] = []
                 for (const s of availableSignals.value) {
-                  
-                        slist.push(
-                            h(ElOption, {
-                                value: s,
-                                key: s,
-                                label: s
-                            })
-                        )
-                    
+
+                    slist.push(
+                        h(ElOption, {
+                            value: s,
+                            key: s,
+                            label: s
+                        })
+                    )
+
                 }
                 return slist
             }),
@@ -210,13 +211,13 @@ function addNewSignal() {
         cancelButtonText: 'Cancel',
     }).then(() => {
         if (index.value) {
-           
-                frame.value.signals.push({
-                    name: index.value,
-                    offset: 0
-                })
-                autoUpdateOffset1()
-            
+
+            frame.value.signals.push({
+                name: index.value,
+                offset: 0
+            })
+            autoUpdateOffset1()
+
         }
     }).catch(() => {
         null
@@ -226,20 +227,20 @@ function addNewSignal() {
 // 修改自动更新函数
 function autoUpdateOffset1() {
     if (!autoUpdateOffset.value) return
-    
+
     for (const [index, s] of frame.value.signals.entries()) {
-                if (s.name in props.ldf.signals) {
-                    s.offset = index == 0 ? frame.value.signals[0].offset : frame.value.signals[index - 1].offset + props.ldf.signals[frame.value.signals[index - 1].name].signalSizeBits
-                }
-            }
-            //frameSize update
-            let frameSizeBits = frame.value.signals.length > 0 ? frame.value.signals[0].offset : 0
-            for (const s of frame.value.signals) {
-                if (s.name in props.ldf.signals) {
-                    frameSizeBits += props.ldf.signals[s.name].signalSizeBits
-                }
-            }
-            frame.value.frameSize = Math.ceil(frameSizeBits / 8)
+        if (s.name in props.ldf.signals) {
+            s.offset = index == 0 ? frame.value.signals[0].offset : frame.value.signals[index - 1].offset + props.ldf.signals[frame.value.signals[index - 1].name].signalSizeBits
+        }
+    }
+    //frameSize update
+    let frameSizeBits = frame.value.signals.length > 0 ? frame.value.signals[0].offset : 0
+    for (const s of frame.value.signals) {
+        if (s.name in props.ldf.signals) {
+            frameSizeBits += props.ldf.signals[s.name].signalSizeBits
+        }
+    }
+    frame.value.frameSize = Math.ceil(frameSizeBits / 8)
 }
 
 
@@ -248,7 +249,7 @@ function autoUpdateOffset1() {
 function getMinOffset(currentSignal: FrameSignalItem): number {
     const currentIndex = frame.value.signals.findIndex(s => s.name === currentSignal.name)
     if (currentIndex <= 0) return 0
-    
+
     const prevSignal = frame.value.signals[currentIndex - 1]
     if (prevSignal && prevSignal.name in props.ldf.signals) {
         return prevSignal.offset + props.ldf.signals[prevSignal.name].signalSizeBits
@@ -261,7 +262,7 @@ function getMinOffset(currentSignal: FrameSignalItem): number {
 function editSignal() {
     if (popoverIndex.value >= 0) {
         editNodeName.value = frame.value.signals[popoverIndex.value].name
-        
+
         nextTick(() => {
             // Open edit dialog
             editSig.value = true
@@ -279,7 +280,7 @@ function deleteSignal() {
             appendTo: `#win${props.editIndex}`
         }).then(() => {
             frame.value.signals.splice(popoverIndex.value, 1)
-          
+
             popoverIndex.value = -1
         }).catch(() => {
             //do nothing
@@ -288,7 +289,7 @@ function deleteSignal() {
 }
 
 
-const height=inject('height') as Ref<number>
+const height = inject('height') as Ref<number>
 
 const tableId = computed(() => {
     return `frameTable${props.editIndex}`
@@ -300,7 +301,6 @@ const rowDrop = (event: { preventDefault: () => void }) => {
         const wrapper = document.querySelector(
             `#${tableId.value} tbody`
         ) as HTMLElement
-        console.log(wrapper)
         Sortable.create(wrapper, {
             animation: 300,
             handle: `#frameDragBtn${props.editIndex}`,
@@ -309,11 +309,11 @@ const rowDrop = (event: { preventDefault: () => void }) => {
                 if (newIndex == undefined || oldIndex == undefined) return
                 const currentRow = frame.value.signals.splice(oldIndex, 1)[0]
                 frame.value.signals.splice(newIndex, 0, currentRow)
-                
+
                 // 如果启用了自动更新，则在拖拽后更新偏移量
-                
+
                 autoUpdateOffset1()
-                
+
             }
         })
     })
@@ -326,7 +326,7 @@ const gridOptions = computed<VxeGridProps<FrameSignalItem>>(() => {
         columnConfig: {
             resizable: true,
         },
-        height: height.value/3*2,
+        height: height.value / 3 * 2,
         showOverflow: true,
         scrollY: {
             enabled: true,
@@ -343,12 +343,17 @@ const gridOptions = computed<VxeGridProps<FrameSignalItem>>(() => {
                 return true
             }
         },
-        rowClassName:() => {
-            if(errors.value.includes('signals')){
-                return 'ldf-danger-row'
-            }else{
-                return ''
+        rowClassName: ({ row }) => {
+            let className = ''
+            for (const error of errors.value) {
+                const errArray = error.split(' ');
+                if (errArray.indexOf(row.name) !== -1) {
+                    className = 'ldf-danger-row'
+                    break
+                }
+
             }
+            return className
         },
         toolbarConfig: {
             slots: {
@@ -358,7 +363,7 @@ const gridOptions = computed<VxeGridProps<FrameSignalItem>>(() => {
         align: 'center',
         id: `frameTable${props.editIndex}`,
         columns: [
-           
+
             {
                 field: 'drag',
                 title: '',
@@ -366,23 +371,23 @@ const gridOptions = computed<VxeGridProps<FrameSignalItem>>(() => {
                 resizable: false,
                 slots: { default: 'default_drag' }
             },
-            { 
-                field: 'name', 
-                title: 'Signal', 
+            {
+                field: 'name',
+                title: 'Signal',
                 minWidth: 150,
                 editRender: {},
                 slots: { edit: 'edit_name' }
             },
-            { 
-                field: 'offset', 
-                title: 'Offset [Bit]', 
+            {
+                field: 'offset',
+                title: 'Offset [Bit]',
                 minWidth: 150,
                 editRender: {},
                 slots: { edit: 'edit_offset' }
             },
-            { 
-                field: 'length', 
-                title: 'Length [Bit]', 
+            {
+                field: 'length',
+                title: 'Length [Bit]',
                 width: 150,
                 slots: { default: 'default_length' }
             }
@@ -423,23 +428,22 @@ function menuClick(val: any) {
     // Handle menu click
 }
 
-const errors=ref<string[]>([])
-async function validate(){
-    errors.value=[]
+const errors = ref<string[]>([])
+async function validate() {
+    errors.value = []
     const schema = new Schema(props.rules as any)
     try {
         await schema.validate(frame.value)
     } catch (e: any) {
         for (const key in e.fields) {
-                for (const error of e.fields[key]) {
-                    errors.value.push(key)
-                }
+            for (const error of e.fields[key]) {
+                errors.value.push(error.toString())
             }
+        }
     }
-    console.log(errors.value)
 }
 
-onMounted(()=>{
+onMounted(() => {
     validate()
 })
 
@@ -453,9 +457,11 @@ defineExpose({
 .el-table .danger-row {
     --el-table-tr-bg-color: var(--el-color-danger);
 }
+
 .drag-btn {
     cursor: move;
 }
+
 .el-divider--vertical {
     height: 20px;
     margin: 0 8px;

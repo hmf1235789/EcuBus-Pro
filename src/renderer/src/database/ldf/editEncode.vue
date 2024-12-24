@@ -19,7 +19,9 @@
                             <template v-if="encodeForm.type === 'logicalValue'">
                                 <el-form-item label="Value" prop="logicalValue.signalValue">
                                     <el-input-number v-model="encodeForm.logicalValue.signalValue"
-                                        style="width: 130px" />
+                                        :min="0"
+                                        :max="65535"
+                                        style="width: 130px" controls-position="right"/>
                                 </el-form-item>
                                 <el-form-item label="Description" prop="logicalValue.textInfo">
                                     <el-input v-model="encodeForm.logicalValue.textInfo" style="width: 200px" />
@@ -29,16 +31,22 @@
                             <!-- Physical Value Fields -->
                             <template v-if="encodeForm.type === 'physicalValue'">
                                 <el-form-item label="Min" prop="physicalValue.minValue">
-                                    <el-input-number v-model="encodeForm.physicalValue.minValue" style="width: 130px" />
+                                    <el-input-number v-model="encodeForm.physicalValue.minValue" 
+                                        :min="0"
+                                        :max="65535"
+                                        style="width: 130px" controls-position="right"/>
                                 </el-form-item>
                                 <el-form-item label="Max" prop="physicalValue.maxValue">
-                                    <el-input-number v-model="encodeForm.physicalValue.maxValue" style="width: 130px" />
+                                    <el-input-number v-model="encodeForm.physicalValue.maxValue" 
+                                        :min="0"
+                                        :max="65535"
+                                        style="width: 130px" controls-position="right"/>
                                 </el-form-item>
                                 <el-form-item label="Scale" prop="physicalValue.scale">
-                                    <el-input-number v-model="encodeForm.physicalValue.scale" style="width: 130px" />
+                                    <el-input-number v-model="encodeForm.physicalValue.scale" style="width: 130px" controls-position="right"/>
                                 </el-form-item>
                                 <el-form-item label="Offset" prop="physicalValue.offset">
-                                    <el-input-number v-model="encodeForm.physicalValue.offset" style="width: 130px" />
+                                    <el-input-number v-model="encodeForm.physicalValue.offset" style="width: 130px" controls-position="right"/>
                                 </el-form-item>
                                 <el-form-item label="Description" prop="physicalValue.textInfo">
                                     <el-input v-model="encodeForm.physicalValue.textInfo" style="width: 200px" />
@@ -114,13 +122,59 @@ const formRules = computed<FormRules>(() => ({
     type: [{ required: true, message: 'Please select type', trigger: 'change' }],
     'logicalValue.signalValue': [{
         required: encodeForm.value.type === 'logicalValue',
-        message: 'Please input value',
-        trigger: 'blur'
+        trigger: 'blur',
+        validator: (rule: any, value: any, callback: any) => {
+            if (encodeForm.value.type !== 'logicalValue') {
+                callback()
+                return
+            }
+            // Signal value must be between 0 and 65535 per LIN spec
+            if (typeof value !== 'number' || value < 0 || value > 65535) {
+                callback(new Error('Signal value must be between 0 and 65535'))
+                return
+            }
+            callback()
+        }
     }],
     'physicalValue.minValue': [{
         required: encodeForm.value.type === 'physicalValue',
-        message: 'Please input min value',
-        trigger: 'blur'
+       
+        trigger: 'blur',
+        validator: (rule: any, value: any, callback: any) => {
+            if (encodeForm.value.type !== 'physicalValue') {
+                callback()
+                return
+            }
+            // Min value must be between 0 and 65535 per LIN spec
+            if (typeof value !== 'number' || value < 0 || value > 65535) {
+                callback(new Error('Min value must be between 0 and 65535'))
+                return
+            }
+            callback()
+        }
+    }],
+    'physicalValue.maxValue': [{
+        required: encodeForm.value.type === 'physicalValue',
+       
+        trigger: 'blur',
+        validator: (rule: any, value: any, callback: any) => {
+            if (encodeForm.value.type !== 'physicalValue') {
+                callback()
+                return
+            }
+            console.log(value)
+            // Max value must be between 0 and 65535 per LIN spec
+            if (typeof value !== 'number' || value < 0 || value > 65535) {
+                callback(new Error('Max value must be between 0 and 65535'))
+                return
+            }
+            // Max value must be greater than or equal to min value
+            if (value < encodeForm.value.physicalValue.minValue) {
+                callback(new Error('Max value must be greater than or equal to min value'))
+                return
+            }
+            callback()
+        }
     }],
     // Add other validation rules as needed
 }))

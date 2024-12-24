@@ -221,6 +221,8 @@ function addFrame() {
             }
         } else {
             ElNotification({
+                offset: 50,
+                appendTo: `#win${props.editIndex}`,
                 title: 'Error',
                 message: 'Frame name already exists or empty',
                 type: 'error'
