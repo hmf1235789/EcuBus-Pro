@@ -20,51 +20,76 @@
 
 ## Introduction
 
-`CAN-OE` is the best tool, but it's expensive. We still need another tool to develop our ECU code. EcuBus-Pro is a powerful automotive ECU development tool, it contains the following features:
+EcuBus-Pro is a free and open source alternative to `CAN-OE`, designed for automotive ECU development. Our tool offers:
 
-* open source and free
-* easy of use
-* cross platform
-* add multi USB dongle (PEAK, Kvaser, ZLG, etc)  
-* powerful script ability, based on typescript
-* CLI ability support
+* 🆓 Open source and free
+* 🚀 Intuitive user interface
+* 💻 Cross-platform compatibility
+* 🔌 Multi-vendor USB dongle support (PEAK, Kvaser, ZLG, etc.)
+* 📝 TypeScript-based scripting capabilities
+* ⌨️ Comprehensive CLI support
 
-### Detailed features
+### Key Features
 
-See the User Manual for more detailed features: [User Manual](./docs/um/concept.md)
+See our [User Manual](./docs/um/concept.md) for detailed documentation.
 
-* CAN/CAN-FD
-  * PEAK
-  * Kvaser
-  * ZLG
-  * Simulation
-* DOIP
-  * PC Adapter
-* UDS
-  * Over CAN/CAN-FD
-  * Over DoIP
-* Script
-  * UDS
-  * CAN
-  * KeyBoard
-  * SerialPort
+<div>
+<table style="white-space: nowrap;">
+<thead>
+  <tr>
+    <th>CAN/CAN-FD</th>
+    <th>DOIP</th>
+    <th>UDS</th>
+    <th>Script</th>
+    <th>Database</th>
+  </tr>
+</thead>
+<tbody>
+  <tr style="vertical-align: top;">
+    <td>
+      • PEAK<br>
+      • Kvaser<br>
+      • ZLG<br>
+      • Simulation
+    </td>
+    <td>
+      • PC Adapter
+    </td>
+    <td>
+      • Over CAN/CAN-FD<br>
+      • Over DoIP
+    </td>
+    <td>
+      • UDS<br>
+      • CAN<br>
+      • KeyBoard<br>
+      • SerialPort
+    </td>
+    <td>
+      • LIN LDF (edit and export)
+    </td>
+  </tr>
+</tbody>
+</table>
+</div>
 
-
-### GUI Snapshot
+### Visual Overview
 
 ![base1](./docs/about/base1.gif)
 ---
 ![base1](./docs/about/uds.gif)
 
-### Script Ability
+### Script Capabilities
+Our script engine leverages `Node.js`, enabling you to:
+- Use standard Node.js functions
+- Access EcuBus-Pro's extensive API
+- Automate testing and diagnostics
 
-Script Engine is based on `nodejs`, you can use almost all nodejs functions in your script, Also, we provide  a lot of APIs to interact with EcuBus-Pro, such as:
-![cli](./docs/um/script1.gif)
+![base1](./docs/um/script1.gif)
 
-### CLI Ability
-
-run uds sequence by cli
-![cli](./docs/about/seq.png)
+### Command Line Interface
+Streamline your workflow with CLI support for UDS sequences:
+![base1](./docs/about/seq.png)
 
 ## Thanks
 This project exists thanks to all the people who have contributed:
