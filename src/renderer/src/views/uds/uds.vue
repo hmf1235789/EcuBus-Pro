@@ -534,29 +534,23 @@ async function openDatabase(testerIndex: string) {
     if (file == undefined) {
       return
     }
-    const content = await window.electron.ipcRenderer.invoke('ipc-fs-readFile', file)
-    try {
-      if (type == 'lin') {
-        const result = ldfParse(content)
-        const id = v4()
-        layoutMaster.addWin('ldf', `${id}`, {
-
-          params: {
-            'edit-index': id,
-            'ldf': result,
-          }
-        })
 
 
-      }
+    if (type == 'lin') {
 
-    } catch (e: any) {
-      ElMessageBox.alert('Invalid Database File', 'Error', {
-        confirmButtonText: 'OK',
-        type: 'error',
-        message: e.message
+      const id = v4()
+      layoutMaster.addWin('ldf', `${id}`, {
+
+        params: {
+          'edit-index': id,
+          'ldfFile': file,
+        }
       })
+
+
     }
+
+
 
 
 

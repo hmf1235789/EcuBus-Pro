@@ -65,7 +65,7 @@ export interface NodeAttrDef {
     supplier_id: number,
     function_id: number,
     variant?: number,
-    response_error: string,
+    response_error?: string,
     fault_state_signals?: string[],
     P2_min?: number,
     ST_min?: number,
@@ -263,14 +263,14 @@ const Interger = createToken({ name: "Interger", pattern: /(-?\s*\d+\.\d+|-?0x[a
 // const Interger = createToken({ name: "Interger", pattern: /\b(-?\d+|0x[a-fA-F0-9]+)\b/ })
 const Channel_name = createToken({ name: "Channel_name", pattern: /[C|c]hannel_name\s+/ })
 const Identifier = createToken({ name: "Identifier", pattern: /[a-zA-Z_][a-zA-Z_0-9]*/ })
-const Nodes = createToken({ name: "Nodes", pattern: /[N|n]odes\s+/ })
-const Node_attributes = createToken({ name: "Node_attributes", pattern: /[N|n]ode_attributes\s+/ })
+const Nodes = createToken({ name: "Nodes", pattern: /[N|n]odes\s*/ })
+const Node_attributes = createToken({ name: "Node_attributes", pattern: /[N|n]ode_attributes\s*/ })
 const LCurly = createToken({ name: "LCurly", pattern: /{/ });
 const RCurly = createToken({ name: "RCurly", pattern: /}/ });
-const Comma = createToken({ name: "Comma", pattern: /,\s+/ });
+const Comma = createToken({ name: "Comma", pattern: /,\s*/ });
 const Colon = createToken({ name: "Colon", pattern: /:/ });
-const Master = createToken({ name: "Master", pattern: /[M|m]aster:\s+/ });
-const Slave = createToken({ name: "Slave", pattern: /[S|s]laves:\s+/ });
+const Master = createToken({ name: "Master", pattern: /[M|m]aster:\s*/ });
+const Slave = createToken({ name: "Slave", pattern: /[S|s]laves:\s*/ });
 const MS = createToken({ name: "MS", pattern: /\s+ms/ });
 const DELAY = createToken({ name: "DELAY", pattern: /\s*delay\s+/ });
 const product_id = createToken({ name: "product_id", pattern: /product_id\s+/ });
@@ -280,16 +280,16 @@ const P2_min = createToken({ name: "P2_min", pattern: /P2_min\s+/ });
 const ST_min = createToken({ name: "ST_min", pattern: /ST_min\s+/ });
 const N_As_timeout = createToken({ name: "N_As_timeout", pattern: /N_As_timeout\s+/ });
 const N_Cr_timeout = createToken({ name: "N_Cr_timeout", pattern: /N_Cr_timeout\s+/ });
-const configurable_frames = createToken({ name: "configurable_frames", pattern: /configurable_frames\s+/ });
+const configurable_frames = createToken({ name: "configurable_frames", pattern: /configurable_frames\s*/ });
 const LIN_protocol = createToken({ name: "LIN_protocol", pattern: /LIN_protocol\s+/ });
 const configured_NAD = createToken({ name: "configured_NAD", pattern: /configured_NAD\s+/ });
 const initial_NAD = createToken({ name: "initial_NAD", pattern: /initial_NAD\s+/ });
 const composite = createToken({ name: "composite", pattern: /[C|c]omposite\s+/ });
 const configuration = createToken({ name: "configuration", pattern: /[C|c]onfiguration\s+/ });
-const Signals = createToken({ name: "Signals", pattern: /Signals\s+/ });
+const Signals = createToken({ name: "Signals", pattern: /Signals\s*/ });
 const Diagnostic_signals = createToken({ name: "Diagnostic_signals", pattern: /Diagnostic_signals\s+/ });
 const DiagReq = createToken({ name: "DiagReq", pattern: /(Master|Slave)(Req|Resp)B[0-7]:\s+/ });
-const Frames = createToken({ name: "Frames", pattern: /Frames\s+/ });
+const Frames = createToken({ name: "Frames", pattern: /Frames\s*/ });
 const Signal_groups = createToken({ name: "Signal_groups", pattern: /Signal_groups\s+/ });
 const Sporadic_frames = createToken({ name: "Sporadic_frames", pattern: /Sporadic_frames\s+/ });
 const Event_triggered_frames = createToken({ name: "Event_triggered_frames", pattern: /Event_triggered_frames\s+/ });
@@ -820,10 +820,8 @@ class LdfParser extends CstParser {
         this.CONSUME4(Comma);
         this.CONSUME5(Interger);
         this.CONSUME5(Comma);
-        this.CONSUME6(Interger);
-        this.CONSUME6(Comma);
 
-        this.CONSUME7(Interger);
+        this.CONSUME6(Interger);
         this.CONSUME6(RCurly);
     })
 
@@ -1206,7 +1204,7 @@ class LdfVistor extends visitor {
                 supplier_id: Number((((ctx.product_idClause[index] as CstNode).children.Interger[0]) as IToken).image),
                 function_id: Number((((ctx.product_idClause[index] as CstNode).children.Interger[1]) as IToken).image),
                 variant: (ctx.product_idClause[index] as CstNode).children.Interger[2] ? Number((((ctx.product_idClause[index] as CstNode).children.Interger[2]) as IToken).image) : undefined,
-                response_error: (((ctx.response_errorClause[index] as CstNode).children.Identifier[0]) as IToken).image,
+                response_error: ctx.response_errorClause?(((ctx.response_errorClause[index] as CstNode).children.Identifier[0]) as IToken).image:undefined,
                 fault_state_signals: [...(ctx.fault_state_signalsClause && ctx.fault_state_signalsClause[index]) ? (((ctx.fault_state_signalsClause[index] as CstNode).children.Identifier as IToken[]).map((i) => i.image)) : []],
                 P2_min: (ctx.P2_minClause && ctx.P2_minClause[index]) ? Number((((ctx.P2_minClause[index] as CstNode).children.Interger[0]) as IToken).image) : undefined,
                 ST_min: (ctx.ST_minClause && ctx.ST_minClause[index]) ? Number((((ctx.ST_minClause[index] as CstNode).children.Interger[0]) as IToken).image) : undefined,
@@ -1560,19 +1558,115 @@ export function getFrameSize(ldfObj: LDF, frameName: string): number {
     // if(frameName in ldfObj.value.)
 
 }
-export default function parseInput(text: string){
-    text=text.replace(/\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/gm, '$1').replace(/^\s*\n/gm, ''); // 删除空行
+
+// 添加一个函数来创建行号映射
+function createLineMapping(originalText: string, processedText: string): number[] {
+    const originalLines = originalText.split('\n');
+    const processedLines = processedText.split('\n');
+    const mapping: number[] = [];
+    let originalLineNum = 0;
     
-    const lexingResult = LdfLexer.tokenize(text)
-  
-    // "input" is a setter which will reset the parser's state.
-    parser.input = lexingResult.tokens
-    const vv = new LdfVistor()
-    const cst = parser.ldfParse()
-    if (parser.errors.length > 0) {
-        console.log(parser.errors)
-        throw new Error("sad sad panda, Parsing errors detected")
+    for (let processedLineNum = 0; processedLineNum < processedLines.length; processedLineNum++) {
+        while (originalLineNum < originalLines.length) {
+            const originalLine = originalLines[originalLineNum].trim();
+            const processedLine = processedLines[processedLineNum].trim();
+            
+            if (originalLine === processedLine || 
+                (originalLine.replace(/\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/, '').trim() === processedLine)) {
+                mapping[processedLineNum] = originalLineNum;
+                originalLineNum++;
+                break;
+            }
+            originalLineNum++;
+        }
     }
-    vv.visit(cst)
-    return vv.ldf
+    return mapping;
+}
+
+function formatLexerError(error: any, text: string, originalText: string, lineMapping: number[]): string {
+    const lines = text.split('\n');
+    const originalLines = originalText.split('\n');
+    const lineNumber = error.line - 1;
+    const originalLineNumber = lineMapping[lineNumber];
+    
+    // Get context from original text
+    const contextStart = Math.max(0, originalLineNumber - 3);
+    const contextEnd = Math.min(originalLines.length, originalLineNumber + 4);
+    const contextLines = originalLines.slice(contextStart, contextEnd);
+    
+    const context = contextLines.map((line, idx) => {
+        const currentLineNumber = contextStart + idx + 1;
+        const linePrefix = currentLineNumber === (originalLineNumber + 1) ? '>' : ' ';
+        return `${linePrefix} ${currentLineNumber.toString().padStart(4)}: ${line}`;
+    }).join('\n');
+    
+    const pointer = `     ${' '.repeat(error.column)}^`;
+    const message = `Lexer error at line ${originalLineNumber + 1}, column ${error.column}:
+Context:
+${context}
+${pointer}
+Unexpected character: "${error.message.split("'")[1]}"
+`;
+    return message;
+}
+
+function formatParserError(error: any, text: string, originalText: string, lineMapping: number[]): string {
+    const lines = text.split('\n');
+    const originalLines = originalText.split('\n');
+    const lineNumber = error.token.startLine - 1;
+    const originalLineNumber = lineMapping[lineNumber];
+    
+    const contextStart = Math.max(0, originalLineNumber - 3);
+    const contextEnd = Math.min(originalLines.length, originalLineNumber + 4);
+    const contextLines = originalLines.slice(contextStart, contextEnd);
+    
+    const context = contextLines.map((line, idx) => {
+        const currentLineNumber = contextStart + idx + 1;
+        const linePrefix = currentLineNumber === (originalLineNumber + 1) ? '>' : ' ';
+        return `${linePrefix} ${currentLineNumber.toString().padStart(4)}: ${line}`;
+    }).join('\n');
+    
+    const pointer = `     ${' '.repeat(error.token.startColumn)}^`;
+    const message = `Parser error at line ${originalLineNumber + 1}, column ${error.token.startColumn}:
+Context:
+${context}
+${pointer}
+${error.message}
+Expected one of: ${error.expectedTokens?.join(', ')}`;
+    return message;
+}
+
+export default function parseInput(text: string) {
+    const originalText = text;
+    text = text.replace(/\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/gm, '$1').replace(/^\s*\n/gm, '');
+    const lineMapping = createLineMapping(originalText, text);
+    
+    const lexingResult = LdfLexer.tokenize(text);
+    if (lexingResult.errors.length > 0) {
+        const formattedErrors = lexingResult.errors.map(err => 
+            formatLexerError(err, text, originalText, lineMapping)
+        );
+        throw new Error(`Lexing errors:\n${formattedErrors.join('\n\n')}`);
+    }
+
+    parser.input = lexingResult.tokens;
+    const vv = new LdfVistor();
+
+    try {
+        const cst = parser.ldfParse();
+        if (parser.errors.length > 0) {
+            const formattedErrors = parser.errors.map(err => 
+                formatParserError(err, text, originalText, lineMapping)
+            );
+            throw new Error(`Parsing errors:\n${formattedErrors.join('\n\n')}`);
+        }
+        vv.visit(cst);
+        return vv.ldf;
+    } catch (err) {
+        if (err instanceof Error) {
+            throw err;
+        }
+        // Handle unexpected errors
+        throw new Error(`Unexpected error during parsing: ${err}`);
+    }
 }

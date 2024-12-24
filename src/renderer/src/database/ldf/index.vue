@@ -1,6 +1,6 @@
 <template>
     <div>
-        <el-tabs class="ldfTabs" type="card" v-model="editableTabsValue" addable>
+        <el-tabs class="ldfTabs" type="card" v-model="editableTabsValue" addable v-if="!loading">
             <template #add-icon>
                 <el-tooltip  effect="light" content="Delete Database" placement="bottom"
                     :show-after="1000">
@@ -69,11 +69,11 @@
 
 <script setup lang="ts">
 
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, toRef, inject, provide } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, toRef, inject, provide, Ref } from "vue";
 import General from './general.vue'
 import Node from "./node.vue";
 import Signal from "./signal.vue";
-import { LDF } from "../ldfParse";
+import ldfParse, { LDF } from "../ldfParse";
 import saveIcon from '@iconify/icons-material-symbols/save'
 import deleteIcon from '@iconify/icons-material-symbols/delete'
 import { Icon } from '@iconify/vue'
@@ -91,7 +91,7 @@ import File from "./file.vue";
 const layout = inject('layout') as Layout
 
 const props = defineProps<{
-    ldf: LDF
+    ldfFile: string
     editIndex: string
     height: number
 }>()
@@ -103,7 +103,7 @@ const editableTabsValue = ref('General')
 provide('height', h)
 const database = useDataStore()
 
-const ldfObj = ref<LDF>(cloneDeep(props.ldf))
+const ldfObj = ref<LDF>() as Ref<LDF>
 
 
 const existed = computed(() => {
@@ -252,14 +252,47 @@ watch(ldfObj, (val) => {
     }, 500);
 }, { deep: true })
 
+const loading=ref(true)
 onMounted(() => {
     // Add your onMounted logic here
     if (!existed.value) {
-        layout.setWinModified(props.editIndex, true)
+        window.electron.ipcRenderer.invoke('ipc-fs-readFile', props.ldfFile).then((content: string) => {
+           
+            try{
+                const result = ldfParse(content)
+                ldfObj.value = result
+                loading.value=false
+            }catch(err:any){
+                ElMessageBox.alert('Parse failed', 'Error', {
+                    confirmButtonText: 'OK',
+                    type: 'error',
+                    buttonSize: 'small',
+                    appendTo: `#win${props.editIndex}`,
+                    message: `<pre style="max-height:200px;overflow:auto;width:380px;font-size:12px;line-height:12px">${err.message}</pre>`,
+                    dangerouslyUseHTMLString: true,
+                }).finally(() => {
+                    layout.removeWin(props.editIndex,true)
+                })
+            }
+        }).catch((err) => {
+            
+            ElMessageBox.alert('Parse failed', 'Error', {
+                confirmButtonText: 'OK',
+                type: 'error',
+                buttonSize: 'small',
+                appendTo: `#win${props.editIndex}`,
+                message: err.message
+            }).then(() => {
+                layout.removeWin(props.editIndex,true)
+            }).catch(null)
+          
+        })
+   
     }else{
         ldfObj.value=cloneDeep(database.database.lin[props.editIndex])
+        loading.value=false
     }
-    valid().catch(null)
+    
 });
 
 

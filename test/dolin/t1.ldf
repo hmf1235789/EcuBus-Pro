@@ -1,0 +1,142 @@
+// LIN Description File 
+
+
+
+
+LIN_description_file;
+LIN_protocol_version = "2.1" ;
+LIN_language_version = "2.1" ;
+LIN_speed = 19.2 kbps ;
+
+Nodes{
+       Master:AMP,10.0000 ms, 0.1000 ms ;
+       Slaves:EXV ;
+}
+
+Signals{
+	AMP_EXV_PositionRequest: 16, 0, AMP, EXV ;
+	AMP_EXV_EnableRequest: 1, 0, AMP, EXV ;
+	AMP_EXV_initRequest: 4, 0, AMP, EXV ;
+	EXV_ResponseError: 1, 0, EXV, AMP ;
+	EXV_CurrentInitState: 2, 0, EXV, AMP ;
+	EXV_RunState: 1, 0, EXV, AMP ;
+	EXV_FaultState: 5, 0, EXV, AMP ;
+	EXV_VoltageState: 2, 0, EXV, AMP ;
+	EXV_CurrentPosition: 16, 0, EXV, AMP ;
+	EXV_Temperator: 8, 40, EXV, AMP ;
+	EXV_Voltage: 16, 0, EXV, AMP ;
+	EXV_Version: 8, 0, EXV, AMP ;
+}
+
+Frames{
+	AMP_EXV: 4, AMP, 4{
+		AMP_EXV_PositionRequest, 0;
+		AMP_EXV_EnableRequest, 16;
+		AMP_EXV_initRequest, 24;
+	}
+	EXV_AMP: 3, EXV, 8{
+		EXV_ResponseError, 0;
+		EXV_CurrentInitState, 2;
+		EXV_RunState, 4;
+		EXV_FaultState, 8;
+		EXV_VoltageState, 13;
+		EXV_CurrentPosition, 16;
+		EXV_Temperator, 32;
+		EXV_Voltage, 40;
+		EXV_Version, 56;
+	}
+}
+
+
+
+
+Node_attributes {
+	EXV{
+		LIN_protocol = "2.1" ;
+		configured_NAD = 0x1 ;
+		initial_NAD = 0x1 ;
+		product_id = 0x0, 0x0, 0x28 ;
+		P2_min = 50 ms ;
+		ST_min = 0 ms ;
+		N_As_timeout = 1000 ms ;
+		N_Cr_timeout = 1000 ms ;
+		configurable_frames{
+			EXV_AMP ;
+		}
+	}
+}
+
+Schedule_tables {
+ schedule{
+	AMP_EXV delay 40 ms ;
+	EXV_AMP delay 100 ms ;
+ }
+}
+Signal_encoding_types {
+	AMP_EXV_PositionRequest{
+		physical_value, 0, 500, 1, 0, "Step" ;
+	}
+	AMP_EXV_EnableRequest{
+		logical_value, 0, "EXV_OFF" ;
+		logical_value, 1, "EXV_ON" ;
+	}
+	AMP_EXV_initRequest{
+		logical_value, 0, "NO_RQ" ;
+		logical_value, 1, "START_INIT_SQC" ;
+	}
+	EXV_ResponseError{
+		logical_value, 0, "No Comm Error" ;
+		logical_value, 1, "Comm Error Active" ;
+	}
+	EXV_CurrentInitState{
+		logical_value, 0, "NO_INIT" ;
+		logical_value, 1, "INIT_IN_PROCESS" ;
+		logical_value, 2, "INIT_READY" ;
+		logical_value, 3, "INIT_Error" ;
+	}
+	EXV_RunState{
+		logical_value, 0, "NO_MOVEMENT" ;
+		logical_value, 1, "ACT_MOVING" ;
+	}
+	EXV_FaultState{
+		logical_value, 0, "No Fault" ;
+		logical_value, 1, "COIL_SHRT" ;
+		logical_value, 2, "COIL_OPN" ;
+		logical_value, 3, "OVR_TMP_SHUTDWN" ;
+		logical_value, 4, "STAT_INDET" ;
+		logical_value, 5, "Temperature warning" ;
+		logical_value, 6, "Reserved" ;
+	}
+	EXV_VoltageState{
+		logical_value, 0, "Voltage Range OK" ;
+		logical_value, 1, "Over Voltage" ;
+		logical_value, 2, "Under Voltage" ;
+	}
+	EXV_CurrentPosition{
+		physical_value, 0, 500, 1, 0, "Step" ;
+	}
+	EXV_Temper{
+		physical_value, 0, 240, 1, -40, "℃" ;
+	}
+	EXV_Volt{
+		physical_value, 0, 3000, 0.01, 0, "V" ;
+	}
+	
+	EXV_Version{
+		physical_value, 0, 300, 0.01, 0 ;
+	}
+}
+Signal_representation {
+	AMP_EXV_PositionRequest: AMP_EXV_PositionRequest ;
+	AMP_EXV_EnableRequest: AMP_EXV_EnableRequest ;
+	AMP_EXV_initRequest: AMP_EXV_initRequest ;
+	EXV_ResponseError: EXV_ResponseError ;
+	EXV_CurrentInitState: EXV_CurrentInitState ;
+	EXV_RunState: EXV_RunState ;
+	EXV_FaultState: EXV_FaultState ;
+	EXV_VoltageState: EXV_VoltageState ;
+	EXV_CurrentPosition: EXV_CurrentPosition ;
+	EXV_Temper: EXV_Temperator ;
+	EXV_Volt: EXV_Voltage ;
+	EXV_Version: EXV_Version ;
+}

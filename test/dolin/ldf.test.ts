@@ -27,3 +27,9 @@ test("ldf door",()=>{
     const r=parse(ldf)
     // console.log(r)
 })
+
+test("ldf t1",()=>{test
+    const ldf=fs.readFileSync(path.join(__dirname,'t1.ldf'),'utf-8')
+    const r=parse(ldf)
+    // console.log(r)
+})
