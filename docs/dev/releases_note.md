@@ -1,5 +1,12 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.12
+Changes from v0.8.11 to v0.8.12:
+
+ 
+* [feat]:add LDF database feature
+---
+
 ## v0.8.11
 Changes from v0.8.10 to v0.8.11:
 

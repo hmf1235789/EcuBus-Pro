@@ -70,6 +70,9 @@ export default defineConfig({
           { text: 'Script', link: '/docs/um/script',items:[
             { text: 'Use External Package', link: '/docs/um/scriptSerialPort' },
           ]},
+          { text: 'Database', link: '/docs/um/database',items:[
+            { text: 'LIN LDF', link: '/docs/um/ldf' },
+          ]},
         ]
       },
       {
