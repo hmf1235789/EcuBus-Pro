@@ -91,7 +91,7 @@ import File from "./file.vue";
 const layout = inject('layout') as Layout
 
 const props = defineProps<{
-    ldfFile: string
+    ldfFile?: string
     editIndex: string
     height: number
 }>()

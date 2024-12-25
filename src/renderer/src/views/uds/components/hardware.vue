@@ -2,8 +2,8 @@
     <div class="main" v-loading="loading">
         <div class="left">
             <el-scrollbar :height="h + 'px'">
-                <el-tree ref="treeRef" node-key="id" default-expand-all :data="tData" :expand-on-click-node="false" highlight-current
-                    @node-click="nodeClick">
+                <el-tree ref="treeRef" node-key="id" default-expand-all :data="tData" :expand-on-click-node="false"
+                    highlight-current @node-click="nodeClick">
                     <template #default="{ node, data }">
                         <div class="tree-node">
                             <span :class="{
@@ -12,11 +12,13 @@
                                 treeLabel: true
                             }">{{ node.label }}
                             </span>
-                            <el-button :disabled="globalStart" type="primary" link v-if="data.append" @click.stop="addNewDevice(data)" >
+                            <el-button :disabled="globalStart" type="primary" link v-if="data.append"
+                                @click.stop="addNewDevice(data)">
                                 <Icon class="tree-add" :icon="circlePlusFilled" />
                             </el-button>
 
-                            <el-button :disabled="globalStart" type="danger" link v-else-if="node.parent?.data.append" @click.stop="removeDevice(data.id)" >
+                            <el-button :disabled="globalStart" type="danger" link v-else-if="node.parent?.data.append"
+                                @click.stop="removeDevice(data.id)">
                                 <Icon class="tree-delete" :icon="removeIcon" />
                             </el-button>
 
@@ -28,10 +30,12 @@
         <div class="shift" :id="`${winKey}Shift`" />
         <div class="right">
             <div v-if="activeTree">
-                <canNodeVue v-if="activeTree.type == 'can'" v-model="dataModify"  :index="activeTree.id"
+                <canNodeVue v-if="activeTree.type == 'can'" v-model="dataModify" :index="activeTree.id"
                     :vendor="activeTree.vendor" @change="nodeChange" />
-                <ethNodeVue v-else-if="activeTree.type == 'eth'" v-model="dataModify" :index="activeTree.id" :vendor="activeTree.vendor"
-                    @change="nodeChange" />
+                <ethNodeVue v-else-if="activeTree.type == 'eth'" v-model="dataModify" :index="activeTree.id"
+                    :vendor="activeTree.vendor" @change="nodeChange" />
+                <LinNodeVue v-else-if="activeTree.type == 'lin'" v-model="dataModify" :index="activeTree.id"
+                    :vendor="activeTree.vendor" @change="nodeChange" />
             </div>
         </div>
 
@@ -50,6 +54,7 @@ import canNodeVue from './config/node/canNode.vue'
 import ethNodeVue from './config/node/ethNode.vue'
 import { CanVendor } from 'nodeCan/can'
 import { Layout } from '../layout'
+import LinNodeVue from './config/node/linNode.vue'
 
 const loading = ref(false)
 const activeTree = ref<tree>()
@@ -195,14 +200,14 @@ function addSubTree(vendor: CanVendor, node: tree) {
             })
         }
     }
-    if(vendor=='simulate'){
-        const ethTree:tree={
-            label:'Ethernet',
-            append:true,
-            id:vendor+'Eth',
-            vendor:vendor,
-            type:'eth',
-            children:[]
+    if (vendor == 'simulate') {
+        const ethTree: tree = {
+            label: 'Ethernet',
+            append: true,
+            id: vendor + 'Eth',
+            vendor: vendor,
+            type: 'eth',
+            children: []
         }
         node.children?.push(ethTree)
         for (const [key, value] of Object.entries(devices.devices)) {
@@ -217,13 +222,28 @@ function addSubTree(vendor: CanVendor, node: tree) {
             }
         }
     }
-    // const linTree:tree={
-    //     label:'LIN',
-    //     append:false,
-    //     id:vendor+'LIN',
-    //     type:'lin',
-    //     children:[]
-    // }
+    const linTree: tree = {
+        label: 'LIN',
+        append: true,
+        id: vendor + 'LIN',
+        vendor: vendor,
+        type: 'lin',
+        children: []
+    }
+    if (vendor == 'peak') {
+        node.children?.push(linTree)
+    }
+    for (const [key, value] of Object.entries(devices.devices)) {
+        if (value.type == 'lin' && value.linDevice && value.linDevice.vendor == vendor) {
+            linTree.children?.push({
+                label: value.linDevice.name,
+                append: false,
+                vendor: vendor,
+                id: key,
+                type: 'lin',
+            })
+        }
+    }
     // const ethTree:tree={
     //     label:'Ethernet',
     //     append:false,
@@ -273,7 +293,7 @@ function buildTree() {
     }
     t.push(simulate)
     addSubTree('simulate', simulate)
-   
+
 
     tData.value = t
 }
@@ -282,13 +302,13 @@ const layout = inject('layout') as Layout
 watch(dataModify, (val) => {
     layout.setWinModified(winKey, val)
 })
-const deviceId=toRef(props,'deviceId')
-watch(deviceId,(val)=>{
-    if(val){
+const deviceId = toRef(props, 'deviceId')
+watch(deviceId, (val) => {
+    if (val) {
         const node = treeRef.value?.getNode(val)
-        if(node){
+        if (node) {
             treeRef.value?.setCurrentKey(val)
-            nodeClick(node.data,node)
+            nodeClick(node.data, node)
         }
     }
 })
@@ -296,7 +316,7 @@ onBeforeMount(() => {
     buildTree()
 })
 onMounted(() => {
- 
+
     interact(`#${winKey}Shift`).resizable({
         // resize from all edges and corners
         edges: { left: false, right: true, bottom: false, top: false },
@@ -314,14 +334,14 @@ onMounted(() => {
 
         inertia: true
     })
-    if(deviceId.value){
+    if (deviceId.value) {
         const node = treeRef.value?.getNode(deviceId.value)
-        if(node){
+        if (node) {
             treeRef.value?.setCurrentKey(deviceId.value)
-            nodeClick(node.data,node)
+            nodeClick(node.data, node)
         }
     }
-  
+
 })
 </script>
 <style scoped>

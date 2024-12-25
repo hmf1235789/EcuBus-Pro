@@ -12,7 +12,7 @@
         {{ props.vendor.toLocaleUpperCase() }}
       </el-tag>
     </el-form-item>
-    <el-form-item label="Device" prop="handle">
+    <el-form-item label="Device" prop="handle" required>
       <el-select v-model="data.handle" :loading="deviceLoading" style="width: 300px">
         <el-option v-for="item in deviceList" :key="item.handle" :label="item.label" :value="item.handle"
           :disabled="item.busy" />

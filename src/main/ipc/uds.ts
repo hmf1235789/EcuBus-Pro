@@ -15,6 +15,8 @@ import { EthAddr, EthBaseInfo, EthNode } from '../share/doip'
 import { NodeEthItem } from '../doip/nodeItem'
 import { getCanDevices, openCanDevice } from '../docan/can'
 import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
+import { getLinDevices, openLinDevice } from '../dolin'
+import { LinBase } from '../share/lin'
 
 const libPath = path.dirname(dllLib)
 log.info('dll lib path:', libPath)
@@ -89,6 +91,9 @@ ipcMain.handle('ipc-get-eth-devices', async (event, ...arg) => {
 
 })
 
+ipcMain.handle('ipc-get-lin-devices', async (event, ...arg) => {
+    return getLinDevices(arg[0])
+})
 
 
 
@@ -116,6 +121,7 @@ interface NodeItemA{
 
 const canBaseMap = new Map<string, CanBase>()
 const ethBaseMap = new Map<string, EthBaseInfo>()
+const linBaseMap = new Map<string, LinBase>()
 const udsTesterMap = new Map<string, UDSTesterMain>()
 const nodeMap = new Map<string, NodeItemA>()
 let cantps: CAN_TP[] = []
@@ -129,8 +135,9 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
             const device = devices[key]
             if (device.type == 'can' && device.canDevice) {
                 const canDevice = device.canDevice
-                const canBase = openCanDevice(canDevice)
                 activeKey = canDevice.name
+                const canBase = openCanDevice(canDevice)
+                
                 sysLog.info(`start can device ${canDevice.vendor}-${canDevice.handle} success`)
                 if (canBase) {
                     canBase.event.on('close', (errMsg) => {
@@ -143,7 +150,22 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
                 }
             } else if (device.type == 'eth' && device.ethDevice) {
                 const ethDevice = device.ethDevice
+                activeKey = ethDevice.name
                 ethBaseMap.set(key, ethDevice)
+            } else if (device.type == 'lin' && device.linDevice) {
+                const linDevice = device.linDevice
+                activeKey = linDevice.name
+                const linBase = openLinDevice(linDevice)
+                sysLog.info(`start lin device ${linDevice.vendor}-${linDevice.device.handle} success`)
+                if (linBase) {
+                    linBase.event.on('close', (errMsg) => {
+                        if (errMsg) {
+                            sysLog.error(`${linDevice.vendor}-${linDevice.device.handle} error: ${errMsg}`)
+                            globalStop(true)
+                        }
+                    })
+                    linBaseMap.set(key, linBase)
+                }
             }
         }
     } catch (err: any) {
@@ -305,6 +327,12 @@ export function globalStop(emit = false) {
         sysLog.info(`stop can device ${value.info.vendor}-${value.info.handle}`)
     })
     canBaseMap.clear()
+    
+    // ethBaseMap.clear()
+    linBaseMap.forEach((value) => {
+        value.close()
+    })
+    linBaseMap.clear()
 
     nodeMap.forEach((value) => {
         value.close()

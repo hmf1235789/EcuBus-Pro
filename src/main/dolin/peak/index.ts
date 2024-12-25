@@ -1,4 +1,4 @@
-import { getPID, LIN_ERROR_ID, LinChecksumType, LinDevice, LinDirection, LinError, LinMode, LinMsg } from '../../share/lin'
+import { getPID,LinBase, LIN_ERROR_ID, LinChecksumType, LinDevice, LinDirection, LinError, LinMode, LinMsg } from '../../share/lin'
 import LIN from '../build/Release/peakLin.node'
 import { v4 } from 'uuid'
 import { queue, QueueObject } from 'async'
@@ -24,7 +24,7 @@ function buf2str(buf: Buffer) {
 
 
 
-export class PeakLin {
+export class PeakLin extends LinBase {
     private queue = queue((task: { resolve: any; reject: any; data: LinMsg }, cb) => {
         this._write(task.data).then(task.resolve).catch(task.reject).finally(cb)
     }, 1)
@@ -57,6 +57,7 @@ export class PeakLin {
     }
     log: LinLOG
     constructor(private device: LinDevice, private mode: LinMode, private baud: number) {
+        super()
         this.client = this.registerClient()
         this.connectClient(this.client, device)
         this.initHardware(device, this.client, mode == LinMode.MASTER, baud)

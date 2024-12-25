@@ -26,7 +26,7 @@
         </el-scrollbar>
       </div>
       <div id="networkShift" class="shift" />
-      <div class="right">
+      <div class="right" v-loading="loading">
         <div id="networkGraph" />
       </div>
       <div class="help">
@@ -242,7 +242,10 @@ const treePop = ref<Record<string, any>>({})
 watch([w, h, leftWidth], () => {
   paper?.setDimensions(w.value - leftWidth.value - 5, h.value - 5)
 })
+
+const loading=ref(true)
 onMounted(() => {
+  loading.value=true
   interact('#networkShift').resizable({
     // resize from all edges and corners
     edges: { left: false, right: true, bottom: false, top: false },
@@ -356,13 +359,12 @@ onMounted(() => {
   paper.on('element:mouseleave', function (elementView) {
     elementView.hideTools()
   })
-
-  nextTick(() => {
+  setTimeout(() => {
     buildView()
     initDone.value = true
+    loading.value=false
     // fitPater()
-  })
-
+  }, 1000)
 
 })
 const layout = inject('layout') as Layout

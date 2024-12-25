@@ -12,7 +12,7 @@
         {{ props.vendor.toLocaleUpperCase() }}
       </el-tag>
     </el-form-item>
-    <el-form-item label="Device" prop="handle" required>
+    <el-form-item label="Device" prop="device.handle" required>
       <el-select v-model="data.device.handle" :loading="deviceLoading" style="width: 300px">
         <el-option v-for="item in deviceList" :key="item.handle" :label="item.label" :value="item.handle"
            />
@@ -23,6 +23,29 @@
           </el-button>
         </template>
       </el-select>
+    </el-form-item>
+    
+    <el-divider content-position="left">
+      Lin Parameters
+    </el-divider>
+    <el-form-item label-width="0">
+
+      <el-col :span="12">
+        <el-form-item label="Lin Mode" prop="mode" required>
+          <el-select v-model="data.mode" >
+            <el-option label="Master" value="MASTER" />
+            <el-option label="Slave" value="SLAVE" />
+          </el-select>
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item label="Baud Rate" prop="baudRate">
+          <el-select v-model="data.baudRate" required>
+            <el-option label="9600" value="9600" />
+            <el-option label="19200" value="19200" />
+          </el-select>
+        </el-form-item>
+      </el-col>
     </el-form-item>
 
     
@@ -60,22 +83,27 @@ import { InfoFilled } from "@element-plus/icons-vue";
 import { assign, cloneDeep } from "lodash";
 import { useDataStore } from "@r/stores/data";
 import { VxeGridProps, VxeGrid } from "vxe-table";
-import { EthDevice,EthBaseInfo} from "nodeCan/doip";
 import { CanVendor } from "nodeCan/can";
+import { LinBaseInfo, LinDevice, LinMode } from "nodeCan/lin";
 
 const ruleFormRef = ref<FormInstance>();
 const devices = useDataStore()
 const globalStart = toRef(window, 'globalStart')
-const data = ref<EthBaseInfo>({
-  device:{
+const props = defineProps<{
+  index: string;
+  vendor: CanVendor;
+}>();
+const data = ref<LinBaseInfo>({
+  device: {
     label: '',
     handle: '',
     id: '',
-    detail: undefined
   },
   name: '',
   id: '',
-  vendor: 'simulate'
+  vendor: props.vendor,
+  baudRate: 19200,
+  mode: LinMode.MASTER
 });
 
 
@@ -83,13 +111,13 @@ const data = ref<EthBaseInfo>({
 
 
 
-const deviceList = ref<EthDevice[]>([]);
+const deviceList = ref<LinDevice[]>([]);
 const deviceLoading = ref(false);
 function getDevice(visible: boolean) {
   if (visible) {
     deviceLoading.value = true;
     window.electron.ipcRenderer
-      .invoke("ipc-get-eth-devices", props.vendor.toLocaleUpperCase())
+      .invoke("ipc-get-lin-devices", props.vendor.toLocaleUpperCase())
       .then((res) => {
         deviceList.value = res;
 
@@ -115,7 +143,7 @@ const nameCheck = (rule: any, value: any, callback: any) => {
 };
 
 
-const rules: FormRules<EthBaseInfo> = {
+const rules: FormRules<LinBaseInfo> = {
   "name": [{ required: true, trigger: "blur", validator: nameCheck }],
   "device.handle": [
     {
@@ -127,10 +155,7 @@ const rules: FormRules<EthBaseInfo> = {
  
 };
 
-const props = defineProps<{
-  index: string;
-  vendor: CanVendor;
-}>();
+
 
 const editIndex = ref(props.index);
 
@@ -140,19 +165,19 @@ const onSubmit = () => {
   ruleFormRef.value?.validate((valid) => {
     if (valid) {
       data.value.vendor = props.vendor;
-      data.value.device.detail = deviceList.value.find(item => item.handle == data.value.device.handle)?.detail
+     
       if (editIndex.value == "") {
         const id = v4();
         data.value.id = id;
         devices.devices[id] = {
-          type: 'eth',
-          ethDevice: cloneDeep(data.value),
+          type: 'lin',
+          linDevice: cloneDeep(data.value),
         }
         emits('change', id, data.value.name)
       } else {
         data.value.id = editIndex.value;
       
-        assign(devices.devices[editIndex.value].ethDevice, data.value);
+        assign(devices.devices[editIndex.value].linDevice, data.value);
         emits('change', editIndex.value, data.value.name)
       }
       dataModify.value = false
@@ -169,8 +194,8 @@ onBeforeMount(() => {
   getDevice(true);
   if (editIndex.value) {
     const editData = devices.devices[editIndex.value]
-    if (editData && editData.type == 'eth' && editData.ethDevice) {
-      data.value = cloneDeep(editData.ethDevice);
+    if (editData && editData.type == 'lin' && editData.linDevice) {
+      data.value = cloneDeep(editData.linDevice);
     } else {
       data.value.name = `${props.vendor.toLocaleUpperCase()}_${Object.keys(devices.devices).length}`
       editIndex.value = ''

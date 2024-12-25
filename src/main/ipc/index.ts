@@ -6,6 +6,7 @@ import './examples'
 import './key'
 import { ipcMain, shell } from 'electron'
 import { getCanVersion } from '../docan/can'
+import { getLinVersion } from '../dolin'
 
 
 interface EcuBusPro {
@@ -30,8 +31,14 @@ ipcMain.handle('ipc-get-version', async (event, arg) => {
     for (const v of input.support) {
         for (const vendor of input.vendor[v]) {
             list.push({
-                name: `${vendor} ${v}`,
+                name: `${vendor} can`,
                 version: getCanVersion(vendor)
+            })
+        }
+        for (const vendor of input.vendor[v]) {
+            list.push({
+                name: `${vendor} lin`,
+                version: getLinVersion(vendor)
             })
         }
     }

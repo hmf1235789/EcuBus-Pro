@@ -1,7 +1,9 @@
+import { EventEmitter } from "stream"
+import { CanVendor } from "./can"
 
 
 
-
+// export type LinVendor = 'peak'
 export interface LinDevice {
     label: string
     id: string
@@ -10,6 +12,15 @@ export interface LinDevice {
 }
 
 
+export interface LinBaseInfo {
+    id: string
+    device: LinDevice
+    baudRate: number
+    mode: LinMode
+    vendor: CanVendor
+    name:string
+}
+
 export enum LinDirection {
     SEND,
     RECV,
@@ -17,8 +28,8 @@ export enum LinDirection {
 }
 
 export enum LinMode {
-    MASTER,
-    SLAVE
+    MASTER='MASTER',
+    SLAVE='SLAVE'
 }
 
 
@@ -80,6 +91,17 @@ const LinPidTable =
     0xF0, 0xB1, 0x32, 0x73, 0xB4, 0xF5, 0x76, 0x37,
     0x78, 0x39, 0xBA, 0xFB, 0x3C, 0x7D, 0xFE, 0xBF
 ]
+
+
+export abstract class LinBase {
+    constructor() {
+    }
+    abstract event:EventEmitter
+    static getValidDevices(): LinDevice[]{
+        throw new Error('Method not implemented.')
+    }
+    abstract close(): void
+}
 
 export function getPID(frameId:number){
     return LinPidTable[frameId]
