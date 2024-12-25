@@ -342,6 +342,8 @@ export class udsHardware extends udsCeil {
       name = device.canDevice.name
     }else if(device.type=='eth'&& device.ethDevice ){
       name= device.ethDevice.name
+    }else if(device.type=='lin'&& device.linDevice ){
+      name= device.linDevice.name
     }
     super(
       paper,
@@ -528,6 +530,13 @@ export class UDSView {
       const item=dataBase.ia[id]
       if (item.type == 'can') {
         this.layout.addWin('cani', `${id}_ia`, {
+          name: item.name,
+          params: {
+            'edit-index': id,
+          }
+        })
+      }else if(item.type=='lin'){
+        this.layout.addWin('lini', `${id}_ia`, {
           name: item.name,
           params: {
             'edit-index': id,

@@ -135,6 +135,17 @@ const layoutMap: Record<string, LayoutItem> = {
     component: defineAsyncComponent(() => import('./cani.vue')),
     icon: interIcon
   },
+  lini: {
+    i: 'IA',
+    x: 0,
+    y: 0,
+    w: 700,
+    h: 400,
+    label: 'IA',
+    key: 'IA',
+    component: defineAsyncComponent(() => import('./lini.vue')),
+    icon: interIcon
+  },
   ldf:{
     i: 'LDF',
     x: 0,

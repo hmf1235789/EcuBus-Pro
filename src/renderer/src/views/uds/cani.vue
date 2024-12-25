@@ -1,6 +1,6 @@
 <template>
     <div style="display: relative">
-        <VxeGrid ref="xGrid" v-bind="gridOptions" class="sequenceTable" @menu-click="menuClick" @cell-click="ceilClick">
+        <VxeGrid ref="xGrid" v-bind="gridOptions" class="sequenceTable"  @cell-click="ceilClick">
             <template #default_trigger="{ row, rowIndex }">
                 <span class="lr">
                     <span>{{ row.trigger.type.toUpperCase() }} <span
@@ -396,20 +396,12 @@ interface Option {
 }
 const allDeviceLabel = computed(() => {
     const dd: Option[] = []
-    for (const d of Object.keys(allDevices.value)) {
-        dd.push({ key: d, label: allDevices.value[d].name, disabled: false })
+    for (const d of Object.keys(devices.value)) {
+        dd.push({ key: d, label: devices.value[d].name, disabled: false })
     }
     return dd
 })
-const allDevices = computed(() => {
-    const dd: Record<string, CanBaseInfo> = {}
-    for (const d in dataBase.devices) {
-        if (dataBase.devices[d].type == 'can' && dataBase.devices[d].canDevice) {
-            dd[d] = dataBase.devices[d].canDevice
-        }
-    }
-    return dd
-})
+
 function editConnect() {
     connectV.value = true
 }
@@ -507,17 +499,6 @@ const gridOptions = computed(() => {
 })
 
 
-function menuClick(val: any) {
-    switch (val.menu.code) {
-        case 'copyRaw':
-            {
-                const data = `${val.row.label} ${val.row.message}`
-                navigator.clipboard.writeText(data)
-                break
-            }
-
-    }
-}
 
 const fh = computed(() => Math.ceil(h.value * 2 / 3) + 'px')
 

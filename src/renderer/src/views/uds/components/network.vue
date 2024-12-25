@@ -109,13 +109,30 @@ function addChild(parent: Tree) {
       }
 
     }
-  }else if(parent.type=='eth'){
+  } else if (parent.type == 'eth') {
     for (const key of Object.keys(dataBase.devices)) {
       const item = dataBase.devices[key]
       if (item.type == 'eth' && item.ethDevice) {
         const cc: Tree = {
           type: 'device',
           label: item.ethDevice.name,
+          canAdd: false,
+          children: [],
+          icon: deviceIcon,
+          contextMenu: true,
+          id: key
+        }
+        c.children.push(cc)
+      }
+
+    }
+  } else if (parent.type == 'lin') {
+    for (const key of Object.keys(dataBase.devices)) {
+      const item = dataBase.devices[key]
+      if (item.type == 'lin' && item.linDevice) {
+        const cc: Tree = {
+          type: 'device',
+          label: item.linDevice.name,
           canAdd: false,
           children: [],
           icon: deviceIcon,
@@ -152,10 +169,25 @@ function addChild(parent: Tree) {
         }
         i.children.push(cc)
       }
-
+    }
+  } else if (parent.type == 'lin') {
+    for (const key of Object.keys(dataBase.ia)) {
+      const item = dataBase.ia[key]
+      if (item.type == 'lin') {
+        const cc: Tree = {
+          type: 'interactive',
+          label: item.name,
+          canAdd: false,
+          children: [],
+          icon: interIcon,
+          contextMenu: true,
+          id: key
+        }
+        i.children.push(cc)
+      }
     }
   }
-  if(parent.type!='eth'){
+  if (parent.type != 'eth') {
     parent.children.push(i)
   }
   //node
@@ -216,7 +248,7 @@ const tData = computed(() => {
   addChild(can)
   addChild(lin)
   addChild(eth)
-  return [can, lin,eth]
+  return [can, lin, eth]
 
 })
 
@@ -243,9 +275,9 @@ watch([w, h, leftWidth], () => {
   paper?.setDimensions(w.value - leftWidth.value - 5, h.value - 5)
 })
 
-const loading=ref(true)
+const loading = ref(true)
 onMounted(() => {
-  loading.value=true
+  loading.value = true
   interact('#networkShift').resizable({
     // resize from all edges and corners
     edges: { left: false, right: true, bottom: false, top: false },
@@ -362,7 +394,7 @@ onMounted(() => {
   setTimeout(() => {
     buildView()
     initDone.value = true
-    loading.value=false
+    loading.value = false
     // fitPater()
   }, 1000)
 
@@ -392,8 +424,10 @@ watchEffect(() => {
       udsView.addDevice(key, dataBase.devices[key])
       if (dataBase.devices[key].type == 'can' && dataBase.devices[key].canDevice) {
         udsView.changeName(key, dataBase.devices[key].canDevice.name)
-      }else if(dataBase.devices[key].type == 'eth' && dataBase.devices[key].ethDevice){
+      } else if (dataBase.devices[key].type == 'eth' && dataBase.devices[key].ethDevice) {
         udsView.changeName(key, dataBase.devices[key].ethDevice.name)
+      } else if (dataBase.devices[key].type == 'lin' && dataBase.devices[key].linDevice) {
+        udsView.changeName(key, dataBase.devices[key].linDevice.name)
       }
     }
     //check link
@@ -509,7 +543,7 @@ function removeNode(data: Tree) {
 
 function addNode(type: string, parent?: Tree) {
   // layout.addWin(type, v4())
- 
+
   if (type == 'interactive') {
     const id = v4()
     if (parent?.type == 'can') {
@@ -535,9 +569,30 @@ function addNode(type: string, parent?: Tree) {
         udsView.addLink(id, key)
       }
 
+    } else if (parent?.type == 'lin') {
+      const devices: string[] = []
+      for (const key of Object.keys(dataBase.devices)) {
+        const item = dataBase.devices[key]
+        if (item.type == 'lin' && item.linDevice) {
+          devices.push(key)
+        }
+      }
+
+      dataBase.ia[id] = {
+        name: parent?.label + ' IA',
+        type: 'lin',
+        id: id,
+        devices: devices, // Add an empty array for devices,
+        action: []
+      }
+      udsView.addIg(id, dataBase.ia[id])
+      // add link
+      for (const key of devices) {
+        udsView.addLink(id, key)
+      }
     }
   }
-  else if(type == 'node'){
+  else if (type == 'node') {
     const id = v4()
     if (parent?.type == 'can') {
       const devices: string[] = []
@@ -552,7 +607,7 @@ function addNode(type: string, parent?: Tree) {
         type: 'can',
         id: id,
         channel: devices, // Add an empty array for devices,
-      
+
       }
       udsView.addNode(id, dataBase.nodes[id])
       // add link
@@ -560,7 +615,7 @@ function addNode(type: string, parent?: Tree) {
         udsView.addLink(id, key)
       }
 
-    }else if (parent?.type == 'eth') {
+    } else if (parent?.type == 'eth') {
       const devices: string[] = []
       for (const key of Object.keys(dataBase.devices)) {
         const item = dataBase.devices[key]
@@ -573,7 +628,7 @@ function addNode(type: string, parent?: Tree) {
         type: 'eth',
         id: id,
         channel: devices, // Add an empty array for devices,
-      
+
       }
       udsView.addNode(id, dataBase.nodes[id])
       // add link
@@ -583,7 +638,8 @@ function addNode(type: string, parent?: Tree) {
 
     }
   }
-
+  //fit
+  fitPater()
 }
 
 

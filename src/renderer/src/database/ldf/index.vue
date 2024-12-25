@@ -291,6 +291,9 @@ onMounted(() => {
     }else{
         ldfObj.value=cloneDeep(database.database.lin[props.editIndex])
         loading.value=false
+        nextTick(() => {
+            layout.setWinModified(props.editIndex, false)
+        })
     }
     
 });
