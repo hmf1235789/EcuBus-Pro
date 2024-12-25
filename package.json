@@ -39,6 +39,7 @@
     "build:linux": "npm run build && electron-builder --linux",
     "api": "typedoc --tsconfig tsconfig.worker.json",
     "docan": "cd src/main/docan && npx node-gyp rebuild",
+    "dolin": "cd src/main/dolin && npx node-gyp rebuild",
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview"
