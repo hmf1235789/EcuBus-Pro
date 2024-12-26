@@ -21,6 +21,20 @@ export interface LinBaseInfo {
     name:string
 }
 
+
+export interface LinNode{
+    type:'lin'
+    disabled?:boolean
+    id:string
+    name:string
+    channel:string[]
+    script?:string
+    attachTester?:string
+    database?:string
+    workNode?:string
+  }
+
+
 export enum LinDirection {
     SEND,
     RECV,

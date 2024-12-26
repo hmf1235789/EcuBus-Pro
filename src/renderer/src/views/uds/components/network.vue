@@ -216,6 +216,40 @@ function addChild(parent: Tree) {
       }
 
     }
+  }else if(parent.type=='eth'){
+    for (const key of Object.keys(dataBase.nodes)) {
+      const item = dataBase.nodes[key]
+      if (item.type == 'eth') {
+        const cc: Tree = {
+          type: 'node',
+          label: item.name,
+          canAdd: false,
+          children: [],
+          icon: nodeIcon,
+          contextMenu: true,
+          id: key
+        }
+        n.children.push(cc)
+      }
+
+    }
+  }else if(parent.type=='lin'){
+    for (const key of Object.keys(dataBase.nodes)) {
+      const item = dataBase.nodes[key]
+      if (item.type == 'lin') {
+        const cc: Tree = {
+          type: 'node',
+          label: item.name,
+          canAdd: false,
+          children: [],
+          icon: nodeIcon,
+          contextMenu: true,
+          id: key
+        }
+        n.children.push(cc)
+      }
+
+    }
   }
   parent.children.push(n)
 
@@ -636,6 +670,26 @@ function addNode(type: string, parent?: Tree) {
         udsView.addLink(id, key)
       }
 
+    }else if(parent?.type=='lin'){
+      const devices: string[] = []
+      for (const key of Object.keys(dataBase.devices)) {
+        const item = dataBase.devices[key]
+        if (item.type == 'lin' && item.linDevice) {
+          devices.push(key)
+        }
+      }
+      dataBase.nodes[id] = {
+        name: `Node ${Object.keys(dataBase.nodes).length + 1}`,
+        type: 'lin',
+        id: id,
+        channel: devices, // Add an empty array for devices,
+
+      }
+      udsView.addNode(id, dataBase.nodes[id])
+      // add link
+      for (const key of devices) {
+        udsView.addLink(id, key)
+      }
     }
   }
   //fit

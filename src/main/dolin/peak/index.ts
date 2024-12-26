@@ -4,6 +4,7 @@ import { v4 } from 'uuid'
 import { queue, QueueObject } from 'async'
 import { LinLOG } from 'src/main/log'
 import EventEmitter from 'events'
+import { LDF } from 'src/renderer/src/database/ldfParse'
 
 
 
@@ -37,6 +38,7 @@ export class PeakLin extends LinBase {
         length: number
 
     }> = {}
+    db?:LDF
     event = new EventEmitter()
     pendingPromise?: {
         resolve: (msg: LinMsg, ts: number) => void
@@ -67,24 +69,31 @@ export class PeakLin extends LinBase {
         // this.getEntrys()
         // this.wakeup()
     }
-    getEntrys() {
-        //get entry
-        for (let i = 0; i < 0x3F; i++) {
-            const entry = new LIN.TLINFrameEntry()
-            entry.FrameId = i
-            const result = LIN.LIN_GetFrameEntry(this.device.handle, entry)
-            if (result != 0) {
-                throw new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, undefined, err2Str(result))
-            }
-            this.entryTable[i] = {
-                frameId: entry.FrameId,
-                dir: entry.Direction,
-                checksumType: entry.ChecksumType,
-                length: entry.Length
-            }
+    importDb(db:LDF){
+        if(this.db?.name==db.name){
+            return
         }
-        console.log('entryTable', this.entryTable)
+        this.db=db
     }
+    
+    // getEntrys() {
+    //     //get entry
+    //     for (let i = 0; i < 0x3F; i++) {
+    //         const entry = new LIN.TLINFrameEntry()
+    //         entry.FrameId = i
+    //         const result = LIN.LIN_GetFrameEntry(this.device.handle, entry)
+    //         if (result != 0) {
+    //             throw new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, undefined, err2Str(result))
+    //         }
+    //         this.entryTable[i] = {
+    //             frameId: entry.FrameId,
+    //             dir: entry.Direction,
+    //             checksumType: entry.ChecksumType,
+    //             length: entry.Length
+    //         }
+    //     }
+    //     console.log('entryTable', this.entryTable)
+    // }
     async callback() {
 
         const recvMsg = new LIN.TLINRcvMsg()

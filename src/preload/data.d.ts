@@ -3,7 +3,7 @@ import type { UdsDevice } from 'src/main/share/uds';
 import type { TesterInfo } from 'src/main/share/tester';
 import type { EthNode } from 'src/main/share/doip';
 import type {LDF} from 'src/renderer/src/database/ldfParse'
-
+import type {LinNode} from 'src/main/share/lin'
 
 
 
@@ -28,7 +28,7 @@ export interface LinInter {
     database?: string
 }
 export type Inter = CanInter | LinInter
-export type NodeItem = CanNode | EthNode
+export type NodeItem = CanNode | EthNode | LinNode
 
 export interface DataSet {
     devices: Record<string, UdsDevice>

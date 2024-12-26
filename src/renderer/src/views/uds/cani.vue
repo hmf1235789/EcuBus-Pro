@@ -1,6 +1,6 @@
 <template>
     <div style="display: relative">
-        <VxeGrid ref="xGrid" v-bind="gridOptions" class="sequenceTable"  @cell-click="ceilClick">
+        <VxeGrid ref="xGrid" v-bind="gridOptions" class="sequenceTable" @cell-click="ceilClick">
             <template #default_trigger="{ row, rowIndex }">
                 <span class="lr">
                     <span>{{ row.trigger.type.toUpperCase() }} <span
@@ -338,7 +338,7 @@ const animate = ref(false)
 onKeyStroke(true, (e) => {
     // e.preventDefault()
     if (globalStart.value) {
-       
+
         const key = e.key
         pressedKey.value = key.toLocaleUpperCase()
         for (const [index, v] of dataBase.ia[editIndex.value].action.entries()) {
@@ -355,7 +355,7 @@ onKeyUp(true, () => {
     setTimeout(() => {
         animate.value = false
     }, 200);
-   
+
 })
 function sendFrame(index: number) {
     const frame = dataBase.ia[editIndex.value]?.action[index]
@@ -379,8 +379,8 @@ function sendFrame(index: number) {
 
 const devices = computed(() => {
     const dd: Record<string, CanBaseInfo> = {}
-    for (const d of dataBase.ia[editIndex.value].devices) {
-        if (dataBase.devices[d]&&dataBase.devices[d].type == 'can' && dataBase.devices[d].canDevice) {
+    for (const d in dataBase.devices) {
+        if (dataBase.devices[d] && dataBase.devices[d].type == 'can' && dataBase.devices[d].canDevice) {
             dd[d] = dataBase.devices[d].canDevice
 
 

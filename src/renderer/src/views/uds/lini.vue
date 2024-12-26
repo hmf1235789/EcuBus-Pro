@@ -114,7 +114,7 @@ function ceilClick(val: any) {
 
 const devices = computed(() => {
     const dd: Record<string, LinBaseInfo> = {}
-    for (const d of dataBase.ia[editIndex.value].devices) {
+    for (const d in dataBase.devices) { 
         if (dataBase.devices[d]&&dataBase.devices[d].type == 'lin' && dataBase.devices[d].linDevice) {
             dd[d] = dataBase.devices[d].linDevice
 
@@ -369,7 +369,7 @@ watch(selectedDB, () => {
 </script>
 <style lang="scss">
 .expand-wrapper {
-    padding-left: 46px;
+    padding-left: 45px;
     
 }
 </style>
