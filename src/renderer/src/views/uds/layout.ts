@@ -605,14 +605,14 @@ export class Layout {
       if (options?.name != undefined) {
         if (item.options.name != options.name) {
           item.options.name = options.name
-          this.data.projectDirty = true
+          // this.data.projectDirty = true
         }
 
       }
       if (options?.params) {
         if (!isEqual(item.options.params, options.params)) {
           item.options.params = options.params
-          this.data.projectDirty = true
+          // this.data.projectDirty = true
         }
       }
       if (item.hide && switchHide) {
@@ -669,7 +669,7 @@ export class Layout {
       await nextTick()
       this.layoutInit(id, `#win${id} .uds-draggable`, `#win${id}`)
       this.event.emit('add', this.data.project.wins[id])
-      this.data.projectDirty = true
+      // this.data.projectDirty = true
       this.clickWin(id)
 
     }
@@ -689,7 +689,7 @@ export class Layout {
         delete this.winRef[key]
         delete this.winEl[key]
         delete this.data.project.wins[key]
-        this.data.projectDirty = true
+        // this.data.projectDirty = true
         if(key==this.maxWinId.value){
           this.maxWinId.value = undefined
         }

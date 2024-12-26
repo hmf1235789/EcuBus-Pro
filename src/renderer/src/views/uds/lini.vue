@@ -11,52 +11,43 @@
             </template>
            
           
-           
-            <template #default_channel="{ row }">
-                {{ devices[row.channel]?.name }}
-            </template>
-            <template #edit_channel="{ row }">
-                <el-select v-model="row.channel" size="small" style="width: 100%;" clearable>
-                    <el-option v-for="item, key in devices" :value="key" :key="key" :label="item.name"></el-option>
-
-
-                </el-select>
-            </template>
+         
+        
           
-            <template #default_name="{ row }">
-                <el-input v-model="row.name" size="small" style="width: 100%;" />
-
-            </template>
+          
             <template #toolbar>
-                <div style="justify-content: flex-start;display: flex;align-items: center;gap:2px;margin-left: 5px;">
-                    <el-select v-model="selectedDB" size="small" placeholder="Select Database" clearable style="width: 200px;">
-                        <el-option v-for="(db, key) in databases" :key="key" :label="db.name" :value="key"></el-option>
-                    </el-select>
+                <div style="justify-content: flex-start;display: flex;align-items: center;gap:4px;margin-left: 5px;padding:6px 4px;">
+                    
                     
                     <el-tooltip effect="light" content="Edit Connect" placement="bottom" :show-after="1000">
                         <el-button type="primary" link @click="editConnect">
                             <Icon :icon="linkIcon" style="rotate: -45deg;font-size: 18px;" />
                         </el-button>
                     </el-tooltip>
+                    <el-divider direction="vertical"></el-divider>
+                    <Icon :icon="databaseIcon"/>
+                    <span>Database</span>
+                    <el-select v-model="selectedDB" size="small" placeholder="Select Database" clearable style="width: 200px;">
+                        <el-option v-for="(db, key) in databases" :key="key" :label="db.name" :value="key"></el-option>
+                    </el-select>
                 </div>
             </template>
 
-            <template #default_entries="{ row }">
-                <VxeTable :data="row.entries" :column-config="{ resizable: true }" size="mini" border>
-                    <VxeColumn type="seq" width="50"></VxeColumn>
-                    <VxeColumn field="name" title="Name" width="150"></VxeColumn>
-                    <VxeColumn field="delay" title="Delay (ms)" width="100"></VxeColumn>
-                    <VxeColumn field="isCommand" title="Type" width="100">
-                        <template #default="{ row }">
-                            {{ row.isCommand ? 'Command' : 'Frame' }}
+           
+          
+            <template #expand_content="parent">
+                <div class="expand-wrapper">
+                    <VxeGrid v-bind="childGridOptions" :data="parent.row.childList">
+                        <template #default_active="{ row }">
+                            <el-checkbox 
+                            size="small"
+                                v-model="activeStates[`${parent.row.Table}-${row.index}`]"
+                               
+                            />
+                          
                         </template>
-                    </VxeColumn>
-                    <VxeColumn field="details" title="Details" show-overflow>
-                        <template #default="{ row }">
-                            {{ getEntryDetails(row) }}
-                        </template>
-                    </VxeColumn>
-                </VxeTable>
+                    </VxeGrid>
+                </div>
             </template>
         </VxeGrid>
 
@@ -91,12 +82,13 @@ import sendIcon from '@iconify/icons-material-symbols/send';
 import stopIcon from '@iconify/icons-material-symbols/stop';
 import deleteIcon from '@iconify/icons-material-symbols/delete';
 import editIcon from '@iconify/icons-material-symbols/edit-square-outline';
+import databaseIcon from '@iconify/icons-material-symbols/database';
 import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds';
 import { useDataStore } from '@r/stores/data';
 import { cloneDeep } from 'lodash';
 import { onKeyStroke, onKeyUp } from '@vueuse/core';
 import { LinBaseInfo } from 'nodeCan/lin';
-import { SchTable } from '@r/database/ldfParse'
+import { getFrameSize, LDF, SchTable } from '@r/database/ldfParse'
 import { LinInter } from 'src/preload/data'
 
 const xGrid = ref()
@@ -149,6 +141,21 @@ function editConnect() {
     connectV.value = true
 }
 
+interface Table{
+    Table: string,
+    index: number,
+    FrameId?: string,
+    Active?: boolean,
+    Delay?: number,
+    Type?: string,
+    childList:Table[]
+    length?:number
+}
+
+
+
+// 将 activeStates 改为简单对象
+const activeStates = ref<Record<string,boolean>>({})
 
 const props = defineProps<{
     height: number
@@ -165,37 +172,116 @@ const selectedDB = computed({
     get: () => dataBase.ia[editIndex.value]?.database || '',
     set: (value) => {
         if (dataBase.ia[editIndex.value]) {
-            dataBase.ia[editIndex.value].database = value
+            if(dataBase.ia[editIndex.value].database!=value){
+                dataBase.ia[editIndex.value].database = value
+            }
         }
     }
 })
 
 const databases = computed(() => dataBase.database.lin || {})
-
+// 修改 tableData computed
 const tableData = computed(() => {
+    const tables:Table[] = []
     if (!selectedDB.value || !dataBase.database.lin[selectedDB.value]) {
-        return []
+        return tables
     }
-    return dataBase.database.lin[selectedDB.value].schTables
+    const db = dataBase.database.lin[selectedDB.value]
+    let i = 0;
+
+    for (const table of db.schTables) {
+        const t:Table = {
+            Table: table.name,
+            index: i,
+            childList: [],
+            length: table.entries.length
+        }
+        let totalBytes = 0
+        for (const [index, entry] of table.entries.entries()) {
+            const key=`${table.name}-${index}`
+            const frameSize = entry.isCommand ? 8 : getFrameSize(dataBase.database.lin[selectedDB.value], entry.name)
+            totalBytes += frameSize
+            t.childList.push({
+                Table: entry.name,
+                index: index,
+                FrameId: getFrameId(entry),
+    
+                Delay: entry.delay,
+                Type: getFrameType(entry),
+                childList: [],
+                length: frameSize
+            })
+        }
+     
+        tables.push(t)
+        i++
+    }
+    return tables
 })
 
-function getEntryDetails(entry: any) {
+
+
+// 修改 getFrameId 函数处理 sporadic frames
+function getFrameId(entry: any): string {
     if (entry.isCommand) {
-        // Format command details
-        if (entry.AssignNAD) return `AssignNAD: ${entry.AssignNAD.nodeName}`
-        if (entry.ConditionalChangeNAD) return `ConditionalChangeNAD: NAD=${entry.ConditionalChangeNAD.nad}`
-        if (entry.DataDump) return `DataDump: Node=${entry.DataDump.nodeName}`
-        if (entry.SaveConfiguration) return `SaveConfiguration: ${entry.SaveConfiguration.nodeName}`
-        if (entry.AssignFrameIdRange) return `AssignFrameIdRange: ${entry.AssignFrameIdRange.nodeName}`
-        if (entry.AssignFrameId) return `AssignFrameId: ${entry.AssignFrameId.nodeName} - ${entry.AssignFrameId.frameName}`
-        return entry.name
+        return '0x3C'
     }
-    // For frames, return frame name
-    return entry.name
+    
+    const db = dataBase.database.lin[selectedDB.value]
+    // 检查是否是 sporadic frame
+    if (entry.name in db.sporadicFrames) {
+        // 获取所有关联帧的ID并组合
+        const frameIds = db.sporadicFrames[entry.name].frameNames
+            .map(fname => {
+                const frame = db.frames[fname]
+                return frame ? `0x${frame.id.toString(16).toUpperCase()}` : ''
+            })
+            .filter(id => id !== '')
+        return frameIds.join('|')
+    }
+    
+    // 获取普通帧的ID
+    const frame = db.frames[entry.name]
+    if (frame) {
+        return `0x${frame.id.toString(16).toUpperCase()}`
+    }
+    // 获取事件触发帧的ID
+    const eventFrame = db.eventTriggeredFrames[entry.name]
+    if (eventFrame) {
+        return `0x${eventFrame.frameId.toString(16).toUpperCase()}`
+    }
+    return ''
 }
 
+function getFrameType(entry: any): string {
+    if (entry.isCommand) {
+        return 'Command'
+    }
+    const db = dataBase.database.lin[selectedDB.value]
+    if (entry.name in db.frames) {
+        return 'Unconditional'
+    }
+    if (entry.name in db.eventTriggeredFrames) {
+        return 'Event Triggered'
+    }
+    if (entry.name in db.sporadicFrames) {
+        return 'Sporadic'
+    }
+    return 'Unknown'
+}
+
+// 修改处理激活状态变化的函数
+function handleActiveChange(val: boolean, row: Table) {
+    activeStates.value[row.index] = val
+}
+
+// 修改 gridOptions computed 添加长度列
 const gridOptions = computed(() => {
-    const v: VxeGridProps<SchTable> = {
+    const v: VxeGridProps<Table> = {
+        expandConfig:{
+            expandAll:true,
+            padding:false,
+        },
         border: true,
         size: "mini",
         columnConfig: {
@@ -217,18 +303,41 @@ const gridOptions = computed(() => {
         },
         align: 'center',
         columns: [
-            {
-                type: "seq",
-                width: 50,
-                title: "",
-                align: "center",
-                fixed: "left",
-                resizable: false,
-            },
-            { field: 'name', title: 'Schedule Table', width: 150 },
-            { field: 'entries', title: 'Entries', minWidth: 300, slots: { default: 'default_entries' } },
+            
+            { type: 'expand', width: 46, slots: { content: 'expand_content' }, resizable:false},
+            { field: 'index', title: 'Index', width: 100, resizable:false},
+            { field: 'Table', title: 'Schedule Table', minWidth: 150 },
+           
+            { field: 'length', title: 'Frame Number', minWidth: 120 }
         ],
         data: tableData.value,
+    }
+    return v
+})
+
+// 修改 childGridOptions computed 添加长度列
+const childGridOptions = computed(() => {
+    const v: VxeGridProps<Table> = {
+        border: true,
+        size: "mini",
+        columnConfig: { resizable: true },
+        showOverflow: true,
+        align: 'center',
+        columns: [
+            { field: 'index', title: 'Index', width: 100, resizable:false},
+            { field: 'Table', title: 'Frame', minWidth: 150 },
+            { field: 'FrameId', title: 'Frame ID', minWidth: 150 },
+           
+            { 
+                field: 'Active', 
+                title: 'Active', 
+                width: 80,
+                slots: { default: 'default_active' }
+            },
+            { field: 'Delay', title: 'Delay (ms)', width: 100 },
+            { field: 'length', title: 'Size (bytes)', width: 100 },
+            { field: 'Type', title: 'Type', minWidth: 120 }
+        ]
     }
     return v
 })
@@ -236,71 +345,33 @@ const gridOptions = computed(() => {
 const fh = computed(() => Math.ceil(h.value * 2 / 3) + 'px')
 
 onMounted(() => {
-    null
-
+    //set activeStates all true
+    for (const table of tableData.value) {
+        for (const entry of table.childList) {
+            activeStates.value[`${table.Table}-${entry.index}`] = true
+        }
+    }
 })
 
+// 修改 watch,数据库切换时清空激活状态
+watch(selectedDB, () => {
+    activeStates.value = {}
+    nextTick(()=>{
+        //set activeStates all true
+        for (const table of tableData.value) {
+            for (const entry of table.childList) {
+                activeStates.value[`${table.Table}-${entry.index}`] = true
+            }
+        }
+    })
+})
 
 </script>
 <style lang="scss">
-.canit {
-    --el-transfer-panel-body-height: 200px
-}
-
-.dataI {
-    .el-input-group__prepend {
-        padding: 0 5px !important;
-    }
+.expand-wrapper {
+    padding-left: 46px;
+    
 }
 </style>
 <style scoped>
-.key-box {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background-color: white;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    border-radius: 0.5rem;
-    padding: 2rem;
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.key-text {
-    font-size: 2.25rem;
-    font-weight: bold;
-    color: #1f2937;
-}
-
-.hint-text {
-    color: #6b7280;
-}
-
-/* 动画效果 */
-.bounce-enter-active {
-    animation: bounce-in 0.2s;
-}
-
-.bounce-leave-active {
-    animation: bounce-in 0.2s reverse;
-}
-
-@keyframes bounce-in {
-    0% {
-        transform: scale(0.3);
-        opacity: 0;
-    }
-
-    50% {
-        transform: scale(1.1);
-    }
-
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
 </style>

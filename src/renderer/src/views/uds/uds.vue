@@ -476,6 +476,13 @@ function openIA(testerIndex: string) {
         'edit-index': testerIndex,
       }
     })
+  }else if (item.type == 'lin') {
+    layoutMaster.addWin('lini', `${testerIndex}_ia`, {
+      name: dataBase.ia[testerIndex].name,
+      params: {
+        'edit-index': testerIndex,
+      }
+    })
   }
 }
 function openSequence(testerIndex: string) {

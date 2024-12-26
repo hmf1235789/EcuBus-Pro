@@ -694,6 +694,7 @@ function fitPater() {
 onUnmounted(() => {
   udsView.clear()
   layout.off(`max:network`, fitPater)
+  paper.remove()
 })
 </script>
 <style>
