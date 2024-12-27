@@ -183,8 +183,8 @@ const rules: FormRules<NodeAttrDef> = {
                 callback(new Error('Please enter function ID'))
                 return
             }
-            if (value < 0 || value > 255) {
-                callback(new Error('Function ID must be between 0 and 255'))
+            if (value < 0 || value > 65535) {
+                callback(new Error('Function ID must be between 0 and 65535'))
             } else {
                 callback()
             }

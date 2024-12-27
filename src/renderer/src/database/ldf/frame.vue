@@ -318,26 +318,33 @@ const rules: FormRules<Frame> = {
                     callback(new Error('Duplicate signals are not allowed'))
                     return
                 }
-                // Check signal offsets and sizes
-                let lastOffset = 0
-                for (let i = 0; i < value.length; i++) {
-                    const signal = value[i]
-                    if (signal.offset < lastOffset) {
-                        callback(new Error(`Signal ${signal.name} offset must be greater than or equal to ${lastOffset}`))
-                        return
-                    }
+
+                // Check for signal overlaps and validate signal existence
+                const signalRanges: Array<{ start: number; end: number; name: string }> = []
+                for (const signal of value) {
                     if (!(signal.name in ldfObj.value.signals)) {
                         callback(new Error(`Signal ${signal.name} not found in LDF`))
                         return
                     }
                     const signalSize = ldfObj.value.signals[signal.name].signalSizeBits
-                    lastOffset = signal.offset + signalSize
-                }
-                const frame=ldfObj.value.frames[editFrameName1]
-                // Check if total size exceeds frame size
-                if (lastOffset > frame.frameSize * 8) {
-                    callback(new Error(`Total signal size exceeds frame size`))
-                    return
+                    const start = signal.offset
+                    const end = signal.offset + signalSize - 1
+
+                    // Check for overlaps with other signals
+                    for (const range of signalRanges) {
+                        if (!(end < range.start || start > range.end)) {
+                            callback(new Error(`Signal ${signal.name} overlaps with signal ${range.name}`))
+                            return
+                        }
+                    }
+                    signalRanges.push({ start, end, name: signal.name })
+
+                    const frame = ldfObj.value.frames[editFrameName1]
+                    // Check if signal fits within frame size
+                    if (end >= frame.frameSize * 8) {
+                        callback(new Error(`Signal ${signal.name} exceeds frame size`))
+                        return
+                    }
                 }
                 callback()
             }

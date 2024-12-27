@@ -1193,7 +1193,7 @@ class LdfVistor extends visitor {
             //check empty in configFramesVal
             for(let i=0;i<configFramesVal.length;i++){
                 if(configFramesVal[i]==undefined){
-                    throw new Error(`configurable_frames [${configFramesVal}] must be continuous, and start from 0`)
+                    throw new Error(`configurable_frames of ${t.image}  must be continuous, and start from 0`)
                 }
             }
 
