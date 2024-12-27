@@ -502,9 +502,19 @@ const gridOptions = computed(() => {
 
 const fh = computed(() => Math.ceil(h.value * 2 / 3) + 'px')
 
-onMounted(() => {
-    null
-
+onMounted(async () => {
+    // Get initial period status
+    const periods = await window.electron.ipcRenderer.invoke('ipc-get-can-period')
+    for (const [key, period] of Object.entries(periods)) {
+        console.log(key)
+        const a = key.split('-')
+        const item=a.slice(0,-1).join('-')
+        const index=Number(a[a.length-1])
+        
+        if (item === editIndex.value) {
+            periodTimer.value[index] = true
+        }
+    }
 })
 
 

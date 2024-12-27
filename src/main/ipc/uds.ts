@@ -311,7 +311,8 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
 })
 interface timerType {
     timer: NodeJS.Timeout,
-    socket: CAN_SOCKET
+    socket: CAN_SOCKET,
+    period: number
 }
 const timerMap = new Map<string, timerType>()
 
@@ -498,6 +499,13 @@ ipcMain.on('ipc-send-can', (event, ...arg) => {
     }
 })
 
+ipcMain.handle('ipc-get-can-period', (event, ...arg) => {
+    const info:Record<string,number> = {}
+    timerMap.forEach((value,key)=>{
+        info[key] = value.period
+    })
+    return info
+})
 ipcMain.on('ipc-send-can-period', (event, ...arg) => {
     const id = arg[0] as string
     const ia = arg[1] as CanInterAction
@@ -536,7 +544,8 @@ ipcMain.on('ipc-send-can-period', (event, ...arg) => {
         }, ia.trigger.period || 10)
         timerMap.set(id, {
             timer: t,
-            socket: socket
+            socket: socket,
+            period: ia.trigger.period || 10
         })
 
     } else {
@@ -549,5 +558,6 @@ ipcMain.on('ipc-stop-can-period', (event, ...arg) => {
     if (timer) {
         clearInterval(timer.timer)
         timer.socket.close()
+        timerMap.delete(id)
     }
 })
