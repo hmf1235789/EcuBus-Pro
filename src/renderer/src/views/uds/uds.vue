@@ -49,15 +49,15 @@
             </span>
           </template>
           <div style="display:flex;gap:5px;padding:15px">
-            <div class="grid girdenable" @click="handleSelect(['network'])">
-              <Icon :icon="networkNode" style="font-size: 24px; " />
-              <span>Network</span>
-            </div>
+           
             <div class="grid girdenable" @click="handleSelect(['hardware'])">
               <Icon :icon="deviceIcon" style="font-size: 24px; " />
               <span>Devices</span>
             </div>
-
+            <div class="grid girdenable" @click="handleSelect(['network'])">
+              <Icon :icon="networkNode" style="font-size: 24px; " />
+              <span>Network</span>
+            </div>
             <div class="grid girdenable">
               <Icon :icon="interIcon" style="font-size: 24px; " />
               <el-dropdown @command="openIA">

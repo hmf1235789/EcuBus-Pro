@@ -39,6 +39,8 @@ export interface EthNode{
   channel:string[]
   script?:string
   attachTester?:string
+  database?:string
+  workNode?:string
 }
 
 

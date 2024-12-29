@@ -1,10 +1,12 @@
-import { getPID,LinBase, LIN_ERROR_ID, LinChecksumType, LinDevice, LinDirection, LinError, LinMode, LinMsg } from '../../share/lin'
+import { getPID, LIN_ERROR_ID, LinChecksumType, LinDevice, LinDirection, LinError, LinMode, LinMsg } from '../../share/lin'
 import LIN from '../build/Release/peakLin.node'
 import { v4 } from 'uuid'
 import { queue, QueueObject } from 'async'
 import { LinLOG } from 'src/main/log'
 import EventEmitter from 'events'
 import { LDF } from 'src/renderer/src/database/ldfParse'
+import { LinBase } from '..'
+
 
 
 
@@ -39,6 +41,13 @@ export class PeakLin extends LinBase {
 
     }> = {}
     db?:LDF
+    sch?:{
+        activeSchName:string,
+        timer:NodeJS.Timeout,
+        activeIndex:number,
+        lastActiveSchName:string
+        lastActiveIndex:number
+    }
     event = new EventEmitter()
     pendingPromise?: {
         resolve: (msg: LinMsg, ts: number) => void
@@ -69,12 +78,87 @@ export class PeakLin extends LinBase {
         // this.getEntrys()
         // this.wakeup()
     }
-    importDb(db:LDF){
-        if(this.db?.name==db.name){
-            return
+    setEntry(frameId:number,length:number,dir:LinDirection,checksumType:LinChecksumType,initData:Buffer,flag:number){
+        const entry=new LIN.TLINFrameEntry()
+        entry.FrameId=frameId
+        entry.Length=length
+        entry.Direction=dir==LinDirection.SEND?1:(dir==LinDirection.RECV?2:3)
+        entry.ChecksumType=checksumType==LinChecksumType.CLASSIC?1:2
+        entry.Flags=flag
+        const ia=LIN.ByteArray.frompointer(entry.InitialData)
+        for(let i=0;i<length;i++){
+            ia.setitem(i,initData[i])
         }
-        this.db=db
+        const result=LIN.LIN_SetFrameEntry(this.device.handle,entry)
+        if(result!=0){
+            throw new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR,undefined,err2Str(result))
+        }
     }
+    // importDb(db:LDF,node?:string){
+    //     // if(this.db?.name==db.name){
+    //     //     return
+    //     // }
+    //     this.db=db
+    //     if(node){
+    //         //set entry for the node
+    //         for(const frame of Object.values(db.frames)){
+    //             if(frame.publishedBy == node){
+    //                 // For frames published by this slave node
+    //                 const initData = getFrameInitData(this.db,frame)
+    //                 this.setEntry(
+    //                     frame.id,
+    //                     frame.frameSize,
+    //                     LinDirection.SEND,
+    //                     frame.frameSize > 4 ? LinChecksumType.ENHANCED : LinChecksumType.CLASSIC,
+    //                     initData,
+    //                     LIN.FRAME_FLAG_RESPONSE_ENABLE
+    //                 )
+    //             }
+    //         }
+            
+    //         // Also handle event triggered frames
+    //         for(const etFrame of Object.values(db.eventTriggeredFrames)){
+    //             for(const frameName of etFrame.frameNames){
+    //                 const frame = db.frames[frameName]
+    //                 if(frame && frame.publishedBy == node){
+    //                     const initData = getFrameInitData(this.db,frame)
+    //                     const pid=getPID(frame.id)
+    //                     initData[0]=pid
+    //                     this.setEntry(
+    //                         etFrame.frameId,
+    //                         frame.frameSize,
+    //                         LinDirection.SEND,
+    //                         frame.frameSize > 4 ? LinChecksumType.ENHANCED : LinChecksumType.CLASSIC,
+    //                         initData,
+    //                         LIN.FRAME_FLAG_SINGLE_SHOT  //|LIN.FRAME_FLAG_IGNORE_INIT_DATA
+    //                     )
+    //                     break // Only need to set entry once for each event triggered frame
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+    // startSch(schName:string,activeMap:Record<string,boolean>,index?:number){
+    //     if(this.mode==LinMode.SLAVE){
+    //         return
+    //     }
+    //     if(this.sch){
+    //         clearTimeout(this.sch.timer)
+    //         this.sch.lastActiveSchName=this.sch.activeSchName
+    //         this.sch.lastActiveIndex=this.sch.activeIndex
+    //     }
+    //     if(this.db){
+    //         const sch=this.db.schTables.find(s=>s.name==schName)
+    //         const rIndex=index??0
+    //         const frame=sch?.entries[rIndex]
+    //         if(frame&&activeMap[`${frame.name}-${rIndex}`]!=false){
+    //            //
+            
+               
+    //         }
+    //     }
+        
+    // }
     
     // getEntrys() {
     //     //get entry

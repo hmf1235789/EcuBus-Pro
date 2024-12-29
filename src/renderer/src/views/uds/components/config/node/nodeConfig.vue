@@ -92,7 +92,7 @@
                         <el-form-item label="Database" prop="database">
                          
                             <el-select  v-model="data.database" placeholder="Database">
-                                <el-option v-for="item in db" :key="item.value" :label="item.label" :value="item.value">
+                                <el-option v-for="item in db" :key="item.value" :label="`Lin.${item.label}`" :value="item.value">
                                 </el-option>
                             </el-select>
                         </el-form-item>

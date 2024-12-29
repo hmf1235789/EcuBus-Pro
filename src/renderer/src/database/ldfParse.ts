@@ -93,6 +93,8 @@ export interface SignalDef {
     signalName: string,
     signalSizeBits: number,
     initValue: number|number[],
+    value?: number|number[],
+    update?: boolean,
     punishedBy: string,
     subscribedBy: string[],
     singleType: 'ByteArray'|'Scalar',
@@ -232,7 +234,8 @@ export interface LDF {
     eventTriggeredFrames: Record<string,EventTriggeredFrame>,
     schTables: SchTable[],
     signalEncodeTypes: Record<string,SignalEncodeType>,
-    signalRep: Record<string,string[]>
+    signalRep: Record<string,string[]>,
+    event: any
 }
 
 

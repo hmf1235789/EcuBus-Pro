@@ -15,8 +15,8 @@ import { EthAddr, EthBaseInfo, EthNode } from '../share/doip'
 import { NodeEthItem } from '../doip/nodeItem'
 import { getCanDevices, openCanDevice } from '../docan/can'
 import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
-import { getLinDevices, openLinDevice } from '../dolin'
-import { LinBase } from '../share/lin'
+import { getLinDevices, LinBase, openLinDevice, updateSignalVal } from '../dolin'
+import EventEmitter from 'events'
 
 const libPath = path.dirname(dllLib)
 log.info('dll lib path:', libPath)
@@ -299,6 +299,13 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
     const testers = arg[i++] as Record<string, TesterInfo>
     const nodes = arg[i++] as Record<string, CanNode>
     const sub = arg[i++] as Subscription[] || []
+    global.database=arg[i++]
+    //create event for db
+    for(const val of Object.values(global.database)){
+        for(const sval of Object.values(val)){
+            sval.event=new EventEmitter()
+        }
+    }
 
     try {
         await globalStart(devices, testers, nodes, projectInfo, sub)
@@ -309,6 +316,8 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
 
 
 })
+
+
 interface timerType {
     timer: NodeJS.Timeout,
     socket: CAN_SOCKET,
@@ -559,5 +568,16 @@ ipcMain.on('ipc-stop-can-period', (event, ...arg) => {
         clearInterval(timer.timer)
         timer.socket.close()
         timerMap.delete(id)
+    }
+})
+
+
+ipcMain.on('ipc-update-lin-signals', (event, ...arg) => {
+    const dbIndex=arg[0] as string
+    const signalName=arg[1] as string
+    const value=arg[2] as any
+    const db=global.database.lin[dbIndex]
+    if(db){
+        updateSignalVal(db,signalName,value)
     }
 })

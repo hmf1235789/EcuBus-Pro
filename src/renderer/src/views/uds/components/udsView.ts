@@ -7,12 +7,11 @@ import { v4 } from 'uuid'
 import { ElMessageBox } from 'element-plus'
 import { UdsDevice } from 'nodeCan/uds'
 import { Layout } from '../layout'
-import { el } from 'element-plus/es/locale'
 import { useDataStore } from '@r/stores/data'
 import nodeConfig from './config/node/nodeConfig.vue'
 import { h } from 'vue'
 import { useProjectStore } from '@r/stores/project'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, get } from 'lodash'
 import {Inter, NodeItem} from 'src/preload/data'
 
 export interface udsBase {
@@ -55,11 +54,17 @@ class Region extends joint.dia.Element {
         },
         labelBottom: {
 
-          x: 'calc(w)',
-          y: 'calc(1*h-5)',
+          textVerticalAnchor: 'middle',
+          textAnchor: 'middle',
+          refX: '50%',
+          refY: '75%',
           fontSize: 10,
           fill: '#333333',
-          'font-weight': 700
+          textWrap: {
+            width: -10, // 相对于元素宽度的偏移
+            height: 22, // 设置为与字体大小相同的固定高度
+            ellipsis: true // 如果文本太长，以省略号结尾
+          }
         },
         title: {
           x: 'calc(0.5*w)',
@@ -145,6 +150,7 @@ export class udsCeil {
 
   constructor(paper: joint.dia.Paper, graph: joint.dia.Graph, e: udsBase, private x: number, private y: number, button: {
     edit: boolean,
+    panel: boolean,
     remove: boolean,
     lockY?: boolean
     lockX?: boolean
@@ -171,7 +177,11 @@ export class udsCeil {
           text: e.name,
           fontSize: 12,
           fill: colorMap[e.type].color
-
+        },
+        labelBottom: {
+          text: '',
+          fontSize: 10,
+          fill: colorMap[e.type].color
         },
 
       },
@@ -236,6 +246,8 @@ export class udsCeil {
 
       const boundaryTool = new joint.elementTools.Boundary();
       const toolsList = [boundaryTool]
+      let offset = -8
+     
       if (button.edit) {
         const editButtonClass = (joint.elementTools.Button as any).extend({
           name: 'edit-button',
@@ -264,7 +276,7 @@ export class udsCeil {
             y: '100%',
             offset: {
               x: 8,
-              y: -8,
+              y: offset,
             },
             rotate: true,
             action: () => {
@@ -274,6 +286,49 @@ export class udsCeil {
         });
         const edit = new editButtonClass();
         toolsList.push(edit)
+        offset-=17
+      }
+
+     
+      if(button.panel){
+        const editButtonClass = (joint.elementTools.Button as any).extend({
+          name: 'edit-button',
+          options: {
+            markup: [{
+              tagName: 'circle',
+              selector: 'button',
+              attributes: {
+                'r': 7,
+                'fill': 'var(--el-color-primary)',
+                'cursor': 'pointer'
+              }
+            }, {
+              tagName: 'path',
+              selector: 'icon',
+              attributes: {
+                'd': ['M10.05 23q-.75 0-1.4-.337T7.575 21.7L1.2 12.375l.6-.575q.475-.475 1.125-.55t1.175.3L7 13.575V4q0-.425.288-.712T8 3t.713.288T9 4v8h2V2q0-.425.288-.712T12 1t.713.288T13 2v10h2V3q0-.425.288-.712T16 2t.713.288T17 3v9h2V5q0-.425.288-.712T20 4t.713.288T21 5v14q0 1.65-1.175 2.825T17 23z'],
+                'fill': 'none',
+                'stroke': '#FFFFFF',
+                'stroke-width': 2,
+                'pointer-events': 'none',
+                'transform': ['translate(-5.5,-5.5)', 'scale(0.45)'],
+              }
+            }],
+            x: '0%',
+            y: '100%',
+            offset: {
+              x: 8,
+              y: offset,
+            },
+            rotate: true,
+            action: () => {
+              this.events.emit('panel', this)
+            }
+          }
+        });
+        const edit = new editButtonClass();
+        toolsList.push(edit)
+        offset-=17
       }
 
       if (button.remove) {
@@ -282,15 +337,15 @@ export class udsCeil {
           y: '100%',
           offset: {
             x: 8,
-            y: -25,
+            y: offset,
           },
           action: () => {
             this.events.emit('remove', this)
           }
         });
         toolsList.push(removeTools)
+        offset-=17
       }
-
 
       const toolsView = new joint.dia.ToolsView({
         tools: toolsList
@@ -302,12 +357,15 @@ export class udsCeil {
   getId() {
     return this.data.id
   }
-  on(event: 'edit' | 'add' | 'remove', cb: (ceil: udsCeil) => void) {
+  on(event: 'edit' | 'add' | 'remove'|'panel', cb: (ceil: udsCeil) => void) {
     this.events.on(event, cb)
   }
   changeName(name: string) {
     this.data.name = name
     this.rect.attr('label/text', name)
+  }
+  changeNameBottom(name: string) {
+    this.rect.attr('labelBottom/text', name)
   }
   setEnable(enable: boolean) {
     this.enable = enable
@@ -356,6 +414,7 @@ export class udsHardware extends udsCeil {
       x,
       y,
       {
+        panel:false,
         edit: true,
         remove: false,
         lockX: true,
@@ -389,6 +448,7 @@ export class IG extends udsCeil {
       x,
       y,
       {
+        panel:false,
         edit: true,
         remove: true,
         lockX: false,
@@ -406,12 +466,12 @@ export class Node extends udsCeil {
     paper: joint.dia.Paper,
     graph: joint.dia.Graph,
     id: string,
-    ig: NodeItem,
+    private ig: NodeItem,
     x: number,
     y: number
   ) {
 
-
+    
     super(
       paper,
       graph,
@@ -423,14 +483,33 @@ export class Node extends udsCeil {
       x,
       y,
       {
+        panel:ig.type=='lin',
         edit: true,
         remove: true,
         lockX: false,
         lockY: true
       }
     )
+    const t=this.getNodeBottomName()
+    this.changeNameBottom(t)
 
-
+  }
+  getNodeBottomName(){
+   
+      this.rect.attr('labelBottom/text', '')
+      if(this.ig.database&&this.ig.workNode){
+        const db=get(useDataStore().database,`${this.ig.type}.${this.ig.database}`)
+        if(db){
+          const upperFirstChar = (str: string) => {
+            return str.charAt(0).toUpperCase() + str.slice(1)
+          }
+          const txt=`${upperFirstChar(this.ig.type)}.${db.name} (${this.ig.workNode})`
+          return txt
+        }
+      
+      }
+    
+    return ''
   }
 }
 
@@ -589,7 +668,23 @@ export class UDSView {
         }).catch(null).finally(()=>{
           //modify name
           ceil.changeName(dataBase.nodes[id].name)
+          const t=element.getNodeBottomName()
+          ceil.changeNameBottom(t)
         })
+      
+
+    })
+    element.on('panel', (ceil) => {
+      const dataBase = useDataStore()
+      const item=dataBase.nodes[id]
+      this.layout.addWin('linPanel',id,{
+        name:item.name,
+        params:{
+          editIndex:id,
+          database:item.database,
+          workNode:item.workNode
+        }
+      })
       
 
     })

@@ -28,7 +28,7 @@
                     <Icon :icon="databaseIcon"/>
                     <span>Database</span>
                     <el-select v-model="selectedDB" size="small" placeholder="Select Database" clearable style="width: 200px;">
-                        <el-option v-for="(db, key) in databases" :key="key" :label="db.name" :value="key"></el-option>
+                        <el-option v-for="(db, key) in databases" :key="key" :label="`Lin.${db.name}`" :value="key"></el-option>
                     </el-select>
                 </div>
             </template>
@@ -270,10 +270,10 @@ function getFrameType(entry: any): string {
     return 'Unknown'
 }
 
-// 修改处理激活状态变化的函数
-function handleActiveChange(val: boolean, row: Table) {
-    activeStates.value[row.index] = val
-}
+// // 修改处理激活状态变化的函数
+// function handleActiveChange(val: boolean, row: Table) {
+//     activeStates.value[row.index] = val
+// }
 
 // 修改 gridOptions computed 添加长度列
 const gridOptions = computed(() => {
@@ -290,7 +290,7 @@ const gridOptions = computed(() => {
         height: props.height,
         showOverflow: true,
         scrollY: {
-            enabled: true,
+            enabled: false,
             gt: 0
         },
         rowConfig: {

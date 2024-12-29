@@ -16,7 +16,9 @@ import { useProjectStore,State as ProjectState} from '@r/stores/project'
 import stepIcon from '@iconify/icons-material-symbols/step-rounded'
 import msgIcon from '@iconify/icons-material-symbols/terminal'
 import interIcon from '@iconify/icons-material-symbols/interactive-space-outline'
+import panelIcon from '@iconify/icons-material-symbols/pan-tool'
 import log from 'electron-log'
+
 
 
 type WinsType = ProjectState["project"]['wins'];
@@ -145,6 +147,17 @@ const layoutMap: Record<string, LayoutItem> = {
     key: 'IA',
     component: defineAsyncComponent(() => import('./lini.vue')),
     icon: interIcon
+  },
+  linPanel:{
+    i: 'Panel',
+    x: 0,
+    y: 0,
+    w: 700,
+    h: 400,
+    label: 'Panel',
+    key: 'Panel',
+    component: defineAsyncComponent(() => import('./linPanel.vue')),
+    icon:panelIcon
   },
   ldf:{
     i: 'LDF',
