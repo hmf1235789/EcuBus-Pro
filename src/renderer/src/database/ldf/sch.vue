@@ -42,6 +42,7 @@
                 v-model="editingSchedule"
                 :edit-index="editIndex"
                 ref="editRef"
+                :sch-names="ldfObj.schTables.map(t => t.name)"
                 :ldf="ldfObj"
                 :rules="rules"
             />

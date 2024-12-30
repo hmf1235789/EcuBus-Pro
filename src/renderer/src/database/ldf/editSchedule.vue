@@ -47,6 +47,11 @@
                                             :value="frame" />
                                     </el-select>
                                 </el-form-item>
+                                <el-form-item label="Schedule Table" prop="scheduleName">
+                                    <el-select v-model="addFrameForm.scheduleName" style="width: 200px">
+                                        <el-option v-for="schName in props.schNames" :key="schName" :label="schName" :value="schName" />
+                                    </el-select>
+                                </el-form-item>
                             </template>
 
                             <!-- 添加 Sporadic Frame Form -->
@@ -268,6 +273,7 @@ const props = defineProps<{
     editIndex: string
     ldf: LDF
     rules: FormRules
+    schNames: string[] // 添加可用的调度表名称列表
 }>()
 
 const schedule = defineModel<SchTable>({
@@ -448,7 +454,8 @@ const addFrameForm = ref({
     D4: 0,
     D5: 0,
     frameIndex: 0,
-    framePIDs: [0, 0, 0, 0]
+    framePIDs: [0, 0, 0, 0],
+    scheduleName: '' // 添加调度表选择字段
     // 其他字段根据需要添加
 })
 
@@ -855,7 +862,12 @@ const formRules = computed<FormRules>(() => ({
           
           callback()
         }
-      }]
+      }],
+      scheduleName: [{
+        required: addFrameForm.value.type === 'EventTrigger',
+        message: 'Please select schedule table for collision handling',
+        trigger: 'change'
+    }]
 }))
 
 // 计算可用的帧
@@ -896,7 +908,8 @@ function handleFrameTypeChange(type: string) {
         D4: 0,
         D5: 0,
         frameIndex: 0,
-        framePIDs: [0, 0, 0, 0]
+        framePIDs: [0, 0, 0, 0],
+        scheduleName: '' // 添加调度表选择字段
     }
     // 重置表单验证
     nextTick(() => {
@@ -931,13 +944,13 @@ function handleAddFrame() {
             break;
 
         case 'EventTrigger':
-            if (form.name && form.frameId && form.frameNames.length > 0) {
+            if (form.name && form.frameId && form.frameNames.length > 0 && form.scheduleName) {
                 // 添加事件触发帧的逻辑
                 ldf.value.eventTriggeredFrames[form.name] = {
-                    frameId: parseInt(form.frameId),
+                    frameId: parseInt(form.frameId, 16),
                     name: form.name,
                     frameNames: form.frameNames,
-                    schTableName: props.editIndex
+                    schTableName: form.scheduleName // 使用选择的调度表名称
                 }
                 schedule.value.entries.push({
                     name: form.name,

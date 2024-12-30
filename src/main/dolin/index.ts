@@ -2,27 +2,17 @@ import { UdsDevice } from "../share/uds";
 import { PeakLin } from "./peak";
 import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
 import path from "path";
-import { LinBaseInfo, LinChecksumType, LinDevice, LinDirection, LinNode } from "../share/lin";
-import { LDF } from "src/renderer/src/database/ldfParse";
+import { getFrameData, getPID, LinBaseInfo, LinChecksumType, LinDevice, LinDirection, LinMode, LinMsg, LinNode } from "../share/lin";
+import { Frame, LDF } from "src/renderer/src/database/ldfParse";
 import EventEmitter from "events";
 import { isEqual } from "lodash";
+import LinBase from "./base";
 
-export abstract class LinBase {
-    constructor() {
-    }
-    abstract event: EventEmitter
-    static getValidDevices(): LinDevice[] {
-        throw new Error('Method not implemented.')
-    }
-    abstract db?: LDF
-    abstract close(): void
-    abstract setEntry(frameId: number, length: number, dir: LinDirection, checksumType: LinChecksumType, initData: Buffer, flag: number): void
-    abstract registerNode(nodeName:string):void
-}
 
 
 const libPath = path.dirname(dllLib)
 PeakLin.loadDllPath(libPath)
+
 
 
 

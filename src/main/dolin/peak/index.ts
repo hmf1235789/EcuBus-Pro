@@ -4,8 +4,8 @@ import { v4 } from 'uuid'
 import { queue, QueueObject } from 'async'
 import { LinLOG } from 'src/main/log'
 import EventEmitter from 'events'
-import { LDF } from 'src/renderer/src/database/ldfParse'
-import { LinBase } from '..'
+import LinBase from '../base'
+
 
 
 
@@ -40,14 +40,8 @@ export class PeakLin extends LinBase {
         length: number
 
     }> = {}
-    db?:LDF
-    sch?:{
-        activeSchName:string,
-        timer:NodeJS.Timeout,
-        activeIndex:number,
-        lastActiveSchName:string
-        lastActiveIndex:number
-    }
+    
+    
     event = new EventEmitter()
     pendingPromise?: {
         resolve: (msg: LinMsg, ts: number) => void
@@ -67,8 +61,8 @@ export class PeakLin extends LinBase {
         }
     }
     log: LinLOG
-    constructor(private device: LinDevice, private mode: LinMode, private baud: number) {
-        super()
+    constructor(private device: LinDevice, public mode: LinMode, private baud: number) {
+        super(mode)
         this.client = this.registerClient()
         this.connectClient(this.client, device)
         this.initHardware(device, this.client, mode == LinMode.MASTER, baud)
@@ -94,6 +88,7 @@ export class PeakLin extends LinBase {
             throw new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR,undefined,err2Str(result))
         }
     }
+
     // importDb(db:LDF,node?:string){
     //     // if(this.db?.name==db.name){
     //     //     return
