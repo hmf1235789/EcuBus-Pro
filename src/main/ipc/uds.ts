@@ -15,8 +15,10 @@ import { EthAddr, EthBaseInfo, EthNode } from '../share/doip'
 import { NodeEthItem } from '../doip/nodeItem'
 import { getCanDevices, openCanDevice } from '../docan/can'
 import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
-import { getLinDevices, LinBase, openLinDevice, updateSignalVal } from '../dolin'
+import { getLinDevices, openLinDevice, updateSignalVal } from '../dolin'
 import EventEmitter from 'events'
+import LinBase from '../dolin/base'
+import { LinInter } from 'src/preload/data'
 
 const libPath = path.dirname(dllLib)
 log.info('dll lib path:', libPath)
@@ -114,8 +116,8 @@ interface Subscription {
     state: string;
 }
 
-interface NodeItemA{
-    close:()=>void
+interface NodeItemA {
+    close: () => void
 }
 
 
@@ -128,7 +130,7 @@ let cantps: CAN_TP[] = []
 let doips: DOIP[] = []
 
 
-async function globalStart(devices: Record<string, UdsDevice>, testers: Record<string, TesterInfo>, nodes: Record<string, CanNode|EthNode>, projectInfo: { path: string, name: string }, sub: Subscription[]) {
+async function globalStart(devices: Record<string, UdsDevice>, testers: Record<string, TesterInfo>, nodes: Record<string, CanNode | EthNode>, projectInfo: { path: string, name: string }) {
     let activeKey = ''
     try {
         for (const key in devices) {
@@ -137,7 +139,7 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
                 const canDevice = device.canDevice
                 activeKey = canDevice.name
                 const canBase = openCanDevice(canDevice)
-                
+
                 sysLog.info(`start can device ${canDevice.vendor}-${canDevice.handle} success`)
                 if (canBase) {
                     canBase.event.on('close', (errMsg) => {
@@ -173,10 +175,10 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
         throw err
     }
     //testes
-    const doipConnectList:{
-        tester:TesterInfo,
-        addr:UdsAddress,
-        connect:()=>Promise<clientTcp>
+    const doipConnectList: {
+        tester: TesterInfo,
+        addr: UdsAddress,
+        connect: () => Promise<clientTcp>
     }[] = []
     for (const key in testers) {
         const tester = testers[key]
@@ -220,16 +222,16 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
         }
         else if (tester.type == 'eth') {
             for (const val of ethBaseMap.values()) {
-                const doip = new DOIP(val,tester)
+                const doip = new DOIP(val, tester)
                 doips.push(doip)
-                
+
                 for (const addr of tester.address) {
                     if (addr.type == 'eth' && addr.ethAddr) {
                         doipConnectList.push(
                             {
-                                tester:tester,
-                                addr:addr,
-                                connect:()=>doip.createClient(addr.ethAddr!),
+                                tester: tester,
+                                addr: addr,
+                                connect: () => doip.createClient(addr.ethAddr!),
                             }
                         )
 
@@ -239,7 +241,7 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
                     }
                 }
 
-                
+
             }
         }
     }
@@ -248,9 +250,9 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
     //nodes
     for (const key in nodes) {
         const node = nodes[key]
-        if(node.type=='can'){
+        if (node.type == 'can') {
             const nodeItem = new NodeItem(node, canBaseMap, projectInfo.path, projectInfo.name, testers)
-        
+
             try {
                 await nodeItem.start()
                 nodeMap.set(key, nodeItem)
@@ -259,8 +261,8 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
                 nodeItem.close()
 
             }
-        }else if(node.type=='eth'){
-            const nodeItem = new NodeEthItem(node, doips,ethBaseMap ,projectInfo.path, projectInfo.name, testers)
+        } else if (node.type == 'eth') {
+            const nodeItem = new NodeEthItem(node, doips, ethBaseMap, projectInfo.path, projectInfo.name, testers)
             try {
                 await nodeItem.start()
                 nodeMap.set(key, nodeItem)
@@ -287,7 +289,7 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
     //         }
     //     }
     // })
-   
+
 }
 ipcMain.handle('ipc-global-start', async (event, ...arg) => {
     let i = 0
@@ -298,17 +300,18 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
     const devices = arg[i++] as Record<string, UdsDevice>
     const testers = arg[i++] as Record<string, TesterInfo>
     const nodes = arg[i++] as Record<string, CanNode>
-    const sub = arg[i++] as Subscription[] || []
-    global.database=arg[i++]
+
+    global.database = arg[i++]
+
     //create event for db
-    for(const val of Object.values(global.database)){
-        for(const sval of Object.values(val)){
-            sval.event=new EventEmitter()
+    for (const val of Object.values(global.database)) {
+        for (const sval of Object.values(val)) {
+            sval.event = new EventEmitter()
         }
     }
 
     try {
-        await globalStart(devices, testers, nodes, projectInfo, sub)
+        await globalStart(devices, testers, nodes, projectInfo)
     } catch (err: any) {
         globalStop(true)
         throw err
@@ -326,6 +329,9 @@ interface timerType {
 const timerMap = new Map<string, timerType>()
 
 
+
+
+
 export function globalStop(emit = false) {
     //clear all timer
     timerMap.forEach((value) => {
@@ -337,7 +343,7 @@ export function globalStop(emit = false) {
         sysLog.info(`stop can device ${value.info.vendor}-${value.info.handle}`)
     })
     canBaseMap.clear()
-    
+
     // ethBaseMap.clear()
     linBaseMap.forEach((value) => {
         value.close()
@@ -375,8 +381,41 @@ ipcMain.handle('ipc-global-stop', async (event, ...arg) => {
 
 
 
+ipcMain.handle('ipc-start-schedule', async (event, ...arg) => {
+    const linIa: LinInter = arg[0] as LinInter
+    const schName: string = arg[1] as string
+    const active = arg[2]
+    //find linBase by linia devices
+    if (linIa.database) {
+        const db = global.database.lin[linIa.database]
+        linIa.devices.forEach((d) => {
+            const base = linBaseMap.get(d)
 
 
+            if (base && db) {
+                base.startSch(db, schName, active,0)
+            }
+        })
+    }
+
+})
+ipcMain.handle('ipc-stop-schedule', async (event, ...arg) => {
+    const linIa: LinInter = arg[0] as LinInter
+
+    //find linBase by linia devices
+
+    linIa.devices.forEach((d) => {
+        const base = linBaseMap.get(d)
+
+
+        if (base) {
+            base.stopSch()
+        }
+
+
+    })
+
+})
 
 
 ipcMain.handle('ipc-run-sequence', async (event, ...arg) => {
@@ -402,7 +441,7 @@ ipcMain.handle('ipc-run-sequence', async (event, ...arg) => {
                 throw new Error(`can device ${device.canDevice.vendor}-${device.canDevice.handle} not found`)
             }
         } else if (device.type == 'eth' && device.ethDevice) {
-            const id=device.ethDevice.id
+            const id = device.ethDevice.id
             const ethBase = doips.find((e) => e.base.id == id)
             if (ethBase) {
                 uds.setDoip(ethBase)
@@ -429,6 +468,8 @@ ipcMain.handle('ipc-stop-sequence', async (event, ...arg) => {
         uds.cancel()
     }
 })
+
+
 
 function getLenByDlc(dlc: number, canFd: boolean) {
     const map: Record<number, number> = {
@@ -496,8 +537,8 @@ ipcMain.on('ipc-send-can', (event, ...arg) => {
 
         })
         const b = Buffer.alloc(len)
-        for(const [index,d] of ia.data.entries()){
-            b[index] = parseInt(d,16)
+        for (const [index, d] of ia.data.entries()) {
+            b[index] = parseInt(d, 16)
         }
         socket.write(b).catch(null).finally(() => {
             socket.close()
@@ -509,8 +550,8 @@ ipcMain.on('ipc-send-can', (event, ...arg) => {
 })
 
 ipcMain.handle('ipc-get-can-period', (event, ...arg) => {
-    const info:Record<string,number> = {}
-    timerMap.forEach((value,key)=>{
+    const info: Record<string, number> = {}
+    timerMap.forEach((value, key) => {
         info[key] = value.period
     })
     return info
@@ -532,8 +573,8 @@ ipcMain.on('ipc-send-can-period', (event, ...arg) => {
 
         })
         const b = Buffer.alloc(len)
-        for(const [index,d] of ia.data.entries()){
-            b[index] = parseInt(d,16)
+        for (const [index, d] of ia.data.entries()) {
+            b[index] = parseInt(d, 16)
         }
         //if timer exist, clear it
         const timer = timerMap.get(id)
@@ -573,11 +614,11 @@ ipcMain.on('ipc-stop-can-period', (event, ...arg) => {
 
 
 ipcMain.on('ipc-update-lin-signals', (event, ...arg) => {
-    const dbIndex=arg[0] as string
-    const signalName=arg[1] as string
-    const value=arg[2] as any
-    const db=global.database.lin[dbIndex]
-    if(db){
-        updateSignalVal(db,signalName,value)
+    const dbIndex = arg[0] as string
+    const signalName = arg[1] as string
+    const value = arg[2] as any
+    const db = global.database.lin[dbIndex]
+    if (db) {
+        updateSignalVal(db, signalName, value)
     }
 })

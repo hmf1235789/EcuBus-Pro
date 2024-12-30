@@ -43,7 +43,7 @@ export default abstract class LinBase {
             this.sch=undefined
         }
     }
-    startSch(db: LDF, schName: string, activeMap: Record<string, boolean>, index?: number) {
+    startSch(db: LDF, schName: string, activeMap: Record<string, boolean>, rIndex: number) {
         if (this.mode == LinMode.SLAVE) {
             return
         }
@@ -52,11 +52,10 @@ export default abstract class LinBase {
             this.sch.lastActiveSchName = this.sch.activeSchName
             this.sch.lastActiveIndex = this.sch.activeIndex
         }
-
         const sch = db.schTables.find(s => s.name == schName)
-        const rIndex = index ?? 0
         const entry = sch?.entries[rIndex]
-        if (entry && activeMap[`${entry.name}-${rIndex}`] != false) {
+    
+        if (entry && activeMap[`${schName}-${rIndex}`] != false) {
             const nextDelay = entry.delay;
 
             if(entry.isCommand) {
@@ -169,7 +168,8 @@ export default abstract class LinBase {
                         direction: LinDirection.SEND,
                         checksumType: checksum,
                         database: db,
-                        workNode: db.node.master.nodeName
+                        workNode: db.node.master.nodeName,
+                        name: frame.name
                     })
                 }
             }

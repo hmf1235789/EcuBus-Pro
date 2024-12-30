@@ -81,9 +81,9 @@ export interface LinMsg {
     direction: LinDirection
     checksumType: LinChecksumType
     checksum?: number
-    ts?: number
     database?: LDF
     workNode?: string
+    name?: string
 }
 
 export class LinError extends Error {

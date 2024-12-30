@@ -165,7 +165,6 @@ const onSubmit = () => {
   ruleFormRef.value?.validate((valid) => {
     if (valid) {
       data.value.vendor = props.vendor;
-     
       if (editIndex.value == "") {
         const id = v4();
         data.value.id = id;

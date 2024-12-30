@@ -20,11 +20,21 @@ const delay = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, m
 describe('peak lin master', () => {
     let client!: PeakLin
     beforeAll(async () => {
-        client = new PeakLin({
-            handle: 1,
-            label: 'lin1',
-            id: 'lin1',
-        }, LinMode.MASTER, 19200)
+        client = new PeakLin(
+            {
+                device: {
+                    handle: 1,
+                    label: 'lin1',
+                    id: 'lin1',
+                },
+                id: 'lin1',
+                vendor: 'peak',
+                name: 'lin1',
+                baudRate: 19200,
+                mode: LinMode.MASTER,
+
+            }
+        )
     })
 
     test('write frames', async () => {

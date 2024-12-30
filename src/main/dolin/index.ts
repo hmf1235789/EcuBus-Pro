@@ -23,7 +23,7 @@ export function openLinDevice(device: LinBaseInfo) {
 
     // #v-ifdef IGNORE_NODE!='1'
     if (device.vendor == 'peak') {
-        canBase = new PeakLin(device.device, device.mode, device.baudRate)
+        canBase = new PeakLin(device)
     }
 
     return canBase

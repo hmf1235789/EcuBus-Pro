@@ -26,6 +26,7 @@
                      <el-dropdown-menu>
                         <el-checkbox-group v-model="checkList" size="small" style="width: 200px;margin:10px">
                            <el-checkbox label="CAN" value="canBase" @change="filterChange('canBase', $event)" />
+                           <el-checkbox label="LIN" value="linBase" @change="filterChange('linBase', $event)" />
                            <el-checkbox label="UDS" value="uds" @change="filterChange('uds', $event)" />
                            <el-checkbox label="ETH" value="ipBase" @change="filterChange('ipBase', $event)" />
 
@@ -72,6 +73,7 @@ import saveIcon from '@iconify/icons-material-symbols/save'
 
 import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds';
 import { useDataStore } from '@r/stores/data';
+import { LinMsg } from 'nodeCan/lin';
 
 
 interface LogData {
@@ -85,7 +87,7 @@ interface LogData {
    channel: string,
    msgType: string,
    method: string
-   name: string,
+   name?: string,
    seqIndex?: number
 
 }
@@ -96,6 +98,7 @@ const xGrid = ref()
 const checkList = ref<string[]>([
    'canBase',
    'ipBase',
+   'linBase',
    'uds',
 ])
 interface CanBaseLog {
@@ -106,18 +109,23 @@ interface IpBaseLog {
    method: 'ipBase',
    data: { dir: 'OUT' | 'IN'; data: Uint8Array; ts: number; local:string,remote:string ,type:'udp'|'tcp',name:string}
 }
+interface LinBaseLog {
+   method: 'linBase',
+   data: LinMsg|'busSleep'|'busWakeUp',
+   ts: number
+}
 interface UdsLog {
    method: 'udsSent' | 'udsRecv' | 'udsNegRecv',
    id?: string,
    data: { service: ServiceItem, ts: number,  recvData?: Uint8Array, msg?: string }
 }
 interface UdsErrorLog {
-   method: 'udsError' | 'udsScript' | 'udsSystem' | 'canError',
+   method: 'udsError' | 'udsScript' | 'udsSystem' | 'canError'|'linError',
    data: { msg: string, ts: number }
 }
 
 interface LogItem {
-   message: CanBaseLog | UdsLog | UdsErrorLog|IpBaseLog,
+   message: CanBaseLog | UdsLog | UdsErrorLog|IpBaseLog|LinBaseLog,
    level: string,
    instance: string,
    label: string,
@@ -195,7 +203,7 @@ function _logDisplay(vals: LogItem[]) {
 
          })
       } 
-      if (val.message.method == 'ipBase') {
+      else if (val.message.method == 'ipBase') {
         
       
         
@@ -214,6 +222,37 @@ function _logDisplay(vals: LogItem[]) {
 
         })
      } 
+     else if(val.message.method=='linBase'){
+        console.log(val)
+         if(typeof val.message.data=='string'){
+            insertData({
+               method: val.message.method,
+               dir: '--',
+               data: val.message.data,
+               ts: (val.message.ts / 1000000).toFixed(3),
+               id: '',
+               len: 0,
+               device: val.label,
+               channel: val.instance,
+               msgType: 'LIN',
+               name: ''
+            })
+         }else{
+            insertData({
+               method: val.message.method,
+               dir: '--',
+               data: data2str(val.message.data.data),
+               ts: (val.message.ts / 1000000).toFixed(3),
+               id: '0x' + (val.message.data.frameId.toString(16)),
+               len: val.message.data.data.length,
+               device: val.label,
+               channel: val.instance,
+               msgType: 'LIN',
+               dlc: val.message.data.data.length,
+               name: val.message.data.name
+            })
+         }
+     }
       
       else if (val.message.method == 'udsSent') {
          let testerName=val.message.data.service.name
@@ -280,7 +319,21 @@ function _logDisplay(vals: LogItem[]) {
 
 
 
-      } else if (val.message.method == 'udsScript') {
+      } else if(val.message.method=='linError'){
+         insertData({
+            method: val.message.method,
+            name: '',
+            data: val.message.data.msg,
+            ts: (val.message.data.ts / 1000000).toFixed(3),
+            id: '',
+            len: 0,
+            device: val.label,
+            channel: val.instance,
+            msgType: 'LIN Error',
+         })
+      } 
+      
+      else if (val.message.method == 'udsScript') {
          insertData({
             method: val.message.method,
             name: '',
@@ -326,7 +379,7 @@ defineExpose({
 })
 
 let list: Record<string, () => void>={}
-function filterChange(method: 'uds' | 'canBase'|'ipBase', val: boolean) {
+function filterChange(method: 'uds' | 'canBase'|'ipBase'|'linBase', val: boolean) {
    if (method == 'uds') {
       if(list['udsSent']){
          list['udsSent']()
@@ -362,6 +415,17 @@ function filterChange(method: 'uds' | 'canBase'|'ipBase', val: boolean) {
       if (val) {
          window.electron.ipcRenderer.on(`ipc-log-ipBase`, logDisplay)
          window.electron.ipcRenderer.on(`ipc-log-ipError`, logDisplay)
+      }
+   }else if (method == 'linBase') {
+      if(list['linBase']){
+         list['linBase']()
+      }
+      if(list['linError']){
+         list['linError']()
+      }
+      if (val) {
+         window.electron.ipcRenderer.on(`ipc-log-linBase`, logDisplay)
+         window.electron.ipcRenderer.on(`ipc-log-linError`, logDisplay)
       }
    }
 
@@ -473,6 +537,9 @@ onMounted(() => {
       } else if (item == 'ipBase') {
          list['ipBase']=window.electron.ipcRenderer.on(`ipc-log-ipBase`, logDisplay)
          list['ipError']=window.electron.ipcRenderer.on(`ipc-log-ipError`, logDisplay)
+      } else if (item == 'linBase') {
+         list['linBase']=window.electron.ipcRenderer.on(`ipc-log-linBase`, logDisplay)
+         list['linError']=window.electron.ipcRenderer.on(`ipc-log-linError`, logDisplay)
       }
    }
    timer = setInterval(() => {

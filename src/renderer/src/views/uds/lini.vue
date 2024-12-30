@@ -9,6 +9,13 @@
                 </el-button>
                 
             </template>
+            <template #default_sch="{ row }">
+                <el-button :type="activeSch === row.Table ? 'danger' : 'primary'" size="small" plain style="width: 100px;" 
+                    :disabled="!globalStart" @click="toggleSch(row.Table)">
+                    <Icon :icon="activeSch === row.Table ? stopIcon : sendIcon" />
+                    {{ activeSch === row.Table ? 'Stop SCH' : 'Start SCH' }}
+                </el-button>
+            </template>
            
           
          
@@ -100,7 +107,34 @@ const connectV = ref(false)
 const popoverIndex = ref(-1)
 const globalStart = toRef(window, 'globalStart')
 
+const activeSch = ref<string | null>(null)
 
+function toggleSch(table: string) {
+    if (activeSch.value === table) {
+        // Stop current schedule
+        stopSchedule()
+        activeSch.value = null
+    } else {
+        // If there's already a running schedule, stop it first
+        if (activeSch.value) {
+            stopSchedule()
+        }
+        // Start new schedule
+        activeSch.value = table
+        startSchedule()
+      
+    }
+}
+
+function startSchedule() {
+    // Implement start schedule logic here
+    window.electron.ipcRenderer.invoke('ipc-start-schedule', cloneDeep(dataBase.ia[editIndex.value]), activeSch.value,cloneDeep(activeStates.value))
+}
+
+function stopSchedule() {
+    // Implement stop schedule logic here
+    window.electron.ipcRenderer.invoke('ipc-stop-schedule', cloneDeep(dataBase.ia[editIndex.value]))
+}
 
 function ceilClick(val: any) {
     popoverIndex.value = val.rowIndex
@@ -306,8 +340,9 @@ const gridOptions = computed(() => {
             
             { type: 'expand', width: 46, slots: { content: 'expand_content' }, resizable:false},
             { field: 'index', title: 'Index', width: 100, resizable:false},
+            { field: 'sch', title: 'SCH Control', width: 200,resizable:false, slots: { default: 'default_sch' } },
             { field: 'Table', title: 'Schedule Table', minWidth: 150 },
-           
+          
             { field: 'length', title: 'Frame Number', minWidth: 120 }
         ],
         data: tableData.value,
@@ -345,10 +380,26 @@ const childGridOptions = computed(() => {
 const fh = computed(() => Math.ceil(h.value * 2 / 3) + 'px')
 
 onMounted(() => {
-    //set activeStates all true
+    // Get initial active SCH
+    window.electron.ipcRenderer.invoke('ipc-get-active-sch').then((name: string) => {
+        activeSch.value = name
+    })
+    
+
+    // Set activeStates all true
     for (const table of tableData.value) {
         for (const entry of table.childList) {
             activeStates.value[`${table.Table}-${entry.index}`] = true
+        }
+    }
+})
+
+// Watch globalStart, stop all SCH when globalStart is stopped
+watch(globalStart, (v) => {
+    if (v === false) {
+        if (activeSch.value) {
+            stopSchedule()
+            activeSch.value = null
         }
     }
 })
