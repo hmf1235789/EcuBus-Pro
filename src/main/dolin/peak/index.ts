@@ -9,9 +9,6 @@ import { getTsUs } from 'src/main/share/can'
 
 
 
-
-
-
 function err2Str(result: number): string {
     const buffer = Buffer.alloc(256)
     LIN.LIN_GetErrorText(result, 9, buffer)
@@ -33,7 +30,7 @@ export class PeakLin extends LinBase {
         this._write(task.data).then(task.resolve).catch(task.reject).finally(cb)
     }, 1)
     private client: number
-    private lastFrame:Map<number,LinMsg>=new Map()
+    private lastFrame: Map<number, LinMsg> = new Map()
     private entryTable: Record<number, {
         frameId: number
         dir: number
@@ -41,8 +38,8 @@ export class PeakLin extends LinBase {
         length: number
 
     }> = {}
-    
-    
+
+
     event = new EventEmitter()
     pendingPromise?: {
         resolve: (msg: LinMsg, ts: number) => void
@@ -61,12 +58,12 @@ export class PeakLin extends LinBase {
             throw new Error(err2Str(result))
         }
     }
-    startTs:number
-    offsetTs=0
-    offsetInit=false
+    startTs: number
+    offsetTs = 0
+    offsetInit = false
     log: LinLOG
-    
-    constructor(private info:LinBaseInfo) {
+
+    constructor(private info: LinBaseInfo) {
         super(info.mode)
         this.client = this.registerClient()
         this.connectClient(this.client, info.device)
@@ -74,24 +71,24 @@ export class PeakLin extends LinBase {
         LIN.LIN_RegisterFrameId(this.client, info.device.handle, 0, 0x3F)
         LIN.CreateTSFN(this.client, this.info.id, this.callback.bind(this))
         this.log = new LinLOG('PEAK', info.name, this.event)
-        this.startTs=getTsUs()
+        this.startTs = getTsUs()
         // this.getEntrys()
         // this.wakeup()
     }
-    setEntry(frameId:number,length:number,dir:LinDirection,checksumType:LinChecksumType,initData:Buffer,flag:number){
-        const entry=new LIN.TLINFrameEntry()
-        entry.FrameId=frameId
-        entry.Length=length
-        entry.Direction=dir==LinDirection.SEND?1:(dir==LinDirection.RECV?2:3)
-        entry.ChecksumType=checksumType==LinChecksumType.CLASSIC?1:2
-        entry.Flags=flag
-        const ia=LIN.ByteArray.frompointer(entry.InitialData)
-        for(let i=0;i<length;i++){
-            ia.setitem(i,initData[i])
+    setEntry(frameId: number, length: number, dir: LinDirection, checksumType: LinChecksumType, initData: Buffer, flag: number) {
+        const entry = new LIN.TLINFrameEntry()
+        entry.FrameId = frameId
+        entry.Length = length
+        entry.Direction = dir == LinDirection.SEND ? 1 : (dir == LinDirection.RECV ? 2 : 3)
+        entry.ChecksumType = checksumType == LinChecksumType.CLASSIC ? 1 : 2
+        entry.Flags = flag
+        const ia = LIN.ByteArray.frompointer(entry.InitialData)
+        for (let i = 0; i < length; i++) {
+            ia.setitem(i, initData[i])
         }
-        const result=LIN.LIN_SetFrameEntry(this.info.device.handle,entry)
-        if(result!=0){
-            throw new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR,undefined,err2Str(result))
+        const result = LIN.LIN_SetFrameEntry(this.info.device.handle, entry)
+        if (result != 0) {
+            throw new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, undefined, err2Str(result))
         }
     }
     async callback() {
@@ -99,14 +96,14 @@ export class PeakLin extends LinBase {
         const recvMsg = new LIN.TLINRcvMsg()
         const ret = LIN.LIN_Read(this.client, recvMsg)
         if (ret == 0) {
-           
+
             let ts = recvMsg.TimeStamp
-            if(!this.offsetInit){
-                this.offsetTs=ts-(getTsUs()-this.startTs)
-                this.offsetInit=true
+            if (!this.offsetInit) {
+                this.offsetTs = ts - (getTsUs() - this.startTs)
+                this.offsetInit = true
             }
-            ts-=this.offsetTs
-            
+            ts -= this.offsetTs
+
             if (recvMsg.Type == 0) {
                 //mstStandard
                 const a = new LIN.ByteArray.frompointer(recvMsg.Data)
@@ -118,15 +115,15 @@ export class PeakLin extends LinBase {
 
 
                 const msg: LinMsg = {
-                    frameId: recvMsg.FrameId&0x3f,
+                    frameId: recvMsg.FrameId & 0x3f,
                     data: data,
                     direction: recvMsg.Direction == 1 ? LinDirection.SEND : (recvMsg.Direction == 2 ? LinDirection.RECV : LinDirection.RECV_AUTO_LEN),
                     checksumType: recvMsg.ChecksumType == 1 ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED,
                     checksum: recvMsg.Checksum,
-                  
+
                 }
-                if(recvMsg.ErrorFlags==0){
-                    this.lastFrame.set(msg.frameId,msg)
+                if (recvMsg.ErrorFlags == 0) {
+                    this.lastFrame.set(msg.frameId, msg)
                 }
                 const error: string[] = []
                 const handle = () => {
@@ -162,14 +159,14 @@ export class PeakLin extends LinBase {
                         error.push(' Response was received from other station')
                     }
                 }
-               
+
                 if (this.pendingPromise && this.pendingPromise.sendMsg.frameId == (msg.frameId & 0x3f)) {
                     if (recvMsg.ErrorFlags != 0) {
                         handle()
-                        this.log.error(ts, error.join(', '))
+                        this.log.error(ts, error.join(', '), this.pendingPromise.sendMsg)
                         this.pendingPromise.reject(new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, msg, error.join(', ')))
                     } else {
-                        this.log.linBase(this.pendingPromise.sendMsg,ts)
+                        this.log.linBase(this.pendingPromise.sendMsg, ts)
                         this.event.emit(`${msg.frameId}`, msg)
                         this.pendingPromise.resolve(msg, ts)
                     }
@@ -179,15 +176,15 @@ export class PeakLin extends LinBase {
                         handle()
                         this.log.error(ts, error.join(', '))
                     } else {
-                        this.log.linBase(msg,ts)
+                        this.log.linBase(msg, ts)
                         this.event.emit(`${msg.frameId}`, msg)
                     }
                 }
 
             } else if (recvMsg.Type == 1) {
-                this.log.linBase('busSleep',ts)
+                this.log.linBase('busSleep', ts)
             } else if (recvMsg.Type == 2) {
-                this.log.linBase('busWakeUp',ts)
+                this.log.linBase('busWakeUp', ts)
             } else {
                 this.log.error(ts, 'internal error')
             }
@@ -213,14 +210,14 @@ export class PeakLin extends LinBase {
 
     }
     async _write(m: LinMsg): Promise<number> {
-        const msg = new LIN.TLINMsg()
-        msg.FrameId = getPID(m.frameId)
-        msg.Length = Math.min(m.data.length, 8)
-        msg.Direction = m.direction == LinDirection.SEND ? 1 : (m.direction == LinDirection.RECV ? 2 : 3)
-        msg.ChecksumType = m.checksumType == LinChecksumType.CLASSIC ? 1 : 2
+
         return new Promise<number>((resolve, reject) => {
             let result = 0
-
+            const msg = new LIN.TLINMsg()
+            msg.FrameId = getPID(m.frameId)
+            msg.Length = Math.min(m.data.length, 8)
+            msg.Direction = m.direction == LinDirection.SEND ? 1 : (m.direction == LinDirection.RECV ? 2 : 3)
+            msg.ChecksumType = m.checksumType == LinChecksumType.CLASSIC ? 1 : 2
             if (this.mode == LinMode.MASTER) {
                 if (this.pendingPromise != undefined) {
                     reject(new LinError(LIN_ERROR_ID.LIN_BUS_BUSY, m))
@@ -255,24 +252,30 @@ export class PeakLin extends LinBase {
 
             } else {
                 //set entry
-                
+
                 const entry = new LIN.TLINFrameEntry()
                 entry.FrameId = m.frameId
                 entry.Direction = m.direction == LinDirection.SEND ? 1 : (m.direction == LinDirection.RECV ? 2 : 3)
                 entry.ChecksumType = m.checksumType == LinChecksumType.CLASSIC ? 1 : 2
                 entry.Length = m.data.length
-                entry.Flags=LIN.FRAME_FLAG_RESPONSE_ENABLE|LIN.FRAME_FLAG_IGNORE_INIT_DATA
+                entry.Flags = LIN.FRAME_FLAG_RESPONSE_ENABLE | LIN.FRAME_FLAG_IGNORE_INIT_DATA
                 result = LIN.LIN_SetFrameEntry(this.info.device.handle, entry)
                 if (result != 0) {
                     reject(new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, m, err2Str(result)))
                     return
                 }
                 //update entry
-                const a=new LIN.ByteArray(m.data.length)
-                for(let i=0;i<m.data.length;i++){
-                    a.setitem(i,m.data[i])
+                const a = new LIN.ByteArray(m.data.length)
+                for (let i = 0; i < m.data.length; i++) {
+                    a.setitem(i, m.data[i])
                 }
-                result = LIN.LIN_UpdateByteArray(this.client, this.info.device.handle, m.frameId,0,m.data.length,a.cast())
+                result = LIN.LIN_UpdateByteArray(this.client, this.info.device.handle, m.frameId, 0, m.data.length, a.cast())
+                if (result != 0) {
+                    reject(new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, m, err2Str(result)))
+                    return
+                }else{
+                    resolve(0)
+                }
             }
         })
 
@@ -285,10 +288,12 @@ export class PeakLin extends LinBase {
     }
     async write(m: LinMsg): Promise<number> {
         return new Promise<number>((resolve, reject) => {
+           
             this.queue.push({ resolve, reject, data: m })
+            
         })
     }
-    read(frameId:number){
+    read(frameId: number) {
         return this.lastFrame.get(frameId)
     }
     wakeup() {

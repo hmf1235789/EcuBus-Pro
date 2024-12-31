@@ -73,14 +73,14 @@ import saveIcon from '@iconify/icons-material-symbols/save'
 
 import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds';
 import { useDataStore } from '@r/stores/data';
-import { LinMsg } from 'nodeCan/lin';
+import { LinDirection, LinMsg } from 'nodeCan/lin';
 
 
 interface LogData {
    dir?: 'Tx' | 'Rx'|'--',
    data: string,
    ts: string,
-   id: string,
+   id?: string,
    dlc?: number,
    len?: number,
    device: string,
@@ -120,12 +120,16 @@ interface UdsLog {
    data: { service: ServiceItem, ts: number,  recvData?: Uint8Array, msg?: string }
 }
 interface UdsErrorLog {
-   method: 'udsError' | 'udsScript' | 'udsSystem' | 'canError'|'linError',
-   data: { msg: string, ts: number }
+   method: 'udsError' | 'udsScript' | 'udsSystem' | 'canError',
+   data: { msg: string, ts: number}
+}
+interface LinErrorLog{
+   method: 'linError',
+   data: { msg: string, ts: number,data?:LinMsg}
 }
 
 interface LogItem {
-   message: CanBaseLog | UdsLog | UdsErrorLog|IpBaseLog|LinBaseLog,
+   message: CanBaseLog | UdsLog | UdsErrorLog|IpBaseLog|LinBaseLog|LinErrorLog,
    level: string,
    instance: string,
    label: string,
@@ -240,7 +244,7 @@ function _logDisplay(vals: LogItem[]) {
          }else{
             insertData({
                method: val.message.method,
-               dir: '--',
+               dir: val.message.data.direction == LinDirection.SEND ? 'Tx' : 'Rx',
                data: data2str(val.message.data.data),
                ts: (val.message.ts / 1000000).toFixed(3),
                id: '0x' + (val.message.data.frameId.toString(16)),
@@ -320,17 +324,36 @@ function _logDisplay(vals: LogItem[]) {
 
 
       } else if(val.message.method=='linError'){
-         insertData({
-            method: val.message.method,
-            name: '',
-            data: val.message.data.msg,
-            ts: (val.message.data.ts / 1000000).toFixed(3),
-            id: '',
-            len: 0,
-            device: val.label,
-            channel: val.instance,
-            msgType: 'LIN Error',
-         })
+         if(val.message.data.data){
+            insertData({
+               method: val.message.method,
+               name: val.message.data.data.name,
+               data: val.message.data.msg,
+               ts: (val.message.data.ts / 1000000).toFixed(3),
+               id: '0x'+val.message.data.data.frameId?.toString(16),
+               len: val.message.data.data.data.length,
+               dlc: val.message.data.data.data.length,
+               dir: val.message.data.data.direction == LinDirection.SEND ? 'Tx' : 'Rx',
+               device: val.label,
+               channel: val.instance,
+               msgType: 'LIN Error',
+               
+            })
+         }else{
+            insertData({
+               method: val.message.method,
+               name: '',
+               data: val.message.data.msg,
+               ts: (val.message.data.ts / 1000000).toFixed(3),
+               id: '',
+               len: 0,
+               device: val.label,
+               channel: val.instance,
+               msgType: 'LIN Error',
+               
+            })
+         }
+         
       } 
       
       else if (val.message.method == 'udsScript') {
@@ -581,6 +604,12 @@ onUnmounted(() => {
 }
 
 .canError {
+   color: var(--el-color-danger);
+}
+.linError {
+   color: var(--el-color-danger);
+}
+.ipError {
    color: var(--el-color-danger);
 }
 

@@ -338,14 +338,17 @@ export function globalStop(emit = false) {
         clearInterval(value.timer)
         value.socket.close()
     })
+    timerMap.clear()
     canBaseMap.forEach((value) => {
         value.close()
         sysLog.info(`stop can device ${value.info.vendor}-${value.info.handle}`)
     })
     canBaseMap.clear()
 
+    schMap.clear()
     // ethBaseMap.clear()
     linBaseMap.forEach((value) => {
+        value.stopSch()
         value.close()
     })
     linBaseMap.clear()
@@ -380,7 +383,10 @@ ipcMain.handle('ipc-global-stop', async (event, ...arg) => {
 
 
 
-
+interface schType {
+    schName: string
+}
+const schMap = new Map<string, schType>()
 ipcMain.handle('ipc-start-schedule', async (event, ...arg) => {
     const linIa: LinInter = arg[0] as LinInter
     const schName: string = arg[1] as string
@@ -390,13 +396,14 @@ ipcMain.handle('ipc-start-schedule', async (event, ...arg) => {
         const db = global.database.lin[linIa.database]
         linIa.devices.forEach((d) => {
             const base = linBaseMap.get(d)
-
-
             if (base && db) {
                 base.startSch(db, schName, active,0)
+                
             }
         })
     }
+    schMap.set(linIa.id, { schName })
+    
 
 })
 ipcMain.handle('ipc-stop-schedule', async (event, ...arg) => {
@@ -410,13 +417,19 @@ ipcMain.handle('ipc-stop-schedule', async (event, ...arg) => {
 
         if (base) {
             base.stopSch()
+           
         }
 
 
     })
+    schMap.delete(linIa.id)
 
 })
 
+ipcMain.handle('ipc-get-schedule', async (event, ...arg) => {
+    const id=arg[0] as string
+    return schMap.get(id)
+})
 
 ipcMain.handle('ipc-run-sequence', async (event, ...arg) => {
     const projectPath = arg[0] as string

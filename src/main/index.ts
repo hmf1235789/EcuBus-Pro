@@ -81,14 +81,6 @@ class ElectronLog extends Transport {
       ipcc = `ipc-log-${info.message.method}`
     }
     this.win.webContents.send(ipcc, info)
-    if (info.level == 'error') {
-      log.error(info)
-    }
-
-
-
-
-
     callback()
   }
 }

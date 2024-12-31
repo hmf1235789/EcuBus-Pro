@@ -359,14 +359,6 @@ export class DoipLOG {
     // this.event.emit('ip-frame', val)
     return ts
   }
-  // doipTp(data: { dir: 'OUT' | 'IN'; data: Buffer; ts: number; addr: CanAddr }) {
-  //   this.logTp.info(
-  //     {
-  //       method: 'canTp',
-  //       data
-  //     }
-  //   )
-  // }
   error(ts: number, msg?: string) {
     this.log.error(
       {
@@ -414,13 +406,14 @@ export class LinLOG {
     this.event.emit('lin-frame', data)
   }
   
-  error(ts: number, msg?: string) {
+  error(ts: number, msg?: string, data?: LinMsg) {
     this.log.error(
       {
         method: 'linError',
         data: {
-          ts: ts,
-          msg: msg
+          ts,
+          msg,
+          data
         }
       }
     )

@@ -84,6 +84,7 @@ export interface LinMsg {
     database?: LDF
     workNode?: string
     name?: string
+    isEvent?: boolean
 }
 
 export class LinError extends Error {

@@ -46,5 +46,5 @@ ipcMain.handle('ipc-get-version', async (event, arg) => {
 })
 
 ipcMain.on('ipc-open-um', (event, arg) => {
-    shell.openExternal('https://www.yuque.com/frankie-axwvu/mx7w4f')
+    shell.openExternal('https://app.whyengineer.com/docs/um/concept.html')
 })

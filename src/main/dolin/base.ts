@@ -1,4 +1,4 @@
-import { LDF } from "src/renderer/src/database/ldfParse"
+import { EventTriggeredFrame, Frame, LDF } from "src/renderer/src/database/ldfParse"
 import { getFrameData, LinChecksumType, LinDevice, LinDirection, LinMode, LinMsg } from "../share/lin"
 import EventEmitter from "events"
 
@@ -121,20 +121,33 @@ export default abstract class LinBase {
                     frameId: frameId,
                     data: data,
                     direction: LinDirection.SEND,
-                    checksumType: LinChecksumType.CLASSIC // 诊断帧使用classic校验
-                });
+                    checksumType: LinChecksumType.CLASSIC,
+                    name: entry.name
+                }).catch(()=>{
+                    null
+                })
             } else {
                 // 处理普通帧和Sporadic帧
-                let frame = db.frames[entry.name]
+                let frame:Frame = db.frames[entry.name]
                 let frameId: number | undefined
                 let frameData: Buffer | undefined
-                
+               
                 // 检查是否为事件触发帧
                 const eventFrame = db.eventTriggeredFrames[entry.name]
                 if(eventFrame) {
                    
-                   //TODO:
-                    
+                    frameId = eventFrame.frameId
+                    //sub frame max len 
+                    let maxLen = 0
+                    eventFrame.frameNames.forEach(subFrameName=>{
+                        const subFrame = db.frames[subFrameName]
+                        if(subFrame){
+                           if(subFrame.frameSize>maxLen){
+                               maxLen=subFrame.frameSize
+                           }
+                        }
+                    })
+                    frameData = Buffer.alloc(maxLen+1)
                     
                 } 
                 // 如果是Sporadic帧
@@ -157,19 +170,22 @@ export default abstract class LinBase {
                     }
                 }
                 
-                if((frameId || frame?.id) && frame && frame.publishedBy === db.node.master.nodeName) {
+                if((frameId || frame?.id) && (frame||eventFrame)) {
                     const data = frameData || getFrameData(db, frame)
                     const id = frameId || frame.id
                     const checksum = (id==0x3||id==0x3d) ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED
-                    
+                    const dir=eventFrame?LinDirection.RECV:(frame.publishedBy === db.node.master.nodeName ? LinDirection.SEND : LinDirection.RECV)
                     this.write({
                         frameId: id,
                         data: data,
-                        direction: LinDirection.SEND,
+                        direction: dir,
                         checksumType: checksum,
                         database: db,
                         workNode: db.node.master.nodeName,
-                        name: frame.name
+                        name: eventFrame?eventFrame.name:frame.name,
+                        isEvent:eventFrame?true:false
+                    }).catch(()=>{
+                       null
                     })
                 }
             }

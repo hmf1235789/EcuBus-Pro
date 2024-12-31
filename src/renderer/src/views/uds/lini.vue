@@ -107,13 +107,13 @@ const connectV = ref(false)
 const popoverIndex = ref(-1)
 const globalStart = toRef(window, 'globalStart')
 
-const activeSch = ref<string | null>(null)
+const activeSch = ref<string | undefined>(undefined)
 
 function toggleSch(table: string) {
     if (activeSch.value === table) {
         // Stop current schedule
         stopSchedule()
-        activeSch.value = null
+        activeSch.value = undefined
     } else {
         // If there's already a running schedule, stop it first
         if (activeSch.value) {
@@ -381,8 +381,10 @@ const fh = computed(() => Math.ceil(h.value * 2 / 3) + 'px')
 
 onMounted(() => {
     // Get initial active SCH
-    window.electron.ipcRenderer.invoke('ipc-get-active-sch').then((name: string) => {
-        activeSch.value = name
+    window.electron.ipcRenderer.invoke('ipc-get-schedule',dataBase.ia[editIndex.value].id).then((name?: any) => {
+        if(name){
+            activeSch.value = name.schName
+        }
     })
     
 
@@ -399,7 +401,7 @@ watch(globalStart, (v) => {
     if (v === false) {
         if (activeSch.value) {
             stopSchedule()
-            activeSch.value = null
+            activeSch.value = undefined
         }
     }
 })
