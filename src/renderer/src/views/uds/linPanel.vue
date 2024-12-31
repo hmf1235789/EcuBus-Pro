@@ -162,15 +162,7 @@ const tableData = computed(() => {
     for (const [frameName, frame] of Object.entries(db.frames)) {
         // Only show frames where workNode is publisher or subscriber
         if (frame.publishedBy !== workNode.value) {
-            let isSubscriber = false
-            for (const signal of frame.signals) {
-                const signalDef = db.signals[signal.name]
-                if (signalDef.subscribedBy.includes(workNode.value)) {
-                    isSubscriber = true
-                    break
-                }
-            }
-            if (!isSubscriber) continue
+            continue
         }
 
         const frameRow: FrameRow = {

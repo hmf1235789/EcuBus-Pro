@@ -1,6 +1,6 @@
 import { EventEmitter } from "stream"
 import { CanVendor } from "./can"
-import { Frame, LDF } from "src/renderer/src/database/ldfParse"
+import type { Frame, LDF } from "src/renderer/src/database/ldfParse"
 import { isEqual } from "lodash"
 
 
@@ -120,82 +120,49 @@ export function getPID(frameId: number) {
 
 export function getFrameData(db: LDF, frame: Frame): Buffer {
     const data = Buffer.alloc(frame.frameSize)
-    
     for (const signal of frame.signals) {
         const signalDef = db.signals[signal.name]
         if (!signalDef) continue
-
-        const byteOffset = Math.floor(signal.offset / 8)
-        const bitOffset = signal.offset % 8
 
         if (signalDef.singleType === 'ByteArray') {
             // Handle byte array type signals
             const initValues = (signalDef.value!=undefined?signalDef.value:signalDef.initValue) as number[]
             const bytesToCopy = Math.ceil(signalDef.signalSizeBits / 8)
-            
-            if (bitOffset === 0) {
-                // Aligned byte copy
-                for (let i = 0; i < bytesToCopy && i < initValues.length; i++) {
-                    data[byteOffset + i] = initValues[i]
-                }
-            } else {
-                // Unaligned byte copy
-                let remainingBits = signalDef.signalSizeBits
-                for (let i = 0; i < bytesToCopy && i < initValues.length; i++) {
-                    const value = initValues[i]
-                    const bitsInThisByte = Math.min(8 - bitOffset, remainingBits)
-                    
-                    // Clear the target bits first
-                    const mask = ~(((1 << bitsInThisByte) - 1) << bitOffset)
-                    data[byteOffset + i] &= mask
-                    
-                    // Set the new bits
-                    data[byteOffset + i] |= (value << bitOffset) & 0xFF
-                    
-                    // Handle bits that overflow to next byte
-                    if (bitOffset + bitsInThisByte > 8 && byteOffset + i + 1 < data.length) {
-                        const overflowBits = value >> (8 - bitOffset)
-                        data[byteOffset + i + 1] = overflowBits & 0xFF
+            initValues.reverse()
+            for (let i = 0; i < bytesToCopy && i < initValues.length; i++) {
+                const startBit = signal.offset + (i * 8)
+                const byteOffset = Math.floor(startBit / 8)
+                const bitOffset = startBit % 8
+                
+                if (bitOffset === 0) {
+                    // Aligned byte
+                    data[byteOffset] = initValues[i]
+                } else {
+                    // Unaligned byte
+                    data[byteOffset] |= (initValues[i] << bitOffset) & 0xFF
+                    if (byteOffset + 1 < data.length) {
+                        data[byteOffset + 1] = (initValues[i] >> (8 - bitOffset)) & 0xFF
                     }
-                    
-                    remainingBits -= bitsInThisByte
                 }
             }
         } else {
-            // Handle scalar type signals
-            const initValue = (signalDef.value!=undefined?signalDef.value:signalDef.initValue) as number
-            const bitsToWrite = signalDef.signalSizeBits
-
-            if (bitsToWrite <= 8) {
-                // Fits in one byte
-                const mask = ((1 << bitsToWrite) - 1) << bitOffset
-                const value = (initValue << bitOffset) & mask
-                data[byteOffset] &= ~mask // Clear bits
-                data[byteOffset] |= value // Set new value
+            // Handle scalar type signals - process bit by bit
+            const value = (signalDef.value!=undefined?signalDef.value:signalDef.initValue) as number
+            let tempValue = value
+            
+            for (let i = 0; i < signalDef.signalSizeBits; i++) {
+                const targetBit = signal.offset + i
+                const byteOffset = Math.floor(targetBit / 8)
+                const bitOffset = targetBit % 8
                 
-                // Handle overflow to next byte
-                if (bitOffset + bitsToWrite > 8 && byteOffset + 1 < data.length) {
-                    const overflowBits = initValue >> (8 - bitOffset)
-                    data[byteOffset + 1] = overflowBits & 0xFF
-                }
-            } else {
-                // Signal spans multiple bytes
-                let remainingBits = bitsToWrite
-                const valueToWrite = initValue
-                
-                while (remainingBits > 0) {
-                    const currentByte = byteOffset + Math.floor((bitsToWrite - remainingBits) / 8)
-                    const currentBitOffset = (signal.offset + (bitsToWrite - remainingBits)) % 8
-                    const bitsInThisByte = Math.min(8 - currentBitOffset, remainingBits)
-                    const mask =  ((1 << bitsInThisByte) - 1) << currentBitOffset;
-                    const value = ((valueToWrite >> (remainingBits - bitsInThisByte)) << currentBitOffset) & mask
-                    
-                    if (currentByte < data.length) {
-                        data[currentByte] &= ~mask
-                        data[currentByte] |= value
+                if (byteOffset < data.length) {
+                    // Clear bit
+                    data[byteOffset] &= ~(1 << bitOffset)
+                    // Set bit if needed
+                    if ((tempValue & 1) === 1) {
+                        data[byteOffset] |= (1 << bitOffset)
                     }
-                    
-                    remainingBits -= bitsInThisByte
+                    tempValue >>= 1
                 }
             }
         }
