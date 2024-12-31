@@ -161,14 +161,16 @@ export class PeakLin extends LinBase {
                 }
 
                 if (this.pendingPromise && this.pendingPromise.sendMsg.frameId == (msg.frameId & 0x3f)) {
+                    this.pendingPromise.sendMsg.data = msg.data
                     if (recvMsg.ErrorFlags != 0) {
                         handle()
                         this.log.error(ts, error.join(', '), this.pendingPromise.sendMsg)
-                        this.pendingPromise.reject(new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, msg, error.join(', ')))
+                        this.pendingPromise.reject(new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, this.pendingPromise.sendMsg, error.join(', ')))
                     } else {
+
                         this.log.linBase(this.pendingPromise.sendMsg, ts)
-                        this.event.emit(`${msg.frameId}`, msg)
-                        this.pendingPromise.resolve(msg, ts)
+                        this.event.emit(`${msg.frameId}`, this.pendingPromise.sendMsg)
+                        this.pendingPromise.resolve(this.pendingPromise.sendMsg, ts)
                     }
                     this.pendingPromise = undefined
                 } else {

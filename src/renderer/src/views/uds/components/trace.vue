@@ -16,6 +16,11 @@
                         <Icon :icon="circlePlusFilled" />
                      </el-button>
                   </el-tooltip>
+                  <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom" :show-after="1000">
+                     <el-button type="primary" link @click="togglePause">
+                        <Icon :icon="isPaused ? playIcon : pauseIcon" />
+                     </el-button>
+                  </el-tooltip>
                </el-button-group>
                <el-divider direction="vertical" />
                <el-dropdown>
@@ -69,6 +74,8 @@ import info from '@iconify/icons-material-symbols/info-outline'
 import errorIcon from '@iconify/icons-material-symbols/chat-error-outline-sharp'
 import filterIcon from '@iconify/icons-material-symbols/filter-alt-off-outline'
 import saveIcon from '@iconify/icons-material-symbols/save'
+import pauseIcon from '@iconify/icons-material-symbols/pause-circle-outline'
+import playIcon from '@iconify/icons-material-symbols/play-circle-outline'
 
 
 import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds';
@@ -138,6 +145,7 @@ interface LogItem {
 watch(window.globalStart,(val)=>{
     if(val){
         clearLog()
+        isPaused.value=false
     }
 })
 function clearLog() {
@@ -177,6 +185,9 @@ function insertData1(data: LogData[]) {
 
 let logList: LogItem[] = []
 function _logDisplay(vals: LogItem[]) {
+   // Don't process logs when paused
+   if (isPaused.value) return
+
    const logData: LogData[] = []
    const insertData = (data: LogData) => {
       logData.push(data)
@@ -227,7 +238,6 @@ function _logDisplay(vals: LogItem[]) {
         })
      } 
      else if(val.message.method=='linBase'){
-        console.log(val)
          if(typeof val.message.data=='string'){
             insertData({
                method: val.message.method,
@@ -548,6 +558,12 @@ function menuClick(val: any) {
 function saveAll() {
    xGrid.value.exportData()
 }
+
+function togglePause() {
+   isPaused.value = !isPaused.value
+}
+
+const isPaused = ref(false)
 
 onMounted(() => {
    for (const item of checkList.value) {

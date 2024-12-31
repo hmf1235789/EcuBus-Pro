@@ -11,13 +11,13 @@
                 <el-tooltip v-if="errorList.length == 0" effect="light" content="Save Database" placement="bottom"
                     :show-after="1000">
                     <el-button type="success"  link @click="saveDataBase">
-                        <Icon :icon="saveIcon" />
+                        <Icon :icon="saveIcon" :disabled="globalStart"/>
                     </el-button>
                 </el-tooltip>
                 <el-tooltip v-else effect="light" content="Fix errors to save the database" placement="bottom"
                     :show-after="1000">
 
-                    <el-button type="danger"  link  @click="handleTabSwitch('General')">
+                    <el-button type="danger"  link  @click="handleTabSwitch('General')" :disabled="globalStart">
                         <Icon :icon="saveIcon" />
                     </el-button>
 
@@ -105,6 +105,7 @@ const database = useDataStore()
 
 const ldfObj = ref<LDF>() as Ref<LDF>
 
+const globalStart=computed(()=>window.globalStart)
 
 const existed = computed(() => {
     let existed = false

@@ -12,7 +12,7 @@
             <template #default_sch="{ row }">
                 <el-button :type="activeSch === row.Table ? 'danger' : 'primary'" size="small" plain style="width: 100px;" 
                     :disabled="!globalStart" @click="toggleSch(row.Table)">
-                    <Icon :icon="activeSch === row.Table ? stopIcon : sendIcon" />
+                    <Icon :icon="activeSch === row.Table ? stopIcon : sendIcon" style="margin-right: 5px;"/>
                     {{ activeSch === row.Table ? 'Stop SCH' : 'Start SCH' }}
                 </el-button>
             </template>
