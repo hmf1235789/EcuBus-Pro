@@ -47,6 +47,7 @@ export default abstract class LinBase {
         if (this.mode == LinMode.SLAVE) {
             return
         }
+       
         if (this.sch) {
             clearTimeout(this.sch.timer)
             this.sch.lastActiveSchName = this.sch.activeSchName
@@ -205,5 +206,6 @@ export default abstract class LinBase {
                 lastActiveIndex: rIndex
             }
         }
+       
     }
 }

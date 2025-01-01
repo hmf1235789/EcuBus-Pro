@@ -235,7 +235,6 @@ export interface LDF {
     schTables: SchTable[],
     signalEncodeTypes: Record<string,SignalEncodeType>,
     signalRep: Record<string,string[]>,
-    event: any
 }
 
 

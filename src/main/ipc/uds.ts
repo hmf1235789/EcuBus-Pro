@@ -303,12 +303,6 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
 
     global.database = arg[i++]
 
-    //create event for db
-    for (const val of Object.values(global.database)) {
-        for (const sval of Object.values(val)) {
-            sval.event = new EventEmitter()
-        }
-    }
 
     try {
         await globalStart(devices, testers, nodes, projectInfo)

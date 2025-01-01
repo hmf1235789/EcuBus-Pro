@@ -68,13 +68,13 @@ export class LinNodeSocket {
             if (db) {
 
                 this.db = db
-                db.event.on('signal', this.cb)
+                // db.event.on('signal', this.cb)
             }
         }
     }
     close() {
         if (this.db) {
-            this.db.event.removeListener('signal', this.cb)
+            // this.db.event.removeListener('signal', this.cb)
         }
     }
     signalHandle(signalName: string, value: number | number[]) {
@@ -90,8 +90,6 @@ export function updateSignalVal(db: LDF, signalName: string, value: number | num
         const lastValue = signal.value != undefined ? signal.value : signal.initValue
         if (!isEqual(lastValue, value)) {
             signal.update = true
-            // db.event.emit(signalName,value)
-            db.event.emit('signal', signalName, value)
         }
         signal.value = value
     }
