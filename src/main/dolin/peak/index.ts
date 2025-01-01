@@ -226,12 +226,11 @@ export class PeakLin extends LinBase {
                     return
                 }
                 if (m.direction == LinDirection.SEND) {
-                    const a = new LIN.ByteArray.frompointer(msg.Data)
+                    const a = LIN.ByteArray.frompointer(msg.Data)
                     for (let i = 0; i < msg.Length; i++) {
-                        // msg.Data.setitem(i,data[i])
+                        // msg.Data.setitem(i,data[i])  
                         a.setitem(i, m.data[i])
                     }
-
                     result = LIN.LIN_CalculateChecksum(msg)
                     if (result != 0) {
                         reject(new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, m, err2Str(result)))

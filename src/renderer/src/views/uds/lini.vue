@@ -96,7 +96,6 @@ import { cloneDeep } from 'lodash';
 import { onKeyStroke, onKeyUp } from '@vueuse/core';
 import { LinBaseInfo } from 'nodeCan/lin';
 import { getFrameSize, LDF, SchTable } from '@r/database/ldfParse'
-import { LinInter } from 'src/preload/data'
 
 const xGrid = ref()
 // const logData = ref<LogData[]>([])

@@ -410,7 +410,7 @@ const updateSignalValue = (frameName: string, signalName: string, value: number 
         db.signals[signalName].value = value
     }
     if(window.globalStart.value){
-        window.electron.ipcRenderer.invoke('ipc-update-lin-signals', selectedDB.value, signalName, value)
+        window.electron.ipcRenderer.send('ipc-update-lin-signals', selectedDB.value, signalName, value)
     }
 }
 
