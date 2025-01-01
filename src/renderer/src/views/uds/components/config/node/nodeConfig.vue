@@ -86,35 +86,36 @@
 
                 </div>
             </el-tab-pane>
-            <el-tab-pane label="Database" name="Database" v-if="data.type=='lin'">
-                <div style="height: 270px;width: 570px;overflow-y: auto;">
-                    <el-form :model="data" label-width="100px" size="small" :disabled="globalStart">
-                        <el-form-item label="Database" prop="database">
-                         
-                            <el-select  v-model="data.database" placeholder="Database">
-                                <el-option v-for="item in db" :key="item.value" :label="`Lin.${item.label}`" :value="item.value">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                        <el-form-item label="Net Node" prop="workNode">
-                            <el-select v-model="data.workNode" placeholder="Node Name">
-                                <el-option v-for="item in nodesName" :key="item.value" :label="item.label" :value="item.value">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                    </el-form>
-                </div>
-            </el-tab-pane>
+           
             <el-tab-pane label="Connected" name="Connected">
                 <div
                     style="text-align: center;padding-top:10px;padding-bottom: 10px;width:570px;height:250px; overflow: auto;">
 
                     <el-transfer class="canit" style="text-align: left; display: inline-block;"
                         v-model="dataBase.nodes[editIndex].channel" :data="allDeviceLabel"
-                        :titles="['Valid', 'Assigned ']" />
+                        :titles="['Valid', 'Assigned ']" @leftCheckChange="handleLeftCheckChange"/>
                 </div>
             </el-tab-pane>
-
+            <el-tab-pane label="Database" name="Database" v-if="data.type=='lin'">
+                <div style="height: 270px;width: 570px;overflow-y: auto;">
+                    <el-form :model="data" label-width="100px" size="small" :disabled="globalStart||dbName==undefined">
+                        <el-form-item label="Database" prop="database">
+                         
+                            <el-select  v-model="dbName" placeholder="No Database" disabled>
+                                <el-option v-for="item in db" :key="item.value" :label="`Lin.${item.label}`" :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="Net Node" prop="workNode" v-if="dbName">
+                            <el-select v-model="data.workNode" placeholder="Node Name">
+                                <el-option v-for="item in nodesName" :key="item.value" :label="item.label" :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-alert v-else title="Choose database in connected device" type="info" :closable="false"/>
+                    </el-form>
+                </div>
+            </el-tab-pane>
         </el-tabs>
 
 
@@ -123,7 +124,7 @@
 </template>
 <script lang="ts" setup>
 import { ArrowDown } from '@element-plus/icons-vue'
-import { ref, onMounted, onUnmounted, computed, toRef, nextTick, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, toRef, nextTick, watch, watchEffect } from 'vue'
 import { CAN_ID_TYPE, CanBaseInfo, CanDevice, CanInterAction, CanMsgType, getDlcByLen } from 'nodeCan/can';
 import { useDataStore } from '@r/stores/data';
 import buildIcon from '@iconify/icons-material-symbols/build-circle-outline-sharp'
@@ -133,15 +134,21 @@ import dangerIcon from '@iconify/icons-material-symbols/dangerous-outline-rounde
 import newIcon from '@iconify/icons-material-symbols/new-window'
 import { Icon } from '@iconify/vue'
 import { useProjectStore } from '@r/stores/project';
-import { ElMessageBox, FormRules } from 'element-plus';
+import { ElMessageBox, FormRules, TransferKey } from 'element-plus';
 import { cloneDeep } from 'lodash';
 import { TesterInfo } from 'nodeCan/tester';
 
 const activeName = ref('general')
+const props = defineProps<{
+    editIndex: string
+    type: string
 
+}>()
 const globalStart = toRef(window, 'globalStart')
-
+const editIndex = toRef(props, 'editIndex')
+const dataBase = useDataStore()
 const buildStatus = ref<string | undefined>()
+const data = toRef(dataBase.nodes, editIndex.value)
 const nameCheck = (rule: any, value: any, callback: any) => {
     if (value) {
         for (const key of Object.keys(dataBase.nodes)) {
@@ -155,6 +162,14 @@ const nameCheck = (rule: any, value: any, callback: any) => {
         callback(new Error("Please input node name"));
     }
 };
+
+
+const handleLeftCheckChange=(value: TransferKey[], movedKeys?: TransferKey[])=>{
+
+    if(value.length>1){
+        value.splice(0,1)
+    }
+}
 const rules: FormRules = {
     "name": [
         {
@@ -290,13 +305,28 @@ const db=computed(()=>{
     }
     return list
 })
+
+const dbName=ref('')
+const getUsedDb=()=>{
+    const device=data.value.channel[0]
+    if(device&&dataBase.devices[device].type=='lin'&&dataBase.devices[device].linDevice&&dataBase.devices[device].linDevice.database){
+        dbName.value=dataBase.devices[device].linDevice.database
+    }else{
+        dbName.value=''
+    }
+}
+watchEffect(()=>{
+    getUsedDb()
+})
+
+
 const nodesName=computed(()=>{
     const list:{
         label:string,
         value:string
     }[]=[]
-    if(props.type=='lin'&&data.value.type=='lin'&&data.value.database){
-        const db=dataBase.database.lin[data.value.database]
+    if(dbName.value&&props.type=='lin'&&data.value.type=='lin'){
+        const db=dataBase.database.lin[dbName.value]
         list.push({
             label:`${db.node.master.nodeName} (Master)`,
             value:db.node.master.nodeName
@@ -319,7 +349,8 @@ interface Option {
 const allDeviceLabel = computed(() => {
     const dd: Option[] = []
     for (const d of Object.keys(allDevices.value)) {
-        dd.push({ key: d, label: allDevices.value[d].name, disabled: globalStart.value })
+        const deviceDisabled=(data.value.channel.length>=maxDeviceNum.value)&&(data.value.channel.indexOf(d) == -1)
+        dd.push({ key: d, label: allDevices.value[d].name, disabled: globalStart.value||(deviceDisabled) })
     }
     return dd
 })
@@ -343,18 +374,19 @@ const allDevices = computed(() => {
 
 
 
-const props = defineProps<{
-    editIndex: string
-    type: string
 
-}>()
+
+const maxDeviceNum=computed(()=>{
+    if(props.type=='lin'){
+        return 1
+    }
+    return Infinity
+})
 // const start = toRef(props, 'start')
 // const h = toRef(props, 'height')
 
-const editIndex = toRef(props, 'editIndex')
-const dataBase = useDataStore()
 
-const data = toRef(dataBase.nodes, editIndex.value)
+
 
 
 
@@ -363,7 +395,6 @@ const data = toRef(dataBase.nodes, editIndex.value)
 
 onMounted(() => {
     refreshBuildStatus()
-
 })
 
 

@@ -1,5 +1,5 @@
 import { EventTriggeredFrame, Frame, LDF } from "src/renderer/src/database/ldfParse"
-import { getFrameData, LinChecksumType, LinDevice, LinDirection, LinMode, LinMsg } from "../share/lin"
+import { getFrameData, LinBaseInfo, LinChecksumType, LinDevice, LinDirection, LinMode, LinMsg } from "../share/lin"
 import EventEmitter from "events"
 
 export default abstract class LinBase {
@@ -11,6 +11,7 @@ export default abstract class LinBase {
         lastActiveSchName: string
         lastActiveIndex: number
     }
+    abstract info:LinBaseInfo
     nodeList: {
         db: LDF,
         nodeName: string

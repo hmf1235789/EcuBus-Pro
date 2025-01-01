@@ -497,15 +497,11 @@ export class Node extends udsCeil {
   getNodeBottomName(){
    
       this.rect.attr('labelBottom/text', '')
-      if(this.ig.database&&this.ig.workNode){
-        const db=get(useDataStore().database,`${this.ig.type}.${this.ig.database}`)
-        if(db){
-          const upperFirstChar = (str: string) => {
-            return str.charAt(0).toUpperCase() + str.slice(1)
-          }
-          const txt=`${upperFirstChar(this.ig.type)}.${db.name} (${this.ig.workNode})`
+      if(this.ig.workNode){
+     
+          const txt=`${this.ig.workNode}`
           return txt
-        }
+        
       
       }
     
@@ -681,8 +677,6 @@ export class UDSView {
         name:item.name,
         params:{
           editIndex:id,
-          database:item.database,
-          workNode:item.workNode
         }
       })
       

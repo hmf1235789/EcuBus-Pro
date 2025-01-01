@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, toRef, nextTick, watch } from 'vue'
+import { ref, onMounted, computed, toRef, nextTick, watch, watchEffect } from 'vue'
 import { VxeGrid, VxeGridProps } from 'vxe-table'
 import { Icon } from '@iconify/vue'
 import databaseIcon from '@iconify/icons-material-symbols/database'
@@ -81,17 +81,20 @@ const h = toRef(props, 'height')
 const editIndex = toRef(props, 'editIndex')
 const dataBase = useDataStore()
 
-const selectedDB = computed({
-    get: () => dataBase.nodes[editIndex.value]?.database || '',
-    set: (value) => {
-        if (dataBase.nodes[editIndex.value]) {
-            if(dataBase.nodes[editIndex.value].database!=value){
-                dataBase.nodes[editIndex.value].database = value
-            }
-        }
-    }
-})
 
+
+const selectedDB=ref('')
+const getUsedDb=()=>{
+    const device=dataBase.nodes[editIndex.value].channel[0]
+    if(device&&dataBase.devices[device].type=='lin'&&dataBase.devices[device].linDevice&&dataBase.devices[device].linDevice.database){
+        selectedDB.value=dataBase.devices[device].linDevice.database
+    }else{
+        selectedDB.value=''
+    }
+}
+watchEffect(()=>{
+    getUsedDb()
+})
 const selectedDBName = computed(() => {
     if (!selectedDB.value || !dataBase.database.lin[selectedDB.value]) return ''
     return `Lin.${dataBase.database.lin[selectedDB.value].name}`
@@ -447,6 +450,7 @@ onMounted(() => {
             rawValues.value[`${frame.name}-${signal.name}`] = signal.rawValue
         }
     }
+    getUsedDb()
 })
 </script>
 

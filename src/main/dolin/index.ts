@@ -63,14 +63,14 @@ export class LinNodeSocket {
     db?: LDF
     constructor(private base: LinBase, private nodeItem: LinNode) {
         this.cb = this.signalHandle.bind(this)
-        if (nodeItem.database) {
-            const db = global.database.lin[nodeItem.database]
-            if (db) {
+        // if (nodeItem.database) {
+        //     const db = global.database.lin[nodeItem.database]
+        //     if (db) {
 
-                this.db = db
-                // db.event.on('signal', this.cb)
-            }
-        }
+        //         this.db = db
+        //         // db.event.on('signal', this.cb)
+        //     }
+        // }
     }
     close() {
         if (this.db) {

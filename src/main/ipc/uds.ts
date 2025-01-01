@@ -386,17 +386,19 @@ ipcMain.handle('ipc-start-schedule', async (event, ...arg) => {
     const schName: string = arg[1] as string
     const active = arg[2]
     //find linBase by linia devices
-    if (linIa.database) {
-        const db = global.database.lin[linIa.database]
+   
+       
         linIa.devices.forEach((d) => {
             const base = linBaseMap.get(d)
-            if (base && db) {
+           
+            if (base&&base.info.database) {
+                const db = global.database.lin[base.info.database]
                 base.startSch(db, schName, active,0)
-                
+                schMap.set(base.info.id, { schName })   
             }
         })
-    }
-    schMap.set(linIa.id, { schName })
+    
+ 
     
 
 })

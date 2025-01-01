@@ -63,7 +63,7 @@ export class PeakLin extends LinBase {
     offsetInit = false
     log: LinLOG
 
-    constructor(private info: LinBaseInfo) {
+    constructor(public info: LinBaseInfo) {
         super(info.mode)
         this.client = this.registerClient()
         this.connectClient(this.client, info.device)

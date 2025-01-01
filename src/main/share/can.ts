@@ -208,7 +208,6 @@ export interface CanNode{
   channel:string[]
   script?:string
   attachTester?:string
-  database?:string
   workNode?:string
 }
 

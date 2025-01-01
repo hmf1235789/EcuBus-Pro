@@ -21,6 +21,8 @@ export interface LinBaseInfo {
     mode: LinMode
     vendor: CanVendor
     name: string
+    database?: string
+    workNode?: string
 }
 
 
@@ -32,7 +34,6 @@ export interface LinNode {
     channel: string[]
     script?: string
     attachTester?: string
-    database?: string
     workNode?: string
 }
 

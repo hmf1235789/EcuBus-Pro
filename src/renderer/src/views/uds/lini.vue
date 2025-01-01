@@ -34,7 +34,7 @@
                     <el-divider direction="vertical"></el-divider>
                     <Icon :icon="databaseIcon"/>
                     <span>Database</span>
-                    <el-select v-model="selectedDB" size="small" placeholder="Select Database" clearable style="width: 200px;">
+                    <el-select v-model="dbName" disabled size="small" placeholder="Select Database In Device" clearable style="width: 200px;">
                         <el-option v-for="(db, key) in databases" :key="key" :label="`Lin.${db.name}`" :value="key"></el-option>
                     </el-select>
                 </div>
@@ -64,7 +64,7 @@
             <div
                 style="text-align: center;padding-top:10px;padding-bottom: 10px;width:570px;height:250px; overflow: auto;">
 
-                <el-transfer class="canit" style="text-align: left; display: inline-block;"
+                <el-transfer class="canit" style="text-align: left; display: inline-block;" @leftCheckChange="handleLeftCheckChange"
                     v-model="dataBase.ia[editIndex].devices" :data="allDeviceLabel" :titles="['Valid', 'Assigned ']" />
             </div>
         </el-dialog>
@@ -74,7 +74,7 @@
 </template>
 <script lang="ts" setup>
 import { ArrowDown } from '@element-plus/icons-vue'
-import { ref, onMounted, onUnmounted, computed, toRef, nextTick, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, toRef, nextTick, watch, watchEffect } from 'vue'
 import { VxeGridProps } from 'vxe-table'
 import { VxeGrid, VxeTable, VxeColumn } from 'vxe-table'
 import { Icon } from '@iconify/vue'
@@ -96,6 +96,7 @@ import { cloneDeep } from 'lodash';
 import { onKeyStroke, onKeyUp } from '@vueuse/core';
 import { LinBaseInfo } from 'nodeCan/lin';
 import { getFrameSize, LDF, SchTable } from '@r/database/ldfParse'
+import { TransferKey } from 'element-plus'
 
 const xGrid = ref()
 // const logData = ref<LogData[]>([])
@@ -201,25 +202,15 @@ const h = toRef(props, 'height')
 const editIndex = toRef(props, 'editIndex')
 const dataBase = useDataStore()
 
-const selectedDB = computed({
-    get: () => dataBase.ia[editIndex.value]?.database || '',
-    set: (value) => {
-        if (dataBase.ia[editIndex.value]) {
-            if(dataBase.ia[editIndex.value].database!=value){
-                dataBase.ia[editIndex.value].database = value
-            }
-        }
-    }
-})
 
 const databases = computed(() => dataBase.database.lin || {})
 // 修改 tableData computed
 const tableData = computed(() => {
     const tables:Table[] = []
-    if (!selectedDB.value || !dataBase.database.lin[selectedDB.value]) {
+    if (!dbName.value || !dataBase.database.lin[dbName.value]) {
         return tables
     }
-    const db = dataBase.database.lin[selectedDB.value]
+    const db = dataBase.database.lin[dbName.value]
     let i = 0;
 
     for (const table of db.schTables) {
@@ -232,7 +223,7 @@ const tableData = computed(() => {
         let totalBytes = 0
         for (const [index, entry] of table.entries.entries()) {
             const key=`${table.name}-${index}`
-            const frameSize = entry.isCommand ? 8 : getFrameSize(dataBase.database.lin[selectedDB.value], entry.name)
+            const frameSize = entry.isCommand ? 8 : getFrameSize(dataBase.database.lin[dbName.value], entry.name)
             totalBytes += frameSize
             t.childList.push({
                 Table: entry.name,
@@ -252,7 +243,12 @@ const tableData = computed(() => {
     return tables
 })
 
+const handleLeftCheckChange=(value: TransferKey[], movedKeys?: TransferKey[])=>{
 
+if(value.length>1){
+    value.splice(0,1)
+}
+}
 
 // 修改 getFrameId 函数处理 sporadic frames
 function getFrameId(entry: any): string {
@@ -260,7 +256,7 @@ function getFrameId(entry: any): string {
         return '0x3C'
     }
     
-    const db = dataBase.database.lin[selectedDB.value]
+    const db = dataBase.database.lin[dbName.value]
     // 检查是否是 sporadic frame
     if (entry.name in db.sporadicFrames) {
         // 获取所有关联帧的ID并组合
@@ -290,7 +286,7 @@ function getFrameType(entry: any): string {
     if (entry.isCommand) {
         return 'Command'
     }
-    const db = dataBase.database.lin[selectedDB.value]
+    const db = dataBase.database.lin[dbName.value]
     if (entry.name in db.frames) {
         return 'Unconditional'
     }
@@ -378,6 +374,43 @@ const childGridOptions = computed(() => {
 
 const fh = computed(() => Math.ceil(h.value * 2 / 3) + 'px')
 
+
+
+// Watch globalStart, stop all SCH when globalStart is stopped
+watch(globalStart, (v) => {
+    if (v === false) {
+        if (activeSch.value) {
+            stopSchedule()
+            activeSch.value = undefined
+        }
+    }
+})
+
+const dbName=ref('')
+const getUsedDb=()=>{
+    const device=dataBase.ia[editIndex.value].devices[0]
+    if(device&&dataBase.devices[device].type=='lin'&&dataBase.devices[device].linDevice&&dataBase.devices[device].linDevice.database){
+        dbName.value=dataBase.devices[device].linDevice.database
+    }else{
+        dbName.value=''
+    }
+}
+watchEffect(()=>{
+    getUsedDb()
+})
+// 修改 watch,数据库切换时清空激活状态
+watch(()=>dbName, () => {
+    activeStates.value = {}
+    nextTick(()=>{
+        //set activeStates all true
+        for (const table of tableData.value) {
+            for (const entry of table.childList) {
+                activeStates.value[`${table.Table}-${entry.index}`] = true
+            }
+        }
+    })
+})
+
 onMounted(() => {
     // Get initial active SCH
     window.electron.ipcRenderer.invoke('ipc-get-schedule',dataBase.ia[editIndex.value].id).then((name?: any) => {
@@ -393,30 +426,9 @@ onMounted(() => {
             activeStates.value[`${table.Table}-${entry.index}`] = true
         }
     }
+    getUsedDb()
 })
 
-// Watch globalStart, stop all SCH when globalStart is stopped
-watch(globalStart, (v) => {
-    if (v === false) {
-        if (activeSch.value) {
-            stopSchedule()
-            activeSch.value = undefined
-        }
-    }
-})
-
-// 修改 watch,数据库切换时清空激活状态
-watch(selectedDB, () => {
-    activeStates.value = {}
-    nextTick(()=>{
-        //set activeStates all true
-        for (const table of tableData.value) {
-            for (const entry of table.childList) {
-                activeStates.value[`${table.Table}-${entry.index}`] = true
-            }
-        }
-    })
-})
 
 </script>
 <style lang="scss">

@@ -16,7 +16,6 @@ export interface CanInter {
     name: string,
     devices: string[],
     action: CanInterAction[]
-    database?: string
 }
 
 export interface LinInter {
@@ -25,7 +24,6 @@ export interface LinInter {
     devices: string[],
     type: 'lin',
     action: any[],
-    database?: string
 }
 export type Inter = CanInter | LinInter
 export type NodeItem = CanNode | EthNode | LinNode

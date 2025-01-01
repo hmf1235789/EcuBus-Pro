@@ -14,8 +14,7 @@
     </el-form-item>
     <el-form-item label="Device" prop="device.handle" required>
       <el-select v-model="data.device.handle" :loading="deviceLoading" style="width: 300px">
-        <el-option v-for="item in deviceList" :key="item.handle" :label="item.label" :value="item.handle"
-           />
+        <el-option v-for="item in deviceList" :key="item.handle" :label="item.label" :value="item.handle" />
         <template #footer>
           <el-button text style="float: right; margin-bottom: 10px" size="small" @click="getDevice(true)"
             icon="RefreshRight">
@@ -24,7 +23,7 @@
         </template>
       </el-select>
     </el-form-item>
-    
+
     <el-divider content-position="left">
       Lin Parameters
     </el-divider>
@@ -32,7 +31,7 @@
 
       <el-col :span="12">
         <el-form-item label="Lin Mode" prop="mode" required>
-          <el-select v-model="data.mode" >
+          <el-select v-model="data.mode">
             <el-option label="Master" value="MASTER" />
             <el-option label="Slave" value="SLAVE" />
           </el-select>
@@ -48,8 +47,24 @@
       </el-col>
     </el-form-item>
 
-    
+    <el-divider content-position="left">
+      Database
+    </el-divider>
+    <el-form-item label="Database" prop="database">
+      <el-select v-model="data.database" placeholder="No Database" clearable style="width: 300px" @change="clearDatabase">
+        <el-option v-for="item in dbList" :key="item.value" :label="`Lin.${item.label}`" :value="item.value">
+        </el-option>
+      </el-select>
+    </el-form-item>
+    <el-form-item label="Node" prop="workNode">
+      <el-select v-model="data.workNode" placeholder="Node Name" style="width: 300px" >
+        <el-option v-for="item in filteredNodesName" :key="item.value" :label="item.label" :value="item.value">
+        </el-option>
+      </el-select>
+    </el-form-item>
 
+
+    <el-divider />
 
     <el-divider />
     <el-form-item label-width="0">
@@ -103,13 +118,52 @@ const data = ref<LinBaseInfo>({
   id: '',
   vendor: props.vendor,
   baudRate: 19200,
-  mode: LinMode.MASTER
+  mode: LinMode.MASTER,
+  database: '',
+  workNode: '',
 });
 
+const dbList = computed(() => {
+  const list: { label: string; value: string }[] = [];
+  for (const key of Object.keys(devices.database.lin)) {
+    list.push({
+      label: devices.database.lin[key].name,
+      value: key
+    });
+  }
+  return list;
+});
 
+const filteredNodesName = computed(() => {
+  const list: { label: string; value: string }[] = [];
+  if (data.value.database) {
+    const db = devices.database.lin[data.value.database];
+    if (data.value.mode === 'MASTER') {
+      list.push({
+        label: `${db.node.master.nodeName} (Master)`,
+        value: db.node.master.nodeName
+      });
+    } else {
+      // For SLAVE mode, only show slave nodes
+      for (const n of db.node.salveNode) {
+        list.push({
+          label: `${n} (Slave)`,
+          value: n
+        });
+      }
+    }
+  }
+  return list;
+});
 
+// Add watcher to reset workNode when mode changes
+watch([() => data.value.mode], () => {
+  data.value.workNode = ''; // Reset node selection when mode changes
+});
 
-
+function clearDatabase(){
+  data.value.workNode = '';
+}
 
 const deviceList = ref<LinDevice[]>([]);
 const deviceLoading = ref(false);
@@ -143,17 +197,32 @@ const nameCheck = (rule: any, value: any, callback: any) => {
 };
 
 
-const rules: FormRules<LinBaseInfo> = {
-  "name": [{ required: true, trigger: "blur", validator: nameCheck }],
-  "device.handle": [
-    {
-      required: true,
-      message: "Please select device",
-      trigger: "change",
-    },
-  ],
- 
-};
+const rules = computed(() => {
+  return {
+    "name": [{ required: true, trigger: "blur", validator: nameCheck }],
+    "device.handle": [
+      {
+        required: true,
+        message: "Please select device",
+        trigger: "change",
+      },
+    ],
+    "database": [
+      {
+
+        message: "Please select database",
+        trigger: "change",
+      },
+    ],
+    "workNode": [
+      {
+        required: data.value.database ? true : false,
+        message: "Please select node",
+        trigger: "change",
+      },
+    ],
+  }
+});
 
 
 
@@ -175,7 +244,7 @@ const onSubmit = () => {
         emits('change', id, data.value.name)
       } else {
         data.value.id = editIndex.value;
-      
+
         assign(devices.devices[editIndex.value].linDevice, data.value);
         emits('change', editIndex.value, data.value.name)
       }
