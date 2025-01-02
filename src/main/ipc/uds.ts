@@ -15,10 +15,11 @@ import { EthAddr, EthBaseInfo, EthNode } from '../share/doip'
 import { NodeEthItem } from '../doip/nodeItem'
 import { getCanDevices, openCanDevice } from '../docan/can'
 import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
-import { getLinDevices, openLinDevice, updateSignalVal } from '../dolin'
+import { getLinDevices, NodeLinItem, openLinDevice, updateSignalVal } from '../dolin'
 import EventEmitter from 'events'
 import LinBase from '../dolin/base'
 import { LinInter } from 'src/preload/data'
+import { LinNode } from '../share/lin'
 
 const libPath = path.dirname(dllLib)
 log.info('dll lib path:', libPath)
@@ -130,7 +131,7 @@ let cantps: CAN_TP[] = []
 let doips: DOIP[] = []
 
 
-async function globalStart(devices: Record<string, UdsDevice>, testers: Record<string, TesterInfo>, nodes: Record<string, CanNode | EthNode>, projectInfo: { path: string, name: string }) {
+async function globalStart(devices: Record<string, UdsDevice>, testers: Record<string, TesterInfo>, nodes: Record<string, CanNode | EthNode| LinNode>, projectInfo: { path: string, name: string }) {
     let activeKey = ''
     try {
         for (const key in devices) {
@@ -269,6 +270,17 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
             } catch (err: any) {
                 nodeItem.log?.systemMsg(formatError(err), 0, 'error')
                 nodeItem.close()
+            }
+        }else if (node.type == 'lin') {
+            const nodeItem = new NodeLinItem(node, linBaseMap, projectInfo.path, projectInfo.name, testers)
+
+            try {
+                await nodeItem.start()
+                nodeMap.set(key, nodeItem)
+            } catch (err: any) {
+                nodeItem.log?.systemMsg(formatError(err), 0, 'error')
+                nodeItem.close()
+
             }
         }
 

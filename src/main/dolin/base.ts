@@ -11,28 +11,35 @@ export default abstract class LinBase {
         lastActiveSchName: string
         lastActiveIndex: number
     }
-    abstract info:LinBaseInfo
+    abstract info: LinBaseInfo
     nodeList: {
         db: LDF,
         nodeName: string
     }[] = []
+    
     constructor(info: LinBaseInfo) {
-       
+
 
     }
     abstract event: EventEmitter
     static getValidDevices(): LinDevice[] {
         throw new Error('Method not implemented.')
     }
-    setupEntry(workNode:string){
-        if(this.info.mode==LinMode.SLAVE&&this.info.database){
-            const db=global.database.lin[this.info.database]
-            if(db){
+    attachCanMessage(cb: (msg: LinMsg) => void) {
+        this.event.on('lin-frame', cb)
+    }
+    detachCanMessage(cb: (msg: LinMsg) => void) {
+        this.event.off('lin-frame', cb)
+    }
+    setupEntry(workNode: string){
+        if (this.info.mode == LinMode.SLAVE && this.info.database) {
+            const db = global.database.lin[this.info.database]
+            if (db) {
                 //setup entry for unconditional frames
                 for (const frameName in db.frames) {
                     const frame = db.frames[frameName]
                     if (frame.publishedBy === workNode) {
-                        const checksum = (frame.id == 0x3c || frame.id == 0x3d) ? 
+                        const checksum = (frame.id == 0x3c || frame.id == 0x3d) ?
                             LinChecksumType.CLASSIC : LinChecksumType.ENHANCED
                         this.setEntry(
                             frame.id,
@@ -49,10 +56,10 @@ export default abstract class LinBase {
                 for (const eventFrameName in db.eventTriggeredFrames) {
                     const eventFrame = db.eventTriggeredFrames[eventFrameName]
                     // Check if any associated frame is published by this node
-                    const containsPublishedFrame = eventFrame.frameNames.some(fname => 
+                    const containsPublishedFrame = eventFrame.frameNames.some(fname =>
                         db.frames[fname]?.publishedBy === workNode
                     )
-                    
+
                     if (containsPublishedFrame) {
                         // Find max frame size among associated frames
                         let maxFrameSize = 0
@@ -69,14 +76,18 @@ export default abstract class LinBase {
                             LinDirection.SEND,
                             LinChecksumType.ENHANCED,
                             Buffer.alloc(maxFrameSize + 1),
-                            2|4
+                            2 | 4
                         )
                     }
                 }
+
+
+                return db
             }
         }
+        return undefined
     }
-
+    
     abstract close(): void
     abstract setEntry(frameId: number, length: number, dir: LinDirection, checksumType: LinChecksumType, initData: Buffer, flag: number): void
     // abstract registerNode(nodeName:string):void
@@ -100,7 +111,7 @@ export default abstract class LinBase {
         if (this.info.mode == LinMode.SLAVE) {
             return
         }
-       
+
         if (this.sch) {
             clearTimeout(this.sch.timer)
             this.sch.lastActiveSchName = this.sch.activeSchName
@@ -259,6 +270,6 @@ export default abstract class LinBase {
                 lastActiveIndex: rIndex
             }
         }
-       
+
     }
 }

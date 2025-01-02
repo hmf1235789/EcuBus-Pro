@@ -85,6 +85,7 @@ export interface LinMsg {
     workNode?: string
     name?: string
     isEvent?: boolean
+    uuid?: string
 }
 
 export class LinError extends Error {

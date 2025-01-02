@@ -5,9 +5,12 @@ import path from "path";
 import { getFrameData, getPID, LinBaseInfo, LinChecksumType, LinDevice, LinDirection, LinMode, LinMsg, LinNode } from "../share/lin";
 import { Frame, LDF } from "src/renderer/src/database/ldfParse";
 import EventEmitter from "events";
-import { isEqual } from "lodash";
+import { cloneDeep, isEqual } from "lodash";
 import LinBase from "./base";
-
+import { TesterInfo } from "../share/tester";
+import { UdsLOG } from "../log";
+import UdsTester from "../workerClient";
+import fs from 'fs'
 
 
 const libPath = path.dirname(dllLib)
@@ -58,12 +61,51 @@ export function getLinDevices(vendor: string) {
 }
 
 
-export class LinNodeSocket {
-    cb: any
+export class NodeLinItem {
+    private pool?: UdsTester
+    tester?: TesterInfo
+    log?: UdsLOG
     db?: LDF
-    constructor(private base: LinBase, private nodeItem: LinNode) {
-        this.cb = this.signalHandle.bind(this)
-        // if (nodeItem.database) {
+    constructor(
+        public nodeItem: LinNode,
+        private canBaseMap: Map<string, LinBase>,
+        private projectPath: string,
+        private projectName: string,
+        testers: Record<string, TesterInfo>
+    ) {
+
+        const device = canBaseMap.get(nodeItem.channel[0])
+        if (device) {
+            if (nodeItem.workNode) {
+                this.db=device.setupEntry(nodeItem.workNode)
+                if(this.db){
+                    device.registerNode(this.db,nodeItem.workNode)
+                }
+            }
+        }
+
+        if (nodeItem.script) {
+            const outDir = path.join(this.projectPath, '.ScriptBuild')
+            const scriptNameNoExt = path.basename(nodeItem.script, '.ts')
+            const jsPath = path.join(outDir, scriptNameNoExt + '.js')
+            if (fs.existsSync(jsPath)) {
+                this.tester = cloneDeep(nodeItem.attachTester ? testers[nodeItem.attachTester] : undefined)
+                this.log = new UdsLOG(`${nodeItem.name} ${path.basename(nodeItem.script)}`, this.tester?.id)
+                this.pool = new UdsTester({
+                    PROJECT_ROOT: this.projectPath,
+                    PROJECT_NAME: this.projectName,
+                    MODE: 'node',
+                    NAME: nodeItem.name,
+                }, jsPath, this.log, this.tester)
+                //find tester
+                for (const c of nodeItem.channel) {
+                    const baseItem = this.canBaseMap.get(c)
+                    if (baseItem) {
+                        baseItem.attachCanMessage(this.cb.bind(this))
+                    }
+                }
+            }
+        }
         //     const db = global.database.lin[nodeItem.database]
         //     if (db) {
 
@@ -73,11 +115,27 @@ export class LinNodeSocket {
         // }
     }
     close() {
-        if (this.db) {
-            // this.db.event.removeListener('signal', this.cb)
+        for (const c of this.nodeItem.channel) {
+            const baseItem = this.canBaseMap.get(c)
+            if (baseItem) {
+                baseItem.detachCanMessage(this.cb.bind(this))
+            }
         }
+        this.pool?.stop()
+
+
     }
-    signalHandle(signalName: string, value: number | number[]) {
+    async start() {
+
+
+        this.pool?.updateTs(0)
+        await this.pool?.start(this.projectPath)
+
+    }
+    cb(frame: LinMsg) {
+        if (frame.uuid != this.nodeItem.id) {
+            // this.pool?.triggerCanFrame(frame)
+        }
 
     }
 }
