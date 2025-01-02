@@ -582,12 +582,12 @@ function addNode(type: string, parent?: Tree) {
     const id = v4()
     if (parent?.type == 'can') {
       const devices: string[] = []
-      for (const key of Object.keys(dataBase.devices)) {
-        const item = dataBase.devices[key]
-        if (item.type == 'can' && item.canDevice) {
-          devices.push(key)
-        }
-      }
+      // for (const key of Object.keys(dataBase.devices)) {
+      //   const item = dataBase.devices[key]
+      //   if (item.type == 'can' && item.canDevice) {
+      //     devices.push(key)
+      //   }
+      // }
 
 
       dataBase.ia[id] = {
@@ -605,12 +605,14 @@ function addNode(type: string, parent?: Tree) {
 
     } else if (parent?.type == 'lin') {
       const devices: string[] = []
-      for (const key of Object.keys(dataBase.devices)) {
-        const item = dataBase.devices[key]
-        if (item.type == 'lin' && item.linDevice) {
-          devices.push(key)
-        }
-      }
+      // for (const key of Object.keys(dataBase.devices)) {
+      //   const item = dataBase.devices[key]
+      //   if (item.type == 'lin' && item.linDevice) {
+      //     devices.push(key)
+      //   }
+      // }
+      //lin only one device
+
 
       dataBase.ia[id] = {
         name: parent?.label + ' IA',
@@ -630,12 +632,12 @@ function addNode(type: string, parent?: Tree) {
     const id = v4()
     if (parent?.type == 'can') {
       const devices: string[] = []
-      for (const key of Object.keys(dataBase.devices)) {
-        const item = dataBase.devices[key]
-        if (item.type == 'can' && item.canDevice) {
-          devices.push(key)
-        }
-      }
+      // for (const key of Object.keys(dataBase.devices)) {
+      //   const item = dataBase.devices[key]
+      //   if (item.type == 'can' && item.canDevice) {
+      //     devices.push(key)
+      //   }
+      // }
       dataBase.nodes[id] = {
         name: `Node ${Object.keys(dataBase.nodes).length + 1}`,
         type: 'can',
@@ -672,12 +674,12 @@ function addNode(type: string, parent?: Tree) {
 
     }else if(parent?.type=='lin'){
       const devices: string[] = []
-      for (const key of Object.keys(dataBase.devices)) {
-        const item = dataBase.devices[key]
-        if (item.type == 'lin' && item.linDevice) {
-          devices.push(key)
-        }
-      }
+      // for (const key of Object.keys(dataBase.devices)) {
+      //   const item = dataBase.devices[key]
+      //   if (item.type == 'lin' && item.linDevice) {
+      //     devices.push(key)
+      //   }
+      // }
       dataBase.nodes[id] = {
         name: `Node ${Object.keys(dataBase.nodes).length + 1}`,
         type: 'lin',

@@ -16,14 +16,66 @@ export default abstract class LinBase {
         db: LDF,
         nodeName: string
     }[] = []
-    constructor(public mode: LinMode) {
+    constructor(info: LinBaseInfo) {
+       
 
     }
     abstract event: EventEmitter
     static getValidDevices(): LinDevice[] {
         throw new Error('Method not implemented.')
     }
+    setupEntry(workNode:string){
+        if(this.info.mode==LinMode.SLAVE&&this.info.database){
+            const db=global.database.lin[this.info.database]
+            if(db){
+                //setup entry for unconditional frames
+                for (const frameName in db.frames) {
+                    const frame = db.frames[frameName]
+                    if (frame.publishedBy === workNode) {
+                        const checksum = (frame.id == 0x3c || frame.id == 0x3d) ? 
+                            LinChecksumType.CLASSIC : LinChecksumType.ENHANCED
+                        this.setEntry(
+                            frame.id,
+                            frame.frameSize,
+                            LinDirection.SEND,
+                            checksum,
+                            getFrameData(db, frame),
+                            1
+                        )
+                    }
+                }
 
+                //setup entry for event triggered frames
+                for (const eventFrameName in db.eventTriggeredFrames) {
+                    const eventFrame = db.eventTriggeredFrames[eventFrameName]
+                    // Check if any associated frame is published by this node
+                    const containsPublishedFrame = eventFrame.frameNames.some(fname => 
+                        db.frames[fname]?.publishedBy === workNode
+                    )
+                    
+                    if (containsPublishedFrame) {
+                        // Find max frame size among associated frames
+                        let maxFrameSize = 0
+                        eventFrame.frameNames.forEach(fname => {
+                            const frame = db.frames[fname]
+                            if (frame && frame.frameSize > maxFrameSize) {
+                                maxFrameSize = frame.frameSize
+                            }
+                        })
+
+                        this.setEntry(
+                            eventFrame.frameId,
+                            maxFrameSize + 1, // +1 for PID
+                            LinDirection.SEND,
+                            LinChecksumType.ENHANCED,
+                            Buffer.alloc(maxFrameSize + 1),
+                            2|4
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     abstract close(): void
     abstract setEntry(frameId: number, length: number, dir: LinDirection, checksumType: LinChecksumType, initData: Buffer, flag: number): void
@@ -45,7 +97,7 @@ export default abstract class LinBase {
         }
     }
     startSch(db: LDF, schName: string, activeMap: Record<string, boolean>, rIndex: number) {
-        if (this.mode == LinMode.SLAVE) {
+        if (this.info.mode == LinMode.SLAVE) {
             return
         }
        

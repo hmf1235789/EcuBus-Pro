@@ -79,40 +79,43 @@
 
                         </el-form-item>
                         <el-form-item label="Node Active" prop="disabled">
-                            <el-switch v-model="data.disabled" disabled active-text="Disabled" inactive-text="Enabled" />
+                            <el-switch v-model="data.disabled" disabled active-text="Disabled"
+                                inactive-text="Enabled" />
                         </el-form-item>
 
                     </el-form>
 
                 </div>
             </el-tab-pane>
-           
+
             <el-tab-pane label="Connected" name="Connected">
                 <div
                     style="text-align: center;padding-top:10px;padding-bottom: 10px;width:570px;height:250px; overflow: auto;">
 
                     <el-transfer class="canit" style="text-align: left; display: inline-block;"
                         v-model="dataBase.nodes[editIndex].channel" :data="allDeviceLabel"
-                        :titles="['Valid', 'Assigned ']" @leftCheckChange="handleLeftCheckChange"/>
+                        :titles="['Valid', 'Assigned ']" @leftCheckChange="handleLeftCheckChange" />
                 </div>
             </el-tab-pane>
-            <el-tab-pane label="Database" name="Database" v-if="data.type=='lin'">
+            <el-tab-pane label="Database" name="Database" v-if="data.type == 'lin'">
                 <div style="height: 270px;width: 570px;overflow-y: auto;">
-                    <el-form :model="data" label-width="100px" size="small" :disabled="globalStart||dbName==undefined">
+                    <el-form :model="data" label-width="100px" size="small" :disabled="globalStart || dbName == undefined">
                         <el-form-item label="Database" prop="database">
-                         
-                            <el-select  v-model="dbName" placeholder="No Database" disabled>
-                                <el-option v-for="item in db" :key="item.value" :label="`Lin.${item.label}`" :value="item.value">
+
+                            <el-select v-model="dbName" placeholder="No Database" disabled>
+                                <el-option v-for="item in db" :key="item.value" :label="`Lin.${item.label}`"
+                                    :value="item.value">
                                 </el-option>
                             </el-select>
                         </el-form-item>
                         <el-form-item label="Net Node" prop="workNode" v-if="dbName">
-                            <el-select v-model="data.workNode" placeholder="Node Name">
-                                <el-option v-for="item in nodesName" :key="item.value" :label="item.label" :value="item.value">
+                            <el-select v-model="data.workNode" placeholder="Node Name" clearable>
+                                <el-option v-for="item in nodesName" :key="item.value" :label="item.label"
+                                    :value="item.value">
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                        <el-alert v-else title="Choose database in connected device" type="info" :closable="false"/>
+                        <el-alert v-else title="Choose database in connected device" type="info" :closable="false" />
                     </el-form>
                 </div>
             </el-tab-pane>
@@ -164,10 +167,10 @@ const nameCheck = (rule: any, value: any, callback: any) => {
 };
 
 
-const handleLeftCheckChange=(value: TransferKey[], movedKeys?: TransferKey[])=>{
+const handleLeftCheckChange = (value: TransferKey[], movedKeys?: TransferKey[]) => {
 
-    if(value.length>1){
-        value.splice(0,1)
+    if (value.length > 1) {
+        value.splice(0, 1)
     }
 }
 const rules: FormRules = {
@@ -291,52 +294,62 @@ function refreshBuildStatus() {
 }
 
 
-const db=computed(()=>{
-    const list:{
-        label:string,
-        value:string
-    }[]=[]
-    if(props.type=='lin'){
-        for(const key of Object.keys(dataBase.database.lin)){
-           
-            list.push({label:dataBase.database.lin[key].name,value:key})
-            
+const db = computed(() => {
+    const list: {
+        label: string,
+        value: string
+    }[] = []
+    if (props.type == 'lin') {
+        for (const key of Object.keys(dataBase.database.lin)) {
+
+            list.push({ label: dataBase.database.lin[key].name, value: key })
+
         }
     }
     return list
 })
 
-const dbName=ref('')
-const getUsedDb=()=>{
-    const device=data.value.channel[0]
-    if(device&&dataBase.devices[device].type=='lin'&&dataBase.devices[device].linDevice&&dataBase.devices[device].linDevice.database){
-        dbName.value=dataBase.devices[device].linDevice.database
-    }else{
-        dbName.value=''
+const dbName = ref('')
+const getUsedDb = () => {
+    const device = data.value.channel[0]
+    if (device && dataBase.devices[device] && dataBase.devices[device].type == 'lin' && dataBase.devices[device].linDevice && dataBase.devices[device].linDevice.database) {
+        dbName.value = dataBase.devices[device].linDevice.database
+    } else {
+        dbName.value = ''
+        data.value.workNode = ''
     }
 }
-watchEffect(()=>{
+watchEffect(() => {
     getUsedDb()
 })
 
 
-const nodesName=computed(()=>{
-    const list:{
-        label:string,
-        value:string
-    }[]=[]
-    if(dbName.value&&props.type=='lin'&&data.value.type=='lin'){
-        const db=dataBase.database.lin[dbName.value]
-        list.push({
-            label:`${db.node.master.nodeName} (Master)`,
-            value:db.node.master.nodeName
-        })
-        for(const n of db.node.salveNode){
+const nodesName = computed(() => {
+    const list: {
+        label: string,
+        value: string
+    }[] = []
+    if (dbName.value && props.type == 'lin' && data.value.type == 'lin') {
+
+        const device = data.value.channel[0]
+
+        const db = dataBase.database.lin[dbName.value]
+
+        if (dataBase.devices[device].linDevice?.mode == 'MASTER') {
             list.push({
-                label:`${n} (Slave)`,
-                value:n
+                label: `${db.node.master.nodeName} (Master)`,
+                value: db.node.master.nodeName
+            })
+
+        } 
+        for (const n of db.node.salveNode) {
+            list.push({
+                label: `${n} (Slave)`,
+                value: n
             })
         }
+
+
     }
     return list
 })
@@ -349,8 +362,8 @@ interface Option {
 const allDeviceLabel = computed(() => {
     const dd: Option[] = []
     for (const d of Object.keys(allDevices.value)) {
-        const deviceDisabled=(data.value.channel.length>=maxDeviceNum.value)&&(data.value.channel.indexOf(d) == -1)
-        dd.push({ key: d, label: allDevices.value[d].name, disabled: globalStart.value||(deviceDisabled) })
+        const deviceDisabled = (data.value.channel.length >= maxDeviceNum.value) && (data.value.channel.indexOf(d) == -1)
+        dd.push({ key: d, label: allDevices.value[d].name, disabled: globalStart.value || (deviceDisabled) })
     }
     return dd
 })
@@ -376,8 +389,8 @@ const allDevices = computed(() => {
 
 
 
-const maxDeviceNum=computed(()=>{
-    if(props.type=='lin'){
+const maxDeviceNum = computed(() => {
+    if (props.type == 'lin') {
         return 1
     }
     return Infinity

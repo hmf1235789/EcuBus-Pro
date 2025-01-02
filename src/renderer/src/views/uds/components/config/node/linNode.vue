@@ -31,7 +31,7 @@
 
       <el-col :span="12">
         <el-form-item label="Lin Mode" prop="mode" required>
-          <el-select v-model="data.mode">
+          <el-select v-model="data.mode" @change="clearDatabase">
             <el-option label="Master" value="MASTER" />
             <el-option label="Slave" value="SLAVE" />
           </el-select>
@@ -56,12 +56,7 @@
         </el-option>
       </el-select>
     </el-form-item>
-    <el-form-item label="Node" prop="workNode">
-      <el-select v-model="data.workNode" placeholder="Node Name" style="width: 300px" >
-        <el-option v-for="item in filteredNodesName" :key="item.value" :label="item.label" :value="item.value">
-        </el-option>
-      </el-select>
-    </el-form-item>
+  
 
 
     <el-divider />
@@ -119,8 +114,6 @@ const data = ref<LinBaseInfo>({
   vendor: props.vendor,
   baudRate: 19200,
   mode: LinMode.MASTER,
-  database: '',
-  workNode: '',
 });
 
 const dbList = computed(() => {
@@ -156,13 +149,9 @@ const filteredNodesName = computed(() => {
   return list;
 });
 
-// Add watcher to reset workNode when mode changes
-watch([() => data.value.mode], () => {
-  data.value.workNode = ''; // Reset node selection when mode changes
-});
 
 function clearDatabase(){
-  data.value.workNode = '';
+  // data.value.workNode = '';
 }
 
 const deviceList = ref<LinDevice[]>([]);

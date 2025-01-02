@@ -22,7 +22,6 @@ export interface LinBaseInfo {
     vendor: CanVendor
     name: string
     database?: string
-    workNode?: string
 }
 
 

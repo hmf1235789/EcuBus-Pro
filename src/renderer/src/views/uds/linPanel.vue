@@ -9,7 +9,7 @@
                     <el-divider direction="vertical"></el-divider>
                     <Icon :icon="nodeIcon"/>
                     <span>Node:</span>
-                    <span style="color: var(--el-color-primary)">{{ workNode }}</span>
+                    <span style="color: var(--el-color-primary)">{{ selectedDBName?workNode:'' }}</span>
                     <el-divider direction="vertical"></el-divider>
                     <el-button size="small" type="warning" link @click="resetAllSignals">
                         <Icon :icon="resetIcon" />

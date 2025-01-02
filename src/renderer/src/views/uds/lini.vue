@@ -94,7 +94,7 @@ import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds';
 import { useDataStore } from '@r/stores/data';
 import { cloneDeep } from 'lodash';
 import { onKeyStroke, onKeyUp } from '@vueuse/core';
-import { LinBaseInfo } from 'nodeCan/lin';
+import { LinBaseInfo, LinMode } from 'nodeCan/lin';
 import { getFrameSize, LDF, SchTable } from '@r/database/ldfParse'
 import { TransferKey } from 'element-plus'
 
@@ -166,7 +166,8 @@ interface Option {
 const allDeviceLabel = computed(() => {
     const dd: Option[] = []
     for (const d of Object.keys(devices.value)) {
-        dd.push({ key: d, label: devices.value[d].name, disabled: false })
+        const deviceDisabled=(dataBase.ia[editIndex.value].devices.length>=1)&&(dataBase.ia[editIndex.value].devices.indexOf(d) == -1)
+        dd.push({ key: d, label: devices.value[d].name, disabled: globalStart.value||(deviceDisabled)||devices.value[d].mode==LinMode.SLAVE })
     }
     return dd
 })
@@ -426,7 +427,6 @@ onMounted(() => {
             activeStates.value[`${table.Table}-${entry.index}`] = true
         }
     }
-    getUsedDb()
 })
 
 

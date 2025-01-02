@@ -6,6 +6,7 @@ import { LinLOG } from 'src/main/log'
 import EventEmitter from 'events'
 import LinBase from '../base'
 import { getTsUs } from 'src/main/share/can'
+import { LDF } from 'src/renderer/src/database/ldfParse'
 
 
 
@@ -62,9 +63,9 @@ export class PeakLin extends LinBase {
     offsetTs = 0
     offsetInit = false
     log: LinLOG
-
+    db?:LDF
     constructor(public info: LinBaseInfo) {
-        super(info.mode)
+        super(info)
         this.client = this.registerClient()
         this.connectClient(this.client, info.device)
         this.initHardware(info.device, this.client, info.mode == LinMode.MASTER, info.baudRate)
@@ -72,6 +73,10 @@ export class PeakLin extends LinBase {
         LIN.CreateTSFN(this.client, this.info.id, this.callback.bind(this))
         this.log = new LinLOG('PEAK', info.name, this.event)
         this.startTs = getTsUs()
+       
+        if(info.database){
+            this.db=global.database.lin[info.database]
+        }
         // this.getEntrys()
         // this.wakeup()
     }
@@ -86,7 +91,7 @@ export class PeakLin extends LinBase {
         for (let i = 0; i < length; i++) {
             ia.setitem(i, initData[i])
         }
-        const result = LIN.LIN_SetFrameEntry(this.info.device.handle, entry)
+        const result = LIN.LIN_SetFrameEntry(this.client, this.info.device.handle, entry)
         if (result != 0) {
             throw new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, undefined, err2Str(result))
         }
@@ -159,7 +164,7 @@ export class PeakLin extends LinBase {
                         error.push(' Response was received from other station')
                     }
                 }
-
+                let isEvent = false;
                 if (this.pendingPromise && this.pendingPromise.sendMsg.frameId == (msg.frameId & 0x3f)) {
                     this.pendingPromise.sendMsg.data = msg.data
                     if (recvMsg.ErrorFlags != 0) {
@@ -174,10 +179,55 @@ export class PeakLin extends LinBase {
                     }
                     this.pendingPromise = undefined
                 } else {
+                    //slave
+                    if(this.db) {
+                        // Find matching frame or event frame
+                        let frameName: string | undefined;
+                       
+                        let publish: string | undefined;
+                        
+                        // Check regular frames
+                        for (const fname in this.db.frames) {
+                            if (this.db.frames[fname].id === msg.frameId) {
+                                frameName = fname;
+                                publish = this.db.frames[fname].publishedBy;
+                                break;
+                            }
+                        }
+
+                        // Check event triggered frames
+                        if (!frameName) {
+                            
+                            for (const ename in this.db.eventTriggeredFrames) {
+                                const eventFrame = this.db.eventTriggeredFrames[ename];
+                                if (eventFrame.frameId === msg.frameId) {
+                                    frameName = ename;
+                                    isEvent = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Enrich message with database info if frame found
+                        if (frameName) {
+                            msg.name = frameName;
+                            msg.workNode = publish;
+                            msg.isEvent = isEvent;
+                        }
+                    }
                     if (recvMsg.ErrorFlags != 0) {
                         handle()
-                        this.log.error(ts, error.join(', '))
+                        this.log.error(ts, error.join(', '),msg)
                     } else {
+                        if(isEvent&&this.db){
+                            const pid=msg.data[0]&0x3f
+                            for (const fname in this.db.frames) {
+                                if (this.db.frames[fname].id === pid) {
+                                    msg.workNode = this.db.frames[fname].publishedBy;
+                                    break;
+                                }
+                            }
+                        }
                         this.log.linBase(msg, ts)
                         this.event.emit(`${msg.frameId}`, msg)
                     }
@@ -220,7 +270,7 @@ export class PeakLin extends LinBase {
             msg.Length = Math.min(m.data.length, 8)
             msg.Direction = m.direction == LinDirection.SEND ? 1 : (m.direction == LinDirection.RECV ? 2 : 3)
             msg.ChecksumType = m.checksumType == LinChecksumType.CLASSIC ? 1 : 2
-            if (this.mode == LinMode.MASTER) {
+            if (this.info.mode == LinMode.MASTER) {
                 if (this.pendingPromise != undefined) {
                     reject(new LinError(LIN_ERROR_ID.LIN_BUS_BUSY, m))
                     return
