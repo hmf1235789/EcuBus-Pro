@@ -211,7 +211,8 @@
               "subscribedBy": [
                 "SeatECU"
               ],
-              "singleType": "Scalar"
+              "singleType": "Scalar",
+              "value": 1
             },
             "MotorDirection": {
               "signalName": "MotorDirection",
@@ -673,10 +674,27 @@
         "label": "Trace",
         "id": "trace",
         "options": {}
+      },
+      "9505c05a-4fe5-42e1-a45d-b1cbc14854ba": {
+        "pos": {
+          "x": 666,
+          "y": 316.5,
+          "w": 960,
+          "h": 400
+        },
+        "title": "linPanel",
+        "label": "Panel",
+        "id": "9505c05a-4fe5-42e1-a45d-b1cbc14854ba",
+        "options": {
+          "params": {
+            "editIndex": "9505c05a-4fe5-42e1-a45d-b1cbc14854ba"
+          },
+          "name": "Node 1"
+        }
       }
     },
-    "example":{
-      "catalog":"LIN"
+    "example": {
+      "catalog": "LIN"
     }
   }
 }

@@ -1,7 +1,7 @@
 import { EventEmitter } from "stream"
 import { CanVendor } from "./can"
 import type { Frame, LDF } from "src/renderer/src/database/ldfParse"
-import { isEqual } from "lodash"
+import { cloneDeep, isEqual } from "lodash"
 
 
 
@@ -122,7 +122,7 @@ export function getPID(frameId: number) {
 export function getFrameData(db: LDF, frame: Frame): Buffer {
     const data = Buffer.alloc(frame.frameSize)
     for (const signal of frame.signals) {
-        const signalDef = db.signals[signal.name]
+        const signalDef = cloneDeep(db.signals[signal.name])
         if (!signalDef) continue
 
         if (signalDef.singleType === 'ByteArray') {

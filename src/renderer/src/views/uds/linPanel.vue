@@ -58,13 +58,12 @@ import { useDataStore } from '@r/stores/data'
 import { LDF, getFrameSize } from '@r/database/ldfParse'
 import { LinInter } from 'src/preload/data'
 import { getFrameData } from 'nodeCan/lin'
+import { isEqual } from 'lodash'
 
 interface SignalRow {
     name: string
-    physicalValue: string
-    rawValue: string
     encodingType?: string
-    bitLength: number // Add bit length field
+    bitLength: number
 }
 
 interface FrameRow {
@@ -100,9 +99,7 @@ const selectedDBName = computed(() => {
     return `Lin.${dataBase.database.lin[selectedDB.value].name}`
 })
 
-const databases = computed(() => dataBase.database.lin || {})
 
-const signalValues = ref<Record<string, string>>({})
 
 const workNode = computed(() => dataBase.nodes[editIndex.value]?.workNode || '')
 const physicalValues = ref<Record<string, string>>({})
@@ -153,6 +150,21 @@ const hasPhysicalEncoding = (encodingType?: string) => {
     return encoding.encodingTypes.some(type => type.type === 'physicalValue')
 }
 
+// 修改工具函数
+const updateSignalDisplayValues = (frameName: string, signal: SignalRow, restore: boolean = true) => {
+    if (!selectedDB.value) return
+    const db = dataBase.database.lin[selectedDB.value] as LDF
+    const signalDef = db.signals[signal.name]
+   
+
+    // 如果没有上一次的值或不需要恢复，则使用初始值
+    const rawValue = restore?(signalDef.value??signalDef.initValue) : signalDef.initValue
+    const rawValueStr = Array.isArray(rawValue) ? rawValue.join(',') : rawValue?.toString()
+    rawValues.value[`${frameName}-${signal.name}`] = rawValueStr||''
+    physicalValues.value[`${frameName}-${signal.name}`] = signal.encodingType && hasPhysicalEncoding(signal.encodingType) ? 
+        getPhysicalValue(Number(rawValueStr), signal.encodingType, db) : ''
+}
+
 // Update tableData to only show relevant frames
 const tableData = computed(() => {
     const frames: FrameRow[] = []
@@ -179,15 +191,8 @@ const tableData = computed(() => {
             const encodingType = Object.entries(db.signalRep).find(([_, signals]) => 
                 signals.includes(signal.name))?.[0]
             
-            const rawValue = signalDef.value ?? signalDef.initValue
-            const rawValueStr = Array.isArray(rawValue) ? rawValue.join(',') : rawValue.toString()
-            
             frameRow.childList.push({
                 name: signal.name,
-                physicalValue: encodingType && hasPhysicalEncoding(encodingType) ? 
-                    getPhysicalValue(Number(rawValueStr), encodingType, db) : 
-                    rawValueStr,
-                rawValue: rawValueStr,
                 encodingType,
                 bitLength: signalDef.signalSizeBits
             })
@@ -299,6 +304,9 @@ const validateRawValue = (value: string, signal: SignalRow): boolean => {
     // Handle array type signals
     if (signalDef.singleType === 'ByteArray') {
         const values = value.split(',').map(v => Number(v.trim()))
+        if(values.length!=signalDef.signalSizeBits/8){
+            return false
+        }
         // Check if all values are valid numbers
         if (values.some(v => isNaN(v))) return false
         // Check array length
@@ -315,8 +323,8 @@ const validateRawValue = (value: string, signal: SignalRow): boolean => {
 }
 
 const handlePhysicalValueChange = (value: string, frameName: string, signal: SignalRow) => {
-    if (!validatePhysicalValue(value, signal)||value=='') {
-        physicalValues.value[`${frameName}-${signal.name}`] = signal.physicalValue
+    if (!validatePhysicalValue(value, signal) || value=='') {
+        updateSignalDisplayValues(frameName, signal, true)
         return
     }
     
@@ -329,18 +337,14 @@ const handlePhysicalValueChange = (value: string, frameName: string, signal: Sig
     } else {
         rawValue = Number(value)
     }
-
-    // 更新两个值
-    physicalValues.value[`${frameName}-${signal.name}`] = value
     rawValues.value[`${frameName}-${signal.name}`] = rawValue.toString()
-    
     // 更新数据库
     updateSignalValue(frameName, signal.name, rawValue)
 }
 
 const handleRawValueChange = (value: string, frameName: string, signal: SignalRow) => {
-    if (!validateRawValue(value, signal)||value=='') {
-        rawValues.value[`${frameName}-${signal.name}`] = signal.rawValue
+    if (!validateRawValue(value, signal) || value=='') {
+        updateSignalDisplayValues(frameName, signal, true)
         return
     }
     
@@ -351,7 +355,6 @@ const handleRawValueChange = (value: string, frameName: string, signal: SignalRo
     // Handle array type signals
     if (signalDef.singleType === 'ByteArray') {
         const values = value.split(',').map(v => Number(v.trim()))
-        rawValues.value[`${frameName}-${signal.name}`] = values.join(',')
         updateSignalValue(frameName, signal.name, values)
     } else {
         const numValue = Number(value)
@@ -359,17 +362,14 @@ const handleRawValueChange = (value: string, frameName: string, signal: SignalRo
         // Validate physical value if encoding exists
         if (signal.encodingType) {
             const physicalValue = getPhysicalValue(numValue, signal.encodingType, db)
-            if (!validatePhysicalValue(physicalValue, signal)) {
-                rawValues.value[`${frameName}-${signal.name}`] = signal.rawValue
+            if (!validatePhysicalValue(physicalValue, signal)) {  
+                updateSignalDisplayValues(frameName, signal, true)
                 return
-            }
+            }  
             physicalValues.value[`${frameName}-${signal.name}`] = physicalValue
-        } else {
-            physicalValues.value[`${frameName}-${signal.name}`] = value
-        }
-        
-        rawValues.value[`${frameName}-${signal.name}`] = value
+        } 
         updateSignalValue(frameName, signal.name, numValue)
+
     }
 }
 
@@ -382,25 +382,9 @@ const resetAllSignals = () => {
             const signalDef = db.signals[signal.name]
             if (!signalDef) continue
 
-            // Reset to initial value
-            const rawValue = signalDef.initValue
-            const rawValueStr = Array.isArray(rawValue) ? rawValue.join(',') : rawValue.toString()
-            rawValues.value[`${frame.name}-${signal.name}`] = rawValueStr
-            
-            // Update physical value if encoding exists
-            if (signal.encodingType) {
-                const physicalValue = getPhysicalValue(
-                    Array.isArray(rawValue) ? rawValue[0] : Number(rawValue), 
-                    signal.encodingType, 
-                    db
-                )
-                physicalValues.value[`${frame.name}-${signal.name}`] = physicalValue
-            } else {
-                physicalValues.value[`${frame.name}-${signal.name}`] = rawValueStr
-            }
-
+            updateSignalDisplayValues(frame.name, signal, false) // 使用初始值
             // Update database value
-            db.signals[signal.name].value = rawValue
+            db.signals[signal.name].value = undefined
         }
     }
 }
@@ -428,29 +412,30 @@ const getFrameDataHex = (frameName: string): string => {
     return r.match(/.{1,2}/g)?.join(' ') ?? ''
 }
 
-// Initialize values when database or workNode changes
+// 修改 watch 和 onMounted 中的初始化调用
 watch([selectedDB, workNode], () => {
     physicalValues.value = {}
     rawValues.value = {}
     nextTick(() => {
+        const db = dataBase.database.lin[selectedDB.value] as LDF
         for (const frame of tableData.value) {
             for (const signal of frame.childList) {
-                physicalValues.value[`${frame.name}-${signal.name}`] = signal.physicalValue
-                rawValues.value[`${frame.name}-${signal.name}`] = signal.rawValue
+                updateSignalDisplayValues(frame.name, signal, false) // 使用初始值
             }
         }
     })
 })
 
 onMounted(() => {
-    // Initialize values
+    getUsedDb()
+  
+      
     for (const frame of tableData.value) {
         for (const signal of frame.childList) {
-            physicalValues.value[`${frame.name}-${signal.name}`] = signal.physicalValue
-            rawValues.value[`${frame.name}-${signal.name}`] = signal.rawValue
+            updateSignalDisplayValues(frame.name, signal, false) // 使用初始值
         }
     }
-    getUsedDb()
+    
 })
 </script>
 
