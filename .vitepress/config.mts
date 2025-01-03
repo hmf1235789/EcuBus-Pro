@@ -64,8 +64,8 @@ export default defineConfig({
       },
       {
         text: 'User Manual',
+        link: '/docs/um/concept',
         items: [
-          { text: 'Introduce', link: '/docs/um/concept' },
           { text: 'CLI', link: '/docs/um/cli' },
           { text: 'Script', link: '/docs/um/script',items:[
             { text: 'Use External Package', link: '/docs/um/scriptSerialPort' },
@@ -90,9 +90,17 @@ export default defineConfig({
         collapsed: true,
         items: [
           { text: 'Arch', link: '/docs/dev/arch' },
-          { text: 'Setup', link: '/docs/dev/setup' },
+          { text: 'Setup', link: '/docs/dev/setup',
+            items:[
+              {
+                  text:'Learning Resources',link:'/docs/dev/jslearn'
+              }
+             
+            ]
+          },
           { text: 'Test', link: '/docs/dev/test' },
           { text: 'Addon', link: '/docs/dev/addon' },
+        
           { text: 'Releases Note', link: '/docs/dev/releases_note' },
         ]
       }

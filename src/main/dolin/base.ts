@@ -1,5 +1,5 @@
 import { EventTriggeredFrame, Frame, LDF } from "src/renderer/src/database/ldfParse"
-import { getFrameData, LinBaseInfo, LinChecksumType, LinDevice, LinDirection, LinMode, LinMsg } from "../share/lin"
+import { getFrameData, getPID, LinBaseInfo, LinChecksumType, LinDevice, LinDirection, LinMode, LinMsg } from "../share/lin"
 import EventEmitter from "events"
 
 export default abstract class LinBase {
@@ -32,7 +32,7 @@ export default abstract class LinBase {
         this.event.off('lin-frame', cb)
     }
     setupEntry(workNode: string){
-        if (this.info.mode == LinMode.SLAVE && this.info.database) {
+        if (this.info.database) {
             const db = global.database.lin[this.info.database]
             if (db) {
                 //setup entry for unconditional frames
@@ -95,6 +95,7 @@ export default abstract class LinBase {
 
     registerNode(db: LDF, nodeName: string) {
         //find node
+
         const node = this.nodeList.find(n => n.db.name == db.name && n.nodeName == nodeName)
         if (node) {
             return
@@ -105,6 +106,15 @@ export default abstract class LinBase {
         if (this.sch) {
             clearTimeout(this.sch.timer)
             this.sch = undefined
+        }
+    }
+    checkEventFramePID(data:number){
+        const id=data&0x3f
+        const pid=getPID(id)
+        if(pid!=data){
+            return false
+        }else{
+            return true
         }
     }
     startSch(db: LDF, schName: string, activeMap: Record<string, boolean>, rIndex: number) {
@@ -198,11 +208,24 @@ export default abstract class LinBase {
                     let frame: Frame = db.frames[entry.name]
                     let frameId: number | undefined
                     let frameData: Buffer | undefined
-
+                    let dir=LinDirection.RECV
+                    let workNode=db.node.master.nodeName
+                    // uncondition frame
+                    if(frame){
+                        if(frame.publishedBy==db.node.master.nodeName){
+                            dir=LinDirection.SEND
+                        }
+                        for(const r of this.nodeList){
+                            if(r.db.name==db.name && r.nodeName==frame.publishedBy){
+                                dir=LinDirection.SEND
+                                break
+                            }
+                        }
+                    }
                     // 检查是否为事件触发帧
                     const eventFrame = db.eventTriggeredFrames[entry.name]
                     if (eventFrame) {
-
+                        dir=LinDirection.RECV
                         frameId = eventFrame.frameId
                         //sub frame max len 
                         let maxLen = 0
@@ -215,7 +238,57 @@ export default abstract class LinBase {
                             }
                         })
                         frameData = Buffer.alloc(maxLen + 1)
+                        let sendCnt=0
+                        for(const ff of eventFrame.frameNames){
+                            const f=db.frames[ff]
+                            if(f){
+                                 for(const r of this.nodeList){
+                                    if(r.db.name==db.name && r.nodeName==f.publishedBy){
+                                        //check update 
+                                        const hasUpdate = f.signals.some(signal => {
+                                            const s = db.signals[signal.name]
+                                            return s && s.update
+                                        })
+                                        //clear update flag
 
+                                        if(hasUpdate){
+                                            f.signals.forEach(signal => {
+                                                const s = db.signals[signal.name]
+                                                if (s) {
+                                                    s.update = false
+                                                }
+                                            })
+                                            if(sendCnt>0){
+                                                workNode+=','+r.nodeName
+                                            }else{
+                                                workNode=r.nodeName
+                                            }
+                                            
+                                            dir=LinDirection.SEND
+                                            if(sendCnt>0){
+                                                //two simulate node send, event frame collision
+                                                const last=frameData[0]
+                                                const newPID=getPID(f.id)
+                                                //bit and, 每一个bit AND操作，如果有一个为0，则结果为0，否则为1
+                                                frameData[0]=last & newPID
+                                            }else{
+                                                frameData[0]=getPID(f.id)
+                                            }
+                                            sendCnt++
+                                            const dd=getFrameData(db,f)
+                                            dd.copy(frameData,1)
+                                        }
+                                     
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                        if(sendCnt>1){
+                            //two simulate node send, event frame collision
+
+                        }
+                      
                     }
                     // 如果是Sporadic帧
                     else if (!frame && db.sporadicFrames[entry.name]) {
@@ -230,6 +303,13 @@ export default abstract class LinBase {
                                     return s && s.update
                                 })
                                 if (hasUpdate) {
+                                    // 清除更新标志
+                                    f.signals.forEach(signal => {
+                                        const s = db.signals[signal.name]
+                                        if (s) {
+                                            s.update = false
+                                        }
+                                    })
                                     frame = f
                                     break
                                 }
@@ -241,14 +321,14 @@ export default abstract class LinBase {
                         const data = frameData || getFrameData(db, frame)
                         const id = frameId || frame.id
                         const checksum = (id == 0x3 || id == 0x3d) ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED
-                        const dir = eventFrame ? LinDirection.RECV : (frame.publishedBy === db.node.master.nodeName ? LinDirection.SEND : LinDirection.RECV)
+                     
                         this.write({
                             frameId: id,
                             data: data,
                             direction: dir,
                             checksumType: checksum,
                             database: db,
-                            workNode: db.node.master.nodeName,
+                            workNode: workNode,
                             name: eventFrame ? eventFrame.name : frame.name,
                             isEvent: eventFrame ? true : false
                         }).catch(() => {

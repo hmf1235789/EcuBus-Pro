@@ -1,5 +1,8 @@
 # Setup
 
+If you are not familiar with JavaScript/Typescript,
+you can get some learning resources from [JavaScript/Typescript Learning Resources](./jslearn.md)
+
 ## Prerequisites
 
 - Node.js (v20 or higher)

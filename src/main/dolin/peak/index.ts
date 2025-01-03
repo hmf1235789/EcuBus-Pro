@@ -291,6 +291,12 @@ export class PeakLin extends LinBase {
                         reject(new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, m, err2Str(result)))
                         return
                     }
+                    if(m.isEvent){
+                        if(!this.checkEventFramePID(m.data[0])){
+                            //just change the length to 1 so the checksum will be incorrect
+                            msg.Length=1
+                        }
+                    }
                 }
                 result = LIN.LIN_Write(this.client, this.info.device.handle, msg)
 

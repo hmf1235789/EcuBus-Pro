@@ -502,8 +502,9 @@ const gridOptions = computed(() => {
          { field: 'dlc', title: 'DLC', width: 100 },
          { field: 'len', title: 'Len', width: 100 },
          { field: 'msgType', title: 'Type', width: 100 },
-         { field: 'device', title: 'Device', width: 200 },
          { field: 'channel', title: 'Channel', width: 100 },
+         { field: 'device', title: 'Device', width: 200 },
+         
 
       ],
       rowClassName: ({ row }) => {
