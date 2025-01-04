@@ -25,12 +25,28 @@ export default abstract class LinBase {
     static getValidDevices(): LinDevice[] {
         throw new Error('Method not implemented.')
     }
-    attachCanMessage(cb: (msg: LinMsg) => void) {
+    attachLinMessage(cb: (msg: LinMsg) => void) {
         this.event.on('lin-frame', cb)
     }
-    detachCanMessage(cb: (msg: LinMsg) => void) {
+    detachLinMessage(cb: (msg: LinMsg) => void) {
         this.event.off('lin-frame', cb)
     }
+    // calculateChecksum(data: Buffer, checksumType: LinChecksumType): number {
+    //     let checksum = 0
+    //     if (checksumType == LinChecksumType.CLASSIC) {
+    //         for (let i = 0; i < data.length; i++) {
+    //             checksum += data[i]
+    //         }
+    //         checksum = 0xff - (checksum & 0xff)
+    //     } else {
+    //         for (let i = 0; i < data.length; i++) {
+    //             checksum += data[i]
+    //             checksum = (checksum & 0xff) + (checksum >> 8)
+    //         }
+    //         checksum = 0xff - checksum
+    //     }
+    //     return checksum
+    // }
     setupEntry(workNode: string){
         if (this.info.database) {
             const db = global.database.lin[this.info.database]
@@ -327,7 +343,7 @@ export default abstract class LinBase {
                             data: data,
                             direction: dir,
                             checksumType: checksum,
-                            database: db,
+                            database: db.name,
                             workNode: workNode,
                             name: eventFrame ? eventFrame.name : frame.name,
                             isEvent: eventFrame ? true : false

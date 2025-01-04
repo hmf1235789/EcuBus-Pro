@@ -68,13 +68,13 @@ export class NodeLinItem {
     db?: LDF
     constructor(
         public nodeItem: LinNode,
-        private canBaseMap: Map<string, LinBase>,
+        private linBaseMap: Map<string, LinBase>,
         private projectPath: string,
         private projectName: string,
         testers: Record<string, TesterInfo>
     ) {
 
-        const device = canBaseMap.get(nodeItem.channel[0])
+        const device = linBaseMap.get(nodeItem.channel[0])
         if (device) {
             if (nodeItem.workNode) {
                 this.db=device.setupEntry(nodeItem.workNode)
@@ -97,11 +97,12 @@ export class NodeLinItem {
                     MODE: 'node',
                     NAME: nodeItem.name,
                 }, jsPath, this.log, this.tester)
+                this.pool.registerHandler('sendLinFrame', this.sendFrame.bind(this))
                 //find tester
                 for (const c of nodeItem.channel) {
-                    const baseItem = this.canBaseMap.get(c)
+                    const baseItem = this.linBaseMap.get(c)
                     if (baseItem) {
-                        baseItem.attachCanMessage(this.cb.bind(this))
+                        baseItem.attachLinMessage(this.cb.bind(this))
                     }
                 }
             }
@@ -116,9 +117,9 @@ export class NodeLinItem {
     }
     close() {
         for (const c of this.nodeItem.channel) {
-            const baseItem = this.canBaseMap.get(c)
+            const baseItem = this.linBaseMap.get(c)
             if (baseItem) {
-                baseItem.detachCanMessage(this.cb.bind(this))
+                baseItem.detachLinMessage(this.cb.bind(this))
             }
         }
         this.pool?.stop()
@@ -134,10 +135,30 @@ export class NodeLinItem {
     }
     cb(frame: LinMsg) {
         if (frame.uuid != this.nodeItem.id) {
-            // this.pool?.triggerCanFrame(frame)
+            this.pool?.triggerLinFrame(frame)
         }
 
     }
+    async sendFrame(pool: UdsTester, frame: LinMsg): Promise<number> {
+        frame.uuid = this.nodeItem.id
+        frame.data=Buffer.from(frame.data)
+       
+        if (this.nodeItem.channel.length == 1) {
+          const baseItem = this.linBaseMap.get(this.nodeItem.channel[0])
+          if (baseItem) {
+            baseItem.setEntry(frame.frameId,frame.data.length,frame.direction,frame.checksumType,frame.data,frame.isEvent?2:1)
+            return await baseItem.write(frame)
+          }
+        }
+        for (const c of this.nodeItem.channel) {
+          const baseItem = this.linBaseMap.get(c)
+          if (baseItem && baseItem.info.name == frame.device) {
+            return await baseItem.write(frame)
+          }
+        }
+        throw new Error(`device ${frame.device} not found`)
+    
+      }
 }
 
 

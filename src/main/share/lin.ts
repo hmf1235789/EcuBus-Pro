@@ -38,9 +38,9 @@ export interface LinNode {
 
 
 export enum LinDirection {
-    SEND,
-    RECV,
-    RECV_AUTO_LEN
+    SEND='SEND',
+    RECV='RECV',
+    RECV_AUTO_LEN='RECV_AUTO_LEN'
 }
 
 export enum LinMode {
@@ -50,8 +50,8 @@ export enum LinMode {
 
 
 export enum LinChecksumType {
-    CLASSIC,
-    ENHANCED
+    CLASSIC='CLASSIC',
+    ENHANCED='ENHANCED'
 }
 
 
@@ -81,7 +81,8 @@ export interface LinMsg {
     direction: LinDirection
     checksumType: LinChecksumType
     checksum?: number
-    database?: LDF
+    database?: string
+    device?: string
     workNode?: string
     name?: string
     isEvent?: boolean

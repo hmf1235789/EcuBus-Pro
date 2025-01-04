@@ -8,6 +8,7 @@ import { TesterInfo } from './share/tester'
 import { CanMessage, formatError } from './share/can'
 import { ServiceId } from './share/service'
 import { VinInfo } from './share/doip'
+import { LinMsg } from './share/lin'
 type HandlerMap = {
   sendCanFrame: (pool: UdsTester, data: CanMessage) => Promise<number>
   sendDiag: (pool: UdsTester, data: {
@@ -16,6 +17,7 @@ type HandlerMap = {
     service: ServiceItem
     isReq: boolean
   }) => Promise<number>
+  sendLinFrame: (pool: UdsTester, data: LinMsg) => Promise<number>
   registerEthVirtualEntity: (pool: UdsTester, data: {
     entity:VinInfo,
     ip?:string,
@@ -68,7 +70,7 @@ export default class UdsTester {
         execArgv:['--enable-source-maps']
       },
 
-      onTerminateWorker: () => {
+      onTerminateWorker: (v:any) => {
         if (!this.selfStop) {
 
           this.log.systemMsg('worker terminated', this.ts, 'error')
@@ -202,6 +204,14 @@ export default class UdsTester {
   async triggerCanFrame(msg: CanMessage) {
     try{
       const r=await this.workerEmit('__canMsg', msg)
+      return r
+    }catch(e:any){
+      throw formatError(e)
+    }
+  }
+  async triggerLinFrame(msg: LinMsg) {
+    try{
+      const r=await this.workerEmit('__linMsg', msg)
       return r
     }catch(e:any){
       throw formatError(e)

@@ -14,8 +14,12 @@ import { ServiceId, SupportServiceId } from '../share/service'
 import { CanMessage } from '../share/can'
 import SecureAccessDll from './secureAccess'
 import { EntityAddr, VinInfo } from '../share/doip'
+import { LinMsg } from '../share/lin'
+export { LinDirection,LinChecksumType,LinMode} from '../share/lin'
 export { SecureAccessDll }
 export type {CanMessage}
+export type {EntityAddr}
+export type {LinMsg}
 export type {CanMsgType} from '../share/can'
 
 const testerList = ['{{{testerName}}}'] as const
@@ -846,6 +850,32 @@ export class UtilClass {
     }
   }
   /**
+   * Registers an event listener for LIN messages.
+   *
+   * @param id - The LIN message ID or ${databaseName}.${frameName} to listen for. If `true`, listens for all LIN messages.
+   * @param fc - The callback function to be invoked when a LIN message is received.
+   */
+  OnLin(id: number | string | true, fc: (msg: LinMsg) => void | Promise<void>) {
+    if (id === true) {
+      this.event.on('lin' as any, fc)
+    } else {
+      this.event.on(`lin.${id}` as any, fc)
+    }
+  }
+  /**
+   * Unsubscribes from LIN messages.
+   * 
+   * @param id - The identifier of the LIN message to unsubscribe from. If `true`, unsubscribes from all LIN messages.
+   * @param fc - The callback function to remove from the event listeners.
+   */
+  OffLin(id: number |string | true, fc: (msg: LinMsg) => void | Promise<void>) {
+    if (id === true) {
+      this.event.off('lin' as any, fc)
+    } else {
+      this.event.off(`lin.${id}` as any, fc)
+    }
+  }
+  /**
    * Registers an event listener for a specific key.
    *
    * @param key - The key to listen for. Only the first character of the key is used, * is a wildcard.
@@ -977,6 +1007,13 @@ export class UtilClass {
     await this.event.emit(`can.${msg.id}` as any, msg)
     await this.event.emit('can' as any, msg)
   }
+  private async linMsg(msg: LinMsg) {
+    await this.event.emit(`lin.${msg.frameId}` as any, msg)
+    if(msg.database&&msg.name){
+      await this.event.emit(`lin.${msg.database}.${msg.name}` as any, msg)
+    }
+    await this.event.emit('lin' as any, msg)
+  }
   private async keyDown(key: string) {
     await this.event.emit(`keyDown${key}` as any, key)
     await this.event.emit(`keyDown*` as any, key)
@@ -1007,6 +1044,7 @@ export class UtilClass {
         __eventDone: this.evnetDone.bind(this),
       })
       this.event.on('__canMsg' as any, this.canMsg.bind(this))
+      this.event.on('__linMsg' as any, this.linMsg.bind(this))
       this.event.on('__keyDown' as any, this.keyDown.bind(this))
     }
   }
@@ -1134,6 +1172,32 @@ export async function outputCan(msg: CanMessage): Promise<number> {
     throw err
   }
 }
+
+export async function outputLin(msg: LinMsg): Promise<number> {
+  const p: Promise<number> = new Promise((resolve, reject) => {
+
+    workerpool.workerEmit({
+      id: id,
+      event: 'sendLinFrame',
+      data: msg
+    })
+    emitMap.set(id, { resolve, reject })
+    id++
+  })
+  try {
+    return await p
+  } catch (e: any) {
+    const err = new Error('outputLin error:' + e.toString())
+    //pop stack
+    //just got 0,2,3
+    const stack = err.stack?.split('\n') || []
+    err.stack = [stack[0], stack[2], stack[3]].join('\n')
+    throw err
+  }
+}
+
+
+
 
 let rightEntity: EntityAddr | undefined
 

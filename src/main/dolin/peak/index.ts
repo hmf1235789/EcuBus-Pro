@@ -32,14 +32,7 @@ export class PeakLin extends LinBase {
     }, 1)
     private client: number
     private lastFrame: Map<number, LinMsg> = new Map()
-    private entryTable: Record<number, {
-        frameId: number
-        dir: number
-        checksumType: number
-        length: number
-
-    }> = {}
-
+   
 
     event = new EventEmitter()
     pendingPromise?: {
@@ -132,6 +125,7 @@ export class PeakLin extends LinBase {
                     checksum: recvMsg.Checksum,
 
                 }
+
                 if (recvMsg.ErrorFlags == 0) {
                     this.lastFrame.set(msg.frameId, msg)
                 }
