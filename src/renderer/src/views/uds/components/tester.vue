@@ -200,7 +200,17 @@ function buildTree() {
         append: true,
         id: 'LIN',
         children: [],
-        disabled: true
+        disabled: false
+    }
+    for(const key in globalData.tester){
+        if(globalData.tester[key].type == 'lin'){
+            lin.children?.push({
+                label: globalData.tester[key].name,
+                type: 'lin',
+                append: false,
+                id: key
+            })
+        }
     }
     t.push(lin)
     const eth: tree = {

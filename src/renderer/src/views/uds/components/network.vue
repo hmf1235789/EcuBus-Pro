@@ -68,6 +68,7 @@ import deviceIcon from '@iconify/icons-material-symbols/important-devices-outlin
 import interIcon from '@iconify/icons-material-symbols/interactive-space-outline'
 import networkNode from '@iconify/icons-material-symbols/network-node'
 import nodeIcon from '@iconify/icons-material-symbols/variables-outline-rounded'
+import { useProjectStore } from '@r/stores/project'
 
 interface Tree {
   id: string
@@ -216,7 +217,7 @@ function addChild(parent: Tree) {
       }
 
     }
-  }else if(parent.type=='eth'){
+  } else if (parent.type == 'eth') {
     for (const key of Object.keys(dataBase.nodes)) {
       const item = dataBase.nodes[key]
       if (item.type == 'eth') {
@@ -233,7 +234,7 @@ function addChild(parent: Tree) {
       }
 
     }
-  }else if(parent.type=='lin'){
+  } else if (parent.type == 'lin') {
     for (const key of Object.keys(dataBase.nodes)) {
       const item = dataBase.nodes[key]
       if (item.type == 'lin') {
@@ -303,7 +304,7 @@ const panStartPosition = { x: 0, y: 0 }
 let paper: joint.dia.Paper
 
 const treePop = ref<Record<string, any>>({})
-
+const project = useProjectStore()
 
 watch([w, h, leftWidth], () => {
   paper?.setDimensions(w.value - leftWidth.value - 5, h.value - 5)
@@ -425,12 +426,29 @@ onMounted(() => {
   paper.on('element:mouseleave', function (elementView) {
     elementView.hideTools()
   })
-  setTimeout(() => {
-    buildView()
-    initDone.value = true
-    loading.value = false
+  nextTick(() => {
+    if (project.project.wins['network'].hide) {
+      const q = watch(() => project.project.wins['network'].hide, (v) => {
+        if (v) {
+          //hide
+        } else {
+          nextTick(() => {
+            buildView()
+            initDone.value = true
+            loading.value = false
+          })
+         
+        }
+        q()
+      })
+    } else {
+      buildView()
+      initDone.value = true
+      loading.value = false
+    }
+
     // fitPater()
-  }, 1000)
+  })
 
 })
 const layout = inject('layout') as Layout
@@ -477,7 +495,10 @@ watchEffect(() => {
     //add new link
     for (const key of Object.keys(dataBase.ia)) {
       for (const to of dataBase.ia[key].devices) {
-        udsView.addLink(key, to)
+        if (dataBase.devices[to]) {
+          udsView.addLink(key, to)
+        }
+
       }
     }
     //check link
@@ -493,7 +514,9 @@ watchEffect(() => {
     //add new link
     for (const key of Object.keys(dataBase.nodes)) {
       for (const to of dataBase.nodes[key].channel) {
-        udsView.addLink(key, to)
+        if (dataBase.devices[to]) {
+          udsView.addLink(key, to)
+        }
       }
     }
   }
@@ -672,7 +695,7 @@ function addNode(type: string, parent?: Tree) {
         udsView.addLink(id, key)
       }
 
-    }else if(parent?.type=='lin'){
+    } else if (parent?.type == 'lin') {
       const devices: string[] = []
       // for (const key of Object.keys(dataBase.devices)) {
       //   const item = dataBase.devices[key]

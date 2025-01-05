@@ -470,6 +470,7 @@ export class UDSTesterMain {
             }
             do {
               let rxData = undefined
+              let timeout=this.tester.udsTime.pTime
               try {
                 const curUs = getTsUs()
                 if(this.ac.signal.aborted){
@@ -499,6 +500,7 @@ export class UDSTesterMain {
                       throw new Error(`negative response with wrong service id, expect ${s.serviceId}, got ${rxData.data[1]}`)
                     }
                     if (rxData.data[2] == 0x78) {
+                      timeout=this.tester.udsTime.pExtTime
                       continue
                     }
                     const nrcMsg = NRCMsg[rxData.data[2]]

@@ -38,9 +38,9 @@ export interface LinNode {
 
 
 export enum LinDirection {
-    SEND='SEND',
-    RECV='RECV',
-    RECV_AUTO_LEN='RECV_AUTO_LEN'
+    SEND = 'SEND',
+    RECV = 'RECV',
+    RECV_AUTO_LEN = 'RECV_AUTO_LEN'
 }
 
 export enum LinMode {
@@ -50,8 +50,8 @@ export enum LinMode {
 
 
 export enum LinChecksumType {
-    CLASSIC='CLASSIC',
-    ENHANCED='ENHANCED'
+    CLASSIC = 'CLASSIC',
+    ENHANCED = 'ENHANCED'
 }
 
 
@@ -100,6 +100,24 @@ export class LinError extends Error {
 
     }
 }
+export enum LIN_ADDR_TYPE {
+    PHYSICAL = 'PHYSICAL',
+    FUNCTIONAL = 'FUNCTIONAL'
+}
+export enum LIN_SCH_TYPE {
+    DIAG_ONLY,
+    DIAG_INTERLEAVED,
+    DIAG_DIRECT,
+}
+export interface LinAddr {
+    name: string
+    addrType: LIN_ADDR_TYPE
+    nad: number
+    stMin: number
+    nAs: number
+    nCr: number
+    schType: LIN_SCH_TYPE
+}
 
 const LinPidTable =
     [
@@ -128,14 +146,14 @@ export function getFrameData(db: LDF, frame: Frame): Buffer {
 
         if (signalDef.singleType === 'ByteArray') {
             // Handle byte array type signals
-            const initValues = (signalDef.value!=undefined?signalDef.value:signalDef.initValue) as number[]
+            const initValues = (signalDef.value != undefined ? signalDef.value : signalDef.initValue) as number[]
             const bytesToCopy = Math.ceil(signalDef.signalSizeBits / 8)
             initValues.reverse()
             for (let i = 0; i < bytesToCopy && i < initValues.length; i++) {
                 const startBit = signal.offset + (i * 8)
                 const byteOffset = Math.floor(startBit / 8)
                 const bitOffset = startBit % 8
-                
+
                 if (bitOffset === 0) {
                     // Aligned byte
                     data[byteOffset] = initValues[i]
@@ -149,14 +167,14 @@ export function getFrameData(db: LDF, frame: Frame): Buffer {
             }
         } else {
             // Handle scalar type signals - process bit by bit
-            const value = (signalDef.value!=undefined?signalDef.value:signalDef.initValue) as number
+            const value = (signalDef.value != undefined ? signalDef.value : signalDef.initValue) as number
             let tempValue = value
-            
+
             for (let i = 0; i < signalDef.signalSizeBits; i++) {
                 const targetBit = signal.offset + i
                 const byteOffset = Math.floor(targetBit / 8)
                 const bitOffset = targetBit % 8
-                
+
                 if (byteOffset < data.length) {
                     // Clear bit
                     data[byteOffset] &= ~(1 << bitOffset)

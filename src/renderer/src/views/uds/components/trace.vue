@@ -1,6 +1,6 @@
 <template>
    <div>
-      <VxeGrid ref="xGrid" v-bind="gridOptions" class="sequenceTable" @menu-click="menuClick" :height="tableHeight">
+      <VxeGrid ref="xGrid" v-bind="gridOptions" class="sequenceTable" @menu-click="menuClick" :height="tableHeight" @scroll="scrollHandle">
          <template #default_type="{ row }">
             <Icon :icon="email" v-if="row.method == 'canBase'||row.method=='ipBase'" style="font-size: 14px" />
             <Icon :icon="emailFill" v-else-if="row.method == 'udsSent' || row.method == 'udsRecv'|| row.method =='udsNegRecv' "
@@ -17,10 +17,15 @@
                      </el-button>
                   </el-tooltip>
                   <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom" :show-after="1000">
-                     <el-button type="primary" link @click="togglePause">
+                     <el-button :type="isPaused ? 'success' : 'warning'" link @click="togglePause">
                         <Icon :icon="isPaused ? playIcon : pauseIcon" />
                      </el-button>
                   </el-tooltip>
+                  <!-- <el-tooltip effect="light" :content="autoScroll ? 'Disable Auto-Scroll' : 'Enable Auto-Scroll'" placement="bottom" :show-after="1000">
+                     <el-button :type="autoScroll ? 'success' : 'warning'" link @click="toggleAutoScroll">
+                        <Icon :icon="autoScroll ? scrollIcon2 : scrollIcon1" />
+                     </el-button>
+                  </el-tooltip> -->
                </el-button-group>
                <el-divider direction="vertical" />
                <el-dropdown>
@@ -76,6 +81,8 @@ import filterIcon from '@iconify/icons-material-symbols/filter-alt-off-outline'
 import saveIcon from '@iconify/icons-material-symbols/save'
 import pauseIcon from '@iconify/icons-material-symbols/pause-circle-outline'
 import playIcon from '@iconify/icons-material-symbols/play-circle-outline'
+import scrollIcon1 from '@iconify/icons-material-symbols/autoplay'
+import scrollIcon2 from '@iconify/icons-material-symbols/autopause'
 
 
 import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds';
@@ -176,22 +183,28 @@ function CanMsgType2Str(msgType: CanMsgType) {
 }
 function insertData1(data: LogData[]) {
    xGrid.value.insertAt(data, -1).then((v: any) => {
-
-
-      xGrid.value.scrollToRow(v.row)
-
+      
+         xGrid.value.scrollToRow(v.row)
+      
+      const {fullData} = xGrid.value.getTableData()
+      const limit=1000
+      if(fullData.length>limit){
+     
+         xGrid.value.remove(fullData.slice(0,fullData.length-limit + 10))
+      }
    })
 }
 
 let logList: LogItem[] = []
 function _logDisplay(vals: LogItem[]) {
+
    // Don't process logs when paused
    if (isPaused.value) return
+
 
    const logData: LogData[] = []
    const insertData = (data: LogData) => {
       logData.push(data)
-
    }
    for (const val of vals) {
       if (val.message.method == 'canBase') {
@@ -393,6 +406,7 @@ function _logDisplay(vals: LogItem[]) {
       }
    }
    insertData1(logData)
+   
 
 }
 function logDisplay(_event: any, val: LogItem) {
@@ -477,7 +491,8 @@ const gridOptions = computed(() => {
       showOverflow: true,
       scrollY: {
          enabled: true,
-         gt: 0
+         gt: 0,
+         mode:'wheel'
       },
       rowConfig: {
          isCurrent: true,
@@ -559,12 +574,22 @@ function menuClick(val: any) {
 function saveAll() {
    xGrid.value.exportData()
 }
+const isPaused = ref(false)
+// const autoScroll = ref(true)
+function scrollHandle(x){
+   
+   if(x.type=='body'&&!isPaused.value){
+      isPaused.value=true
+   }
+}
 
 function togglePause() {
    isPaused.value = !isPaused.value
 }
 
-const isPaused = ref(false)
+// function toggleAutoScroll() {
+//    autoScroll.value = !autoScroll.value
+// }
 
 onMounted(() => {
    for (const item of checkList.value) {
@@ -582,13 +607,13 @@ onMounted(() => {
          list['linError']=window.electron.ipcRenderer.on(`ipc-log-linError`, logDisplay)
       }
    }
+   // Initial timer setup
    timer = setInterval(() => {
       if (logList.length > 0) {
-
          _logDisplay(logList)
          logList = []
       }
-   }, 20)
+   }, 50)
 
 })
 

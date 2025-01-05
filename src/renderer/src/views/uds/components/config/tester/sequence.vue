@@ -117,7 +117,10 @@ function getName(device: UdsDevice) {
     return device.canDevice?.name
  }else if(device.type=='eth'){
    return device.ethDevice?.name
- }else{
+ }else if(device.type=='lin'){
+   return device.linDevice?.name
+ }
+ else{
   return ''
  }
 }
@@ -126,6 +129,8 @@ function getVendor(device: UdsDevice) {
     return device.canDevice?.vendor.toLocaleUpperCase()
  }else if(device.type=='eth'){
    return device.ethDevice?.vendor.toLocaleUpperCase()
+ }else if(device.type=='lin'){
+   return device.linDevice?.vendor.toLocaleUpperCase()
  }else{
   return ''
  }

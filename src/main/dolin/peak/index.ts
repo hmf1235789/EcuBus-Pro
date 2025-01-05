@@ -32,8 +32,6 @@ export class PeakLin extends LinBase {
     }, 1)
     private client: number
     private lastFrame: Map<number, LinMsg> = new Map()
-   
-
     event = new EventEmitter()
     pendingPromise?: {
         resolve: (msg: LinMsg, ts: number) => void
@@ -173,7 +171,7 @@ export class PeakLin extends LinBase {
                     } else {
 
                         this.log.linBase(this.pendingPromise.sendMsg, ts)
-                        this.event.emit(`${msg.frameId}`, this.pendingPromise.sendMsg)
+                        this.event.emit(`${msg.frameId}`, this.pendingPromise.sendMsg, ts)
                         this.pendingPromise.resolve(this.pendingPromise.sendMsg, ts)
                     }
                     this.pendingPromise = undefined
@@ -228,7 +226,7 @@ export class PeakLin extends LinBase {
                             }
                         }
                         this.log.linBase(msg, ts)
-                        this.event.emit(`${msg.frameId}`, msg)
+                        this.event.emit(`${msg.frameId}`, msg, ts)
                     }
                 }
 

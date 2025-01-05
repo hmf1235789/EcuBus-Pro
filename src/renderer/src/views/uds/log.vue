@@ -93,7 +93,8 @@ const gridOptions = computed(() => {
         showOverflow: true,
         scrollY: {
             enabled: true,
-            gt: 0
+            gt: 0,
+            mode:'wheel'
         },
         rowConfig: {
             isCurrent: true,
@@ -186,7 +187,7 @@ onMounted(() => {
 
 
         }
-    }, 20)
+    }, 50)
     
 })
 

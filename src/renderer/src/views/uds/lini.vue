@@ -390,7 +390,7 @@ watch(globalStart, (v) => {
 const dbName=ref('')
 const getUsedDb=()=>{
     const device=dataBase.ia[editIndex.value].devices[0]
-    if(device&&dataBase.devices[device].type=='lin'&&dataBase.devices[device].linDevice&&dataBase.devices[device].linDevice.database){
+    if(device&&dataBase.devices[device]&&dataBase.devices[device].type=='lin'&&dataBase.devices[device].linDevice&&dataBase.devices[device].linDevice.database){
         dbName.value=dataBase.devices[device].linDevice.database
     }else{
         dbName.value=''

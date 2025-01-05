@@ -87,8 +87,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="P2 extended" prop="udsTime.pExtTime">
-            <el-input v-model.number="data.udsTime.pExtTime" disabled />
+          <el-form-item label="P2 max (0x78)" prop="udsTime.pExtTime">
+            <el-input v-model.number="data.udsTime.pExtTime"/>
           </el-form-item>
         </el-col>
 
@@ -108,17 +108,23 @@
 
       </el-form-item>
       <el-divider content-position="left">
+        
         <el-button icon="Plus" link type="primary" @click="addCanAddress">
           Add
           {{ props.type.toLocaleUpperCase() }} Address
         </el-button>
+        <el-button icon="Switch" link type="success" @click="addAddrFromDb">
+          Load From Database
+        </el-button>
+
+     
       </el-divider>
     </el-form>
 
     <div v-if="data.address && data.address.length > 0">
       <el-tabs tab-position="left" v-model="activeTabName" v-if="props.type == 'can'" style="height: 660px" closable
         @tab-remove="removeTab">
-        <el-tab-pane :name="`index${index}`" :label="getAddrName(item, index)" v-for="item, index in data.address"
+        <el-tab-pane :name="`index${index}`"  v-for="item, index in data.address"
           :key="index">
           <template #label>
             <span class="custom-tabs-label">
@@ -126,7 +132,7 @@
               <span :class="{
                 addrError: errors[index]
 
-              }">{{ item.canAddr?.name ? item.canAddr.name : `Addr${index}` }}</span>
+              }">{{ getAddrName(item, index) }}</span>
             </span>
           </template>
           <canAddr :index="index" :addrs="data.address" v-if="data.address[index].canAddr"
@@ -136,7 +142,7 @@
       </el-tabs>
       <el-tabs tab-position="left" v-else-if="props.type == 'eth'" v-model="activeTabName" style="height: 450px"
         closable @tab-remove="removeTab">
-        <el-tab-pane :name="`index${index}`" :label="getAddrName(item, index)" v-for="item, index in data.address"
+        <el-tab-pane :name="`index${index}`" v-for="item, index in data.address"
           :key="index">
           <template #label>
             <span class="custom-tabs-label">
@@ -144,12 +150,30 @@
               <span :class="{
                 addrError: errors[index]
 
-              }">{{ item.canAddr?.name ? item.canAddr.name : `Addr${index}` }}</span>
+              }">{{ getAddrName(item, index)}}</span>
             </span>
           </template>
 
           <EthAddr :index="index" v-if="data.address[index].ethAddr" :addrs="data.address"
             :ref="(e) => addrRef[index] = e" v-model="data.address[index].ethAddr" />
+        </el-tab-pane>
+      </el-tabs>
+      <el-tabs tab-position="left" v-else-if="props.type == 'lin'" v-model="activeTabName" style="height: 450px"
+        closable @tab-remove="removeTab">
+        <el-tab-pane :name="`index${index}`"  v-for="item, index in data.address"
+          :key="index">
+          <template #label>
+            <span class="custom-tabs-label">
+
+              <span :class="{
+                addrError: errors[index]
+
+              }">{{ getAddrName(item, index) }}</span>
+            </span>
+          </template>
+
+          <LinAddr :index="index" v-if="data.address[index].linAddr" :addrs="data.address"
+            :ref="(e) => addrRef[index] = e" v-model="data.address[index].linAddr" />
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -168,7 +192,8 @@ import {
   ref,
   toRef,
   watch,
-  nextTick
+  nextTick,
+  h
 } from "vue";
 import canAddr from "./canAddr.vue";
 import { v4 } from "uuid";
@@ -187,6 +212,9 @@ import newIcon from '@iconify/icons-material-symbols/new-window'
 import buildError from "./buildError.vue";
 import dangerIcon from '@iconify/icons-material-symbols/dangerous-outline-rounded'
 import EthAddr from "./ethAddr.vue";
+import LinAddr from "./linAddr.vue";
+import { LIN_ADDR_TYPE, LIN_SCH_TYPE } from "nodeCan/lin";
+import dbchoose from "./dbchoose.vue";
 
 const globalStart = toRef(window, 'globalStart')
 const ruleFormRef = ref<FormInstance>();
@@ -231,6 +259,8 @@ function getAddrName(item: UdsAddress, index: number) {
     return item.canAddr?.name
   } else if (item.type == 'eth') {
     return item.ethAddr?.name
+  }else if(item.type == 'lin'){
+    return item.linAddr?.name
   }
   return `Addr${index}`
 }
@@ -444,6 +474,19 @@ function addCanAddress() {
         }
       }
     })
+  } else if (props.type == 'lin'){
+    data.value.address.push({
+      type: 'lin',
+      linAddr: {
+        name: `Addr${data.value.address.length}`,
+        addrType: LIN_ADDR_TYPE.PHYSICAL,
+        nad: 1,
+        stMin: 20,
+        nAs: 1000,
+        nCr: 1000,
+        schType: LIN_SCH_TYPE.DIAG_ONLY
+      }
+    })
   }
   activeTabName.value = `index${data.value.address.length - 1}`
 
@@ -460,6 +503,23 @@ function removeTab(targetName: string) {
 
 }
 
+
+function addAddrFromDb(){
+  ElMessageBox({
+    title: `Load From Database ${props.type}`,
+    message:h(dbchoose,{
+      type:props.type,
+      testerId:editIndex.value,
+      onAdd:(addr:UdsAddress)=>{
+        data.value.address.push(addr)
+        activeTabName.value = `index${data.value.address.length - 1}`
+      }
+    }),
+    showCancelButton: false,
+    showConfirmButton: false,
+  
+  })
+}
 const errors = ref<Record<number, any>>({})
 const onSubmit = async () => {
   try {
