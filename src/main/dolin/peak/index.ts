@@ -26,7 +26,7 @@ function buf2str(buf: Buffer) {
 
 
 export class PeakLin extends LinBase {
-    private queue = queue((task: { resolve: any; reject: any; data: LinMsg }, cb) => {
+    queue = queue((task: { resolve: any; reject: any; data: LinMsg }, cb) => {
         this._write(task.data).then(task.resolve).catch(task.reject).finally(cb)
     }, 1)
     private client: number
@@ -341,38 +341,7 @@ export class PeakLin extends LinBase {
 
 
     }
-    async write(m: LinMsg, opt?: LinWriteOpt): Promise<number> {
-        return new Promise<number>((resolve, reject) => {
-
-            if (opt?.fromSch) {
-                this.queue.push({ resolve, reject, data: m })
-            } else {
-                if(opt?.diagnostic){
-                    m.uuid=v4()
-                    if(opt.diagnostic.abort){
-                        opt.diagnostic.abort.signal.onabort=()=>{
-                            //remove from queue
-                            const index=this.diagQueue.findIndex((item)=>item.msg.uuid==m.uuid)
-                            if(index!=-1){
-                                this.diagQueue.splice(index,1)
-                            }
-                        }
-                    }
-                    this.diagQueue.push({ resolve, reject, msg: m, addr: opt.diagnostic.addr })
-                }else{
-                    if (this.sch) {
-                       reject(new LinError(LIN_ERROR_ID.LIN_BUS_BUSY, m, 'sch is running'))
-                    }else{
-                        this.queue.push({ resolve, reject, data: m })
-                    }
-                }   
-                
-            }
-
-
-
-        })
-    }
+    
     read(frameId: number) {
         return this.lastFrame.get(frameId)
     }

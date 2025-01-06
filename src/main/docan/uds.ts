@@ -96,6 +96,8 @@ import json5 from 'json5'
 import { v4 } from 'uuid'
 import { glob } from 'glob'
 import { DOIP, DOIP_SOCKET } from '../doip'
+import LinBase from '../dolin/base'
+import { LIN_TP, LIN_TP_SOCKET } from '../dolin/lintp'
 const NRCMsg: Record<number, string> = {
   0x10: 'General Reject',
   0x11: 'Service Not Supported',
@@ -189,6 +191,7 @@ export class UDSTesterMain {
   project: ProjectConfig
   runningCanBase?: CanBase
   runningDoip?:DOIP
+  runningLinBase?: LinBase
   services: Record<string, ServiceItem> = {}
   constructor(project: ProjectConfig, tester: TesterInfo, private device: UdsDevice) {
     this.project = project
@@ -228,6 +231,10 @@ export class UDSTesterMain {
   setDoip(doip?:DOIP){
     this.runningDoip=doip
     this.closeBase=false
+  }
+  setLinBase(base?: LinBase) {
+    this.runningLinBase = base
+    this.closeBase = false
   }
   async runSequence(seqIndex: number, cycle?: number) {
     this.ac = new AbortController()
@@ -309,6 +316,24 @@ export class UDSTesterMain {
             throw e
           }
         }
+      }else if (targetDevice.type == 'lin' && targetDevice.linDevice) {
+        
+        try {
+          if (this.runningLinBase) {
+            await this.runLinSequenceWithBase(this.runningLinBase, seqIndex, log, cycleCount)
+          } else {
+            // await this.runCanSequence(targetDevice.canDevice, seqIndex, log, cycleCount)
+            throw new Error('lin base not found')
+          }
+        } catch (e: any) {
+          if (this.ac.signal.aborted) {
+            null
+          } else {
+            log.error(e.message, this.lastActiveTs, undefined)
+            log.close()
+            throw e
+          }
+        }
       }
       log.close()
     } else {
@@ -347,6 +372,24 @@ export class UDSTesterMain {
       },
       close:(base:boolean)=>{
         null
+      }
+    }, seqIndex, log, cycleCount)
+  }
+  private async runLinSequenceWithBase(base: LinBase, seqIndex: number, log: UdsLOG, cycleCount: number) {
+    const tp = new LIN_TP(base)
+    await this.runCanTp({
+      createSocket:async (addr:UdsAddress)=>{
+        if(addr.linAddr==undefined){
+          throw new Error('address not found')
+        }
+        if(this.ac.signal.aborted){
+          throw new Error('aborted')
+        }
+     
+        return new LIN_TP_SOCKET(tp,addr.linAddr)
+      },
+      close:(base:boolean)=>{
+        tp.close(base)
       }
     }, seqIndex, log, cycleCount)
   }

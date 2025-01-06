@@ -184,7 +184,6 @@ function startSeq() {
     }
     start.value = true
     const seqIndex = parseInt(activeTabName.value.replace('index', ''))
-    
     window.electron.ipcRenderer.invoke('ipc-run-sequence', project.projectInfo.path, project.projectInfo.name, 
     cloneDeep(tester.value),cloneDeep(dataBase.devices[tester.value.targetDeviceId]), seqIndex, seqCycle.value)
       .catch((e) => {

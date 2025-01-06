@@ -471,6 +471,16 @@ ipcMain.handle('ipc-run-sequence', async (event, ...arg) => {
             } else {
                 throw new Error(`eth device ${device.ethDevice.vendor}-${device.ethDevice.device.handle} not found`)
             }
+        } else if(device.type=='lin'&&device.linDevice){
+            const id = device.linDevice.id
+            const linBase = linBaseMap.get(id)
+            if (linBase) {
+                uds.setLinBase(linBase)
+                udsTesterMap.set(tester.id, uds)
+                await uds.runSequence(seqIndex, cycle)
+            } else {
+                throw new Error(`lin device ${device.linDevice.vendor}-${device.linDevice.device.handle} not found`)
+            }
         }
     } catch (err: any) {
 

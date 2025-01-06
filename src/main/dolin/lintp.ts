@@ -3,6 +3,7 @@ import EventEmitter, { getEventListeners } from 'events'
 import { queue, QueueObject } from 'async'
 import { LIN_ADDR_TYPE, LinAddr, LinChecksumType, LinDirection, LinMode, LinMsg } from '../share/lin'
 import LinBase from './base'
+import { v4 } from 'uuid'
 export interface LinTp {
   close: () => void
   writeTp(addr: LinAddr, data: Buffer): Promise<number>
@@ -157,7 +158,7 @@ export class LIN_TP implements LinTp {
     string,
     { ts: number; bs: number; stMin: number; bc: number; leftLen: number; curBs: number, crTimer?: NodeJS.Timeout }
   > = {}
-  lastWriteError?: TpError
+
   constructor(base: LinBase, private listenOnly = false) {
     this.base = base
     //close peak tp default handle
@@ -212,7 +213,7 @@ export class LIN_TP implements LinTp {
       throw new TpError(LIN_TP_ERROR_ID.TP_LEN_ERROR, addr, data)
     }
   }
-  async sendLinFrame(addr: LinAddr, data: Buffer) {
+  async sendLinFrame(addr: LinAddr, data: Buffer,uuid:string) {
     return new Promise<{ ts: number }>((resolve, reject) => {
       const abortController = new AbortController()
       const timer = setTimeout(() => {
@@ -224,7 +225,8 @@ export class LIN_TP implements LinTp {
         frameId: this.base.info.mode == LinMode.MASTER ? 0x3c : 0x3d,
         data: data,
         direction: LinDirection.SEND,
-        checksumType: LinChecksumType.CLASSIC
+        checksumType: LinChecksumType.CLASSIC,
+        uuid:uuid
       }
 
       this.base
@@ -261,13 +263,13 @@ export class LIN_TP implements LinTp {
     })
   }
   async writeTp(addr: LinAddr, data: Buffer) {
-    this.lastWriteError = undefined
+    
     if (data.length == 0 || data.length > 4095) {
       throw new TpError(LIN_TP_ERROR_ID.TP_PARAM_ERROR, addr, data, 'data length error')
     }
     const prefixBuffer = [addr.nad]
 
-
+    const id=v4()
     if (this.isSingleFrame(addr, data)) {
 
 
@@ -275,19 +277,20 @@ export class LIN_TP implements LinTp {
 
 
       const { sendData } = this.getSendData(pci, addr, data)
-      const { ts } = await this.sendLinFrame(addr, sendData)
+      const { ts } = await this.sendLinFrame(addr, sendData,id)
       return ts
     } else {
       if (addr.addrType == LIN_ADDR_TYPE.FUNCTIONAL) {
         throw new TpError(LIN_TP_ERROR_ID.TP_PARAM_ERROR, addr, data, 'functional address not support multi frame')
       }
+      const sendPList=[]
 
       let sn = 1
       let sendLen = 0
 
 
 
-      let lastFrameSentTs = 0
+      
       const pci = Buffer.from([
         ...prefixBuffer,
         0x10 | (Math.floor(data.length / 256) & 0xf),
@@ -295,23 +298,16 @@ export class LIN_TP implements LinTp {
       ])
       //ff
       const { sendData, usedLen } = this.getSendData(pci, addr, data)
-      const { ts } = await this.sendLinFrame(addr, sendData)
-      lastFrameSentTs = ts
+      sendPList.push(this.sendLinFrame(addr, sendData,id))
+      
       sendLen = usedLen
 
       while (sendLen < data.length) {
-        if (this.lastWriteError) {
-          throw this.lastWriteError
-        }
+      
 
         const snData = Buffer.from([...prefixBuffer, 0x20 | (sn & 0xf)])
         const { sendData, usedLen } = this.getSendData(snData, addr, data.subarray(sendLen))
-        this.sendLinFrame(addr, sendData).then(({ ts }) => {
-          lastFrameSentTs = ts
-        }).catch((e) => {
-          this.lastWriteError = e
-        })
-
+        sendPList.push(this.sendLinFrame(addr, sendData,id))
         sendLen += usedLen
 
         sn++
@@ -325,7 +321,8 @@ export class LIN_TP implements LinTp {
 
       }
 
-      return lastFrameSentTs
+      const r=await Promise.all(sendPList)
+      return r[r.length-1].ts
     }
   }
 

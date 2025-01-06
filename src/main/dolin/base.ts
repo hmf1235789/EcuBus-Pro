@@ -1,8 +1,11 @@
 import { EventTriggeredFrame, Frame, LDF, SchTable } from "src/renderer/src/database/ldfParse"
-import { getFrameData, getPID, LIN_SCH_TYPE, LinAddr, LinBaseInfo, LinChecksumType, LinDevice, LinDirection, LinError, LinMode, LinMsg } from "../share/lin"
+import { getFrameData, getPID, LIN_ERROR_ID, LIN_SCH_TYPE, LinAddr, LinBaseInfo, LinChecksumType, LinDevice, LinDirection, LinError, LinMode, LinMsg } from "../share/lin"
 import EventEmitter from "events"
 import { LinLOG } from "../log"
 import { getTsUs } from "../share/can"
+import { v4 } from "uuid"
+import { QueueObject } from "async"
+import { cloneDeep } from "lodash"
 
 export interface LinWriteOpt {
     fromSch?: boolean
@@ -10,18 +13,23 @@ export interface LinWriteOpt {
         addr: LinAddr
         abort?: AbortController
     }
+}
 
+interface DiagItem{
+    msg: LinMsg,
+    reject: (reason?: LinError) => void
+    resolve: (ts: number) => void
+    addr: LinAddr
 }
 export default abstract class LinBase {
 
     sch?: {
-        activeSchName: string,
+        // activeSchName: string,
         timer: NodeJS.Timeout,
-        activeIndex: number,
-        lastActiveSchName?: string
+        // activeIndex: number,
+        lastActiveSchName: string
         lastActiveIndex: number
-        diagAddr?: LinAddr
-        diagMsg?: LinMsg
+        diag?: DiagItem
     }
     abstract info: LinBaseInfo
     abstract log: LinLOG
@@ -29,16 +37,17 @@ export default abstract class LinBase {
         db: LDF,
         nodeName: string
     }[] = []
-    diagQueue: {
-        msg: LinMsg,
-        reject: (reason?: LinError) => void
-        resolve: (ts: number) => void
-        addr: LinAddr
-    }[] = []
+    diagQueue: DiagItem[] = []
     constructor(info: LinBaseInfo) {
 
 
     }
+    abstract queue:QueueObject<{
+        resolve: any;
+        reject: any;
+        data: LinMsg;
+    }>
+    abstract  startTs: number
     abstract event: EventEmitter
     static getValidDevices(): LinDevice[] {
         throw new Error('Method not implemented.')
@@ -125,8 +134,43 @@ export default abstract class LinBase {
     abstract close(): void
     abstract setEntry(frameId: number, length: number, dir: LinDirection, checksumType: LinChecksumType, initData: Buffer, flag: number): void
     // abstract registerNode(nodeName:string):void
-    abstract write(m: LinMsg, opt?: LinWriteOpt): Promise<number>;
+    abstract _write(msg: LinMsg): Promise<number>
+    async write(m: LinMsg, opt?: LinWriteOpt): Promise<number> {
+        return new Promise<number>((resolve, reject) => {
 
+            if (opt?.fromSch) {
+                this.queue.push({ resolve, reject, data: m })
+            } else {
+                if(opt?.diagnostic){
+                    
+                    
+                    if(this.sch==undefined){
+                        reject(new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, m, 'sch is not running'))
+                    }else{
+                        if(opt.diagnostic.abort){
+                            opt.diagnostic.abort.signal.onabort=()=>{
+                                //remove all uuid same from queue
+                                this.diagQueue=this.diagQueue.filter(d=>d.msg.uuid!=m.uuid)
+                                
+                               
+                            }
+                        }
+                        this.diagQueue.push({ resolve, reject, msg: m, addr: opt.diagnostic.addr })
+                    }
+                }else{
+                    if (this.sch) {
+                       reject(new LinError(LIN_ERROR_ID.LIN_BUS_BUSY, m, 'sch is running'))
+                    }else{
+                        this.queue.push({ resolve, reject, data: m })
+                    }
+                }   
+                
+            }
+
+
+
+        })
+    }
     registerNode(db: LDF, nodeName: string) {
         //find node
 
@@ -158,11 +202,9 @@ export default abstract class LinBase {
 
         if (this.sch) {
             clearTimeout(this.sch.timer)
-            if (this.sch.activeSchName != schName) {
-                this.log.sendEvent(`schChanged, table ${schName} slot ${rIndex}`, getTsUs())
+            if (this.sch.lastActiveSchName != schName) {
+                this.log.sendEvent(`schChanged, table ${schName} slot ${rIndex}`, getTsUs()-this.startTs)
             }
-            this.sch.lastActiveSchName = this.sch.activeSchName
-            this.sch.lastActiveIndex = this.sch.activeIndex
 
         }
         let sch = db.schTables.find(s => s.name == schName)
@@ -190,6 +232,7 @@ export default abstract class LinBase {
                 }
                 sch = stubDiagSch
             }
+            
         }
         const entry = sch?.entries[rIndex]
         let nextDelay = 0
@@ -257,15 +300,23 @@ export default abstract class LinBase {
                             // 让从机响应帧数据保持为0
                             break;
                     }
-
+                    const lastDiag=this.sch?.diag
                     this.write({
                         frameId: frameId,
-                        data: this.sch?.diagMsg?.data || data,
-                        direction: this.sch?.diagMsg?.direction||LinDirection.SEND,
+                        data: this.sch?.diag?.msg.data || data,
+                        direction: this.sch?.diag?.msg.direction||LinDirection.SEND,
                         checksumType: LinChecksumType.CLASSIC,
                         name: entry.name
-                    }, { fromSch: true }).catch(() => {
-                        null
+                    }, { fromSch: true }).then((ts)=>{
+                      
+                        if(lastDiag){
+                           
+                            lastDiag.resolve(ts)
+                        }
+                    }).catch((e) => {
+                        if(lastDiag){
+                            lastDiag.reject(e)
+                        }
                     })
                 } else {
                     // 处理普通帧和Sporadic帧
@@ -404,17 +455,18 @@ export default abstract class LinBase {
 
             // 设置下一个调度
             let nextIndex = (rIndex + 1) % sch.entries.length
-            const lastActiveSchName = this.sch?.activeSchName || schName
-            let addr: LinAddr | undefined
-            let diagMsg: LinMsg | undefined
-            if (nextIndex == 0 && this.diagQueue.length > 0) {
-
-                if(this.sch?.diagAddr?.schType!=LIN_SCH_TYPE.DIAG_INTERLEAVED){
+            //TODO:
+            const lastActiveSchName =  this.sch?.diag?this.sch.lastActiveSchName:schName
+            let lastActiveIndex=this.sch?.diag?this.sch.lastActiveIndex:nextIndex
+            let diag: DiagItem | undefined=undefined
+          
+            if ((nextIndex == 0||this.sch?.diag) && this.diagQueue.length > 0) {
+                console.log(this.sch?.diag?.addr.schType,this.diagQueue.length)
+                if(this.sch?.diag?.addr.schType!=LIN_SCH_TYPE.DIAG_INTERLEAVED){
                     //switch diag sch
-                    const diag = this.diagQueue.shift()
+                    diag = this.diagQueue.shift()
                     if (diag) {
-                        addr=diag.addr
-                        diagMsg = diag.msg
+                     
                         schName = "Diagnostic (not found, self defined)"
                         nextIndex = 0
                         let found = false
@@ -451,16 +503,22 @@ export default abstract class LinBase {
                     }
                 }
             }
+            // console.log(this.sch?.lastActiveSchName,this.sch?.activeSchName,this.sch?.diag,this.diagQueue.length)
+            else if(this.sch?.diag&&this.diagQueue.length==0){
+                //switch to before sch
+                lastActiveIndex=rIndex
+                schName=this.sch.lastActiveSchName
+                nextIndex=this.sch.lastActiveIndex
+            }
             this.sch = {
-                activeSchName: schName,
+              
                 timer: setTimeout(() => {
                     this.startSch(db, schName, activeMap, nextIndex)
                 }, nextDelay),
-                activeIndex: nextIndex,
+              
                 lastActiveSchName: lastActiveSchName,
-                lastActiveIndex: rIndex,
-                diagAddr: addr,
-                diagMsg: diagMsg
+                lastActiveIndex: lastActiveIndex,
+                diag: diag
             }
 
 
