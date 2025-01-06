@@ -54,7 +54,6 @@
     <el-radio-group v-model="data.schType" style="margin-left: 30px;">
       <el-radio value="DIAG_ONLY" size="small" border>Diagnostic only</el-radio>
       <el-radio value="DIAG_INTERLEAVED" size="small" border>Interleaved</el-radio>
-      <el-radio value="DIAG_DIRECT" size="small" border>Direct sending</el-radio>
     </el-radio-group>
   </el-form>
 </template>

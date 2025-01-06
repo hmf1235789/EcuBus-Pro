@@ -1,6 +1,8 @@
-import { EventTriggeredFrame, Frame, LDF } from "src/renderer/src/database/ldfParse"
+import { EventTriggeredFrame, Frame, LDF, SchTable } from "src/renderer/src/database/ldfParse"
 import { getFrameData, getPID, LinBaseInfo, LinChecksumType, LinDevice, LinDirection, LinMode, LinMsg } from "../share/lin"
 import EventEmitter from "events"
+import { LinLOG } from "../log"
+import { getTsUs } from "../share/can"
 
 export default abstract class LinBase {
 
@@ -8,10 +10,11 @@ export default abstract class LinBase {
         activeSchName: string,
         timer: NodeJS.Timeout,
         activeIndex: number,
-        lastActiveSchName: string
+        lastActiveSchName?: string
         lastActiveIndex: number
     }
     abstract info: LinBaseInfo
+    abstract log: LinLOG
     nodeList: {
         db: LDF,
         nodeName: string
@@ -140,14 +143,44 @@ export default abstract class LinBase {
 
         if (this.sch) {
             clearTimeout(this.sch.timer)
+            if(this.sch.activeSchName!=schName){
+                this.log.sendEvent(`schChanged, table ${schName} slot ${rIndex}`,getTsUs())
+            }
             this.sch.lastActiveSchName = this.sch.activeSchName
             this.sch.lastActiveIndex = this.sch.activeIndex
+         
         }
-        const sch = db.schTables.find(s => s.name == schName)
+        let sch = db.schTables.find(s => s.name == schName)
+        if(sch==undefined){
+           
+            if(schName=="Diagnostic (not found, self defined)"){
+                const bytes = 8
+                const baseTime = (bytes * 10 + 44) * (1 / db.global.LIN_speed)
+                const maxFrameTime = baseTime * 1.4 // 考虑1.4倍的容差
+                const getm = Math.ceil(maxFrameTime)
+                const stubDiagSch:SchTable={
+                    name: "Diagnostic (not found, self defined)",
+                    entries: [
+                        {
+                            delay: getm,
+                            isCommand: true,
+                            name: "DiagnosticMasterReq"
+                        },
+                        {
+                            delay: getm,
+                            isCommand: true,
+                            name: "DiagnosticSlaveResp"
+                        }
+                    ]
+                }
+                sch=stubDiagSch
+            }
+        }
         const entry = sch?.entries[rIndex]
         let nextDelay = 0
-        if (entry) {
+        if (sch&&entry) {
 
+            
 
             if (activeMap[`${schName}-${rIndex}`] != false) {
                 nextDelay = entry.delay;
@@ -356,13 +389,14 @@ export default abstract class LinBase {
 
             // 设置下一个调度
             const nextIndex = (rIndex + 1) % sch.entries.length
+            const lastActiveSchName = this.sch?.activeSchName||schName
             this.sch = {
                 activeSchName: schName,
                 timer: setTimeout(() => {
                     this.startSch(db, schName, activeMap, nextIndex)
                 }, nextDelay),
                 activeIndex: nextIndex,
-                lastActiveSchName: schName,
+                lastActiveSchName: lastActiveSchName,
                 lastActiveIndex: rIndex
             }
         }

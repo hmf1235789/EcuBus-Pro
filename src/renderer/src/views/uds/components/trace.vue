@@ -16,17 +16,18 @@
                         <Icon :icon="circlePlusFilled" />
                      </el-button>
                   </el-tooltip>
-                  <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom" :show-after="1000">
-                     <el-button :type="isPaused ? 'success' : 'warning'" link @click="togglePause">
-                        <Icon :icon="isPaused ? playIcon : pauseIcon" />
-                     </el-button>
-                  </el-tooltip>
+                  
                   <!-- <el-tooltip effect="light" :content="autoScroll ? 'Disable Auto-Scroll' : 'Enable Auto-Scroll'" placement="bottom" :show-after="1000">
                      <el-button :type="autoScroll ? 'success' : 'warning'" link @click="toggleAutoScroll">
                         <Icon :icon="autoScroll ? scrollIcon2 : scrollIcon1" />
                      </el-button>
                   </el-tooltip> -->
                </el-button-group>
+               <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom" :show-after="1000">
+                     <el-button :type="isPaused ? 'success' : 'warning'" link @click="togglePause" :class="{ 'pause-active': isPaused }">
+                        <Icon :icon="isPaused ? playIcon : pauseIcon" />
+                     </el-button>
+                  </el-tooltip>
                <el-divider direction="vertical" />
                <el-dropdown>
                   <span class="el-dropdown-link">
@@ -125,16 +126,16 @@ interface IpBaseLog {
 }
 interface LinBaseLog {
    method: 'linBase',
-   data: LinMsg|'busSleep'|'busWakeUp',
-   ts: number
+   data: LinMsg,
 }
+
 interface UdsLog {
    method: 'udsSent' | 'udsRecv' | 'udsNegRecv',
    id?: string,
    data: { service: ServiceItem, ts: number,  recvData?: Uint8Array, msg?: string }
 }
 interface UdsErrorLog {
-   method: 'udsError' | 'udsScript' | 'udsSystem' | 'canError',
+   method: 'udsError' | 'udsScript' | 'udsSystem' | 'canError'|'linEvent',
    data: { msg: string, ts: number}
 }
 interface LinErrorLog{
@@ -251,25 +252,12 @@ function _logDisplay(vals: LogItem[]) {
         })
      } 
      else if(val.message.method=='linBase'){
-         if(typeof val.message.data=='string'){
-            insertData({
-               method: val.message.method,
-               dir: '--',
-               data: val.message.data,
-               ts: (val.message.ts / 1000000).toFixed(3),
-               id: '',
-               len: 0,
-               device: val.label,
-               channel: val.instance,
-               msgType: 'LIN',
-               name: ''
-            })
-         }else{
+      
             insertData({
                method: val.message.method,
                dir: val.message.data.direction == LinDirection.SEND ? 'Tx' : 'Rx',
                data: data2str(val.message.data.data),
-               ts: (val.message.ts / 1000000).toFixed(3),
+               ts: ((val.message.data.ts||0) / 1000000).toFixed(3),
                id: '0x' + (val.message.data.frameId.toString(16)),
                len: val.message.data.data.length,
                device: val.label,
@@ -278,7 +266,7 @@ function _logDisplay(vals: LogItem[]) {
                dlc: val.message.data.data.length,
                name: val.message.data.name
             })
-         }
+         
      }
       
       else if (val.message.method == 'udsSent') {
@@ -378,7 +366,19 @@ function _logDisplay(vals: LogItem[]) {
          }
          
       } 
-      
+      else if (val.message.method=='linEvent'){
+         insertData({
+            method: val.message.method,
+            name: '',
+            data: val.message.data.msg,
+            ts: (val.message.data.ts / 1000000).toFixed(3),
+            id: '',
+            len: 0,
+            device: val.label,
+            channel: val.instance,
+            msgType: 'LIN Event',
+         })
+      }
       else if (val.message.method == 'udsScript') {
          insertData({
             method: val.message.method,
@@ -470,9 +470,13 @@ function filterChange(method: 'uds' | 'canBase'|'ipBase'|'linBase', val: boolean
       if(list['linError']){
          list['linError']()
       }
+      if(list['linEvent']){
+         list['linEvent']()
+      }
       if (val) {
          window.electron.ipcRenderer.on(`ipc-log-linBase`, logDisplay)
          window.electron.ipcRenderer.on(`ipc-log-linError`, logDisplay)
+         window.electron.ipcRenderer.on(`ipc-log-linEvent`, logDisplay)
       }
    }
 
@@ -605,6 +609,7 @@ onMounted(() => {
       } else if (item == 'linBase') {
          list['linBase']=window.electron.ipcRenderer.on(`ipc-log-linBase`, logDisplay)
          list['linError']=window.electron.ipcRenderer.on(`ipc-log-linError`, logDisplay)
+         list['linEvent']=window.electron.ipcRenderer.on(`ipc-log-linEvent`, logDisplay)
       }
    }
    // Initial timer setup
@@ -664,5 +669,10 @@ onUnmounted(() => {
 }
 .udsNegRecv {
    color: var(--el-color-warning);
+}
+.pause-active {
+  box-shadow: inset 0 0 4px var(--el-color-info-light-5);
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.05);
 }
 </style>

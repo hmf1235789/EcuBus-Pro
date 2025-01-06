@@ -397,15 +397,22 @@ export class LinLOG {
     this.event.removeAllListeners()
 
   }
-  linBase(data: LinMsg|'busSleep'|'busWakeUp',ts:number) {
+  linBase(data: LinMsg) {
     this.log.debug({
       method: 'linBase',
       data,
-      ts
     })
     this.event.emit('lin-frame', data)
   }
-  
+  sendEvent(msg:string ,ts:number){
+    this.log.info({
+      method: 'linEvent',
+      data: {
+        msg,
+        ts
+      }
+    })
+  }
   error(ts: number, msg?: string, data?: LinMsg) {
     this.log.error(
       {

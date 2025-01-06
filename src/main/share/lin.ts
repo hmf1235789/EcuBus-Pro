@@ -87,6 +87,7 @@ export interface LinMsg {
     name?: string
     isEvent?: boolean
     uuid?: string
+    ts?: number
 }
 
 export class LinError extends Error {
@@ -105,9 +106,8 @@ export enum LIN_ADDR_TYPE {
     FUNCTIONAL = 'FUNCTIONAL'
 }
 export enum LIN_SCH_TYPE {
-    DIAG_ONLY,
-    DIAG_INTERLEAVED,
-    DIAG_DIRECT,
+    DIAG_ONLY= 'DIAG_ONLY',
+    DIAG_INTERLEAVED= 'DIAG_INTERLEAVED',
 }
 export interface LinAddr {
     name: string

@@ -34,7 +34,7 @@ export class PeakLin extends LinBase {
     private lastFrame: Map<number, LinMsg> = new Map()
     event = new EventEmitter()
     pendingPromise?: {
-        resolve: (msg: LinMsg, ts: number) => void
+        resolve: (msg: LinMsg) => void
         reject: (error: LinError) => void
         sendMsg: LinMsg
     }
@@ -164,19 +164,21 @@ export class PeakLin extends LinBase {
                 let isEvent = false;
                 if (this.pendingPromise && this.pendingPromise.sendMsg.frameId == (msg.frameId & 0x3f)) {
                     this.pendingPromise.sendMsg.data = msg.data
+                    this.pendingPromise.sendMsg.ts=ts
                     if (recvMsg.ErrorFlags != 0) {
                         handle()
                         this.log.error(ts, error.join(', '), this.pendingPromise.sendMsg)
                         this.pendingPromise.reject(new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, this.pendingPromise.sendMsg, error.join(', ')))
                     } else {
 
-                        this.log.linBase(this.pendingPromise.sendMsg, ts)
-                        this.event.emit(`${msg.frameId}`, this.pendingPromise.sendMsg, ts)
-                        this.pendingPromise.resolve(this.pendingPromise.sendMsg, ts)
+                        this.log.linBase(this.pendingPromise.sendMsg)
+                        this.event.emit(`${msg.frameId}`, this.pendingPromise.sendMsg)
+                        this.pendingPromise.resolve(this.pendingPromise.sendMsg)
                     }
                     this.pendingPromise = undefined
                 } else {
                     //slave
+                    msg.ts=ts
                     if(this.db) {
                         // Find matching frame or event frame
                         let frameName: string | undefined;
@@ -225,15 +227,15 @@ export class PeakLin extends LinBase {
                                 }
                             }
                         }
-                        this.log.linBase(msg, ts)
-                        this.event.emit(`${msg.frameId}`, msg, ts)
+                        this.log.linBase(msg)
+                        this.event.emit(`${msg.frameId}`, msg)
                     }
                 }
 
             } else if (recvMsg.Type == 1) {
-                this.log.linBase('busSleep', ts)
+                this.log.sendEvent('busSleep',ts)
             } else if (recvMsg.Type == 2) {
-                this.log.linBase('busWakeUp', ts)
+                this.log.sendEvent('busWakeUp',ts)
             } else {
                 this.log.error(ts, 'internal error')
             }
@@ -298,7 +300,7 @@ export class PeakLin extends LinBase {
                 }
 
                 this.pendingPromise = {
-                    resolve: (msg, ts) => resolve(ts),
+                    resolve: (msg) => resolve(msg.ts||0),
                     reject,
                     sendMsg: m
                 }

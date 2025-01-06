@@ -116,9 +116,9 @@ function toggleSch(table: string) {
         activeSch.value = undefined
     } else {
         // If there's already a running schedule, stop it first
-        if (activeSch.value) {
-            stopSchedule()
-        }
+        // if (activeSch.value) {
+        //     stopSchedule()
+        // }
         // Start new schedule
         activeSch.value = table
         startSchedule()
@@ -213,7 +213,8 @@ const tableData = computed(() => {
     }
     const db = dataBase.database.lin[dbName.value]
     let i = 0;
-
+    let foundMasterReq = false
+    let foundSlaveResp = false
     for (const table of db.schTables) {
         const t:Table = {
             Table: table.name,
@@ -224,6 +225,13 @@ const tableData = computed(() => {
         let totalBytes = 0
         for (const [index, entry] of table.entries.entries()) {
             const key=`${table.name}-${index}`
+            if(entry.isCommand){
+                if(entry.name=='DiagnosticMasterReq'){
+                    foundMasterReq=true
+                }else if(entry.name=='DiagnosticSlaveResp'){
+                    foundSlaveResp=true
+                }
+            }
             const frameSize = entry.isCommand ? 8 : getFrameSize(dataBase.database.lin[dbName.value], entry.name)
             totalBytes += frameSize
             t.childList.push({
@@ -240,6 +248,46 @@ const tableData = computed(() => {
      
         tables.push(t)
         i++
+    }
+    if(!foundMasterReq || !foundSlaveResp){
+        const bytes = 8
+        const baseTime = (bytes * 10 + 44) * (1 / db.global.LIN_speed)
+        const maxFrameTime = baseTime * 1.4 // 考虑1.4倍的容差
+        const getm = Math.ceil(maxFrameTime)
+        let index = 0
+        const t:Table={
+            //fixed self defined table name
+            Table: 'Diagnostic (not found, self defined)',
+            index: i,
+            childList: [],
+            length: 0
+        }
+        if(!foundMasterReq){
+            
+            t.childList.push({
+                Table: 'DiagnosticMasterReq',
+                index: index++,
+                FrameId: '0x3C',
+                Delay: getm,
+                Type: 'Command',
+                childList: [],
+                length: 8
+            })
+            
+        }
+        if(!foundSlaveResp){
+            t.childList.push({
+                Table: 'DiagnosticSlaveResp',
+                index: index++,
+                FrameId: '0x3D',
+                Delay: getm,
+                Type: 'Command',
+                childList: [],
+                length: 8
+            })
+        }
+        t.length= index
+        tables.push(t)
     }
     return tables
 })
@@ -412,6 +460,11 @@ watch(()=>dbName, () => {
     })
 })
 
+let schNotify
+
+onUnmounted(() => {
+    schNotify()
+}),
 onMounted(() => {
     // Get initial active SCH
     window.electron.ipcRenderer.invoke('ipc-get-schedule',dataBase.ia[editIndex.value].id).then((name?: any) => {
@@ -420,6 +473,34 @@ onMounted(() => {
         }
     })
     
+    schNotify=window.electron.ipcRenderer.on(`ipc-log-linEvent`,(_event:any,log:{
+        message:{
+            method:string,
+            data:{
+                msg:string,
+                ts:number
+            }
+        }
+        instance:string
+    })=>{
+        const selfDevice=dataBase.ia[editIndex.value].devices[0]
+        if(selfDevice&&dataBase.devices[selfDevice]&&dataBase.devices[selfDevice].linDevice?.name==log.instance){
+            if(log.message.data.msg.startsWith('schChanged')){
+                console.log(log)
+                //this.log.sendEvent(`schChanged, table ${schName} slot ${rIndex}`,getTsUs())
+                //extract sch name
+                const regex=/schChanged, table (.*) slot (.*)/
+                const result=regex.exec(log.message.data.msg)
+                if(result){
+                    const schName=result[1]
+                    const rIndex=parseInt(result[2])
+                    if(schName){
+                        activeSch.value=schName
+                    }
+                }
+            }
+        }
+    })
 
     // Set activeStates all true
     for (const table of tableData.value) {
