@@ -1,9 +1,17 @@
 import { EventTriggeredFrame, Frame, LDF, SchTable } from "src/renderer/src/database/ldfParse"
-import { getFrameData, getPID, LinBaseInfo, LinChecksumType, LinDevice, LinDirection, LinMode, LinMsg } from "../share/lin"
+import { getFrameData, getPID, LIN_SCH_TYPE, LinAddr, LinBaseInfo, LinChecksumType, LinDevice, LinDirection, LinError, LinMode, LinMsg } from "../share/lin"
 import EventEmitter from "events"
 import { LinLOG } from "../log"
 import { getTsUs } from "../share/can"
 
+export interface LinWriteOpt {
+    fromSch?: boolean
+    diagnostic?: {
+        addr: LinAddr
+        abort?: AbortController
+    }
+
+}
 export default abstract class LinBase {
 
     sch?: {
@@ -12,6 +20,8 @@ export default abstract class LinBase {
         activeIndex: number,
         lastActiveSchName?: string
         lastActiveIndex: number
+        diagAddr?: LinAddr
+        diagMsg?: LinMsg
     }
     abstract info: LinBaseInfo
     abstract log: LinLOG
@@ -19,7 +29,12 @@ export default abstract class LinBase {
         db: LDF,
         nodeName: string
     }[] = []
-    
+    diagQueue: {
+        msg: LinMsg,
+        reject: (reason?: LinError) => void
+        resolve: (ts: number) => void
+        addr: LinAddr
+    }[] = []
     constructor(info: LinBaseInfo) {
 
 
@@ -50,7 +65,7 @@ export default abstract class LinBase {
     //     }
     //     return checksum
     // }
-    setupEntry(workNode: string){
+    setupEntry(workNode: string) {
         if (this.info.database) {
             const db = global.database.lin[this.info.database]
             if (db) {
@@ -106,11 +121,11 @@ export default abstract class LinBase {
         }
         return undefined
     }
-    
+
     abstract close(): void
     abstract setEntry(frameId: number, length: number, dir: LinDirection, checksumType: LinChecksumType, initData: Buffer, flag: number): void
     // abstract registerNode(nodeName:string):void
-    abstract write(m: LinMsg): Promise<number>;
+    abstract write(m: LinMsg, opt?: LinWriteOpt): Promise<number>;
 
     registerNode(db: LDF, nodeName: string) {
         //find node
@@ -127,12 +142,12 @@ export default abstract class LinBase {
             this.sch = undefined
         }
     }
-    checkEventFramePID(data:number){
-        const id=data&0x3f
-        const pid=getPID(id)
-        if(pid!=data){
+    checkEventFramePID(data: number) {
+        const id = data & 0x3f
+        const pid = getPID(id)
+        if (pid != data) {
             return false
-        }else{
+        } else {
             return true
         }
     }
@@ -143,22 +158,22 @@ export default abstract class LinBase {
 
         if (this.sch) {
             clearTimeout(this.sch.timer)
-            if(this.sch.activeSchName!=schName){
-                this.log.sendEvent(`schChanged, table ${schName} slot ${rIndex}`,getTsUs())
+            if (this.sch.activeSchName != schName) {
+                this.log.sendEvent(`schChanged, table ${schName} slot ${rIndex}`, getTsUs())
             }
             this.sch.lastActiveSchName = this.sch.activeSchName
             this.sch.lastActiveIndex = this.sch.activeIndex
-         
+
         }
         let sch = db.schTables.find(s => s.name == schName)
-        if(sch==undefined){
-           
-            if(schName=="Diagnostic (not found, self defined)"){
+        if (sch == undefined) {
+
+            if (schName == "Diagnostic (not found, self defined)") {
                 const bytes = 8
                 const baseTime = (bytes * 10 + 44) * (1 / db.global.LIN_speed)
                 const maxFrameTime = baseTime * 1.4 // 考虑1.4倍的容差
                 const getm = Math.ceil(maxFrameTime)
-                const stubDiagSch:SchTable={
+                const stubDiagSch: SchTable = {
                     name: "Diagnostic (not found, self defined)",
                     entries: [
                         {
@@ -173,14 +188,14 @@ export default abstract class LinBase {
                         }
                     ]
                 }
-                sch=stubDiagSch
+                sch = stubDiagSch
             }
         }
         const entry = sch?.entries[rIndex]
         let nextDelay = 0
-        if (sch&&entry) {
+        if (sch && entry) {
 
-            
+
 
             if (activeMap[`${schName}-${rIndex}`] != false) {
                 nextDelay = entry.delay;
@@ -245,11 +260,11 @@ export default abstract class LinBase {
 
                     this.write({
                         frameId: frameId,
-                        data: data,
-                        direction: LinDirection.SEND,
+                        data: this.sch?.diagMsg?.data || data,
+                        direction: this.sch?.diagMsg?.direction||LinDirection.SEND,
                         checksumType: LinChecksumType.CLASSIC,
                         name: entry.name
-                    }).catch(() => {
+                    }, { fromSch: true }).catch(() => {
                         null
                     })
                 } else {
@@ -257,16 +272,16 @@ export default abstract class LinBase {
                     let frame: Frame = db.frames[entry.name]
                     let frameId: number | undefined
                     let frameData: Buffer | undefined
-                    let dir=LinDirection.RECV
-                    let workNode=db.node.master.nodeName
+                    let dir = LinDirection.RECV
+                    let workNode = db.node.master.nodeName
                     // uncondition frame
-                    if(frame){
-                        if(frame.publishedBy==db.node.master.nodeName){
-                            dir=LinDirection.SEND
+                    if (frame) {
+                        if (frame.publishedBy == db.node.master.nodeName) {
+                            dir = LinDirection.SEND
                         }
-                        for(const r of this.nodeList){
-                            if(r.db.name==db.name && r.nodeName==frame.publishedBy){
-                                dir=LinDirection.SEND
+                        for (const r of this.nodeList) {
+                            if (r.db.name == db.name && r.nodeName == frame.publishedBy) {
+                                dir = LinDirection.SEND
                                 break
                             }
                         }
@@ -274,7 +289,7 @@ export default abstract class LinBase {
                     // 检查是否为事件触发帧
                     const eventFrame = db.eventTriggeredFrames[entry.name]
                     if (eventFrame) {
-                        dir=LinDirection.RECV
+                        dir = LinDirection.RECV
                         frameId = eventFrame.frameId
                         //sub frame max len 
                         let maxLen = 0
@@ -287,12 +302,12 @@ export default abstract class LinBase {
                             }
                         })
                         frameData = Buffer.alloc(maxLen + 1)
-                        let sendCnt=0
-                        for(const ff of eventFrame.frameNames){
-                            const f=db.frames[ff]
-                            if(f){
-                                 for(const r of this.nodeList){
-                                    if(r.db.name==db.name && r.nodeName==f.publishedBy){
+                        let sendCnt = 0
+                        for (const ff of eventFrame.frameNames) {
+                            const f = db.frames[ff]
+                            if (f) {
+                                for (const r of this.nodeList) {
+                                    if (r.db.name == db.name && r.nodeName == f.publishedBy) {
                                         //check update 
                                         const hasUpdate = f.signals.some(signal => {
                                             const s = db.signals[signal.name]
@@ -300,44 +315,44 @@ export default abstract class LinBase {
                                         })
                                         //clear update flag
 
-                                        if(hasUpdate){
+                                        if (hasUpdate) {
                                             f.signals.forEach(signal => {
                                                 const s = db.signals[signal.name]
                                                 if (s) {
                                                     s.update = false
                                                 }
                                             })
-                                            if(sendCnt>0){
-                                                workNode+=','+r.nodeName
-                                            }else{
-                                                workNode=r.nodeName
+                                            if (sendCnt > 0) {
+                                                workNode += ',' + r.nodeName
+                                            } else {
+                                                workNode = r.nodeName
                                             }
-                                            
-                                            dir=LinDirection.SEND
-                                            if(sendCnt>0){
+
+                                            dir = LinDirection.SEND
+                                            if (sendCnt > 0) {
                                                 //two simulate node send, event frame collision
-                                                const last=frameData[0]
-                                                const newPID=getPID(f.id)
+                                                const last = frameData[0]
+                                                const newPID = getPID(f.id)
                                                 //bit and, 每一个bit AND操作，如果有一个为0，则结果为0，否则为1
-                                                frameData[0]=last & newPID
-                                            }else{
-                                                frameData[0]=getPID(f.id)
+                                                frameData[0] = last & newPID
+                                            } else {
+                                                frameData[0] = getPID(f.id)
                                             }
                                             sendCnt++
-                                            const dd=getFrameData(db,f)
-                                            dd.copy(frameData,1)
+                                            const dd = getFrameData(db, f)
+                                            dd.copy(frameData, 1)
                                         }
-                                     
+
                                         break
                                     }
                                 }
                             }
                         }
-                        if(sendCnt>1){
+                        if (sendCnt > 1) {
                             //two simulate node send, event frame collision
 
                         }
-                      
+
                     }
                     // 如果是Sporadic帧
                     else if (!frame && db.sporadicFrames[entry.name]) {
@@ -370,7 +385,7 @@ export default abstract class LinBase {
                         const data = frameData || getFrameData(db, frame)
                         const id = frameId || frame.id
                         const checksum = (id == 0x3 || id == 0x3d) ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED
-                     
+
                         this.write({
                             frameId: id,
                             data: data,
@@ -380,7 +395,7 @@ export default abstract class LinBase {
                             workNode: workNode,
                             name: eventFrame ? eventFrame.name : frame.name,
                             isEvent: eventFrame ? true : false
-                        }).catch(() => {
+                        }, { fromSch: true }).catch(() => {
                             null
                         })
                     }
@@ -388,8 +403,54 @@ export default abstract class LinBase {
             }
 
             // 设置下一个调度
-            const nextIndex = (rIndex + 1) % sch.entries.length
-            const lastActiveSchName = this.sch?.activeSchName||schName
+            let nextIndex = (rIndex + 1) % sch.entries.length
+            const lastActiveSchName = this.sch?.activeSchName || schName
+            let addr: LinAddr | undefined
+            let diagMsg: LinMsg | undefined
+            if (nextIndex == 0 && this.diagQueue.length > 0) {
+
+                if(this.sch?.diagAddr?.schType!=LIN_SCH_TYPE.DIAG_INTERLEAVED){
+                    //switch diag sch
+                    const diag = this.diagQueue.shift()
+                    if (diag) {
+                        addr=diag.addr
+                        diagMsg = diag.msg
+                        schName = "Diagnostic (not found, self defined)"
+                        nextIndex = 0
+                        let found = false
+                        //find sch table
+                        if (diag.msg.frameId == 0x3c) {
+                            nextIndex = 0
+                            for (const s of db.schTables) {
+                                s.entries.forEach((e, i) => {
+                                    if (e.name == "DiagnosticMasterReq") {
+                                        schName = s.name
+                                        nextIndex = i
+                                        found = true
+                                    }
+                                })
+                                if (found) {
+                                    break
+                                }
+                            }
+                        } else if (diag.msg.frameId == 0x3d) {
+                            nextIndex = 1
+                            for (const s of db.schTables) {
+                                s.entries.forEach((e, i) => {
+                                    if (e.name == "DiagnosticSlaveResp") {
+                                        schName = s.name
+                                        nextIndex = i
+                                        found = true
+                                    }
+                                })
+                                if (found) {
+                                    break
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             this.sch = {
                 activeSchName: schName,
                 timer: setTimeout(() => {
@@ -397,8 +458,15 @@ export default abstract class LinBase {
                 }, nextDelay),
                 activeIndex: nextIndex,
                 lastActiveSchName: lastActiveSchName,
-                lastActiveIndex: rIndex
+                lastActiveIndex: rIndex,
+                diagAddr: addr,
+                diagMsg: diagMsg
             }
+
+
+
+
+
         }
 
     }

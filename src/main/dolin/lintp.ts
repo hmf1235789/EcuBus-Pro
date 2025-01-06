@@ -214,8 +214,9 @@ export class LIN_TP implements LinTp {
   }
   async sendLinFrame(addr: LinAddr, data: Buffer) {
     return new Promise<{ ts: number }>((resolve, reject) => {
-
+      const abortController = new AbortController()
       const timer = setTimeout(() => {
+        abortController.abort()
         reject(new TpError(LIN_TP_ERROR_ID.TP_TIMEOUT_A, addr, data))
       }, addr.nAs)
 
@@ -227,7 +228,12 @@ export class LIN_TP implements LinTp {
       }
 
       this.base
-        .write(msg)
+        .write(msg,{
+          diagnostic:{
+            addr:addr,
+            abort:abortController
+          }
+        })
         .then((ts) => {
           clearTimeout(timer)
           resolve({ ts })

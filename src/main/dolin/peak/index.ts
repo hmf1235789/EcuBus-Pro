@@ -1,10 +1,10 @@
-import { getPID, LIN_ERROR_ID, LinBaseInfo, LinChecksumType, LinDevice, LinDirection, LinError, LinMode, LinMsg } from '../../share/lin'
+import { getPID, LIN_ERROR_ID, LIN_SCH_TYPE, LinBaseInfo, LinChecksumType, LinDevice, LinDirection, LinError, LinMode, LinMsg } from '../../share/lin'
 import LIN from '../build/Release/peakLin.node'
 import { v4 } from 'uuid'
 import { queue, QueueObject } from 'async'
 import { LinLOG } from 'src/main/log'
 import EventEmitter from 'events'
-import LinBase from '../base'
+import LinBase, { LinWriteOpt } from '../base'
 import { getTsUs } from 'src/main/share/can'
 import { LDF } from 'src/renderer/src/database/ldfParse'
 
@@ -23,7 +23,6 @@ function buf2str(buf: Buffer) {
     }
     return buf.toString('utf8', 0, nullCharIndex)
 }
-
 
 
 export class PeakLin extends LinBase {
@@ -54,7 +53,7 @@ export class PeakLin extends LinBase {
     offsetTs = 0
     offsetInit = false
     log: LinLOG
-    db?:LDF
+    db?: LDF
     constructor(public info: LinBaseInfo) {
         super(info)
         this.client = this.registerClient()
@@ -64,14 +63,14 @@ export class PeakLin extends LinBase {
         LIN.CreateTSFN(this.client, this.info.id, this.callback.bind(this))
         this.log = new LinLOG('PEAK', info.name, this.event)
         this.startTs = getTsUs()
-       
-        if(info.database){
-            this.db=global.database.lin[info.database]
+
+        if (info.database) {
+            this.db = global.database.lin[info.database]
         }
-        for(let i=0;i<=0x3f;i++){
-            const checksum=(i==0x3c||i==0x3d)?LinChecksumType.CLASSIC:LinChecksumType.ENHANCED
+        for (let i = 0; i <= 0x3f; i++) {
+            const checksum = (i == 0x3c || i == 0x3d) ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED
             this.setEntry(i, 8, LinDirection.RECV_AUTO_LEN, checksum, Buffer.alloc(8), 0);
-            
+
         }
         // this.getEntrys()
         // this.wakeup()
@@ -164,7 +163,7 @@ export class PeakLin extends LinBase {
                 let isEvent = false;
                 if (this.pendingPromise && this.pendingPromise.sendMsg.frameId == (msg.frameId & 0x3f)) {
                     this.pendingPromise.sendMsg.data = msg.data
-                    this.pendingPromise.sendMsg.ts=ts
+                    this.pendingPromise.sendMsg.ts = ts
                     if (recvMsg.ErrorFlags != 0) {
                         handle()
                         this.log.error(ts, error.join(', '), this.pendingPromise.sendMsg)
@@ -178,13 +177,13 @@ export class PeakLin extends LinBase {
                     this.pendingPromise = undefined
                 } else {
                     //slave
-                    msg.ts=ts
-                    if(this.db) {
+                    msg.ts = ts
+                    if (this.db) {
                         // Find matching frame or event frame
                         let frameName: string | undefined;
-                       
+
                         let publish: string | undefined;
-                        
+
                         // Check regular frames
                         for (const fname in this.db.frames) {
                             if (this.db.frames[fname].id === msg.frameId) {
@@ -196,7 +195,7 @@ export class PeakLin extends LinBase {
 
                         // Check event triggered frames
                         if (!frameName) {
-                            
+
                             for (const ename in this.db.eventTriggeredFrames) {
                                 const eventFrame = this.db.eventTriggeredFrames[ename];
                                 if (eventFrame.frameId === msg.frameId) {
@@ -216,10 +215,10 @@ export class PeakLin extends LinBase {
                     }
                     if (recvMsg.ErrorFlags != 0) {
                         handle()
-                        this.log.error(ts, error.join(', '),msg)
+                        this.log.error(ts, error.join(', '), msg)
                     } else {
-                        if(isEvent&&this.db){
-                            const pid=msg.data[0]&0x3f
+                        if (isEvent && this.db) {
+                            const pid = msg.data[0] & 0x3f
                             for (const fname in this.db.frames) {
                                 if (this.db.frames[fname].id === pid) {
                                     msg.workNode = this.db.frames[fname].publishedBy;
@@ -233,9 +232,9 @@ export class PeakLin extends LinBase {
                 }
 
             } else if (recvMsg.Type == 1) {
-                this.log.sendEvent('busSleep',ts)
+                this.log.sendEvent('busSleep', ts)
             } else if (recvMsg.Type == 2) {
-                this.log.sendEvent('busWakeUp',ts)
+                this.log.sendEvent('busWakeUp', ts)
             } else {
                 this.log.error(ts, 'internal error')
             }
@@ -285,10 +284,10 @@ export class PeakLin extends LinBase {
                         reject(new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, m, err2Str(result)))
                         return
                     }
-                    if(m.isEvent){
-                        if(!this.checkEventFramePID(m.data[0])){
+                    if (m.isEvent) {
+                        if (!this.checkEventFramePID(m.data[0])) {
                             //just change the length to 1 so the checksum will be incorrect
-                            msg.Length=1
+                            msg.Length = 1
                         }
                     }
                 }
@@ -300,7 +299,7 @@ export class PeakLin extends LinBase {
                 }
 
                 this.pendingPromise = {
-                    resolve: (msg) => resolve(msg.ts||0),
+                    resolve: (msg) => resolve(msg.ts || 0),
                     reject,
                     sendMsg: m
                 }
@@ -329,7 +328,7 @@ export class PeakLin extends LinBase {
                 if (result != 0) {
                     reject(new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, m, err2Str(result)))
                     return
-                }else{
+                } else {
                     resolve(0)
                 }
             }
@@ -342,11 +341,36 @@ export class PeakLin extends LinBase {
 
 
     }
-    async write(m: LinMsg): Promise<number> {
+    async write(m: LinMsg, opt?: LinWriteOpt): Promise<number> {
         return new Promise<number>((resolve, reject) => {
-           
-            this.queue.push({ resolve, reject, data: m })
-            
+
+            if (opt?.fromSch) {
+                this.queue.push({ resolve, reject, data: m })
+            } else {
+                if(opt?.diagnostic){
+                    m.uuid=v4()
+                    if(opt.diagnostic.abort){
+                        opt.diagnostic.abort.signal.onabort=()=>{
+                            //remove from queue
+                            const index=this.diagQueue.findIndex((item)=>item.msg.uuid==m.uuid)
+                            if(index!=-1){
+                                this.diagQueue.splice(index,1)
+                            }
+                        }
+                    }
+                    this.diagQueue.push({ resolve, reject, msg: m, addr: opt.diagnostic.addr })
+                }else{
+                    if (this.sch) {
+                       reject(new LinError(LIN_ERROR_ID.LIN_BUS_BUSY, m, 'sch is running'))
+                    }else{
+                        this.queue.push({ resolve, reject, data: m })
+                    }
+                }   
+                
+            }
+
+
+
         })
     }
     read(frameId: number) {
