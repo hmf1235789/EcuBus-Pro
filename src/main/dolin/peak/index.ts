@@ -4,7 +4,7 @@ import { v4 } from 'uuid'
 import { queue, QueueObject } from 'async'
 import { LinLOG } from 'src/main/log'
 import EventEmitter from 'events'
-import LinBase, { LinWriteOpt } from '../base'
+import LinBase, { LinWriteOpt, QueueItem } from '../base'
 import { getTsUs } from 'src/main/share/can'
 import { LDF } from 'src/renderer/src/database/ldfParse'
 
@@ -26,8 +26,12 @@ function buf2str(buf: Buffer) {
 
 
 export class PeakLin extends LinBase {
-    queue = queue((task: { resolve: any; reject: any; data: LinMsg }, cb) => {
-        this._write(task.data).then(task.resolve).catch(task.reject).finally(cb)
+    queue = queue((task: QueueItem, cb) => {
+        if(task.discard){
+            cb()
+        }else{
+            this._write(task.data).then(task.resolve).catch(task.reject).finally(cb)
+        }
     }, 1)
     private client: number
     private lastFrame: Map<number, LinMsg> = new Map()
@@ -262,6 +266,7 @@ export class PeakLin extends LinBase {
     async _write(m: LinMsg): Promise<number> {
 
         return new Promise<number>((resolve, reject) => {
+
             let result = 0
             const msg = new LIN.TLINMsg()
             msg.FrameId = getPID(m.frameId)

@@ -13,6 +13,7 @@ export interface LinWriteOpt {
         addr: LinAddr
         abort?: AbortController
     }
+    timeout?: number
 }
 
 interface DiagItem {
@@ -20,6 +21,13 @@ interface DiagItem {
     reject: (reason?: LinError) => void
     resolve: (ts: number) => void
     addr: LinAddr
+}
+
+export interface QueueItem {
+    resolve: any;
+    reject: any;
+    data: LinMsg;
+    discard?: boolean
 }
 export default abstract class LinBase {
     lastNad?: number
@@ -43,11 +51,7 @@ export default abstract class LinBase {
 
     }
 
-    abstract queue: QueueObject<{
-        resolve: any;
-        reject: any;
-        data: LinMsg;
-    }>
+    abstract queue: QueueObject<QueueItem>
     abstract startTs: number
     abstract event: EventEmitter
     static getValidDevices(): LinDevice[] {
@@ -150,14 +154,21 @@ export default abstract class LinBase {
     abstract _write(msg: LinMsg): Promise<number>
     async write(m: LinMsg, opt?: LinWriteOpt): Promise<number> {
         return new Promise<number>((resolve, reject) => {
-
+            const item:QueueItem={ resolve, reject, data: m }
+            let timer: NodeJS.Timeout | undefined
+            if(opt?.timeout){
+                timer=setTimeout(()=>{
+                    reject(new LinError(LIN_ERROR_ID.LIN_BUS_ERROR,m,'timeout'))
+                    item.discard=true
+                },opt.timeout)
+            }
             if (opt?.fromSch) {
-                this.queue.push({ resolve, reject, data: m })
+                this.queue.push(item)
             } else {
                 if (opt?.diagnostic) {
 
-
                     if (this.sch == undefined) {
+                        clearTimeout(timer)
                         reject(new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, m, 'sch is not running'))
                     } else {
                         if (opt.diagnostic.abort) {
@@ -172,6 +183,7 @@ export default abstract class LinBase {
                     }
                 } else {
                     if (this.sch) {
+                        clearTimeout(timer)
                         reject(new LinError(LIN_ERROR_ID.LIN_BUS_BUSY, m, 'sch is running'))
                     } else {
                         this.queue.push({ resolve, reject, data: m })
@@ -278,7 +290,6 @@ export default abstract class LinBase {
             clearTimeout(this.sch.timer)
             if (this.sch.activeSchName != schName) {
                 this.log.sendEvent(`schChanged, changed from ${this.sch.activeSchName} to ${schName} at slot ${rIndex}`, getTsUs() - this.startTs)
-                console.log('xxx',this.pendingDiagRead)
                 //判断this.sch.activeSchName是否为diag sch
                 let isDiag=false
                 if(this.sch.activeSchName=="__MasterReqTable"||this.sch.activeSchName=="__SlaveRespTable"){
@@ -410,7 +421,7 @@ export default abstract class LinBase {
                         direction: this.sch?.diag?.msg.direction || LinDirection.SEND,
                         checksumType: LinChecksumType.CLASSIC,
                         name: entry.name
-                    }, { fromSch: true }).then((ts) => {
+                    }, { fromSch: true,timeout:nextDelay}).then((ts) => {
 
                         if (lastDiag) {
 
@@ -549,7 +560,7 @@ export default abstract class LinBase {
                             workNode: workNode,
                             name: eventFrame ? eventFrame.name : frame.name,
                             isEvent: eventFrame ? true : false
-                        }, { fromSch: true }).catch(() => {
+                        }, { fromSch: true, timeout:nextDelay }).catch(() => {
                             null
                         })
                     }
@@ -646,7 +657,15 @@ export default abstract class LinBase {
             this.sch = {
 
                 timer: setTimeout(() => {
-                    this.startSch(db, schName, activeMap, nextIndex)
+                    if(this.queue.idle()){
+                        this.startSch(db, schName, activeMap, nextIndex)
+                    }else{
+                        const q=this.queue.drain()
+                        q.finally(()=>{
+                            this.startSch(db, schName, activeMap, nextIndex)
+                        })
+                       
+                    }
                 }, nextDelay),
                 activeSchName: backUpSchName,
                 activeIndex: backUpIndex,
