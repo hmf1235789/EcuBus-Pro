@@ -226,10 +226,13 @@ export default abstract class LinBase {
         if (this.info.mode == LinMode.SLAVE) {
             return
         }
-      
-       
+
+        let diag: DiagItem | undefined = undefined
         if (this.sch && (this.pendingDiagRead.length > 0)) {
-            if (this.sch?.diag && this.sch.diag.addr.schType == LIN_SCH_TYPE.DIAG_INTERLEAVED) {
+            console.log('pendingDiagRead', this.sch.diag)
+            const d=this.pendingDiagRead[0]
+            const skip=false
+            if ((skip)||(rIndex!=0)) {
                 //skip
             } else {
                 const p = this.pendingDiagRead[0]
@@ -279,6 +282,9 @@ export default abstract class LinBase {
                     }
                    
                 }
+
+                
+               
             }
 
 
@@ -352,7 +358,7 @@ export default abstract class LinBase {
         }
         const entry = sch?.entries[rIndex]
         let nextDelay = 0
-        let diag: DiagItem | undefined = undefined
+       
         if (sch && entry) {
             if (activeMap[`${schName}-${rIndex}`] != false) {
                 nextDelay = entry.delay;
@@ -672,7 +678,6 @@ export default abstract class LinBase {
                 lastActiveSchName: this.sch?.lastActiveSchName,
                 lastActiveIndex: this.sch?.lastActiveIndex,
                 diag: diag,
-
             }
 
 
