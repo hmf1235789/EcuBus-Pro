@@ -98,6 +98,7 @@ import { glob } from 'glob'
 import { DOIP, DOIP_SOCKET } from '../doip'
 import LinBase from '../dolin/base'
 import { LIN_TP, LIN_TP_SOCKET } from '../dolin/lintp'
+import { LinMode } from '../share/lin'
 const NRCMsg: Record<number, string> = {
   0x10: 'General Reject',
   0x11: 'Service Not Supported',
@@ -386,7 +387,7 @@ export class UDSTesterMain {
           throw new Error('aborted')
         }
      
-        return new LIN_TP_SOCKET(tp,addr.linAddr)
+        return new LIN_TP_SOCKET(tp,addr.linAddr,LinMode.MASTER)
       },
       close:(base:boolean)=>{
         tp.close(base)

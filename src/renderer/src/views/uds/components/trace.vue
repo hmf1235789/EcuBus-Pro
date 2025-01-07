@@ -638,6 +638,9 @@ onUnmounted(() => {
    color: var(--el-color-primary);
 }
 
+.linEvent{
+   color: var(--el-color-success);
+}
 .ipBase {
    color: var(--el-color-primary-dark-2);
 }
