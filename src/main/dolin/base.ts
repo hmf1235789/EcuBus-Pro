@@ -169,7 +169,7 @@ export default abstract class LinBase {
 
                     if (this.sch == undefined) {
                         clearTimeout(timer)
-                        reject(new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, m, 'sch is not running'))
+                        this.queue.push(item)
                     } else {
                         if (opt.diagnostic.abort) {
                             opt.diagnostic.abort.signal.onabort = () => {

@@ -34,4 +34,4 @@ This example demonstrates how to use the EcuBus-Pro to upgrade Application firmw
 
 ---
 
-**[详细指南&Demo视频](https://www.yuque.com/frankie-axwvu/mx7w4f/vmc8qg543f42xipt)**
+**[Demo Video](https://www.bilibili.com/video/BV1KcmfYNEkQ)**

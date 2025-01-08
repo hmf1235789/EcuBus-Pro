@@ -4,7 +4,8 @@
 import Emittery from 'emittery'
 import { getRxPdu, getTxPdu, Param, paramSetVal, paramSetSize, paramSetValRaw, Sequence, ServiceItem, applyBuffer, } from '../share/uds'
 export { CAN_ID_TYPE, CAN_ADDR_TYPE, CAN_ADDR_FORMAT } from '../share/can'
-
+export type {ServiceItem}
+export type {ServiceId}
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
 import workerpool, { worker } from 'workerpool'

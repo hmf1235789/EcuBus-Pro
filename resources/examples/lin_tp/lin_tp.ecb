@@ -29,7 +29,131 @@
         "action": []
       }
     },
-    "tester": {},
+    "tester": {
+      "5459ce47-1751-4a82-94a0-9bd33ae289ab": {
+        "id": "5459ce47-1751-4a82-94a0-9bd33ae289ab",
+        "name": "Tester_lin_1",
+        "type": "lin",
+        "script": "",
+        "targetDeviceId": "e4179991-1b87-4889-b365-25b1fd93d97e",
+        "seqList": [
+          {
+            "name": "Seq0",
+            "services": [
+              {
+                "enable": true,
+                "checkResp": true,
+                "retryNum": 0,
+                "addressIndex": 0,
+                "failBehavior": "stop",
+                "serviceId": "59210a0a-b52b-4a6f-bdd2-b867694551f4",
+                "delay": 50,
+                "_X_ROW_KEY": "row_194"
+              }
+            ]
+          }
+        ],
+        "address": [
+          {
+            "type": "lin",
+            "linAddr": {
+              "name": "Motor1_addr",
+              "addrType": "PHYSICAL",
+              "nad": 2,
+              "stMin": 20,
+              "nAs": 1000,
+              "nCr": 1000,
+              "schType": "DIAG_ONLY"
+            }
+          }
+        ],
+        "udsTime": {
+          "pTime": 500,
+          "pExtTime": 5000,
+          "s3Time": 5000,
+          "testerPresentEnable": false
+        },
+        "allServiceList": {
+          "0x10": [
+            {
+              "id": "59210a0a-b52b-4a6f-bdd2-b867694551f4",
+              "name": "DiagnosticSessionControl160",
+              "serviceId": "0x10",
+              "params": [
+                {
+                  "id": "eebb0212-96da-404e-bdc7-0a22dc19f94e",
+                  "name": "diagnosticSessionType",
+                  "bitLen": 8,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      1
+                    ]
+                  },
+                  "phyValue": 1
+                },
+                {
+                  "id": "b3d3774a-bb3e-4f80-9304-b53728f7ded0",
+                  "name": "param2",
+                  "desc": "",
+                  "phyValue": "00 00 00 00",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0,
+                      0,
+                      0,
+                      0
+                    ]
+                  },
+                  "bitLen": 64,
+                  "type": "ARRAY",
+                  "deletable": true,
+                  "editable": true
+                }
+              ],
+              "respParams": [
+                {
+                  "id": "1cef1b8f-c47e-4006-a787-b80c28b46b87",
+                  "name": "diagnosticSessionType",
+                  "bitLen": 8,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      1
+                    ]
+                  },
+                  "phyValue": 1
+                },
+                {
+                  "id": "f5bec8cc-1a1d-40c2-984a-632ec3d956d6",
+                  "name": "sessionParameterRecord",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                }
+              ],
+              "suppress": false,
+              "autoSubfunc": true
+            }
+          ]
+        }
+      }
+    },
     "subFunction": {},
     "nodes": {
       "9505c05a-4fe5-42e1-a45d-b1cbc14854ba": {
@@ -42,15 +166,6 @@
         "workNode": "Motor2",
         "attachTester": "5459ce47-1751-4a82-94a0-9bd33ae289ab",
         "script": "node.ts"
-      },
-      "69c0b8cc-f674-4142-99fc-9eed944cacf9": {
-        "name": "Node 2",
-        "type": "lin",
-        "id": "69c0b8cc-f674-4142-99fc-9eed944cacf9",
-        "channel": [
-          "e4179991-1b87-4889-b365-25b1fd93d97e"
-        ],
-        "workNode": "SeatECU"
       }
     },
     "database": {
@@ -648,23 +763,16 @@
       },
       "network": {
         "pos": {
-          "x": 0,
-          "y": -28,
-          "w": 1707,
-          "h": 670
+          "x": 950,
+          "y": 120,
+          "w": 600,
+          "h": 400
         },
         "title": "network",
         "label": "Network",
         "id": "network",
         "options": {},
-        "hide": false,
-        "backupPos": {
-          "x": 580,
-          "y": 160,
-          "w": 600,
-          "h": 400
-        },
-        "isMax": true
+        "hide": false
       },
       "25cec12a-572d-4221-b85e-2728628134f7_ia": {
         "pos": {
@@ -682,7 +790,7 @@
           },
           "name": "Lin IA"
         },
-        "hide": true
+        "hide": false
       },
       "trace": {
         "pos": {
@@ -695,7 +803,25 @@
         "label": "Trace",
         "id": "trace",
         "options": {},
-        "hide": true
+        "hide": false
+      },
+      "5459ce47-1751-4a82-94a0-9bd33ae289ab_sequence": {
+        "pos": {
+          "x": 180,
+          "y": 171,
+          "w": 700,
+          "h": 400
+        },
+        "title": "testerSequence",
+        "label": "Sequence",
+        "id": "5459ce47-1751-4a82-94a0-9bd33ae289ab_sequence",
+        "options": {
+          "params": {
+            "edit-index": "5459ce47-1751-4a82-94a0-9bd33ae289ab"
+          },
+          "name": "Tester_lin_1"
+        },
+        "hide": false
       }
     },
     "example": {

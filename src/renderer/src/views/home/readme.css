@@ -1,5 +1,4 @@
 
-  
 #readme h1 {
   counter-reset: h2;
   font-size: 2em;
@@ -184,8 +183,8 @@ div.el-overlay.dialog-father > .el-overlay-dialog {
 }
 
 #readme img {
-  width: 90%;
-  max-width: 800px;  /* Limit the maximum width of the image */
+  max-width: 600px;  /* Limit the maximum width of the image */
+  max-height: 400px;  /* Limit the maximum height of the image */
   display: block;  /* Ensure the image is treated as a block element */
   margin: 0 auto;  
 }
