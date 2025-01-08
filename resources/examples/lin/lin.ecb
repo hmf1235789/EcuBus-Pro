@@ -163,7 +163,9 @@
         "channel": [
           "e4179991-1b87-4889-b365-25b1fd93d97e"
         ],
-        "workNode": "Motor2"
+        "workNode": "Motor2",
+        "attachTester": "5459ce47-1751-4a82-94a0-9bd33ae289ab",
+        "script": "node.ts"
       }
     },
     "database": {
@@ -761,8 +763,8 @@
       },
       "network": {
         "pos": {
-          "x": 200,
-          "y": 191,
+          "x": 1280,
+          "y": 420,
           "w": 600,
           "h": 400
         },
@@ -770,7 +772,7 @@
         "label": "Network",
         "id": "network",
         "options": {},
-        "hide": true
+        "hide": false
       },
       "25cec12a-572d-4221-b85e-2728628134f7_ia": {
         "pos": {

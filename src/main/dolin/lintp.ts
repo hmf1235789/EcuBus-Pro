@@ -6,10 +6,10 @@ import LinBase from './base'
 import { v4 } from 'uuid'
 export interface LinTp {
   close: () => void
-  writeTp(mode: LinMode, addr: LinAddr, data: Buffer): Promise<number>
-  getReadId(mode:LinMode,addr: LinAddr): string
+  writeTp(mode: LinMode, addr: LinAddr, data: Buffer,id?:string): Promise<number>
+  getReadId(mode: LinMode, addr: LinAddr): string
   setOption(cmd: string, val: any): void
-  readTp(mode:LinMode,addr: LinAddr, timeout?: number): Promise<{ data: Buffer; ts: number }>
+  readTp(mode: LinMode, addr: LinAddr, timeout?: number): Promise<{ data: Buffer; ts: number }>
   event: EventEmitter
 }
 
@@ -100,13 +100,13 @@ export class LIN_TP_SOCKET {
     return new TpError(id, this.addr)
   }
   async read(timeout: number): Promise<{ data: Buffer; ts: number }> {
-    return await this.inst.readTp(this.mode,this.addr, timeout)
+    return await this.inst.readTp(this.mode, this.addr, timeout)
   }
   async write(data: Buffer): Promise<number> {
     if (this.closed) {
       throw this.error(LIN_TP_ERROR_ID.TP_BUS_CLOSED)
     }
-    return this.inst.writeTp(this.mode,this.addr, data)
+    return this.inst.writeTp(this.mode, this.addr, data)
   }
   close() {
     if (this.pendingRecv) {
@@ -131,7 +131,7 @@ export class LIN_TP implements LinTp {
   tpDataBuffer: Record<string, Buffer> = {}
   tpDataFc: Record<
     string,
-    { ts: number; bs: number; stMin: number; bc: number; leftLen: number; curBs: number, crTimer?: NodeJS.Timeout }
+    {  bc: number; leftLen: number; curBs: number, crTimer?: NodeJS.Timeout }
   > = {}
 
   constructor(base: LinBase, private listenOnly = false) {
@@ -237,14 +237,16 @@ export class LIN_TP implements LinTp {
       }
     })
   }
-  async writeTp(mode: LinMode, addr: LinAddr, data: Buffer) {
+  async writeTp(mode: LinMode, addr: LinAddr, data: Buffer,id?:string){
 
     if (data.length == 0 || data.length > 4095) {
       throw new TpError(LIN_TP_ERROR_ID.TP_PARAM_ERROR, addr, data, 'data length error')
     }
     const prefixBuffer = [addr.nad]
 
-    const id = v4()
+     if(id==undefined){
+      id = v4()
+    }
     if (this.isSingleFrame(addr, data)) {
 
 
@@ -301,12 +303,12 @@ export class LIN_TP implements LinTp {
     }
   }
 
-  getReadId(mode:LinMode, addr: LinAddr): string {
+  getReadId(mode: LinMode, addr: LinAddr): string {
 
-    const tpIdStr = `tp-${addr.nad}`
+    const tpIdStr = `tp-${mode == LinMode.MASTER ? '3c' : '3d'}-${addr.nad}`
     if (!this.rxBaseHandleExist.has(tpIdStr)) {
-      const cb = baseHandle.bind({ addr, inst: this, mode})
-      const baseId = mode == LinMode.MASTER ? 0x3d : 0x3c
+      const cb = baseHandle.bind({ addr, inst: this, mode })
+      const baseId = mode == LinMode.MASTER ? 0x3c : 0x3d
       this.rxBaseHandleExist.set(tpIdStr, {
         baseId,
         cb: cb,
@@ -316,7 +318,7 @@ export class LIN_TP implements LinTp {
     }
     return tpIdStr
   }
-  readTp(mode:LinMode, addr: LinAddr, timeout = 1000) {
+  readTp(mode: LinMode, addr: LinAddr, timeout = 1000) {
     return new Promise<{ data: Buffer; ts: number }>(
       (
         resolve: (value: { data: Buffer; ts: number }) => void,
@@ -325,8 +327,8 @@ export class LIN_TP implements LinTp {
         const cnt = this.cnt
         this.cnt++
         this.rejectMap.set(cnt, reject)
-        const cmdId = this.getReadId(mode,addr)
-        this.base.setPendingDiagRead(cnt,mode,addr)
+        const cmdId = this.getReadId(mode==LinMode.MASTER?LinMode.SLAVE:LinMode.MASTER, addr)
+        this.base.setPendingDiagRead(cnt, mode, addr)
         const timer = setTimeout(() => {
           if (this.rejectMap.has(cnt)) {
             this.rejectMap.delete(cnt)
@@ -354,17 +356,20 @@ export class LIN_TP implements LinTp {
 
 }
 
-function baseHandle(val: LinMsg, ts: number) {
+function baseHandle(val: LinMsg) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //@ts-ignore
-  const _this = this as { addr: LinAddr; inst: LIN_TP, mode:LinMode}
-  const tpCmdId = _this.inst.getReadId(_this.mode,_this.addr)
+  const _this = this as { addr: LinAddr; inst: LIN_TP, mode: LinMode }
+  const tpCmdId = _this.inst.getReadId(_this.mode, _this.addr)
   const status = _this.inst.tpStatus[tpCmdId] || 0
   let index = 0
 
   if (val.data.length != 8) {
     return
   }
+  // if (val.frameId != 0x3c && val.frameId != 0x3d) {
+  //   return
+  // }
   if (_this.addr.nad != val.data[index]) {
     return
   }
@@ -391,7 +396,7 @@ function baseHandle(val: LinMsg, ts: number) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       //@ts-ignore
       this.inst.event.emit(tpCmdId, {
-        data, ts: ts, addr: {
+        data, ts: val.ts, addr: {
           ..._this.addr,
           uuid: val.uuid
         }
@@ -400,8 +405,6 @@ function baseHandle(val: LinMsg, ts: number) {
       delete _this.inst.tpStatus[tpCmdId]
     } else if (pci == 1) {
       //FF
-      const canDl = val.data.length
-
       const len = ((val.data[index] & 0xf) << 8) | val.data[index + 1]
       index += 2
       if (len < 7) {
@@ -410,8 +413,19 @@ function baseHandle(val: LinMsg, ts: number) {
       const data = val.data.subarray(index)
       // this.inst.event.emit(tpCmdId,{data,ts:val.ts})
       _this.inst.tpDataBuffer[tpCmdId] = data
-      _this.inst.tpStatus[tpCmdId] = 1
+      _this.inst.tpStatus[tpCmdId] = 1;
 
+      _this.inst.tpDataFc[tpCmdId] = {
+        bc: 1,
+        leftLen: len - data.length,
+        curBs: 0,
+        crTimer: setTimeout(() => {
+          _this.inst.event.emit(tpCmdId, new TpError(LIN_TP_ERROR_ID.TP_TIMEOUT_CR, _this.addr))
+          delete _this.inst.tpDataBuffer[tpCmdId]
+          delete _this.inst.tpStatus[tpCmdId]
+          delete _this.inst.tpDataFc[tpCmdId]
+        }, _this.addr.nCr)
+      }
       _this.inst.abortAllController.signal.onabort = () => {
 
         _this.inst.event.emit(tpCmdId, new TpError(LIN_TP_ERROR_ID.TP_BUS_CLOSED, _this.addr))
@@ -447,14 +461,13 @@ function baseHandle(val: LinMsg, ts: number) {
         if (data.length >= leftLen) {
           data = data.subarray(0, leftLen)
           //finish
-
           _this.inst.event.emit(tpCmdId, {
             addr: {
               ..._this.addr,
               uuid: val.uuid
             },
             data: Buffer.concat([_this.inst.tpDataBuffer[tpCmdId], data]),
-            ts: ts
+            ts: val.ts
           })
           delete _this.inst.tpDataBuffer[tpCmdId]
           delete _this.inst.tpStatus[tpCmdId]

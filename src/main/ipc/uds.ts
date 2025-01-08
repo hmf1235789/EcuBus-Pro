@@ -19,7 +19,9 @@ import { getLinDevices, NodeLinItem, openLinDevice, updateSignalVal } from '../d
 import EventEmitter from 'events'
 import LinBase from '../dolin/base'
 import { LinInter } from 'src/preload/data'
-import { LinNode } from '../share/lin'
+import { LinMode, LinNode } from '../share/lin'
+import { LIN_TP } from '../dolin/lintp'
+import {TpError as LinTpError} from '../dolin/lintp'
 
 const libPath = path.dirname(dllLib)
 log.info('dll lib path:', libPath)
@@ -127,7 +129,9 @@ const ethBaseMap = new Map<string, EthBaseInfo>()
 const linBaseMap = new Map<string, LinBase>()
 const udsTesterMap = new Map<string, UDSTesterMain>()
 const nodeMap = new Map<string, NodeItemA>()
-let cantps: CAN_TP[] = []
+let cantps: {
+    close: () => void
+}[] = []
 let doips: DOIP[] = []
 
 
@@ -243,6 +247,43 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
                 }
 
 
+            }
+        }else if(tester.type == 'lin') {
+            for(const val of linBaseMap.values()){
+                const lintp=new LIN_TP(val)
+                for(const addr of tester.address){
+                    if(addr.type=='lin'&&addr.linAddr){
+                        const id=lintp.getReadId(LinMode.MASTER,addr.linAddr)
+                        lintp.event.on(id, (data) => {
+                            if (!(data instanceof LinTpError)) {
+                                const log = new UdsLOG(tester.name, tester.id)
+                               
+                                const item = findService(tester, data.data, true)
+                                if (item) {
+                                    log.sent(item, data.ts, data.data)
+                                }
+
+                                log.close()
+                            }
+                        })
+                        const idR = lintp.getReadId(LinMode.SLAVE,addr.linAddr)
+                        lintp.event.on(idR, (data) => {
+                            if (!(data instanceof LinTpError)) {
+                                const log = new UdsLOG(tester.name, tester.id)
+                            
+                                const item = findService(tester, data.data, false)
+                                if (item) {
+                                    log.recv(item, data.ts, data.data)
+                                }
+                                log.close()
+
+                            }
+                        })
+                    }
+                }
+                if(lintp.rxBaseHandleExist.size>0){
+                    cantps.push(lintp)
+                }
             }
         }
     }
