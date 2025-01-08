@@ -63,7 +63,7 @@
               "stMin": 20,
               "nAs": 1000,
               "nCr": 1000,
-              "schType": "DIAG_INTERLEAVED"
+              "schType": "DIAG_ONLY"
             }
           }
         ],

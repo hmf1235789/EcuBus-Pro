@@ -503,7 +503,6 @@ onUnmounted(() => {
             const selfDevice = dataBase.ia[editIndex.value].devices[0]
             if (selfDevice && dataBase.devices[selfDevice] && dataBase.devices[selfDevice].linDevice?.name == log.instance) {
                 if (log.message.data.msg.startsWith('schChanged')) {
-                    console.log(log)
                     //this.log.sendEvent(`schChanged, table ${schName} slot ${rIndex}`,getTsUs())
                     //extract sch name
                     const regex = /schChanged, changed from (.*) to (.*) at slot (.*)/

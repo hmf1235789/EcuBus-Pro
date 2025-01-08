@@ -336,8 +336,12 @@ function _logDisplay(vals: LogItem[]) {
 
       } else if(val.message.method=='linError'){
          if(val.message.data.data){
+            let method='linError'
+            if(val.message.data.data?.isEvent||val.message.data.data?.frameId==0x3d){
+               method='linWarning'
+            }
             insertData({
-               method: val.message.method,
+               method: method,
                name: val.message.data.data.name,
                data: val.message.data.msg,
                ts: (val.message.data.ts / 1000000).toFixed(3),
@@ -658,6 +662,9 @@ onUnmounted(() => {
 }
 .linError {
    color: var(--el-color-danger);
+}
+.linWarning{
+   color: var(--el-color-warning);
 }
 .ipError {
    color: var(--el-color-danger);

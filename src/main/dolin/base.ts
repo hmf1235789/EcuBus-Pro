@@ -73,7 +73,7 @@ export default abstract class LinBase {
     }
     clearPendingDiagRead(id: number) {
         this.pendingDiagRead = this.pendingDiagRead.filter(d => d.id != id)
-      
+
     }
     // calculateChecksum(data: Buffer, checksumType: LinChecksumType): number {
     //     let checksum = 0
@@ -154,13 +154,13 @@ export default abstract class LinBase {
     abstract _write(msg: LinMsg): Promise<number>
     async write(m: LinMsg, opt?: LinWriteOpt): Promise<number> {
         return new Promise<number>((resolve, reject) => {
-            const item:QueueItem={ resolve, reject, data: m }
+            const item: QueueItem = { resolve, reject, data: m }
             let timer: NodeJS.Timeout | undefined
-            if(opt?.timeout){
-                timer=setTimeout(()=>{
-                    reject(new LinError(LIN_ERROR_ID.LIN_BUS_ERROR,m,'timeout'))
-                    item.discard=true
-                },opt.timeout)
+            if (opt?.timeout) {
+                timer = setTimeout(() => {
+                    reject(new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, m, 'timeout'))
+                    item.discard = true
+                }, opt.timeout)
             }
             if (opt?.fromSch) {
                 this.queue.push(item)
@@ -226,15 +226,11 @@ export default abstract class LinBase {
         if (this.info.mode == LinMode.SLAVE) {
             return
         }
-
-        let diag: DiagItem | undefined = undefined
+        //dialog only special process
         if (this.sch && (this.pendingDiagRead.length > 0)) {
-            console.log('pendingDiagRead', this.sch.diag)
-            const d=this.pendingDiagRead[0]
-            const skip=false
-            if ((skip)||(rIndex!=0)) {
-                //skip
-            } else {
+            const d = this.pendingDiagRead[0]
+            if (this.sch.diag==undefined&&d.addr.schType == LIN_SCH_TYPE.DIAG_ONLY && rIndex == 0) {
+   
                 const p = this.pendingDiagRead[0]
                 schName = "__SlaveRespTable"
                 rIndex = 0
@@ -256,7 +252,7 @@ export default abstract class LinBase {
                 //find all diagQueue with same addr
                 for (const d of this.diagQueue) {
                     if (d.addr.nad == p.addr.nad && d.msg.frameId == 0x3d) {
-                    
+
                         this.sch.diag = d
                         break
                     }
@@ -280,11 +276,11 @@ export default abstract class LinBase {
                         reject: () => { },
                         resolve: (ts: number) => { }
                     }
-                   
+
                 }
 
-                
-               
+
+
             }
 
 
@@ -297,27 +293,27 @@ export default abstract class LinBase {
             if (this.sch.activeSchName != schName) {
                 this.log.sendEvent(`schChanged, changed from ${this.sch.activeSchName} to ${schName} at slot ${rIndex}`, getTsUs() - this.startTs)
                 //判断this.sch.activeSchName是否为diag sch
-                let isDiag=false
-                if(this.sch.activeSchName=="__MasterReqTable"||this.sch.activeSchName=="__SlaveRespTable"){
-                    isDiag=true
+                let isDiag = false
+                if (this.sch.activeSchName == "__MasterReqTable" || this.sch.activeSchName == "__SlaveRespTable") {
+                    isDiag = true
                 }
-                for(const s of db.schTables){
-                    for(const e of s.entries){
-                        if(e.name=="DiagnosticMasterReq"||e.name=="DiagnosticSlaveResp"&&s.entries.length==1){
-                            isDiag=true
+                for (const s of db.schTables) {
+                    for (const e of s.entries) {
+                        if (e.name == "DiagnosticMasterReq" || e.name == "DiagnosticSlaveResp" && s.entries.length == 1) {
+                            isDiag = true
                             break
                         }
                     }
-                    if(isDiag){
+                    if (isDiag) {
                         break
                     }
                 }
 
-                if(!isDiag){
+                if (!isDiag) {
                     this.sch.lastActiveSchName = this.sch.activeSchName
                     this.sch.lastActiveIndex = this.sch.activeIndex
                 }
-                
+
             }
         }
         let sch = db.schTables.find(s => s.name == schName)
@@ -358,7 +354,7 @@ export default abstract class LinBase {
         }
         const entry = sch?.entries[rIndex]
         let nextDelay = 0
-       
+
         if (sch && entry) {
             if (activeMap[`${schName}-${rIndex}`] != false) {
                 nextDelay = entry.delay;
@@ -427,7 +423,7 @@ export default abstract class LinBase {
                         direction: this.sch?.diag?.msg.direction || LinDirection.SEND,
                         checksumType: LinChecksumType.CLASSIC,
                         name: entry.name
-                    }, { fromSch: true,timeout:nextDelay}).then((ts) => {
+                    }, { fromSch: true, timeout: nextDelay }).then((ts) => {
 
                         if (lastDiag) {
 
@@ -566,7 +562,7 @@ export default abstract class LinBase {
                             workNode: workNode,
                             name: eventFrame ? eventFrame.name : frame.name,
                             isEvent: eventFrame ? true : false
-                        }, { fromSch: true, timeout:nextDelay }).catch(() => {
+                        }, { fromSch: true, timeout: nextDelay }).catch(() => {
                             null
                         })
                     }
@@ -575,10 +571,7 @@ export default abstract class LinBase {
 
             // 设置下一个调度
             let nextIndex = (rIndex + 1) % sch.entries.length
-
-
-            
-
+            let diag: DiagItem | undefined = undefined
             //sch end, check whether switch to diag sch to back to normal sch
             if (this.sch && (nextIndex == 0)) {
 
@@ -599,9 +592,47 @@ export default abstract class LinBase {
                 if (send) {
                     send = false
                     //switch diag sch
-                    if (this.pendingDiagRead.length == 0) {
-                        diag = this.diagQueue.shift()
-                        if (diag) { 
+                    if ((this.pendingDiagRead.length > 0) || (this.diagQueue.length > 0)) {
+
+                        if (this.pendingDiagRead.length > 0) {
+                            const p = this.pendingDiagRead[0]
+                            for (const d of this.diagQueue) {
+                                if (d.addr.nad == p.addr.nad && d.msg.frameId == 0x3d) {
+
+                                    diag = d
+                                    break
+                                }
+                            }
+                            if (diag) {
+                                //remove diag from diagQueue
+                                const index = this.diagQueue.indexOf(diag)
+                                if (index != -1) {
+                                    this.diagQueue.splice(index, 1)
+                                }
+
+                            } else {
+                                diag = {
+                                    addr: p.addr,
+                                    msg: {
+                                        frameId: 0x3d,
+                                        data: Buffer.alloc(8, 0),
+                                        direction: LinDirection.RECV,
+                                        checksumType: LinChecksumType.CLASSIC
+                                    },
+                                    reject: () => { },
+                                    resolve: (ts: number) => { }
+                                }
+                            }
+                        } else {
+                            diag = this.diagQueue.shift()
+                        }
+
+
+
+
+
+
+                        if (diag) {
                             let found = false
                             //find sch table
                             if (diag.msg.frameId == 0x3c) {
@@ -663,14 +694,14 @@ export default abstract class LinBase {
             this.sch = {
 
                 timer: setTimeout(() => {
-                    if(this.queue.idle()){
+                    if (this.queue.idle()) {
                         this.startSch(db, schName, activeMap, nextIndex)
-                    }else{
-                        const q=this.queue.drain()
-                        q.finally(()=>{
+                    } else {
+                        const q = this.queue.drain()
+                        q.finally(() => {
                             this.startSch(db, schName, activeMap, nextIndex)
                         })
-                       
+
                     }
                 }, nextDelay),
                 activeSchName: backUpSchName,
