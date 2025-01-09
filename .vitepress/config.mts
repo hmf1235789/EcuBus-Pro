@@ -66,7 +66,7 @@ export default defineConfig({
         text: 'User Manual',
         link: '/docs/um/concept',
         items: [
-          { text: 'Lin', link: '/docs/um/Lin/lin.md' },
+          { text: 'Lin', link: '/docs/um/lin/lin.md' },
           { text: 'CLI', link: '/docs/um/cli' },
           {
             text: 'Script', link: '/docs/um/script', items: [
