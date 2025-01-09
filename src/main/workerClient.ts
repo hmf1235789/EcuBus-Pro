@@ -76,6 +76,7 @@ export default class UdsTester {
 
           this.log.systemMsg('worker terminated', this.ts, 'error')
         }
+        this.stop()
       },
 
     })

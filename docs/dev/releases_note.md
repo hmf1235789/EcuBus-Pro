@@ -1,5 +1,18 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.13
+Changes from v0.8.12 to v0.8.13:
+
+ 
+* [bug]:fix key event not off 
+* [feat]:add lin 
+* [feat]:add lin-tp 
+* [feat]:add uds over lin 
+* [feat]:add trace pause/play 
+* [feat]:add lin ia 
+* [opt]:add ldf parse space and error lines display
+---
+
 ## v0.8.12
 Changes from v0.8.11 to v0.8.12:
 

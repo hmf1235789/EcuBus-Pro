@@ -57,7 +57,7 @@ export default defineConfig({
         items: [
           { text: 'Introduce', link: '/' },
           { text: 'Install', link: '/docs/about/install' },
-        
+
           { text: 'Sponsor ❤️', link: '/docs/about/sponsor' },
           { text: 'Contact', link: '/docs/about/contact' }
         ]
@@ -66,23 +66,48 @@ export default defineConfig({
         text: 'User Manual',
         link: '/docs/um/concept',
         items: [
+          { text: 'Lin', link: '/docs/um/Lin/lin.md' },
           { text: 'CLI', link: '/docs/um/cli' },
-          { text: 'Script', link: '/docs/um/script',items:[
-            { text: 'Use External Package', link: '/docs/um/scriptSerialPort' },
-          ]},
-          { text: 'Database', link: '/docs/um/database',items:[
-            { text: 'LIN LDF', link: '/docs/um/ldf' },
-          ]},
+          {
+            text: 'Script', link: '/docs/um/script', items: [
+              { text: 'Use External Package', link: '/docs/um/scriptSerialPort' },
+            ]
+          },
+          {
+            text: 'Database', link: '/docs/um/database', items: [
+              { text: 'LIN LDF', link: '/docs/um/ldf' },
+            ]
+          },
         ]
       },
       {
         text: 'Example',
 
         items: [
-          { text: 'NXP UDS Bootloader', link: '/examples/nxp_bootloader/readme' },
           { text: 'Secure Access dll', link: '/examples/secure_access_dll/readme' },
-          { text: 'DoIP Tester', link: '/examples/doip/readme' },
-          { text: 'DoIP Simulate Entity', link: '/examples/doip_sim_entity/readme' },
+          {
+            text: 'LIN', items: [
+
+              { text: 'LIN General', link: '/examples/lin/readme' },
+              { text: 'LIN TP', link: '/examples/lin_tp/readme' },
+            ],
+            collapsed: true
+          },
+          {
+            text: 'CAN', items: [
+              { text: 'NXP UDS Bootloader', link: '/examples/nxp_bootloader/readme' },
+            ],
+            collapsed: true
+          },
+          {
+            text: 'DOIP', items: [
+              { text: 'DoIP Tester', link: '/examples/doip/readme' },
+              { text: 'DoIP Simulate Entity', link: '/examples/doip_sim_entity/readme' },
+            ],
+            collapsed: true
+          },
+
+
         ]
       },
       {
@@ -90,17 +115,18 @@ export default defineConfig({
         collapsed: true,
         items: [
           { text: 'Arch', link: '/docs/dev/arch' },
-          { text: 'Setup', link: '/docs/dev/setup',
-            items:[
+          {
+            text: 'Setup', link: '/docs/dev/setup',
+            items: [
               {
-                  text:'Learning Resources',link:'/docs/dev/jslearn'
+                text: 'Learning Resources', link: '/docs/dev/jslearn'
               }
-             
+
             ]
           },
           { text: 'Test', link: '/docs/dev/test' },
           { text: 'Addon', link: '/docs/dev/addon' },
-        
+
           { text: 'Releases Note', link: '/docs/dev/releases_note' },
         ]
       }
