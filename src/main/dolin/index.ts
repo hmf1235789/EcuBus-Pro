@@ -209,7 +209,6 @@ export class NodeLinItem {
     async sendFrame(pool: UdsTester, frame: LinMsg): Promise<number> {
         frame.uuid = this.nodeItem.id
         frame.data = Buffer.from(frame.data)
-        console.log('send',frame)
         if (this.nodeItem.channel.length == 1) {
             const baseItem = this.linBaseMap.get(this.nodeItem.channel[0])
             if (baseItem) {

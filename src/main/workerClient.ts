@@ -37,6 +37,7 @@ export default class UdsTester {
   log: UdsLOG
   serviceMap: Record<string, ServiceItem> = {}
   ts = 0
+  cb:any
   eventHandlerMap: Partial<EventHandlerMap> = {}
   constructor(
     env: {
@@ -56,13 +57,13 @@ export default class UdsTester {
         }
       }
     }
-
     this.log = log
     this.pool = workerpool.pool(jsFilePath, {
       minWorkers: 1,
       maxWorkers: 1,
       workerType: 'thread',
       emitStdStreams: false,
+      workerTerminateTimeout:0,
       workerThreadOpts: {
         stderr: true,
         stdout: true,
@@ -93,14 +94,18 @@ export default class UdsTester {
         this.log.systemMsg(str, this.ts, 'error')
       }
     })
-    globalThis.keyEvent.on('keydown', (key: string) => {
-      this.workerEmit('__keyDown', key).catch((e:any) => {
-        this.log.systemMsg(e.toString(), this.ts, 'error')
-      })
-    })
+    this.cb=this.keyHandle.bind(this)
+    globalThis.keyEvent.on('keydown',this.cb)
   }
   updateTs(ts: number) {
     this.ts = ts
+  }
+  keyHandle(key: string) {
+    if(!this.selfStop){
+      this.workerEmit('__keyDown', key).catch((e:any) => {
+        this.log.systemMsg(e.toString(), this.ts, 'error')
+      })
+    }
   }
   private async workerEmit(method: string, data: any): Promise<boolean> {
     return new Promise((resolve, reject) => {
@@ -246,5 +251,7 @@ export default class UdsTester {
   stop() {
     this.selfStop = true
     this.pool.terminate(true).catch(null)
+    this.worker.worker.terminate()
+    globalThis.keyEvent.off('keydown',this.cb)
   }
 }
