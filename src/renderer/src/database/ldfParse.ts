@@ -290,14 +290,14 @@ const composite = createToken({ name: "composite", pattern: /[C|c]omposite\s+/ }
 const configuration = createToken({ name: "configuration", pattern: /[C|c]onfiguration\s+/ });
 const Signals = createToken({ name: "Signals", pattern: /Signals\s*/ });
 const Diagnostic_signals = createToken({ name: "Diagnostic_signals", pattern: /Diagnostic_signals\s+/ });
-const DiagReq = createToken({ name: "DiagReq", pattern: /(Master|Slave)(Req|Resp)B[0-7]:\s+/ });
+const DiagReq = createToken({ name: "DiagReq", pattern: /(Master|Slave)(Req|Resp)B[0-7]:\s*/ });
 const Frames = createToken({ name: "Frames", pattern: /Frames\s*/ });
 const Signal_groups = createToken({ name: "Signal_groups", pattern: /Signal_groups\s+/ });
 const Sporadic_frames = createToken({ name: "Sporadic_frames", pattern: /Sporadic_frames\s+/ });
 const Event_triggered_frames = createToken({ name: "Event_triggered_frames", pattern: /Event_triggered_frames\s+/ });
 const Diagnostic_frames = createToken({ name: "Diagnostic_frames", pattern: /Diagnostic_frames\s+/ });
-const DiagReqFrame = createToken({ name: "DiagReqFrame", pattern: /((MasterReq:\s+0x3c\s+)|(SlaveResp:\s+0x3d\s+))/ });
-const SubDiagReq = createToken({ name: "SubDiagReq", pattern: /(Master|Slave)(Req|Resp)B[0-7],\s+/ });
+const DiagReqFrame = createToken({ name: "DiagReqFrame", pattern: /((MasterReq\s*:\s*(0x3c|60)\s*)|(SlaveResp\s*:\s*(0x3d|61)\s*))/ });
+const SubDiagReq = createToken({ name: "SubDiagReq", pattern: /(Master|Slave)(Req|Resp)B[0-7],\s*/ });
 const Schedule_tables = createToken({ name: "Schedule_tables", pattern: /Schedule_tables\s+/ });
 const MasterReqSlaveResp = createToken({ name: "MasterReqSlaveResp", pattern: /(MasterReq|SlaveResp)\s+/ });
 const AssignNAD = createToken({ name: "AssignNAD", pattern: /AssignNAD\s+/ });
@@ -481,9 +481,13 @@ class LdfParser extends CstParser {
     private LIN_protocol = this.RULE("LIN_protocolClause", () => {
         this.CONSUME(LIN_protocol)
         this.CONSUME(Equal)
-        this.CONSUME(CharString)
+        this.OR([
+            { ALT: () => this.CONSUME(CharString) },
+            { ALT: () => this.CONSUME(Interger) }
+        ])
         this.CONSUME(EOF)
     })
+
 
     private configured_NAD = this.RULE("configured_NADClause", () => {
         this.CONSUME(configured_NAD)
@@ -1200,7 +1204,7 @@ class LdfVistor extends visitor {
             }
 
             this.ldf.nodeAttrs[t.image] = {
-                LIN_protocol: (((ctx.LIN_protocolClause[index] as CstNode).children.CharString[0]) as IToken).image.replace(/"+/g, ''),
+                LIN_protocol: this.visit(ctx.LIN_protocolClause[index] as CstNode),
                 configured_NAD: Number((((ctx.configured_NADClause[index] as CstNode).children.Interger[0]) as IToken).image),
                 initial_NAD: ctx.initial_NADClause[index] ? Number((((ctx.initial_NADClause[index] as CstNode).children.Interger[0]) as IToken).image) : undefined,
                 supplier_id: Number((((ctx.product_idClause[index] as CstNode).children.Interger[0]) as IToken).image),
@@ -1519,6 +1523,14 @@ class LdfVistor extends visitor {
         }
     }
 
+    LIN_protocolClause(ctx: CstChildrenDictionary) {
+        // 获取值（可能是 CharString 或 Interger）
+        const value = ctx.CharString ? 
+            (ctx.CharString[0] as IToken).image.replace(/"+/g, '') : 
+            (ctx.Interger[0] as IToken).image;
+        return value.trim();
+    }
+
 }
 
 
@@ -1615,9 +1627,16 @@ Unexpected character: "${error.message.split("'")[1]}"
 function formatParserError(error: any, text: string, originalText: string, lineMapping: number[]): string {
     const lines = text.split('\n');
     const originalLines = originalText.split('\n');
-    const lineNumber = error.token.startLine - 1;
-    const originalLineNumber = lineMapping[lineNumber];
+    let lineNumber = error.token.startLine - 1;
+    if (isNaN(lineNumber)) {
+        // 如果行号是NaN，尝试从token的位置计算行号
+        const textUpToToken = text.slice(0, error.token.startOffset);
+        lineNumber = (textUpToToken.match(/\n/g) || []).length;
+    }
     
+    const originalLineNumber = lineMapping[lineNumber] || lineNumber;
+    
+    // 获取错误上下文
     const contextStart = Math.max(0, originalLineNumber - 3);
     const contextEnd = Math.min(originalLines.length, originalLineNumber + 4);
     const contextLines = originalLines.slice(contextStart, contextEnd);
@@ -1628,13 +1647,14 @@ function formatParserError(error: any, text: string, originalText: string, lineM
         return `${linePrefix} ${currentLineNumber.toString().padStart(4)}: ${line}`;
     }).join('\n');
     
-    const pointer = `     ${' '.repeat(error.token.startColumn)}^`;
-    const message = `Parser error at line ${originalLineNumber + 1}, column ${error.token.startColumn}:
+    const pointer = `     ${' '.repeat(error.token.startColumn || 0)}^`;
+    const message = `Parser error at line ${originalLineNumber + 1}, column ${error.token.startColumn || 0}:
 Context:
 ${context}
 ${pointer}
 ${error.message}
-Expected one of: ${error.expectedTokens?.join(', ')}`;
+Expected one of: ${(error.expectedTokens || []).join(', ')}`;
+    
     return message;
 }
 

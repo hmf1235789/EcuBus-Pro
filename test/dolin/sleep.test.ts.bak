@@ -40,22 +40,22 @@ const loading=()=>{
 
 const jsDelay = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms))   
 
-describe('delay', () => {
-    it('delay1', async () => {
-        // loading()
-        const t1=getTsUs()
-        await jsDelay(10)
-        //增加一些系统负载，让延时更明显
-        const t2=getTsUs()
-        console.log((t2-t1)/1000)
-    }),
-    test('delay2', async () => {
-        // loading()
-        const delay = new Delay()
-        const t1=getTsUs()
-        await delay.delay(10)
-        const t2=getTsUs()
-        console.log((t2-t1)/1000)
-        delay.close()
-    })
-})
+// describe('delay', () => {
+//     it('delay1', async () => {
+//         // loading()
+//         const t1=getTsUs()
+//         await jsDelay(10)
+//         //增加一些系统负载，让延时更明显
+//         const t2=getTsUs()
+//         console.log((t2-t1)/1000)
+//     }),
+//     test('delay2', async () => {
+//         // loading()
+//         const delay = new Delay()
+//         const t1=getTsUs()
+//         await delay.delay(10)
+//         const t2=getTsUs()
+//         console.log((t2-t1)/1000)
+//         delay.close()
+//     })
+// })

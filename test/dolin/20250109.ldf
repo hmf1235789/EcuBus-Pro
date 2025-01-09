@@ -1,0 +1,108 @@
+LIN_description_file ;
+LIN_protocol_version = "2.1" ;
+LIN_language_version = "2.1" ;
+LIN_speed = 19.200 kbps ;
+Nodes {
+    Master:BCM,1.0000 ms,0.1000 ms ;
+    Slaves:Fragrance;
+}
+Signals {
+    BCM_FragranceFunctionReq:2,0x0,BCM,Fragrance;
+    BCM_FragranceTypeReq:2,0x0,BCM,Fragrance;
+    BCM_PreparationChangeCmd_Type1:1,0x0,BCM,Fragrance;
+    FragranceFunctionStatus:1,0x0,Fragrance,BCM;
+    BCM_FragranceType:3,0x0,Fragrance,BCM;
+    FragranceConcentration:3,0x0,Fragrance,BCM;
+    FragranceErrorSt:1,0x0,Fragrance,BCM;
+    FragrancePreparationLack_Type1:1,0x0,Fragrance,BCM;
+    FragrancePreparationLack_Type2:1,0x0,Fragrance,BCM;
+    LINError:1,0x0,Fragrance,BCM;
+    Fragrance_CommunicationError:1,0x0,Fragrance,BCM;
+    Fragrance_LowVoltageError:1,0x0,Fragrance,BCM;
+    Fragrance_OverVoltageError:1,0x0,Fragrance,BCM;
+    Fragrance_FanError:1,0x0,Fragrance,BCM;
+    Fragrance_InternalSwitchError:1,0x0,Fragrance,BCM;
+    BCM_FragranceConcentrationReq:2,0x0,BCM,Fragrance;
+}
+Diagnostic_signals {
+    MasterReqB0:8,0;
+    MasterReqB1:8,0;
+    MasterReqB2:8,0;
+    MasterReqB3:8,0;
+    MasterReqB4:8,0;
+    MasterReqB5:8,0;
+    MasterReqB6:8,0;
+    MasterReqB7:8,0;
+    SlaveRespB0:8,0;
+    SlaveRespB1:8,0;
+    SlaveRespB2:8,0;
+    SlaveRespB3:8,0;
+    SlaveRespB4:8,0;
+    SlaveRespB5:8,0;
+    SlaveRespB6:8,0;
+    SlaveRespB7:8,0;
+}
+Frames {
+    BCM_Fragrance:0x32,BCM,8{
+        BCM_FragranceFunctionReq,0;
+        BCM_FragranceTypeReq,10;
+        BCM_FragranceConcentrationReq,12;
+    }
+    Fragrance_1:0x38,Fragrance,8{
+        Fragrance_InternalSwitchError,52;
+        Fragrance_OverVoltageError,50;
+        Fragrance_LowVoltageError,49;
+        LINError,24;
+        FragranceFunctionStatus,0;
+        Fragrance_CommunicationError,48;
+        BCM_FragranceType,1;
+        FragrancePreparationLack_Type1,8;
+        FragranceErrorSt,7;
+        Fragrance_FanError,51;
+        FragranceConcentration,4;
+        FragrancePreparationLack_Type2,9;
+    }
+}
+Diagnostic_frames {
+    MasterReq : 60 {
+        MasterReqB0,0;
+        MasterReqB1,8;
+        MasterReqB2,16;
+        MasterReqB3,24;
+        MasterReqB4,32;
+        MasterReqB5,40;
+        MasterReqB6,48;
+        MasterReqB7,56;
+    }
+    SlaveResp : 61 {
+        SlaveRespB0,0;
+        SlaveRespB1,8;
+        SlaveRespB2,16;
+        SlaveRespB3,24;
+        SlaveRespB4,32;
+        SlaveRespB5,40;
+        SlaveRespB6,48;
+        SlaveRespB7,56;
+    }
+}
+Node_attributes {
+    Fragrance {
+        LIN_protocol = 2.1 ;
+        configured_NAD = 0x7f ;
+        initial_NAD = 0x7f ;
+        product_id = 0x003c, 0x003b, 10 ;
+        P2_min = 50.0000 ms ;
+        N_As_timeout = 1000.0000 ms ;
+        N_Cr_timeout = 1000.0000 ms ;
+        configurable_frames {
+            BCM_Fragrance;
+            Fragrance_1;
+        }
+    }
+}
+Schedule_tables {
+    Sh345 {
+        BCM_Fragrance delay 100.0000 ms ;
+        Fragrance_1 delay 100.0000 ms ;
+    }
+}

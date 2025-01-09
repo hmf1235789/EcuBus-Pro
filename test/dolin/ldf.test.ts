@@ -34,6 +34,12 @@ test("ldf t1", () => {
     // console.log(r)
 })
 
+test("ldf 2025", () => {
+    const ldf = fs.readFileSync(path.join(__dirname, '20250109.ldf'), 'utf-8')
+    const r = parse(ldf)
+    // console.log(r)
+})
+
 describe('signal update', () => {
     let ldf: LDF
     beforeAll(() => {
