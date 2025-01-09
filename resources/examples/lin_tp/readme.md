@@ -37,3 +37,8 @@ Util.OnKey('c', async () => {
         checksumType: LinChecksumType.CLASSIC
     })
 })
+```
+
+## Demo
+
+![Demo](./demo.gif)
