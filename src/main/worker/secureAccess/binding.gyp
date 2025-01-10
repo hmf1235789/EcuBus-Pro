@@ -12,13 +12,14 @@
             'defines': [
                '__EXCEPTIONS'
             ],
-            'sources': [
-                './sa.cpp', './sa_wrap.cxx', 
-            ],
+          
             'conditions': [
                 ['OS=="win"', {
                     'cflags': [
                         
+                    ],
+                    'sources': [
+                        './sa.cpp', './sa_wrap.cxx', 
                     ],
                     'cflags_cc': [
                        
