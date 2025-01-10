@@ -9,6 +9,9 @@
     <a href="https://github.com/ecubus/EcuBus-Pro/releases">
       <img src="https://github.com/ecubus/EcuBus-Pro/actions/workflows/build.yml/badge.svg" alt="github-ci" />
     </a>
+    <a href="https://github.com/ecubus/EcuBus-Pro/releases">
+      <img src="https://github.com/ecubus/EcuBus-Pro/actions/workflows/build-linux.yml/badge.svg" alt="github-ci" />
+    </a>
     <a href="https://github.com/ecubus/EcuBus-Pro">
        <img src="https://img.shields.io/github/stars/ecubus/EcuBus-Pro"/>
     </a>
@@ -91,15 +94,6 @@ Our script engine leverages `Node.js`, enabling you to:
 Streamline your workflow with CLI support for UDS sequences:
 ![base1](./docs/about/seq.png)
 
-## Thanks
-This project exists thanks to all the people who have contributed:
-<a href="https://github.com/ecubus/EcuBus-Pro/graphs/contributors"><img src="https://opencollective.com/ecubus/contributors.svg?width=890&amp;button=false"></a>
-
-Your contributions are always welcome! Please have a look at the [contribution guidelines](./.github/contributing.md) first. 
-
-Your logo will show up here with a link to your github profile.
-
-
 ## Support this project
 
 Support this project by [becoming a sponsor](./docs/about/sponsor). Your logo will show up here with a link to your website. 🙏
@@ -111,6 +105,17 @@ You can also consider sponsoring us to get extra technical support services. If 
 - [X] Handling Issues with higher priority
 - [X] One-to-one technical consulting service
 - [X] Help to write addon code to access 0x27,0x29 dll functions
+
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 ## License
 Apache-2.0
