@@ -1,4 +1,4 @@
-name: Release-Windows
+name: Release
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   # Build job
-  build:
+  build-windows:
     runs-on: windows-latest
     permissions: write-all
     steps:
@@ -93,3 +93,59 @@ jobs:
           ALIYUN_ACCESS_KEY_ID: ${{ secrets.ALIYUN_ACCESS_KEY_ID }}
           ALIYUN_ACCESS_KEY_SECRET: ${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}
         run: node tools/upload.js --note --app
+
+  build-linux:
+    needs: build-windows
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set Version
+        id: version
+        shell: bash
+        run: |
+          version=${GITHUB_REF_NAME#v}
+          echo "VERSION=$version" >> $GITHUB_ENV
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm install
+      - name: Build with VitePress
+        run: npm run docs:build
+      - name: Build docan
+        run: npm run docan
+      - name: Build dolin
+        run: npm run dolin
+      - name: Build worker
+        run: npm run worker
+      - name: Build api
+        run: npm run api
+      - name: Build cli
+        run: npm run cli:build:linux
+      - name: Build APP
+        run: npm run build:linux
+      - name: Upload CLI
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./resources/bin/ecb_cli
+          asset_name: ecb_cli
+          asset_content_type: application/octet-stream
+    
+      - name: Upload DEB
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/ecubus-pro_${{ env.VERSION }}_amd64.deb
+          asset_name: ecubuspro_${{ env.VERSION }}_amd64.deb
+          asset_content_type: application/vnd.debian.binary-package
