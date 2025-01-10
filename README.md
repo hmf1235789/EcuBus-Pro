@@ -40,8 +40,10 @@ See our [User Manual](./docs/um/concept.md) for detailed documentation.
 <table style="white-space: nowrap;">
 <thead>
   <tr>
+    <th>Platform</th>
     <th>CAN/CAN-FD</th>
     <th>DOIP</th>
+    <th>LIN</th>
     <th>UDS</th>
     <th>Script</th>
     <th>Database</th>
@@ -49,6 +51,10 @@ See our [User Manual](./docs/um/concept.md) for detailed documentation.
 </thead>
 <tbody>
   <tr style="vertical-align: top;">
+   <td>
+      • Windows (exe)<br>
+      • Linux (deb)<br>
+    </td>
     <td>
       • PEAK<br>
       • Kvaser<br>
@@ -59,12 +65,17 @@ See our [User Manual](./docs/um/concept.md) for detailed documentation.
       • PC Adapter
     </td>
     <td>
+      • PEAK<br>
+    </td>
+    <td>
       • Over CAN/CAN-FD<br>
-      • Over DoIP
+      • Over DoIP<br>
+      • Over LIN
     </td>
     <td>
       • UDS<br>
       • CAN<br>
+      • LIN<br>
       • KeyBoard<br>
       • SerialPort
     </td>
