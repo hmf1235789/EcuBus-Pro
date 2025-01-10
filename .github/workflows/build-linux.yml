@@ -1,0 +1,39 @@
+name: Build-Windows
+
+
+on: 
+  push:
+    branches: [master]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  # Build job
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Not needed if lastUpdated is not enabled
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm # or pnpm / yarn
+      - name: Install dependencies
+        run: npm install
+      - name: Build with VitePress
+        run: npm run docs:build
+      - name: Build docan
+        run: npm run docan
+      - name: Build dolin
+        run: npm run dolin
+      - name: Build worker
+        run: npm run worker
+      - name: Build api
+        run: npm run api
+      - name: Build cli
+        run: npm run cli:build:win
+      - name: Build APP
+        run: npm run build:win
