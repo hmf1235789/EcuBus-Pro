@@ -30,6 +30,7 @@ export default defineConfig({
     ['meta', { property: 'og:site_name', content: 'EcuBus-Pro' }],
     ['meta', { property: 'og:image', content: 'https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png' }],
     ['meta', { property: 'og:url', content: 'https://app.whyengineer.com' }],
+    ['meta', { name: 'google-site-verification', content: '8p_3SCSQGHvWlpmik3zhY902wyQ0QwxQsHaBJocrxfA' }],
   ],
   lastUpdated: true,
 
