@@ -115,7 +115,7 @@ You can also consider sponsoring us to get extra technical support services. If 
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/frankie-zeng"><img src="https://avatars.githubusercontent.com/u/43364599?v=4?s=100" width="100px;" alt="frankie"/><br /><sub><b>frankie</b></sub></a><br /><a href="#projectManagement-frankie-zeng" title="Project Management">📆</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/apps/dependabot"><img src="https://avatars.githubusercontent.com/in/29110?v=4?s=100" width="100px;" alt="dependabot[bot]"/><br /><sub><b>dependabot[bot]</b></sub></a><br /><a href="#eventOrganizing-dependabot[bot]" title="Event Organizing">📋</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/apps/dependabot"><img src="https://avatars.githubusercontent.com/in/29110?v=4?s=100" width="100px;" alt="dependabot[bot]"/><br /><sub><b>dependabot[bot]</b></sub></a><br /><a href="https://github.com/ecubus/EcuBus-Pro/commits?author=dependabot[bot]" title="Documentation">📖</a></td>
     </tr>
   </tbody>
   <tfoot>
