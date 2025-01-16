@@ -10,14 +10,17 @@ import { ServiceId } from './share/service'
 import { VinInfo } from './share/doip'
 import { LinMsg } from './share/lin'
 type HandlerMap = {
-  sendCanFrame: (pool: UdsTester, data: CanMessage) => Promise<number>
+  output: (pool: UdsTester, data: any) => Promise<number>
   sendDiag: (pool: UdsTester, data: {
     device?: string
     address?: string
     service: ServiceItem
     isReq: boolean
   }) => Promise<number>
-  sendLinFrame: (pool: UdsTester, data: LinMsg) => Promise<number>
+  setSignal: (pool: UdsTester, data: {
+    signal: string,
+    value: number|number[]
+  }) => void
   registerEthVirtualEntity: (pool: UdsTester, data: {
     entity:VinInfo,
     ip?:string,
@@ -82,7 +85,9 @@ export default class UdsTester {
     })
     const d = (this.pool as any)._getWorker()
     this.worker = d
-
+    d.worker.globalOn=(payload:any)=>{
+      this.eventHandler(payload,()=>{},()=>{})
+    }
     d.worker.stdout.on('data', (data: any) => {
       if (!this.selfStop) {
         const str = data.toString().trim()
@@ -148,35 +153,35 @@ export default class UdsTester {
       const eventKey = event as keyof EventHandlerMap
       const handler = this.eventHandlerMap[eventKey]
       if (handler) {
-        const result = handler(this, data)
-        if (result instanceof Promise) {
-          result.then((e) => {
-            this.worker.exec('__eventDone', [id, {
-              data: e
-            }]).catch((e: any) => {
+        // 调用handler并处理结果
+        try {
+          const result = handler(this, data)
+          if (result instanceof Promise) {
+            result.then(r => {
+              this.worker.exec('__eventDone', [id, {
+                data: r
+              }]).catch(reject)
+            }).catch(e => {
               this.worker.exec('__eventDone', [id, {
                 err: e.toString()
               }]).catch(reject)
             })
-          }).catch((e) => {
+          } else {
             this.worker.exec('__eventDone', [id, {
-              err: e.toString()
+              data: result
             }]).catch(reject)
-          })
-
-        } else {
-
-          this.worker.exec('__eventDone', [id,{
-            data: result
+          }
+        } catch (e) {
+          this.worker.exec('__eventDone', [id, {
+            err: e instanceof Error ? e.toString() : 'Unknown error'
           }]).catch(reject)
         }
       } else {
-        this.worker.exec('__eventDone', [id,{
+        this.worker.exec('__eventDone', [id, {
           err: 'no handler found'
         }]).catch(reject)
       }
     }
-
   }
   registerHandler<T extends keyof HandlerMap>(id: T, handler: HandlerMap[T]): void {
     this.eventHandlerMap[id] = handler

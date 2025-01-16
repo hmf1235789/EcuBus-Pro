@@ -18,7 +18,8 @@ export const useDataStore = defineStore('useDataStore', {
     nodes: {},
     database:{
       lin:{}
-    }
+    },
+    graphs:{}
   }),
   actions: {
     globalRun(type: 'start' | 'stop') {
@@ -29,8 +30,15 @@ export const useDataStore = defineStore('useDataStore', {
         window.globalStart.value = true
        
         const project=useProjectStore()
-        window.electron.ipcRenderer.invoke('ipc-global-start',cloneDeep(project.projectInfo),cloneDeep(this.devices),cloneDeep(this.tester),cloneDeep(this.nodes),cloneDeep(this.database)).catch((e: any) => {
+        window.dataParseWorker.postMessage({
+          method:'initDataBase',
+          data:cloneDeep(this.database)
+        })
+        window.electron.ipcRenderer.invoke('ipc-global-start',cloneDeep(project.projectInfo),cloneDeep(this.devices),cloneDeep(this.tester),cloneDeep(this.nodes),cloneDeep(this.database)).then(()=>{
+          window.startTime=Date.now()
+        }).catch((e: any) => {
           window.globalStart.value = false
+          window.startTime=Date.now()
         })
       }
       if (type == 'stop' && window.globalStart.value == true) {
@@ -47,7 +55,8 @@ export const useDataStore = defineStore('useDataStore', {
         tester:this.tester,
         subFunction:this.subFunction,
         nodes:this.nodes,
-        database:this.database
+        database:this.database,
+        graphs:this.graphs
       }
     }
   }

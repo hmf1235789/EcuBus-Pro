@@ -35,6 +35,12 @@
               <Icon :icon="logIcon" style="font-size: 24px; " />
               <span>Trace</span>
             </div>
+            <el-divider direction="vertical" style="height: 54px;" />
+            <div class="grid girdenable" @click="handleSelect(['graph'])">
+              <Icon :icon="graphIcon" style="font-size: 24px; " />
+              <span>Graph</span>
+            </div>
+            <el-divider direction="vertical" style="height: 54px;" />
             <div class="grid girdenable" @click="handleSelect(['message'])">
               <Icon :icon="msgIcon" style="font-size: 24px; " />
               <span>Message</span>
@@ -266,10 +272,11 @@
       <div v-for="item in project.project.wins" :key="item.id" style="position: absolute; padding: 1px">
 
         <div v-show="!item.hide" v-if="layoutMaster.getLayoutType(item.id) == undefined" :id="`win${item.id}`" class="uds-window" :style="{
+          transform: 'translate(0px, 0px)',
           top: `${item.pos.y}px`,
           left: `${item.pos.x}px`,
           width: `${item.pos.w}px`,
-          height: `${item.pos.h}px`
+          height: `${item.pos.h}px`,
         }">
           <div class="titleBar" :style="{
             width: `${item.pos.w - 2}px`,
@@ -431,6 +438,7 @@ import codeIcon from '@iconify/icons-material-symbols/code-blocks-outline'
 import pinIcon from '@iconify/icons-material-symbols/push-pin-outline'
 import interIcon from '@iconify/icons-material-symbols/interactive-space-outline'
 import dataBaseIcon from '@iconify/icons-material-symbols/database'
+import graphIcon from '@iconify/icons-ep/histogram'
 import logo from '@r/assets/logo64.png'
 import { v4 } from 'uuid'
 import { cloneDeep } from 'lodash'
