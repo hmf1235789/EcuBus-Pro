@@ -38,9 +38,6 @@ async function make_release_note_all() {
       )
 
       for (let log of logs.stdout.split('\n')) {
-
-        log=log.replace('*', '')
-        console.log(log)
         if (/^\s*\*\s+\[(.*?)\]:/.test(log)) {
           //if log contains https://, we need to replace it with [link](https://), use regex
           log=log.replace(/(https:\/\/\S+)/g, '[$1]($1)')
