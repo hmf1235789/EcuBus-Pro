@@ -36,62 +36,35 @@ EcuBus-Pro is a free and open source alternative to `CAN-OE`, designed for autom
 
 See our [User Manual](./docs/um/concept.md) for detailed documentation.
 
-<div>
-<table style="white-space: nowrap;">
-<thead>
-  <tr>
-    <th>Platform</th>
-    <th>CAN/CAN-FD</th>
-    <th>DOIP</th>
-    <th>LIN</th>
-    <th>UDS</th>
-    <th>Script</th>
-    <th>Database</th>
-  </tr>
-</thead>
-<tbody>
-  <tr style="vertical-align: top;">
-   <td>
-      • Windows (exe)<br>
-      • Linux (deb)<br>
-    </td>
-    <td>
-      • PEAK<br>
-      • Kvaser<br>
-      • ZLG<br>
-      • Simulation
-    </td>
-    <td>
-      • PC Adapter
-    </td>
-    <td>
-      • PEAK<br>
-    </td>
-    <td>
-      • Over CAN/CAN-FD<br>
-      • Over DoIP<br>
-      • Over LIN
-    </td>
-    <td>
-      • UDS<br>
-      • CAN<br>
-      • LIN<br>
-      • KeyBoard<br>
-      • SerialPort
-    </td>
-    <td>
-      • LIN LDF (edit and export)
-    </td>
-  </tr>
-</tbody>
-</table>
-</div>
+#### Hardware Support
+
+| Vendor | Supported Protocols |
+|--------|-------------------|
+| PEAK | CAN/CAN-FD/LIN |
+| KVASER | CAN/CAN-FD |
+| ZLG | CAN/CAN-FD |
+| Toomoss | CAN/CAN-FD (Coming Soon) |
+
+#### Software Features
+
+| Feature | Capabilities |
+|---------|-------------|
+| Platform Support | • Windows (exe)<br>• Linux (deb) |
+| UDS | • Over CAN/CAN-FD<br>• Over DoIP<br>• Over LIN |
+| Scripting | • UDS<br>• CAN<br>• LIN<br>• KeyBoard<br>• SerialPort |
+| Database | • LIN LDF (edit and export) |
+| Graph | • Signal Graph |
 
 ### Visual Overview
 
+#### CAN
 ![base1](./docs/about/base1.gif)
----
+
+#### UDS
 ![base1](./docs/about/uds.gif)
+
+#### Graph Signal
+![base1](./docs/about/graph.gif)
 
 ### Script Capabilities
 Our script engine leverages `Node.js`, enabling you to:

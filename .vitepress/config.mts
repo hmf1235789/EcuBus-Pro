@@ -38,7 +38,7 @@ export default defineConfig({
     nav: nav(),
     // https://vitepress.dev/reference/default-theme-config
     outline: {
-      level: [2, 3]
+      level: [2, 4]
     },
     editLink: {
       pattern: 'https://github.com/ecubus/EcuBus-Pro/edit/master/:path',
@@ -68,6 +68,7 @@ export default defineConfig({
         link: '/docs/um/concept',
         items: [
           { text: 'Lin', link: '/docs/um/lin/lin.md' },
+          { text: 'Graph', link: '/docs/um/graph/graph.md' },
           { text: 'CLI', link: '/docs/um/cli' },
           {
             text: 'Script', link: '/docs/um/script', items: [
