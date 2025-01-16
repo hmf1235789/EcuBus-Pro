@@ -40,20 +40,20 @@ See our [User Manual](./docs/um/concept.md) for detailed documentation.
 
 | Vendor | Supported Protocols |
 |--------|-------------------|
-| PEAK | CAN/CAN-FD/LIN |
-| KVASER | CAN/CAN-FD |
-| ZLG | CAN/CAN-FD |
-| Toomoss | CAN/CAN-FD (Coming Soon) |
+| PEAK | CAN CAN-FD LIN |
+| KVASER | CAN CAN-FD |
+| ZLG | CAN CAN-FD |
+| Toomoss | CAN CAN-FD (Coming Soon) |
 
 #### Software Features
 
 | Feature | Capabilities |
 |---------|-------------|
-| Platform Support | • Windows (exe)<br>• Linux (deb) |
-| UDS | • Over CAN/CAN-FD<br>• Over DoIP<br>• Over LIN |
-| Scripting | • UDS<br>• CAN<br>• LIN<br>• KeyBoard<br>• SerialPort |
-| Database | • LIN LDF (edit and export) |
-| Graph | • Signal Graph |
+| Platform Support | Windows (exe,portable) Linux (deb) |
+| UDS | CAN/CAN-FD DoIP LIN |
+| Scripting | see [script](./docs/um/script.md) |
+| Database | LIN LDF (edit and export) |
+| Graph | Signal Graph |
 
 ### Visual Overview
 
