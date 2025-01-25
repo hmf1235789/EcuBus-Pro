@@ -555,7 +555,7 @@ const gridOptions = computed(() => {
                 resizable: false,
             },
             { field: 'send', title: 'Send', width: 100, resizable: false, slots: { default: 'default_send' } },
-            { field: 'trigger', title: 'Trigger', width: 150, resizable: false, slots: { default: 'default_trigger' } },
+            { field: 'trigger', title: 'Trigger', width: 200, resizable: false, slots: { default: 'default_trigger' } },
             { field: 'name', title: 'Name', width: 100, editRender: {}, slots: { edit: 'default_name' } },
             { field: 'id', title: 'ID (HEX)', minWidth: 100, editRender: {}, slots: { edit: 'default_id' } },
             { field: 'channel', title: 'Channel', minWidth: 100, editRender: {}, slots: { default: 'default_channel', edit: 'edit_channel' } },
