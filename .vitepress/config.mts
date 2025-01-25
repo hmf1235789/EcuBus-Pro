@@ -78,6 +78,7 @@ export default defineConfig({
           {
             text: 'Database', link: '/docs/um/database', items: [
               { text: 'LIN LDF', link: '/docs/um/ldf' },
+              { text: 'CAN DBC', link: '/docs/um/dbc' },
             ]
           },
         ]
@@ -87,6 +88,11 @@ export default defineConfig({
 
         items: [
           { text: 'Secure Access dll', link: '/examples/secure_access_dll/readme' },
+          {
+            text: 'CAN', items: [
+              { text: 'CAN Basic', link: '/examples/can/readme', },
+            ], collapsed: true
+          },
           {
             text: 'LIN', items: [
 

@@ -1,5 +1,15 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.15
+Changes from v0.8.14 to v0.8.15:
+
+ 
+* [feat]:add can setSingal 
+* [feat]:opt can dbc parse 
+* [feat]:add signal update 
+* [feat]:add prase dbc file
+---
+
 ## v0.8.14
 Changes from v0.8.13 to v0.8.14:
 

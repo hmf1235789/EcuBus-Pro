@@ -51,8 +51,8 @@ See our [User Manual](./docs/um/concept.md) for detailed documentation.
 |---------|-------------|
 | Platform Support | Windows (exe,portable) Linux (deb) |
 | UDS | CAN/CAN-FD DoIP LIN |
-| Scripting | see [script](./docs/um/script.md) |
-| Database | LIN LDF (edit and export) |
+| Scripting | see [Scripting](./docs/um/script.md) |
+| Database | LIN LDF (edit and export), CAN DBC (view only), see [Database](./docs/um/database.md) |
 | Graph | Signal Graph |
 
 ### Visual Overview

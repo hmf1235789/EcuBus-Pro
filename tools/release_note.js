@@ -12,8 +12,8 @@ async function make_release_note_all() {
     const ret = await exec('"git" tag -l --sort=-v:refname')
     let tagList = ret.stdout.match(/v\d+\.\d+\.\d+/g) // 匹配形如 'v1.0.0' 的版本号
 
-    if (!tagList || tagList.length < 2) {
-      console.error('Insufficient tags found for release note generation.')
+    if (!tagList) {
+      console.error('No tags found for release note generation.')
       return
     }
 
@@ -23,6 +23,38 @@ async function make_release_note_all() {
     // 初始化Markdown文件内容
     let md = '# EcuBus-Pro Release Notes\n\n'
 
+    // 检查当前commit是否有tag
+    const { stdout: currentTag } = await exec('"git" tag --points-at HEAD')
+    const hasCurrentTag = currentTag.trim() !== ''
+
+    if (!hasCurrentTag) {
+      // 如果当前commit没有tag，添加Unreleased部分
+      const latestTag = tagList[0]
+      md += `## Unreleased\n`
+      md += `Changes since ${latestTag}:\n\n`
+
+      // 获取从最新tag到现在的提交记录
+      const LOG_FORMAT = '%Cgreen*%Creset %s'
+      const latestLogs = await exec(
+        `"git" log --no-merges ${latestTag}..HEAD --format="${LOG_FORMAT}" --date=short`
+      )
+
+      // 处理最新的提交记录
+      for (let log of latestLogs.stdout.split('\n')) {
+        if (/^\s*\*\s+\[(.*?)\]:/.test(log)) {
+          log = log.replace(/(https:\/\/\S+)/g, '[$1]($1)')
+          for (let i = 1; i < log.length; i++) {
+            if (log[i] === '[' && i != 0 && log[i+1]!='h') {
+              md += '\n* '
+            }
+            md += log[i]
+          }
+        }
+      }
+      md += '\n---\n\n'
+    }
+
+    // 处理历史tag之间的变更
     for (let i = 0; i < tagList.length - 1; i++) {
       const currentTag = tagList[i + 1]
       const nextTag = tagList[i]
@@ -39,19 +71,13 @@ async function make_release_note_all() {
 
       for (let log of logs.stdout.split('\n')) {
         if (/^\s*\*\s+\[(.*?)\]:/.test(log)) {
-          //if log contains https://, we need to replace it with [link](https://), use regex
-          log=log.replace(/(https:\/\/\S+)/g, '[$1]($1)')
-          // log may contains mulit [xx], so we need to put each [xx] at new line
-
+          log = log.replace(/(https:\/\/\S+)/g, '[$1]($1)')
           for (let i = 1; i < log.length; i++) {
-            if (log[i] === '[' && i != 0&&log[i+1]!='h') {
+            if (log[i] === '[' && i != 0 && log[i+1]!='h') {
               md += '\n* '
             }
-
             md += log[i]
           }
-
-          // md += log + '\n';
         }
       }
 

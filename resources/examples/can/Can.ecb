@@ -68629,6 +68629,9 @@
         "id": "graph",
         "options": {}
       }
+    },,
+    "example":{
+      "catalog":"CAN"
     }
   }
 }
