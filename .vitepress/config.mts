@@ -92,6 +92,7 @@ export default defineConfig({
           {
             text: 'CAN', items: [
               { text: 'CAN Basic', link: '/examples/can/readme', },
+              { text: 'NXP UDS Bootloader', link: '/examples/nxp_bootloader/readme' },
             ], collapsed: true
           },
           {
@@ -99,12 +100,6 @@ export default defineConfig({
 
               { text: 'LIN General', link: '/examples/lin/readme' },
               { text: 'LIN TP', link: '/examples/lin_tp/readme' },
-            ],
-            collapsed: true
-          },
-          {
-            text: 'CAN', items: [
-              { text: 'NXP UDS Bootloader', link: '/examples/nxp_bootloader/readme' },
             ],
             collapsed: true
           },
