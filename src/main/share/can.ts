@@ -13,7 +13,7 @@ export interface CanBitrate {
 }
 
 
-export type CanVendor='peak'|'simulate'|'zlg'|'kvaser'
+export type CanVendor='peak'|'simulate'|'zlg'|'kvaser'|'toomoss'
 export interface CanBaseInfo {
   id: string
   handle: any
