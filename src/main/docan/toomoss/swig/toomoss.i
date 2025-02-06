@@ -30,6 +30,7 @@
 %include <carrays.i>
 
 %array_class(int, I32Array);
+%array_class(unsigned int, U32Array);
 // %array_class(BYTE, ByteArray);
 // %array_class(ZCAN_Receive_Data, ReceiveDataArray);
 // %array_class(ZCAN_ReceiveFD_Data, ReceiveFDDataArray);

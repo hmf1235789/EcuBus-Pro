@@ -133,30 +133,10 @@ void threadEntry(TsfnContext *context) {
     msgObj.Set("TimeStamp", Napi::Number::New(env, value->TimeStamp));
     msgObj.Set("TimeStampHigh", Napi::Number::New(env, value->TimeStampHigh));
     
-    // 计算实际数据长度(DLC到字节数的转换)
-    unsigned char actualLen = 0;
-    if(value->DLC <= 8) {
-      actualLen = value->DLC;
-    } else if(value->DLC == 9) {
-      actualLen = 12;
-    } else if(value->DLC == 10) {
-      actualLen = 16;
-    } else if(value->DLC == 11) {
-      actualLen = 20;
-    } else if(value->DLC == 12) {
-      actualLen = 24;
-    } else if(value->DLC == 13) {
-      actualLen = 32;
-    } else if(value->DLC == 14) {
-      actualLen = 48;
-    } else if(value->DLC == 15) {
-      actualLen = 64;
-    }
-
     // 创建数据Buffer
     Napi::Buffer<unsigned char> dataBuffer = Napi::Buffer<unsigned char>::Copy(env,
                                                                              value->Data,
-                                                                             actualLen);
+                                                                             value->DLC);
     msgObj.Set("Data", dataBuffer);
 
     // 调用JavaScript回调函数
@@ -233,7 +213,7 @@ void threadEntry(TsfnContext *context) {
         ret = CANFD_GetBusError(context->DevHandle, context->CanIndex, (CANFD_BUS_ERROR*)&context->statusData);
         if(ret == 0) {
           // 只有在出现错误时才上报
-          if(((CANFD_BUS_ERROR*)&context->statusData)->Flags != 0) {
+          if(((CANFD_BUS_ERROR*)&context->statusData)->Flags != 0||((CANFD_BUS_ERROR*)&context->statusData)->REC != 0||((CANFD_BUS_ERROR*)&context->statusData)->TEC != 0) {
             context->tserror.BlockingCall(context, statusCallback);
           }
         }
@@ -290,38 +270,43 @@ public:
       canfdMsg.ID = msgObj.Get("ID").As<Napi::Number>().Uint32Value();
       canfdMsg.DLC = msgObj.Get("DLC").As<Napi::Number>().Uint32Value();
       canfdMsg.Flags = msgObj.Get("Flags").As<Napi::Number>().Uint32Value();
-      
-      // 计算实际数据长度
-      unsigned char actualLen = 0;
-      if(canfdMsg.DLC <= 8) actualLen = canfdMsg.DLC;
-      else if(canfdMsg.DLC == 9) actualLen = 12;
-      else if(canfdMsg.DLC == 10) actualLen = 16;
-      else if(canfdMsg.DLC == 11) actualLen = 20;
-      else if(canfdMsg.DLC == 12) actualLen = 24;
-      else if(canfdMsg.DLC == 13) actualLen = 32;
-      else if(canfdMsg.DLC == 14) actualLen = 48;
-      else if(canfdMsg.DLC == 15) actualLen = 64;
-      
+  
       auto dataBuffer = msgObj.Get("Data").As<Napi::Buffer<uint8_t>>();
-      memcpy(canfdMsg.Data, dataBuffer.Data(), actualLen);
+      memcpy(canfdMsg.Data, dataBuffer.Data(), dataBuffer.Length());
     }
   }
 
   void Execute() override {
     // 在工作线程中执行发送
     if (!isCanFd) {
+      //clear the timestamp
+      canMsg.TimeStamp = 0;
+      canMsg.TimeStampHigh = 0;
       result = CAN_SendMsg(devHandle, canIndex, &canMsg, 1);
+
     } else {
+      //clear the timestamp
+      canfdMsg.TimeStamp = 0;
+      canfdMsg.TimeStampHigh = 0;
       result = CANFD_SendMsg(devHandle, canIndex, &canfdMsg, 1);
     }
   }
 
+
   void OnOK() override {
     // 在主线程中处理成功结果
     if (result > 0) {
-      deferred.Resolve(Napi::Number::New(Env(), result));
+        if (!isCanFd) {
+            // 普通CAN消息时间戳
+            uint64_t timestamp = ((uint64_t)canMsg.TimeStampHigh << 32) | canMsg.TimeStamp;
+            deferred.Resolve(Napi::Number::New(Env(), (double)timestamp));
+        } else {
+            // CANFD消息时间戳
+            uint64_t timestamp = ((uint64_t)canfdMsg.TimeStampHigh << 32) | canfdMsg.TimeStamp;
+            deferred.Resolve(Napi::Number::New(Env(), (double)timestamp));
+        }
     } else {
-      deferred.Reject(Napi::String::New(Env(), "Send failed"));
+        deferred.Reject(Napi::String::New(Env(), "Send failed"));
     }
   }
 

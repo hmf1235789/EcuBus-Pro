@@ -1256,36 +1256,37 @@ Napi::Value SWIG_NAPI_AppendOutput(Napi::Env env, Napi::Value result, Napi::Valu
 #define SWIGTYPE_p_CAN_RELAY_HEAD swig_types[1]
 #define SWIGTYPE_p_HARDWARE_INFO swig_types[2]
 #define SWIGTYPE_p_I32Array swig_types[3]
-#define SWIGTYPE_p__CANFD_BUS_ERROR swig_types[4]
-#define SWIGTYPE_p__CANFD_DIAGNOSTIC swig_types[5]
-#define SWIGTYPE_p__CANFD_FILTER_CONFIG swig_types[6]
-#define SWIGTYPE_p__CANFD_INIT_CONFIG swig_types[7]
-#define SWIGTYPE_p__CANFD_MSG swig_types[8]
-#define SWIGTYPE_p__CAN_FILTER_CONFIG swig_types[9]
-#define SWIGTYPE_p__CAN_INIT_CONFIG swig_types[10]
-#define SWIGTYPE_p__CAN_MSG swig_types[11]
-#define SWIGTYPE_p__CAN_STATUS swig_types[12]
-#define SWIGTYPE_p__CBL_CMD_LIST swig_types[13]
-#define SWIGTYPE_p__DEVICE_INFO swig_types[14]
-#define SWIGTYPE_p___int64 swig_types[15]
-#define SWIGTYPE_p_char swig_types[16]
-#define SWIGTYPE_p_float swig_types[17]
-#define SWIGTYPE_p_int swig_types[18]
-#define SWIGTYPE_p_long swig_types[19]
-#define SWIGTYPE_p_long_long swig_types[20]
-#define SWIGTYPE_p_p_char swig_types[21]
-#define SWIGTYPE_p_p_unsigned_long swig_types[22]
-#define SWIGTYPE_p_short swig_types[23]
-#define SWIGTYPE_p_signed___int64 swig_types[24]
-#define SWIGTYPE_p_signed_char swig_types[25]
-#define SWIGTYPE_p_unsigned___int64 swig_types[26]
-#define SWIGTYPE_p_unsigned_char swig_types[27]
-#define SWIGTYPE_p_unsigned_int swig_types[28]
-#define SWIGTYPE_p_unsigned_long swig_types[29]
-#define SWIGTYPE_p_unsigned_long_long swig_types[30]
-#define SWIGTYPE_p_unsigned_short swig_types[31]
-static swig_type_info *swig_types[33];
-static swig_module_info swig_module = {swig_types, 32, 0, 0, 0, 0};
+#define SWIGTYPE_p_U32Array swig_types[4]
+#define SWIGTYPE_p__CANFD_BUS_ERROR swig_types[5]
+#define SWIGTYPE_p__CANFD_DIAGNOSTIC swig_types[6]
+#define SWIGTYPE_p__CANFD_FILTER_CONFIG swig_types[7]
+#define SWIGTYPE_p__CANFD_INIT_CONFIG swig_types[8]
+#define SWIGTYPE_p__CANFD_MSG swig_types[9]
+#define SWIGTYPE_p__CAN_FILTER_CONFIG swig_types[10]
+#define SWIGTYPE_p__CAN_INIT_CONFIG swig_types[11]
+#define SWIGTYPE_p__CAN_MSG swig_types[12]
+#define SWIGTYPE_p__CAN_STATUS swig_types[13]
+#define SWIGTYPE_p__CBL_CMD_LIST swig_types[14]
+#define SWIGTYPE_p__DEVICE_INFO swig_types[15]
+#define SWIGTYPE_p___int64 swig_types[16]
+#define SWIGTYPE_p_char swig_types[17]
+#define SWIGTYPE_p_float swig_types[18]
+#define SWIGTYPE_p_int swig_types[19]
+#define SWIGTYPE_p_long swig_types[20]
+#define SWIGTYPE_p_long_long swig_types[21]
+#define SWIGTYPE_p_p_char swig_types[22]
+#define SWIGTYPE_p_p_unsigned_long swig_types[23]
+#define SWIGTYPE_p_short swig_types[24]
+#define SWIGTYPE_p_signed___int64 swig_types[25]
+#define SWIGTYPE_p_signed_char swig_types[26]
+#define SWIGTYPE_p_unsigned___int64 swig_types[27]
+#define SWIGTYPE_p_unsigned_char swig_types[28]
+#define SWIGTYPE_p_unsigned_int swig_types[29]
+#define SWIGTYPE_p_unsigned_long swig_types[30]
+#define SWIGTYPE_p_unsigned_long_long swig_types[31]
+#define SWIGTYPE_p_unsigned_short swig_types[32]
+static swig_type_info *swig_types[34];
+static swig_module_info swig_module = {swig_types, 33, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -1543,6 +1544,22 @@ SWIGINTERN I32Array *I32Array_frompointer(int *t){
   return (I32Array *) t;
 }
 
+typedef unsigned int U32Array;
+
+SWIGINTERN U32Array *new_U32Array(size_t nelements){
+  return new unsigned int[nelements]();
+}
+SWIGINTERN unsigned int U32Array_getitem(U32Array *self,size_t index){
+  return self[index];
+}
+
+SWIGINTERN
+Napi::Value SWIG_From_unsigned_SS_int(Napi::Env env, unsigned int val)
+{
+  return Napi::Number::New(env, val);
+}
+
+
 SWIGINTERN
 int SWIG_AsVal_unsigned_SS_int (Napi::Value valRef, unsigned int* val)
 {
@@ -1564,13 +1581,15 @@ fail:
   return SWIG_ERROR;
 }
 
-
-SWIGINTERN
-Napi::Value SWIG_From_unsigned_SS_int(Napi::Env env, unsigned int val)
-{
-  return Napi::Number::New(env, val);
+SWIGINTERN void U32Array_setitem(U32Array *self,size_t index,unsigned int value){
+  self[index] = value;
 }
-
+SWIGINTERN unsigned int *U32Array_cast(U32Array *self){
+  return self;
+}
+SWIGINTERN U32Array *U32Array_frompointer(unsigned int *t){
+  return (U32Array *) t;
+}
 
 SWIGINTERN int
 SWIG_AsVal_unsigned_SS_char (Napi::Value obj, unsigned char *val)
@@ -1886,6 +1905,113 @@ void _exports_I32Array_inst::GetMembers(
     "frompointer",
       StaticMethod("frompointer",
         &_exports_I32Array_templ::_wrap_I32Array_frompointer,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
+  
+}
+// jsnapi_class_prologue_template
+template <typename SWIG_OBJ_WRAP>
+class _exports_U32Array_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
+public:
+  _exports_U32Array_templ(const Napi::CallbackInfo &);
+_exports_U32Array_templ(bool, const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_new_U32Array(const Napi::CallbackInfo &);
+virtual ~_exports_U32Array_templ();
+// jsnapi_class_method_declaration
+Napi::Value _wrap_U32Array_getitem(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_U32Array_setitem(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_U32Array_cast(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+static Napi::Value _wrap_U32Array_frompointer(const Napi::CallbackInfo &);
+// jsnapi_class_epilogue_template
+static void JS_veto_set_static_variable(const Napi::CallbackInfo &, const Napi::Value &);
+void JS_veto_set_variable(const Napi::CallbackInfo &, const Napi::Value &);
+};
+
+template <typename SWIG_OBJ_WRAP>
+void _exports_U32Array_templ<SWIG_OBJ_WRAP>::JS_veto_set_static_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
+SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
+}
+
+template <typename SWIG_OBJ_WRAP>
+void _exports_U32Array_templ<SWIG_OBJ_WRAP>::JS_veto_set_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
+SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
+}
+// jsnapi_class_instance
+class _exports_U32Array_inst : public _exports_U32Array_templ<_exports_U32Array_inst> {
+public:
+  using _exports_U32Array_templ::_exports_U32Array_templ;
+  virtual ~_exports_U32Array_inst() {
+    
+  };
+  static void GetMembers(
+    Napi::Env,
+    std::map<std::string, _exports_U32Array_templ::PropertyDescriptor> &,
+    std::map<std::string, _exports_U32Array_templ::PropertyDescriptor> &
+    );
+  static Napi::Function GetClass(Napi::Env);
+};
+/* Class: U32Array (_exports_U32Array) */
+// jsnapi_getclass
+Napi::Function _exports_U32Array_inst::GetClass(Napi::Env env) {
+  std::map<std::string, _exports_U32Array_templ::PropertyDescriptor> members, staticMembers;
+  GetMembers(env, members, staticMembers);
+  
+  std::vector<_exports_U32Array_inst::PropertyDescriptor> symbolTable;
+  for (auto it = members.begin(); it != members.end(); it++)
+  symbolTable.push_back(it->second);
+  for (auto it = staticMembers.begin(); it != staticMembers.end(); it++)
+  symbolTable.push_back(it->second);
+  
+  return Napi::ObjectWrap<_exports_U32Array_inst>::DefineClass(env, "U32Array", symbolTable);
+}
+
+void _exports_U32Array_inst::GetMembers(
+  Napi::Env env,
+  std::map<std::string, _exports_U32Array_templ::PropertyDescriptor> &members,
+  std::map<std::string, _exports_U32Array_templ::PropertyDescriptor> &staticMembers
+  ) {
+  std::map<std::string, SWIG_NAPI_ObjectWrap_templ<SWIG_NAPI_ObjectWrap_inst>::PropertyDescriptor> baseMembers, baseStaticMembers;
+  SWIG_NAPI_ObjectWrap_inst::GetMembers(env, baseMembers, baseStaticMembers);
+  members.insert(baseMembers.begin(), baseMembers.end());
+  staticMembers.insert(staticMembers.begin(), staticMembers.end());
+  
+  /* register wrapper functions */
+  // jsnapi_member_function_descriptor
+  members.erase("getitem");
+  members.insert({
+    "getitem",
+      _exports_U32Array_templ::InstanceMethod("getitem",
+        &_exports_U32Array_templ::_wrap_U32Array_getitem,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
+  // jsnapi_member_function_descriptor
+  members.erase("setitem");
+  members.insert({
+    "setitem",
+      _exports_U32Array_templ::InstanceMethod("setitem",
+        &_exports_U32Array_templ::_wrap_U32Array_setitem,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
+  // jsnapi_member_function_descriptor
+  members.erase("cast");
+  members.insert({
+    "cast",
+      _exports_U32Array_templ::InstanceMethod("cast",
+        &_exports_U32Array_templ::_wrap_U32Array_cast,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
+  
+  /* add static class functions and variables */
+  // jsnapi_register_static_function
+  staticMembers.erase("frompointer");
+  staticMembers.insert({
+    "frompointer",
+      StaticMethod("frompointer",
+        &_exports_U32Array_templ::_wrap_U32Array_frompointer,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   
@@ -4232,6 +4358,210 @@ Napi::Value _exports_I32Array_templ<SWIG_OBJ_WRAP>::_wrap_I32Array_frompointer(c
   }
   arg1 = reinterpret_cast< int * >(argp1);result = (I32Array *)I32Array_frompointer(arg1);
   jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_I32Array, 0 |  0 );
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+template <typename SWIG_OBJ_WRAP>
+// js_ctor
+// This is the main constructor
+_exports_U32Array_templ<SWIG_OBJ_WRAP>::_exports_U32Array_templ(const Napi::CallbackInfo &info)
+:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
+  Napi::Env env = info.Env();
+  
+  this->info = SWIGTYPE_p_U32Array;
+  if (info.Length() == 1 && info[0].IsExternal()) {
+    // This constructor has been called internally from C++/SWIG
+    // to wrap an already existing C++ object in JS
+    this->self = info[0].As<Napi::External<void>>().Data();
+    this->owned = false;
+    return;
+  }
+  this->owned = true;
+  
+  size_t arg1 ;
+  size_t val1 ;
+  int ecode1 = 0 ;
+  U32Array *result;
+  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_U32Array.");
+  }
+  ecode1 = SWIG_AsVal_size_t(info[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_U32Array" "', argument " "1"" of type '" "size_t""'");
+  } 
+  arg1 = static_cast< size_t >(val1);result = (U32Array *)new_U32Array(SWIG_STD_MOVE(arg1));
+  
+  
+  
+  this->self = result;
+  return;
+  goto fail;
+fail:
+  return;
+}
+
+// This is the bypass constructor to be used from child classes
+template <typename SWIG_OBJ_WRAP>
+_exports_U32Array_templ<SWIG_OBJ_WRAP>::_exports_U32Array_templ(bool, const Napi::CallbackInfo &info)
+:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
+  
+}
+
+SWIGINTERN void delete_U32Array(U32Array *self){
+  delete [] self;
+}
+
+// js_dtoroverride
+template <typename SWIG_OBJ_WRAP>
+_exports_U32Array_templ<SWIG_OBJ_WRAP>::~_exports_U32Array_templ() {
+  auto arg1 = reinterpret_cast<U32Array *>(this->self);
+  if (this->owned && arg1) {
+    delete_U32Array(arg1);
+    this->self = nullptr;
+  }
+}
+
+
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_U32Array_templ<SWIG_OBJ_WRAP>::_wrap_U32Array_getitem(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  U32Array *arg1 = (U32Array *) 0 ;
+  size_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  size_t val2 ;
+  int ecode2 = 0 ;
+  unsigned int result;
+  
+  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_U32Array_getitem.");
+  }
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_U32Array, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "U32Array_getitem" "', argument " "1"" of type '" "U32Array *""'"); 
+  }
+  arg1 = reinterpret_cast< U32Array * >(argp1);ecode2 = SWIG_AsVal_size_t(info[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "U32Array_getitem" "', argument " "2"" of type '" "size_t""'");
+  } 
+  arg2 = static_cast< size_t >(val2);result = (unsigned int)U32Array_getitem(arg1,SWIG_STD_MOVE(arg2));
+  jsresult = SWIG_From_unsigned_SS_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned int >(result));
+  
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_U32Array_templ<SWIG_OBJ_WRAP>::_wrap_U32Array_setitem(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  U32Array *arg1 = (U32Array *) 0 ;
+  size_t arg2 ;
+  unsigned int arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  size_t val2 ;
+  int ecode2 = 0 ;
+  unsigned int val3 ;
+  int ecode3 = 0 ;
+  
+  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_U32Array_setitem.");
+  }
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_U32Array, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "U32Array_setitem" "', argument " "1"" of type '" "U32Array *""'"); 
+  }
+  arg1 = reinterpret_cast< U32Array * >(argp1);ecode2 = SWIG_AsVal_size_t(info[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "U32Array_setitem" "', argument " "2"" of type '" "size_t""'");
+  } 
+  arg2 = static_cast< size_t >(val2);ecode3 = SWIG_AsVal_unsigned_SS_int(info[1], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "U32Array_setitem" "', argument " "3"" of type '" "unsigned int""'");
+  } 
+  arg3 = static_cast< unsigned int >(val3);U32Array_setitem(arg1,SWIG_STD_MOVE(arg2),arg3);
+  jsresult = env.Undefined();
+  
+  
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_U32Array_templ<SWIG_OBJ_WRAP>::_wrap_U32Array_cast(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  U32Array *arg1 = (U32Array *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int *result = 0 ;
+  
+  if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_U32Array_cast.");
+  }
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_U32Array, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "U32Array_cast" "', argument " "1"" of type '" "U32Array *""'"); 
+  }
+  arg1 = reinterpret_cast< U32Array * >(argp1);result = (unsigned int *)U32Array_cast(arg1);
+  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_int, 0 |  0 );
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_U32Array_templ<SWIG_OBJ_WRAP>::_wrap_U32Array_frompointer(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  unsigned int *arg1 = (unsigned int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  U32Array *result = 0 ;
+  
+  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_U32Array_frompointer.");
+  }
+  
+  res1 = SWIG_ConvertPtr(info[0], &argp1,SWIGTYPE_p_unsigned_int, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "U32Array_frompointer" "', argument " "1"" of type '" "unsigned int *""'"); 
+  }
+  arg1 = reinterpret_cast< unsigned int * >(argp1);result = (U32Array *)U32Array_frompointer(arg1);
+  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_U32Array, 0 |  0 );
   
   
   return jsresult;
@@ -15295,10 +15625,14 @@ fail:
 static void *_p_I32ArrayTo_p_int(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((int *)  ((I32Array *) x));
 }
+static void *_p_U32ArrayTo_p_unsigned_int(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((unsigned int *)  ((U32Array *) x));
+}
 static swig_type_info _swigt__p_CAN_RELAY_DATA = {"_p_CAN_RELAY_DATA", "CAN_RELAY_DATA *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_CAN_RELAY_HEAD = {"_p_CAN_RELAY_HEAD", "CAN_RELAY_HEAD *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_HARDWARE_INFO = {"_p_HARDWARE_INFO", "HARDWARE_INFO *|p_HARDWARE_INFO", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_I32Array = {"_p_I32Array", "p_I32Array|I32Array *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_U32Array = {"_p_U32Array", "p_U32Array|U32Array *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p__CANFD_BUS_ERROR = {"_p__CANFD_BUS_ERROR", "CANFD_BUS_ERROR *|p__CANFD_BUS_ERROR|_CANFD_BUS_ERROR *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p__CANFD_DIAGNOSTIC = {"_p__CANFD_DIAGNOSTIC", "CANFD_DIAGNOSTIC *|p__CANFD_DIAGNOSTIC|_CANFD_DIAGNOSTIC *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p__CANFD_FILTER_CONFIG = {"_p__CANFD_FILTER_CONFIG", "CANFD_FILTER_CONFIG *|p__CANFD_FILTER_CONFIG|_CANFD_FILTER_CONFIG *", 0, 0, (void*)0, 0};
@@ -15333,6 +15667,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_CAN_RELAY_HEAD,
   &_swigt__p_HARDWARE_INFO,
   &_swigt__p_I32Array,
+  &_swigt__p_U32Array,
   &_swigt__p__CANFD_BUS_ERROR,
   &_swigt__p__CANFD_DIAGNOSTIC,
   &_swigt__p__CANFD_FILTER_CONFIG,
@@ -15367,6 +15702,7 @@ static swig_cast_info _swigc__p_CAN_RELAY_DATA[] = {  {&_swigt__p_CAN_RELAY_DATA
 static swig_cast_info _swigc__p_CAN_RELAY_HEAD[] = {  {&_swigt__p_CAN_RELAY_HEAD, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_HARDWARE_INFO[] = {  {&_swigt__p_HARDWARE_INFO, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_I32Array[] = {  {&_swigt__p_I32Array, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_U32Array[] = {  {&_swigt__p_U32Array, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p__CANFD_BUS_ERROR[] = {  {&_swigt__p__CANFD_BUS_ERROR, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p__CANFD_DIAGNOSTIC[] = {  {&_swigt__p__CANFD_DIAGNOSTIC, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p__CANFD_FILTER_CONFIG[] = {  {&_swigt__p__CANFD_FILTER_CONFIG, 0, 0, 0},{0, 0, 0, 0}};
@@ -15391,7 +15727,7 @@ static swig_cast_info _swigc__p_signed___int64[] = {  {&_swigt__p_signed___int64
 static swig_cast_info _swigc__p_signed_char[] = {  {&_swigt__p_signed_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_unsigned___int64[] = {  {&_swigt__p_unsigned___int64, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_unsigned_char[] = {  {&_swigt__p_unsigned_char, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_unsigned_int[] = {  {&_swigt__p_unsigned_int, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_unsigned_int[] = {  {&_swigt__p_unsigned_int, 0, 0, 0},  {&_swigt__p_U32Array, _p_U32ArrayTo_p_unsigned_int, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_unsigned_long[] = {  {&_swigt__p_unsigned_long, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_unsigned_long_long[] = {  {&_swigt__p_unsigned_long_long, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_unsigned_short[] = {  {&_swigt__p_unsigned_short, 0, 0, 0},{0, 0, 0, 0}};
@@ -15401,6 +15737,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_CAN_RELAY_HEAD,
   _swigc__p_HARDWARE_INFO,
   _swigc__p_I32Array,
+  _swigc__p_U32Array,
   _swigc__p__CANFD_BUS_ERROR,
   _swigc__p__CANFD_DIAGNOSTIC,
   _swigc__p__CANFD_FILTER_CONFIG,
@@ -15759,126 +16096,136 @@ if (SWIGTYPE_p_I32Array->clientdata == nullptr) {
 Napi::FunctionReference *_exports_I32Array_ctor_ref = new Napi::FunctionReference();
 *_exports_I32Array_ctor_ref = Napi::Persistent(_exports_I32Array_ctor);
 env.GetInstanceData<EnvInstanceData>()->ctor[0] = _exports_I32Array_ctor_ref;
+/* Class: U32Array (_exports_U32Array) */
+// jsnapi_registerclass
+Napi::Function _exports_U32Array_ctor = _exports_U32Array_inst::GetClass(env);
+exports.Set("U32Array", _exports_U32Array_ctor);
+if (SWIGTYPE_p_U32Array->clientdata == nullptr) {
+  SWIGTYPE_p_U32Array->clientdata = new size_t(1);
+}
+Napi::FunctionReference *_exports_U32Array_ctor_ref = new Napi::FunctionReference();
+*_exports_U32Array_ctor_ref = Napi::Persistent(_exports_U32Array_ctor);
+env.GetInstanceData<EnvInstanceData>()->ctor[1] = _exports_U32Array_ctor_ref;
 /* Class: CAN_MSG (_exports_CAN_MSG) */
 // jsnapi_registerclass
 Napi::Function _exports_CAN_MSG_ctor = _exports_CAN_MSG_inst::GetClass(env);
 exports.Set("CAN_MSG", _exports_CAN_MSG_ctor);
 if (SWIGTYPE_p__CAN_MSG->clientdata == nullptr) {
-  SWIGTYPE_p__CAN_MSG->clientdata = new size_t(1);
+  SWIGTYPE_p__CAN_MSG->clientdata = new size_t(2);
 }
 Napi::FunctionReference *_exports_CAN_MSG_ctor_ref = new Napi::FunctionReference();
 *_exports_CAN_MSG_ctor_ref = Napi::Persistent(_exports_CAN_MSG_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[1] = _exports_CAN_MSG_ctor_ref;
+env.GetInstanceData<EnvInstanceData>()->ctor[2] = _exports_CAN_MSG_ctor_ref;
 /* Class: CAN_INIT_CONFIG (_exports_CAN_INIT_CONFIG) */
 // jsnapi_registerclass
 Napi::Function _exports_CAN_INIT_CONFIG_ctor = _exports_CAN_INIT_CONFIG_inst::GetClass(env);
 exports.Set("CAN_INIT_CONFIG", _exports_CAN_INIT_CONFIG_ctor);
 if (SWIGTYPE_p__CAN_INIT_CONFIG->clientdata == nullptr) {
-  SWIGTYPE_p__CAN_INIT_CONFIG->clientdata = new size_t(2);
+  SWIGTYPE_p__CAN_INIT_CONFIG->clientdata = new size_t(3);
 }
 Napi::FunctionReference *_exports_CAN_INIT_CONFIG_ctor_ref = new Napi::FunctionReference();
 *_exports_CAN_INIT_CONFIG_ctor_ref = Napi::Persistent(_exports_CAN_INIT_CONFIG_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[2] = _exports_CAN_INIT_CONFIG_ctor_ref;
+env.GetInstanceData<EnvInstanceData>()->ctor[3] = _exports_CAN_INIT_CONFIG_ctor_ref;
 /* Class: CAN_FILTER_CONFIG (_exports_CAN_FILTER_CONFIG) */
 // jsnapi_registerclass
 Napi::Function _exports_CAN_FILTER_CONFIG_ctor = _exports_CAN_FILTER_CONFIG_inst::GetClass(env);
 exports.Set("CAN_FILTER_CONFIG", _exports_CAN_FILTER_CONFIG_ctor);
 if (SWIGTYPE_p__CAN_FILTER_CONFIG->clientdata == nullptr) {
-  SWIGTYPE_p__CAN_FILTER_CONFIG->clientdata = new size_t(3);
+  SWIGTYPE_p__CAN_FILTER_CONFIG->clientdata = new size_t(4);
 }
 Napi::FunctionReference *_exports_CAN_FILTER_CONFIG_ctor_ref = new Napi::FunctionReference();
 *_exports_CAN_FILTER_CONFIG_ctor_ref = Napi::Persistent(_exports_CAN_FILTER_CONFIG_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[3] = _exports_CAN_FILTER_CONFIG_ctor_ref;
+env.GetInstanceData<EnvInstanceData>()->ctor[4] = _exports_CAN_FILTER_CONFIG_ctor_ref;
 /* Class: CAN_STATUS (_exports_CAN_STATUS) */
 // jsnapi_registerclass
 Napi::Function _exports_CAN_STATUS_ctor = _exports_CAN_STATUS_inst::GetClass(env);
 exports.Set("CAN_STATUS", _exports_CAN_STATUS_ctor);
 if (SWIGTYPE_p__CAN_STATUS->clientdata == nullptr) {
-  SWIGTYPE_p__CAN_STATUS->clientdata = new size_t(4);
+  SWIGTYPE_p__CAN_STATUS->clientdata = new size_t(5);
 }
 Napi::FunctionReference *_exports_CAN_STATUS_ctor_ref = new Napi::FunctionReference();
 *_exports_CAN_STATUS_ctor_ref = Napi::Persistent(_exports_CAN_STATUS_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[4] = _exports_CAN_STATUS_ctor_ref;
+env.GetInstanceData<EnvInstanceData>()->ctor[5] = _exports_CAN_STATUS_ctor_ref;
 /* Class: CBL_CMD_LIST (_exports_CBL_CMD_LIST) */
 // jsnapi_registerclass
 Napi::Function _exports_CBL_CMD_LIST_ctor = _exports_CBL_CMD_LIST_inst::GetClass(env);
 exports.Set("CBL_CMD_LIST", _exports_CBL_CMD_LIST_ctor);
 if (SWIGTYPE_p__CBL_CMD_LIST->clientdata == nullptr) {
-  SWIGTYPE_p__CBL_CMD_LIST->clientdata = new size_t(5);
+  SWIGTYPE_p__CBL_CMD_LIST->clientdata = new size_t(6);
 }
 Napi::FunctionReference *_exports_CBL_CMD_LIST_ctor_ref = new Napi::FunctionReference();
 *_exports_CBL_CMD_LIST_ctor_ref = Napi::Persistent(_exports_CBL_CMD_LIST_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[5] = _exports_CBL_CMD_LIST_ctor_ref;
+env.GetInstanceData<EnvInstanceData>()->ctor[6] = _exports_CBL_CMD_LIST_ctor_ref;
 /* Class: CANFD_MSG (_exports_CANFD_MSG) */
 // jsnapi_registerclass
 Napi::Function _exports_CANFD_MSG_ctor = _exports_CANFD_MSG_inst::GetClass(env);
 exports.Set("CANFD_MSG", _exports_CANFD_MSG_ctor);
 if (SWIGTYPE_p__CANFD_MSG->clientdata == nullptr) {
-  SWIGTYPE_p__CANFD_MSG->clientdata = new size_t(6);
+  SWIGTYPE_p__CANFD_MSG->clientdata = new size_t(7);
 }
 Napi::FunctionReference *_exports_CANFD_MSG_ctor_ref = new Napi::FunctionReference();
 *_exports_CANFD_MSG_ctor_ref = Napi::Persistent(_exports_CANFD_MSG_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[6] = _exports_CANFD_MSG_ctor_ref;
+env.GetInstanceData<EnvInstanceData>()->ctor[7] = _exports_CANFD_MSG_ctor_ref;
 /* Class: CANFD_INIT_CONFIG (_exports_CANFD_INIT_CONFIG) */
 // jsnapi_registerclass
 Napi::Function _exports_CANFD_INIT_CONFIG_ctor = _exports_CANFD_INIT_CONFIG_inst::GetClass(env);
 exports.Set("CANFD_INIT_CONFIG", _exports_CANFD_INIT_CONFIG_ctor);
 if (SWIGTYPE_p__CANFD_INIT_CONFIG->clientdata == nullptr) {
-  SWIGTYPE_p__CANFD_INIT_CONFIG->clientdata = new size_t(7);
+  SWIGTYPE_p__CANFD_INIT_CONFIG->clientdata = new size_t(8);
 }
 Napi::FunctionReference *_exports_CANFD_INIT_CONFIG_ctor_ref = new Napi::FunctionReference();
 *_exports_CANFD_INIT_CONFIG_ctor_ref = Napi::Persistent(_exports_CANFD_INIT_CONFIG_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[7] = _exports_CANFD_INIT_CONFIG_ctor_ref;
+env.GetInstanceData<EnvInstanceData>()->ctor[8] = _exports_CANFD_INIT_CONFIG_ctor_ref;
 /* Class: CANFD_DIAGNOSTIC (_exports_CANFD_DIAGNOSTIC) */
 // jsnapi_registerclass
 Napi::Function _exports_CANFD_DIAGNOSTIC_ctor = _exports_CANFD_DIAGNOSTIC_inst::GetClass(env);
 exports.Set("CANFD_DIAGNOSTIC", _exports_CANFD_DIAGNOSTIC_ctor);
 if (SWIGTYPE_p__CANFD_DIAGNOSTIC->clientdata == nullptr) {
-  SWIGTYPE_p__CANFD_DIAGNOSTIC->clientdata = new size_t(8);
+  SWIGTYPE_p__CANFD_DIAGNOSTIC->clientdata = new size_t(9);
 }
 Napi::FunctionReference *_exports_CANFD_DIAGNOSTIC_ctor_ref = new Napi::FunctionReference();
 *_exports_CANFD_DIAGNOSTIC_ctor_ref = Napi::Persistent(_exports_CANFD_DIAGNOSTIC_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[8] = _exports_CANFD_DIAGNOSTIC_ctor_ref;
+env.GetInstanceData<EnvInstanceData>()->ctor[9] = _exports_CANFD_DIAGNOSTIC_ctor_ref;
 /* Class: CANFD_BUS_ERROR (_exports_CANFD_BUS_ERROR) */
 // jsnapi_registerclass
 Napi::Function _exports_CANFD_BUS_ERROR_ctor = _exports_CANFD_BUS_ERROR_inst::GetClass(env);
 exports.Set("CANFD_BUS_ERROR", _exports_CANFD_BUS_ERROR_ctor);
 if (SWIGTYPE_p__CANFD_BUS_ERROR->clientdata == nullptr) {
-  SWIGTYPE_p__CANFD_BUS_ERROR->clientdata = new size_t(9);
+  SWIGTYPE_p__CANFD_BUS_ERROR->clientdata = new size_t(10);
 }
 Napi::FunctionReference *_exports_CANFD_BUS_ERROR_ctor_ref = new Napi::FunctionReference();
 *_exports_CANFD_BUS_ERROR_ctor_ref = Napi::Persistent(_exports_CANFD_BUS_ERROR_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[9] = _exports_CANFD_BUS_ERROR_ctor_ref;
+env.GetInstanceData<EnvInstanceData>()->ctor[10] = _exports_CANFD_BUS_ERROR_ctor_ref;
 /* Class: CANFD_FILTER_CONFIG (_exports_CANFD_FILTER_CONFIG) */
 // jsnapi_registerclass
 Napi::Function _exports_CANFD_FILTER_CONFIG_ctor = _exports_CANFD_FILTER_CONFIG_inst::GetClass(env);
 exports.Set("CANFD_FILTER_CONFIG", _exports_CANFD_FILTER_CONFIG_ctor);
 if (SWIGTYPE_p__CANFD_FILTER_CONFIG->clientdata == nullptr) {
-  SWIGTYPE_p__CANFD_FILTER_CONFIG->clientdata = new size_t(10);
+  SWIGTYPE_p__CANFD_FILTER_CONFIG->clientdata = new size_t(11);
 }
 Napi::FunctionReference *_exports_CANFD_FILTER_CONFIG_ctor_ref = new Napi::FunctionReference();
 *_exports_CANFD_FILTER_CONFIG_ctor_ref = Napi::Persistent(_exports_CANFD_FILTER_CONFIG_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[10] = _exports_CANFD_FILTER_CONFIG_ctor_ref;
+env.GetInstanceData<EnvInstanceData>()->ctor[11] = _exports_CANFD_FILTER_CONFIG_ctor_ref;
 /* Class: DEVICE_INFO (_exports_DEVICE_INFO) */
 // jsnapi_registerclass
 Napi::Function _exports_DEVICE_INFO_ctor = _exports_DEVICE_INFO_inst::GetClass(env);
 exports.Set("DEVICE_INFO", _exports_DEVICE_INFO_ctor);
 if (SWIGTYPE_p__DEVICE_INFO->clientdata == nullptr) {
-  SWIGTYPE_p__DEVICE_INFO->clientdata = new size_t(11);
+  SWIGTYPE_p__DEVICE_INFO->clientdata = new size_t(12);
 }
 Napi::FunctionReference *_exports_DEVICE_INFO_ctor_ref = new Napi::FunctionReference();
 *_exports_DEVICE_INFO_ctor_ref = Napi::Persistent(_exports_DEVICE_INFO_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[11] = _exports_DEVICE_INFO_ctor_ref;
+env.GetInstanceData<EnvInstanceData>()->ctor[12] = _exports_DEVICE_INFO_ctor_ref;
 /* Class: HARDWARE_INFO (_exports_HARDWARE_INFO) */
 // jsnapi_registerclass
 Napi::Function _exports_HARDWARE_INFO_ctor = _exports_HARDWARE_INFO_inst::GetClass(env);
 exports.Set("HARDWARE_INFO", _exports_HARDWARE_INFO_ctor);
 if (SWIGTYPE_p_HARDWARE_INFO->clientdata == nullptr) {
-  SWIGTYPE_p_HARDWARE_INFO->clientdata = new size_t(12);
+  SWIGTYPE_p_HARDWARE_INFO->clientdata = new size_t(13);
 }
 Napi::FunctionReference *_exports_HARDWARE_INFO_ctor_ref = new Napi::FunctionReference();
 *_exports_HARDWARE_INFO_ctor_ref = Napi::Persistent(_exports_HARDWARE_INFO_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[12] = _exports_HARDWARE_INFO_ctor_ref;
+env.GetInstanceData<EnvInstanceData>()->ctor[13] = _exports_HARDWARE_INFO_ctor_ref;
 
 
   /* enable inheritance */
@@ -15903,6 +16250,21 @@ do {
   NAPI_CHECK_RESULT(SWIG_NAPI_ObjectWrap_ctor.Get("prototype"), protoBase);
   NAPI_CHECK_MAYBE(setProto.Call({
     _exports_I32Array_ctor, SWIG_NAPI_ObjectWrap_ctor
+  }));
+  NAPI_CHECK_MAYBE(setProto.Call({
+    protoSub, protoBase
+  }));
+} while (0);
+
+
+// Inheritance for _exports_U32Array (U32Array) <- SWIG_NAPI_ObjectWrap
+// jsnapi_setup_inheritance
+do {
+  Napi::Value protoBase, protoSub;
+  NAPI_CHECK_RESULT(_exports_U32Array_ctor.Get("prototype"), protoSub);
+  NAPI_CHECK_RESULT(SWIG_NAPI_ObjectWrap_ctor.Get("prototype"), protoBase);
+  NAPI_CHECK_MAYBE(setProto.Call({
+    _exports_U32Array_ctor, SWIG_NAPI_ObjectWrap_ctor
   }));
   NAPI_CHECK_MAYBE(setProto.Call({
     protoSub, protoBase

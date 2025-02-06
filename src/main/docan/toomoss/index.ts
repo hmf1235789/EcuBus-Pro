@@ -26,7 +26,7 @@ interface CANFrame {
 
 export class TOOMOSS_CAN extends CanBase {
     // 添加静态设备管理Map
-    private static deviceHandles = new Map<number, {
+    static deviceHandles = new Map<number, {
         refCount: number,  // 引用计数
         channels: Set<number>  // 当前使用的通道
     }>();
@@ -145,15 +145,16 @@ export class TOOMOSS_CAN extends CanBase {
             deviceInfo.refCount++
             deviceInfo.channels.add(this.deviceIndex)
         }
-
+        TOOMOSS.DEV_ResetTimestamp(this.handle)
         // 初始化CAN配置
         if (info.canfd && info.bitratefd) {
             // CANFD配置
+
             this.canfdConfig = new TOOMOSS.CANFD_INIT_CONFIG()
             this.canfdConfig.Mode = 0 // 正常模式
             this.canfdConfig.ISOCRCEnable = 1
             this.canfdConfig.RetrySend = 0
-            this.canfdConfig.ResEnable = 0
+            this.canfdConfig.ResEnable = 1
             // 仲裁域波特率配置
             this.canfdConfig.NBT_BRP = info.bitrate.preScaler
             this.canfdConfig.NBT_SEG1 = info.bitrate.timeSeg1
@@ -170,12 +171,14 @@ export class TOOMOSS_CAN extends CanBase {
             if (ret != 0) {
                 throw new Error('Init CANFD failed')
             }
+            TOOMOSS.CANFD_ResetStartTime(this.handle, this.deviceIndex)
+
 
             //   // 启动CANFD
-            //   ret = TOOMOSS.CANFD_Start(this.handle, this.deviceIndex)
-            //   if (ret != 0) {
+            // ret = TOOMOSS.CANFD_StartGetMsg(this.handle, this.deviceIndex)
+            // if (ret != 0) {
             //     throw new Error('Start CANFD failed')
-            //   }
+            // }
 
         } else {
             // 普通CAN配置
@@ -200,7 +203,9 @@ export class TOOMOSS_CAN extends CanBase {
             // if (ret != 0) {
             //     throw new Error('Start CAN failed')
             // }
+            TOOMOSS.CAN_ResetStartTime(this.handle, this.deviceIndex)
         }
+
 
         // 启动消息接收
         TOOMOSS.CreateTSFN(
@@ -215,8 +220,7 @@ export class TOOMOSS_CAN extends CanBase {
     }
 
     callback(msg: any) {
-        console.log('msg', this.info.name, msg)
-        if(msg.id==0xffffffff){
+        if (msg.id == 0xffffffff) {
             return
         }
         const frame: CANFrame = {
@@ -228,38 +232,14 @@ export class TOOMOSS_CAN extends CanBase {
                 brs: false
             },
             data: msg.Data,
-            ts: msg.TimeStamp * 100 // 转换为微秒
+            ts: ((msg.TimeStampHigh << 32) | msg.TimeStamp) * 10
         }
-
+        
         if (this.info.canfd) {
             // CANFD消息处理
             frame.msgType.brs = (msg.Flags & 0x01) ? true : false
             frame.msgType.canfd = (msg.Flags & 0x04) ? true : false
 
-            // CANFD的DLC需要转换为实际长度
-            let actualLen = 0
-            if (msg.DLC <= 8) {
-                actualLen = msg.DLC
-            } else if (msg.DLC == 9) {
-                actualLen = 12
-            } else if (msg.DLC == 10) {
-                actualLen = 16
-            } else if (msg.DLC == 11) {
-                actualLen = 20
-            } else if (msg.DLC == 12) {
-                actualLen = 24
-            } else if (msg.DLC == 13) {
-                actualLen = 32
-            } else if (msg.DLC == 14) {
-                actualLen = 48
-            } else if (msg.DLC == 15) {
-                actualLen = 64
-            }
-
-            // 确保data长度正确
-            if (frame.data.length > actualLen) {
-                frame.data = frame.data.subarray(0, actualLen)
-            }
         } else {
             // 普通CAN消息处理
             frame.msgType.brs = false
@@ -275,7 +255,6 @@ export class TOOMOSS_CAN extends CanBase {
     }
 
     callbackError(err: any) {
-        console.log('err',this.info.name, err)
         this.log.error(getTsUs() - this.startTime, 'bus error')
         this.close(true)
     }
@@ -287,7 +266,7 @@ export class TOOMOSS_CAN extends CanBase {
             this.tsOffset = frame.ts - (getTsUs() - this.startTime)
         }
         const ts = frame.ts - this.tsOffset
-
+     
         const cmdId = this.getReadBaseId(frame.canId, frame.msgType)
         const message: CanMessage = {
             device: this.info.name,
@@ -353,8 +332,9 @@ export class TOOMOSS_CAN extends CanBase {
 
         if (isReset) {
             if (this.info.canfd) {
-                TOOMOSS.CANFD_Stop(this.handle, this.deviceIndex)
                 TOOMOSS.CANFD_ClearMsg(this.handle, this.deviceIndex)
+                TOOMOSS.CANFD_Stop(this.handle, this.deviceIndex)
+              
                 TOOMOSS.CANFD_Init(this.handle, this.deviceIndex, this.canfdConfig)
             } else {
                 TOOMOSS.CAN_ClearMsg(this.handle, this.deviceIndex)
@@ -363,10 +343,19 @@ export class TOOMOSS_CAN extends CanBase {
             }
             return
         } else {
+            
             this.closed = true
             this.log.close()
             TOOMOSS.FreeTSFN(this.id)
+            if (this.info.canfd) {
+                TOOMOSS.CANFD_ClearMsg(this.handle, this.deviceIndex)
+                TOOMOSS.CANFD_Stop(this.handle, this.deviceIndex)
+            } else {
+                TOOMOSS.CAN_ClearMsg(this.handle, this.deviceIndex)
+                TOOMOSS.CAN_Stop(this.handle, this.deviceIndex)
+            }
         }
+
 
         // 更新设备引用计数
         const deviceInfo = TOOMOSS_CAN.deviceHandles.get(this.handle)
@@ -387,6 +376,7 @@ export class TOOMOSS_CAN extends CanBase {
             const maxLen = msgType.canfd ? 64 : 8
             if (data.length > maxLen) {
                 reject(new CanError(CAN_ERROR_ID.CAN_PARAM_ERROR, msgType, data))
+                return
             }
 
             TOOMOSS.SendCANMsg(this.handle, this.deviceIndex, this.info.canfd, {
@@ -397,25 +387,24 @@ export class TOOMOSS_CAN extends CanBase {
                 Data: data,
                 DLC: data.length,
                 Flags: (msgType.brs ? 0x01 : 0) | (msgType.canfd ? 0x04 : 0)
-            }).then((res: any) => {
+            }).then((timestamp: number) => {
+                const ts=getTsUs()-this.startTime
                 const message: CanMessage = {
                     device: this.info.name,
                     dir: 'OUT',
                     id: id,
                     data: data,
-                    ts: getTsUs() - this.startTime,
+                    ts: ts, // 转换为微秒
                     msgType: msgType,
                     database: extra?.database,
                     name: extra?.name
                 }
                 this.log.canBase(message)
-                resolve(0)
+                resolve(ts)
             }).catch((err: any) => {
                 reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data, err))
             })
         })
-
-
     }
 
     readBase(id: number, msgType: CanMsgType, timeout: number) {
