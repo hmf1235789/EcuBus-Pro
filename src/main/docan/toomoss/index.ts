@@ -388,7 +388,10 @@ export class TOOMOSS_CAN extends CanBase {
                 DLC: data.length,
                 Flags: (msgType.brs ? 0x01 : 0) | (msgType.canfd ? 0x04 : 0)
             }).then((timestamp: number) => {
-                const ts=getTsUs()-this.startTime
+                if (this.tsOffset == undefined) {
+                    this.tsOffset = timestamp*10 - (getTsUs() - this.startTime)
+                }
+                const ts=timestamp*10-this.tsOffset
                 const message: CanMessage = {
                     device: this.info.name,
                     dir: 'OUT',
