@@ -64,7 +64,7 @@ export class TOOMOSS_CAN extends CanBase {
         }
     >()
 
-    constructor(info: CanBaseInfo) {
+    constructor(info: CanBaseInfo,enableRes=false) {
         super()
         this.id = info.id
         this.info = info
@@ -154,7 +154,7 @@ export class TOOMOSS_CAN extends CanBase {
             this.canfdConfig.Mode = 0 // 正常模式
             this.canfdConfig.ISOCRCEnable = 1
             this.canfdConfig.RetrySend = 0
-            this.canfdConfig.ResEnable = 1
+            this.canfdConfig.ResEnable = enableRes?1:0
             // 仲裁域波特率配置
             this.canfdConfig.NBT_BRP = info.bitrate.preScaler
             this.canfdConfig.NBT_SEG1 = info.bitrate.timeSeg1
@@ -175,10 +175,10 @@ export class TOOMOSS_CAN extends CanBase {
 
 
             //   // 启动CANFD
-            // ret = TOOMOSS.CANFD_StartGetMsg(this.handle, this.deviceIndex)
-            // if (ret != 0) {
-            //     throw new Error('Start CANFD failed')
-            // }
+            ret = TOOMOSS.CANFD_StartGetMsg(this.handle, this.deviceIndex)
+            if (ret != 0) {
+                throw new Error('Start CANFD failed')
+            }
 
         } else {
             // 普通CAN配置
@@ -187,10 +187,11 @@ export class TOOMOSS_CAN extends CanBase {
             this.canConfig.CAN_SJW = info.bitrate.sjw
             this.canConfig.CAN_BS1 = info.bitrate.timeSeg1
             this.canConfig.CAN_BS2 = info.bitrate.timeSeg2
-            this.canConfig.CAN_Mode = 0  // 正常模式
+            this.canConfig.CAN_Mode = enableRes?(0x80|0):0  // 正常模式
             this.canConfig.CAN_ABOM = 0  // 自动离线恢复
             this.canConfig.CAN_NART = 1  // 自动重传
             this.canConfig.CAN_RFLM = 0  // 接收FIFO锁定模式
+
             this.canConfig.CAN_TXFP = 0  // 发送FIFO优先级
 
             ret = TOOMOSS.CAN_Init(this.handle, this.deviceIndex, this.canConfig)
@@ -199,10 +200,10 @@ export class TOOMOSS_CAN extends CanBase {
             }
 
             // 启动CAN
-            // ret = TOOMOSS.CAN_StartGetMsg(this.handle, this.deviceIndex)
-            // if (ret != 0) {
-            //     throw new Error('Start CAN failed')
-            // }
+            ret = TOOMOSS.CAN_StartGetMsg(this.handle, this.deviceIndex)
+            if (ret != 0) {
+                throw new Error('Start CAN failed')
+            }
             TOOMOSS.CAN_ResetStartTime(this.handle, this.deviceIndex)
         }
 
@@ -223,6 +224,7 @@ export class TOOMOSS_CAN extends CanBase {
         if (msg.id == 0xffffffff) {
             return
         }
+
         const frame: CANFrame = {
             canId: msg.ID & 0x1fffffff,
             msgType: {
@@ -334,12 +336,13 @@ export class TOOMOSS_CAN extends CanBase {
             if (this.info.canfd) {
                 TOOMOSS.CANFD_ClearMsg(this.handle, this.deviceIndex)
                 TOOMOSS.CANFD_Stop(this.handle, this.deviceIndex)
-              
                 TOOMOSS.CANFD_Init(this.handle, this.deviceIndex, this.canfdConfig)
+                TOOMOSS.CANFD_StartGetMsg(this.handle, this.deviceIndex)
             } else {
                 TOOMOSS.CAN_ClearMsg(this.handle, this.deviceIndex)
                 TOOMOSS.CAN_Stop(this.handle, this.deviceIndex)
                 TOOMOSS.CAN_Init(this.handle, this.deviceIndex, this.canConfig)
+                TOOMOSS.CAN_StartGetMsg(this.handle, this.deviceIndex)
             }
             return
         } else {
@@ -378,7 +381,7 @@ export class TOOMOSS_CAN extends CanBase {
                 reject(new CanError(CAN_ERROR_ID.CAN_PARAM_ERROR, msgType, data))
                 return
             }
-
+            console.log('send start')
             TOOMOSS.SendCANMsg(this.handle, this.deviceIndex, this.info.canfd, {
                 ID: id | (msgType.idType == CAN_ID_TYPE.EXTENDED ? 0x80000000 : 0) | (msgType.remote ? 0x40000000 : 0),
                 RemoteFlag: msgType.remote ? 1 : 0,
@@ -388,6 +391,7 @@ export class TOOMOSS_CAN extends CanBase {
                 DLC: data.length,
                 Flags: (msgType.brs ? 0x01 : 0) | (msgType.canfd ? 0x04 : 0)
             }).then((timestamp: number) => {
+                console.log('send ok')
                 if (this.tsOffset == undefined) {
                     this.tsOffset = timestamp*10 - (getTsUs() - this.startTime)
                 }
@@ -405,6 +409,7 @@ export class TOOMOSS_CAN extends CanBase {
                 this.log.canBase(message)
                 resolve(ts)
             }).catch((err: any) => {
+                console.log('send error',err)
                 reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data, err))
             })
         })

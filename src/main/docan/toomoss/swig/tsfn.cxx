@@ -227,7 +227,7 @@ void threadEntry(TsfnContext *context) {
     
 
     // 添加短暂延时以降低CPU占用
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    // std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
 }
 

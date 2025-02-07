@@ -14,12 +14,14 @@ import {
 import { CAN_TP, CAN_TP_SOCKET, CanTp } from 'src/main/docan/cantp'
 import { ZLG_CAN } from 'src/main/docan/zlg'
 import { KVASER_CAN } from 'src/main/docan/kvaser'
+import { TOOMOSS_CAN } from 'src/main/docan/toomoss'
 
 
 const dllPath = path.join(__dirname, '../../resources/lib')
 PEAK_TP.loadDllPath(dllPath)
 ZLG_CAN.loadDllPath(dllPath)
 KVASER_CAN.loadDllPath(dllPath)
+TOOMOSS_CAN.loadDllPath(dllPath)
 function createIncrementArray(length: number, start = 0) {
     const array: number[] = []
     for (let i = 0; i < length; i++) {
@@ -207,8 +209,8 @@ const addrList = [
 ]
 const dataList = [
     // Buffer.from([1]),
-    Buffer.from(createIncrementArray(5)),
-    // Buffer.from(createIncrementArray(6)),
+    // Buffer.from(createIncrementArray(5)),
+    Buffer.from(createIncrementArray(6)),
     // Buffer.from(createIncrementArray(7)),
     // Buffer.from(createIncrementArray(8)),
     // Buffer.from(createIncrementArray(60)),
@@ -218,10 +220,11 @@ const dataList = [
     // Buffer.from(createIncrementArray(1064)),
 ]
 
-describe('peak tp', () => {
+describe('peak cantp', () => {
     let client!: CanTp
     let server!: CanTp
     beforeAll(() => {
+
         server = new CAN_TP(
             new PEAK_TP({
                 handle: 81,
@@ -290,10 +293,11 @@ describe('peak tp', () => {
     })
 })
 
-describe('zlg tp', () => {
+describe('zlg cantp', () => {
     let client!: CanTp
     let server!: CanTp
     beforeAll(() => {
+
         server = new CAN_TP(
             new ZLG_CAN({
                 handle: '41_0_0',
@@ -361,10 +365,11 @@ describe('zlg tp', () => {
     })
 })
 
-describe('kvaser tp', () => {
+describe('kvaser cantp', () => {
     let client!: CanTp
     let server!: CanTp
     beforeAll(() => {
+
         server = new CAN_TP(
             new KVASER_CAN({
                 handle: 0,
@@ -433,5 +438,84 @@ describe('kvaser tp', () => {
     afterAll(() => {
         // client.close()
         // server.close()
+    })
+})
+
+describe('toomoss cantp', () => {
+    let client!: CanTp
+    let server!: CanTp
+    beforeAll(() => {
+
+        server = new CAN_TP(
+            new TOOMOSS_CAN({
+                handle: '1417675180:0',
+                name: 'server',
+                vendor: 'toomoss',
+                canfd: true,
+
+                bitrate: {
+                    freq: 500000,
+                    preScaler: 1,
+                    timeSeg1: 68,
+                    timeSeg2: 11,
+                    sjw: 11
+                },
+                bitratefd: {
+                    freq: 1000000,
+                    preScaler: 1,
+                    timeSeg1: 20,
+                    timeSeg2: 19,
+                    sjw: 19
+                },
+                id: 'toomoss0',
+            },true)
+        )
+
+
+        client = new CAN_TP(
+            new TOOMOSS_CAN({
+                handle: '1417675180:1',
+                name: 'client',
+                vendor: 'toomoss',
+                canfd: true,
+
+
+                bitrate: {
+                    freq: 500000,
+                    preScaler: 1,
+                    timeSeg1: 68,
+                    timeSeg2: 11,
+                    sjw: 11
+                },
+                bitratefd: {
+                    freq: 1000000,
+                    preScaler: 1,
+                    timeSeg1: 20,
+                    timeSeg2: 19,
+                    sjw: 19
+                },
+                id: 'toomoss1',
+            },true)
+        )
+
+    })
+
+    dataList.forEach((data) => {
+        addrList.forEach((addr) => {
+            it(`write ${data.length} bytes data to ${addr.name}`, async () => {
+                const clientSocket = new CAN_TP_SOCKET(client, addr)
+                const serverSocket = new CAN_TP_SOCKET(server, swapAddr(addr))
+                await clientSocket.write(data)
+                const result = await serverSocket.read(1000)
+                console.log('result',result)
+                deepEqual(result.data, data)
+                clientSocket.close()
+                serverSocket.close()
+            })
+        })
+    })
+    afterAll(() => {
+        client.close()
+        server.close()
     })
 })
