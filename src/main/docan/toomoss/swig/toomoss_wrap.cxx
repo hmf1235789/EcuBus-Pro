@@ -16052,7 +16052,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
 
 extern void CreateTSFN(const Napi::CallbackInfo &info);
 extern void FreeTSFN(const Napi::CallbackInfo &info);
-extern Napi::Promise SendCANMsg(const Napi::CallbackInfo &info);
+extern void SendCANMsg(const Napi::CallbackInfo& info);
 
 
 do {

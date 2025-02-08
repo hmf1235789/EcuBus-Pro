@@ -58,7 +58,7 @@ void LoadDll(const char* path) {
 
 extern void CreateTSFN(const Napi::CallbackInfo &info);
 extern void FreeTSFN(const Napi::CallbackInfo &info);
-extern Napi::Promise SendCANMsg(const Napi::CallbackInfo &info);
+extern void SendCANMsg(const Napi::CallbackInfo& info);
 
 
 do {

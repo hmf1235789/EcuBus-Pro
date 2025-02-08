@@ -210,14 +210,14 @@ const addrList = [
 const dataList = [
     // Buffer.from([1]),
     // Buffer.from(createIncrementArray(5)),
-    Buffer.from(createIncrementArray(6)),
+    // Buffer.from(createIncrementArray(6)),
     // Buffer.from(createIncrementArray(7)),
     // Buffer.from(createIncrementArray(8)),
-    // Buffer.from(createIncrementArray(60)),
-    // Buffer.from(createIncrementArray(61)),
-    // Buffer.from(createIncrementArray(62)),
-    // Buffer.from(createIncrementArray(63)),
-    // Buffer.from(createIncrementArray(1064)),
+    Buffer.from(createIncrementArray(64)),
+    Buffer.from(createIncrementArray(61)),
+    Buffer.from(createIncrementArray(62)),
+    Buffer.from(createIncrementArray(63)),
+    Buffer.from(createIncrementArray(2048)),
 ]
 
 describe('peak cantp', () => {

@@ -24,6 +24,19 @@ interface CANFrame {
     ts: number
 }
 
+let txCnt = 0
+const pendingBaseCmds = new Map<
+    number,
+    {
+        resolve: (value: number) => void
+        reject: (reason: CanError) => void
+        msgType: CanMsgType
+        id: number
+        data: Buffer
+        extra?: { database?: string; name?: string }
+    }
+>()
+
 export class TOOMOSS_CAN extends CanBase {
     // 添加静态设备管理Map
     static deviceHandles = new Map<number, {
@@ -38,23 +51,16 @@ export class TOOMOSS_CAN extends CanBase {
     deviceIndex: number
     closed = false
     cnt = 0
+
     id: string
     log: CanLOG
     canConfig: any
     canfdConfig: any
     startTime = getTsUs()
     tsOffset: number | undefined
+
     private readAbort = new AbortController()
-    pendingBaseCmds = new Map<
-        string,
-        {
-            resolve: (value: number) => void
-            reject: (reason: CanError) => void
-            msgType: CanMsgType
-            data: Buffer
-            extra?: { database?: string; name?: string }
-        }[]
-    >()
+
 
     rejectBaseMap = new Map<
         number,
@@ -64,7 +70,7 @@ export class TOOMOSS_CAN extends CanBase {
         }
     >()
 
-    constructor(info: CanBaseInfo,enableRes=false) {
+    constructor(info: CanBaseInfo, enableRes = false) {
         super()
         this.id = info.id
         this.info = info
@@ -154,7 +160,7 @@ export class TOOMOSS_CAN extends CanBase {
             this.canfdConfig.Mode = 0 // 正常模式
             this.canfdConfig.ISOCRCEnable = 1
             this.canfdConfig.RetrySend = 0
-            this.canfdConfig.ResEnable = enableRes?1:0
+            this.canfdConfig.ResEnable = enableRes ? 1 : 0
             // 仲裁域波特率配置
             this.canfdConfig.NBT_BRP = info.bitrate.preScaler
             this.canfdConfig.NBT_SEG1 = info.bitrate.timeSeg1
@@ -174,7 +180,7 @@ export class TOOMOSS_CAN extends CanBase {
             TOOMOSS.CANFD_ResetStartTime(this.handle, this.deviceIndex)
 
 
-            //   // 启动CANFD
+              // 启动CANFD
             ret = TOOMOSS.CANFD_StartGetMsg(this.handle, this.deviceIndex)
             if (ret != 0) {
                 throw new Error('Start CANFD failed')
@@ -187,7 +193,7 @@ export class TOOMOSS_CAN extends CanBase {
             this.canConfig.CAN_SJW = info.bitrate.sjw
             this.canConfig.CAN_BS1 = info.bitrate.timeSeg1
             this.canConfig.CAN_BS2 = info.bitrate.timeSeg2
-            this.canConfig.CAN_Mode = enableRes?(0x80|0):0  // 正常模式
+            this.canConfig.CAN_Mode = enableRes ? (0x80 | 0) : 0  // 正常模式
             this.canConfig.CAN_ABOM = 0  // 自动离线恢复
             this.canConfig.CAN_NART = 1  // 自动重传
             this.canConfig.CAN_RFLM = 0  // 接收FIFO锁定模式
@@ -207,23 +213,63 @@ export class TOOMOSS_CAN extends CanBase {
             TOOMOSS.CAN_ResetStartTime(this.handle, this.deviceIndex)
         }
 
+        // 绑定回调函数到实例
+      
 
-        // 启动消息接收
+        // 初始化 TSFN
         TOOMOSS.CreateTSFN(
             this.handle,
             this.deviceIndex,
-            info.canfd,
+            this.info.canfd,
             this.id,
             this.callback.bind(this),
-            this.id + 'error',
-            this.callbackError.bind(this)
+            'error-' + this.id,
+            this.callbackError.bind(this),
+            'tx-' + this.id,
+            this.txCallback.bind(this)
+
         )
     }
+    txCallback(obj: any) {
+        const { id, timestamp, result } = obj
+     
 
+
+        // 更新时间戳偏移
+        if (this.tsOffset == undefined) {
+            this.tsOffset = timestamp * 10 - (getTsUs() - this.startTime)
+        }
+        const ts = timestamp * 10 - this.tsOffset
+
+        // 从待发送队列中找到对应的消息
+        const cmdId = Number(id)
+      
+        const pendingCmds = pendingBaseCmds.get(cmdId)
+
+
+        if (pendingCmds) {
+           
+            const message: CanMessage = {
+                device: this.info.name,
+                dir: 'OUT',
+                id: pendingCmds.id,
+                data: pendingCmds.data,
+                ts: ts,
+                msgType: pendingCmds.msgType,
+                database: pendingCmds.extra?.database,
+                name: pendingCmds.extra?.name
+            }
+            this.log.canBase(message)
+            pendingCmds.resolve(ts)
+            pendingBaseCmds.delete(cmdId)
+
+        } 
+    }
     callback(msg: any) {
         if (msg.id == 0xffffffff) {
             return
         }
+
 
         const frame: CANFrame = {
             canId: msg.ID & 0x1fffffff,
@@ -236,7 +282,7 @@ export class TOOMOSS_CAN extends CanBase {
             data: msg.Data,
             ts: ((msg.TimeStampHigh << 32) | msg.TimeStamp) * 10
         }
-        
+
         if (this.info.canfd) {
             // CANFD消息处理
             frame.msgType.brs = (msg.Flags & 0x01) ? true : false
@@ -257,9 +303,11 @@ export class TOOMOSS_CAN extends CanBase {
     }
 
     callbackError(err: any) {
+        console.log('callbackError', err)
         this.log.error(getTsUs() - this.startTime, 'bus error')
         this.close(true)
     }
+
     setOption(cmd: string, val: any): void {
         null
     }
@@ -268,7 +316,7 @@ export class TOOMOSS_CAN extends CanBase {
             this.tsOffset = frame.ts - (getTsUs() - this.startTime)
         }
         const ts = frame.ts - this.tsOffset
-     
+
         const cmdId = this.getReadBaseId(frame.canId, frame.msgType)
         const message: CanMessage = {
             device: this.info.name,
@@ -319,18 +367,18 @@ export class TOOMOSS_CAN extends CanBase {
 
     close(isReset = false, msg?: string) {
         this.readAbort.abort()
-
+        
         for (const [key, value] of this.rejectBaseMap) {
             value.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, value.msgType))
         }
+
         this.rejectBaseMap.clear()
 
-        for (const [key, vals] of this.pendingBaseCmds) {
-            for (const val of vals) {
-                val.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, val.msgType))
-            }
+        for (const [key, val] of pendingBaseCmds) {
+            val.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, val.msgType))
         }
-        this.pendingBaseCmds.clear()
+        pendingBaseCmds.clear()
+
 
         if (isReset) {
             if (this.info.canfd) {
@@ -346,7 +394,7 @@ export class TOOMOSS_CAN extends CanBase {
             }
             return
         } else {
-            
+
             this.closed = true
             this.log.close()
             TOOMOSS.FreeTSFN(this.id)
@@ -376,42 +424,37 @@ export class TOOMOSS_CAN extends CanBase {
 
     writeBase(id: number, msgType: CanMsgType, data: Buffer, extra?: { database?: string; name?: string }): Promise<number> {
         return new Promise((resolve, reject) => {
-            const maxLen = msgType.canfd ? 64 : 8
-            if (data.length > maxLen) {
-                reject(new CanError(CAN_ERROR_ID.CAN_PARAM_ERROR, msgType, data))
-                return
-            }
-            console.log('send start')
-            TOOMOSS.SendCANMsg(this.handle, this.deviceIndex, this.info.canfd, {
-                ID: id | (msgType.idType == CAN_ID_TYPE.EXTENDED ? 0x80000000 : 0) | (msgType.remote ? 0x40000000 : 0),
-                RemoteFlag: msgType.remote ? 1 : 0,
-                ExternFlag: msgType.idType == CAN_ID_TYPE.EXTENDED ? 1 : 0,
-                DataLen: data.length,
-                Data: data,
-                DLC: data.length,
-                Flags: (msgType.brs ? 0x01 : 0) | (msgType.canfd ? 0x04 : 0)
-            }).then((timestamp: number) => {
-                console.log('send ok')
-                if (this.tsOffset == undefined) {
-                    this.tsOffset = timestamp*10 - (getTsUs() - this.startTime)
-                }
-                const ts=timestamp*10-this.tsOffset
-                const message: CanMessage = {
-                    device: this.info.name,
-                    dir: 'OUT',
-                    id: id,
-                    data: data,
-                    ts: ts, // 转换为微秒
-                    msgType: msgType,
-                    database: extra?.database,
-                    name: extra?.name
-                }
-                this.log.canBase(message)
-                resolve(ts)
-            }).catch((err: any) => {
-                console.log('send error',err)
+            const cmdId = txCnt++
+
+
+
+            try {
+                pendingBaseCmds.set(cmdId, { resolve, reject, msgType, id, data, extra })
+                TOOMOSS.SendCANMsg(
+                    this.handle,
+                    this.deviceIndex,
+                    this.info.canfd,
+                    this.id,
+
+                    cmdId,
+                    {
+                        ID: id | (msgType.idType == CAN_ID_TYPE.EXTENDED ? 0x80000000 : 0) | (msgType.remote ? 0x40000000 : 0),
+                        RemoteFlag: msgType.remote ? 1 : 0,
+                        ExternFlag: msgType.idType == CAN_ID_TYPE.EXTENDED ? 1 : 0,
+                        DataLen: data.length,
+                        Data: data,
+                        DLC: data.length,
+                        Flags: (msgType.brs ? 0x01 : 0) | (msgType.canfd ? 0x04 : 0)
+                    }
+                )
+
+
+
+
+            } catch (err: any) {
+                pendingBaseCmds.delete(cmdId)
                 reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data, err))
-            })
+            }
         })
     }
 

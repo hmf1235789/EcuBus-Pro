@@ -10,6 +10,7 @@ import {
     CAN_ID_TYPE,
     CAN_SOCKET,
     CanAddr,
+    getTsUs,
     swapAddr
 } from '../../src/main/share/can'
 import { CanTp } from 'src/main/docan/cantp'
@@ -331,11 +332,36 @@ describe('toomoss multi send canfd', () => {
 
         }, true)
     })
-    test('write multi frame', async () => {
+    test.skip('write multi frame #1', async () => {
+
+
+
+        for (let i = 0; i < 50; i++) {
+            const t1=getTsUs()
+            await client.writeBase(3 + i, {
+                idType: CAN_ID_TYPE.STANDARD,
+                brs: false,
+                canfd: true,
+                remote: false
+            }, Buffer.alloc(64, 0x33))
+            const t2=getTsUs()
+            console.log('offset',i, t2-t1)
+            
+
+        }
+
+
+
+
+
+
+    })
+    test('write multi frame #2', async () => {
+
 
 
         const list = []
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 20; i++) {
             list.push(client.writeBase(3 + i, {
                 idType: CAN_ID_TYPE.STANDARD,
                 brs: false,
@@ -354,6 +380,7 @@ describe('toomoss multi send canfd', () => {
         console.log('close client')
         client.close()
         client2.close()
+
         // await delay(1000)
 
 
