@@ -43,7 +43,7 @@ For detailed information, please refer to our [User Manual](./docs/um/concept.md
 | PEAK | CAN, CAN-FD, LIN |
 | KVASER | CAN, CAN-FD |
 | ZLG | CAN, CAN-FD |
-| Toomoss | CAN, CAN-FD (Coming Soon) |
+| Toomoss | CAN, CAN-FD |
 
 #### Software Capabilities
 

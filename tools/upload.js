@@ -36,6 +36,8 @@ async function put(list) {
   if(list.includes('--page')){
     const dist = path.join(__dirname, '..', '.vitepress','dist')
     await putDir(dist,'app/dist')
+    const api = path.join(__dirname, '..', 'resources', 'docs','scriptApi')
+    await putDir(api,'app/scriptApi')
   }
 
 

@@ -14,10 +14,15 @@ function nav(): DefaultTheme.NavItem[] {
         },
 
       ]
+    },
+    {
+      text: 'Script API',
+      link: 'https://app.whyengineer.com/scriptApi/index.html'
     }
   ]
 }
 // https://vitepress.dev/reference/site-config
+
 export default defineConfig({
   title: "EcuBus-Pro",
   ignoreDeadLinks: true,
@@ -72,8 +77,8 @@ export default defineConfig({
           { text: 'Graph', link: '/docs/um/graph/graph.md' },
           { text: 'CLI', link: '/docs/um/cli' },
           {
-            text: 'Script', link: '/docs/um/script', items: [
-              { text: 'Use External Package', link: '/docs/um/scriptSerialPort' },
+            text: 'Script', link: '/docs/um/script', items: [   
+              { text: 'Use External Package', link: '/docs/um/scriptExternal' },
             ]
           },
           {
