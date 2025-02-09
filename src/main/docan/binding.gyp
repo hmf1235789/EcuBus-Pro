@@ -126,6 +126,48 @@
                     'cflags_cc': [ '-fexceptions' ]
                 }]
             ]
-        }
+        },
+          {   
+            'target_name': 'toomoss',
+            'conditions': [
+                ['OS=="win"', {
+                    'include_dirs': [
+                        './toomoss/inc',
+                        "<!@(node -p \"require('node-addon-api').include\")"
+                    ],
+                    'configurations': { },
+                    'defines': [
+                        '__EXCEPTIONS'
+                    ],
+                    'sources': [
+                        './toomoss/swig/toomoss_wrap.cxx',
+                        './toomoss/swig/tsfn.cxx'
+                    ],
+                    'cflags': [ ],
+                    'cflags_cc': [ ],
+                    'libraries': ['<(module_root_dir)/toomoss/lib/USB2XXX.lib'],
+                    'defines': [ 'DELAYLOAD_HOOK' ],
+                    'msvs_settings': {
+                        'VCCLCompilerTool': {
+                            'AdditionalOptions': [ '/DELAYLOAD:USB2XXX.dll','/DELAYLOAD:libusb-1.0.dll' ],
+                            'ExceptionHandling':1
+                        }
+                    },
+                    'link_settings': {
+                        'libraries': [ '-DELAYLOAD:USB2XXX.dll','-DELAYLOAD:libusb-1.0.dll' ]
+                    }
+                },'OS=="linux"', {
+                    'include_dirs': [
+                        "<!@(node -p \"require('node-addon-api').include\")"
+                    ],
+                    'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
+                    'cflags!': [ '-fno-exceptions' ],
+                    'cflags_cc!': [ '-fno-exceptions' ],
+                    'sources': [ './fake_linux.cxx' ],
+                    'cflags': [ '-fexceptions' ],
+                    'cflags_cc': [ '-fexceptions' ]
+                }]
+            ]
+        },
     ]
 }

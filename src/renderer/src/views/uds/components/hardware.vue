@@ -292,6 +292,15 @@ function buildTree() {
     }
     t.push(simulate)
     addSubTree('simulate', simulate)
+    const toomoss: tree = {
+        label: 'TOOMOSS',
+        vendor: 'toomoss',
+        append: false,
+        id: 'TOOMOSS',
+        children: []
+    }
+    t.push(toomoss)
+    addSubTree('toomoss', toomoss)
 
 
     tData.value = t

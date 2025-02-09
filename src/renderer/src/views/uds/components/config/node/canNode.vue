@@ -211,6 +211,15 @@ const configInfo: Record<CanVendor, any> = {
     preScaler: false,
     freq: false,
     zlgSpec: false
+  },
+  'toomoss': {
+    clock: true,
+    timeSeg1: true,
+    timeSeg2: true,
+    sjw: true,
+    preScaler: true,
+    freq: true,
+    zlgSpec: false
   }
 }
 
@@ -256,6 +265,11 @@ const clockList = computed(() => {
       { clock: '80', name: "80" },
       { clock: '40', name: "40" },
     ];
+  } else if (props.vendor == 'toomoss') {
+    return [
+     
+      { clock: '40', name: "40" },
+    ];
   }
   return [];
 });
@@ -294,7 +308,7 @@ f_clock=20000000,nom_brp=1,nom_tseg1=14,nom_tseg2=5,nom_sjw=5  sample point = (t
 */
 
 function getBaudrateSP(speed: CanBitrate, index: number) {
-  if (props.vendor == "peak" || props.vendor == 'kvaser') {
+  if (props.vendor == "peak" || props.vendor == 'kvaser'||props.vendor == 'toomoss') {
     let f_clock = Number(speed.clock || 80) * 1000000;
     if (index == 1) {
       f_clock = Number(data.value.bitrate.clock || 80) * 1000000;
@@ -354,9 +368,13 @@ const nameCheck = (rule: any, value: any, callback: any) => {
 };
 
 const bitrateCheck = (rule: any, value: any, callback: any) => {
-  if (props.vendor == "peak" || props.vendor == 'kvaser') {
+  if (props.vendor == "peak" || props.vendor == 'kvaser' || props.vendor == 'toomoss') {
     if (data.value.bitrate.clock == undefined) {
       callback(new Error("Please select clock"));
+    }
+    //must be in clockList
+    if (!clockList.value.some(item => item.clock == data.value.bitrate.clock)) {
+      callback(new Error("Please select correct clock"));
     }
     if ((data.value.bitrate.timeSeg1 + 1) < data.value.bitrate.timeSeg2) {
       callback(new Error("normal tseg1 must be greater than tseg2-1"));
@@ -402,7 +420,7 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
         callback(new Error("data tseg2 must be between 1-16"));
       }
     }
-    if (props.vendor == 'kvaser') {
+    if (props.vendor == 'kvaser' || props.vendor == 'toomoss') {
       const calcFreq = Number(data.value.bitrate.clock || 40) * 1000000 / (data.value.bitrate.preScaler * (data.value.bitrate.timeSeg1 + data.value.bitrate.timeSeg2 + 1));
       if (calcFreq != data.value.bitrate.freq) {
         callback(new Error(`Please input correct frequency, calculated frequency is ${calcFreq}Hz`));

@@ -5,6 +5,7 @@ import path from "path";
 import { ZLG_CAN } from "./zlg";
 import { KVASER_CAN } from "./kvaser";
 import { SIMULATE_CAN } from "./simulate";
+import { TOOMOSS_CAN } from "./toomoss";
 import { CanBase, CanBaseInfo } from "../share/can";
 
 
@@ -12,6 +13,7 @@ const libPath = path.dirname(dllLib)
 PEAK_TP.loadDllPath(libPath)
 ZLG_CAN.loadDllPath(libPath)
 KVASER_CAN.loadDllPath(libPath)
+TOOMOSS_CAN.loadDllPath(libPath)
 
 export function openCanDevice(canDevice: CanBaseInfo) {
     let canBase: CanBase | undefined
@@ -27,6 +29,8 @@ export function openCanDevice(canDevice: CanBaseInfo) {
         canBase = new KVASER_CAN(canDevice)
     } else if (canDevice.vendor == 'simulate') {
         canBase = new SIMULATE_CAN(canDevice)
+    } else if (canDevice.vendor == 'toomoss') {
+        canBase = new TOOMOSS_CAN(canDevice)
     }
 
     return canBase
@@ -44,6 +48,8 @@ export function getCanVersion(vendor: string) {
         return KVASER_CAN.getLibVersion()
     } else if (vendor === 'SIMULATE') {
         return SIMULATE_CAN.getLibVersion()
+    } else if (vendor === 'TOOMOSS') {
+        return TOOMOSS_CAN.getLibVersion()
     }
     else
     // #v-endif
@@ -64,6 +70,8 @@ export function getCanDevices(vendor: string) {
         return KVASER_CAN.getValidDevices()
     } else if (vendor === 'SIMULATE') {
         return SIMULATE_CAN.getValidDevices()
+    } else if (vendor === 'TOOMOSS') {
+        return TOOMOSS_CAN.getValidDevices()
     }
     else
     // #v-endif
