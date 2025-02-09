@@ -1,5 +1,13 @@
 # EcuBus-Pro Release Notes
 
+## Unreleased
+Changes from v0.8.16 to v0.8.15:
+
+ 
+* [opt]:opt cani channel choose
+* [feat]:add toomoss can/can-fd support
+---
+
 ## v0.8.15
 Changes from v0.8.14 to v0.8.15:
 
