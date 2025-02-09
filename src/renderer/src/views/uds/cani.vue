@@ -197,7 +197,7 @@
                                 style="width: 65px;margin-right: 5px;margin-bottom: 5px"
                                 @input="dataChange(index - 1, $event)" @change="dataChangeDone"><template #prepend>{{
                                     index - 1
-                                    }}</template></el-input>
+                                }}</template></el-input>
                         </div>
                     </el-tab-pane>
 
@@ -276,7 +276,75 @@ const speicalDb = computed(() => {
     }
     return list
 })
+const props = defineProps<{
+    height: number
+    editIndex: string
 
+}>()
+// const start = toRef(props, 'start')
+const h = toRef(props, 'height')
+const editIndex = toRef(props, 'editIndex')
+const dataBase = useDataStore()
+const gridOptions = computed(() => {
+    const v: VxeGridProps<CanInterAction> = {
+        border: true,
+        size: "mini",
+        columnConfig: {
+            resizable: true,
+        },
+        height: props.height,
+        showOverflow: true,
+        scrollY: {
+            enabled: true,
+            gt: 0
+        },
+        rowConfig: {
+            isCurrent: true,
+
+        },
+        editConfig: {
+            trigger: 'click',
+            mode: 'cell',
+            showIcon: false,
+            beforeEditMethod({ rowIndex, column, row }) {
+                if (periodTimer.value[rowIndex] == true) {
+                    return false
+                }
+                if (column.field == 'name' && row.database != undefined) {
+                    return false
+                }
+                return true
+            }
+        },
+        toolbarConfig: {
+            slots: {
+                tools: 'toolbar'
+            }
+        },
+        align: 'center',
+        columns: [
+            {
+                type: "seq",
+                width: 50,
+                title: "",
+                align: "center",
+                fixed: "left",
+                resizable: false,
+            },
+            { field: 'send', title: 'Send', width: 100, resizable: false, slots: { default: 'default_send' } },
+            { field: 'trigger', title: 'Trigger', width: 200, resizable: false, slots: { default: 'default_trigger' } },
+            { field: 'name', title: 'Name', width: 100, editRender: {}, slots: { edit: 'default_name' } },
+            { field: 'id', title: 'ID (HEX)', minWidth: 100, editRender: {}, slots: { edit: 'default_id' } },
+            { field: 'channel', title: 'Channel', minWidth: 100, editRender: {}, slots: { default: 'default_channel', edit: 'edit_channel' } },
+            { field: 'type', title: 'Type', width: 100, editRender: {}, slots: { default: 'default_type1', edit: 'default_type' } },
+            { field: 'dlc', title: 'DLC', width: 100, editRender: {}, slots: { edit: 'default_dlc' } },
+
+        ],
+        data: dataBase.ia[props.editIndex]?.action || []
+
+    }
+    return v
+})
 function addFrame() {
     const channel = Object.keys(devices.value)[0] || ''
     dataBase.ia[editIndex.value].action.push({
@@ -441,7 +509,10 @@ const devices = computed(() => {
     const dd: Record<string, CanBaseInfo> = {}
     for (const d in dataBase.devices) {
         if (dataBase.devices[d] && dataBase.devices[d].type == 'can' && dataBase.devices[d].canDevice) {
-            dd[d] = dataBase.devices[d].canDevice
+            if (dataBase.ia[editIndex.value].devices.includes(d)) {
+                dd[d] = dataBase.devices[d].canDevice
+            }
+
 
 
         }
@@ -449,11 +520,24 @@ const devices = computed(() => {
     }
     return dd
 })
+watch(devices, (val) => {
+    //check channel
+    const action = dataBase.ia[editIndex.value].action as CanInterAction[]
+    const list = Object.keys(val)
+    for (const a of action) {
+        if (!list.includes(a.channel)) {
+
+            a.channel = ''
+        }
+
+    }
+})
 interface Option {
     key: string
     label: string
     disabled: boolean
 }
+
 const allDeviceLabel = computed(() => {
     const dd: Option[] = []
     for (const d of Object.keys(devices.value)) {
@@ -485,15 +569,9 @@ function openPr(index: number) {
     }
 
 }
-const props = defineProps<{
-    height: number
-    editIndex: string
 
-}>()
-// const start = toRef(props, 'start')
-const h = toRef(props, 'height')
 watch(formData, (v) => {
-    v=cloneDeep(v)
+    v = cloneDeep(v)
     if (v && popoverIndex.value != -1) {
         if (!isEqual(dataBase.ia[editIndex.value].action[popoverIndex.value], v)) {
             Object.assign(dataBase.ia[editIndex.value].action[popoverIndex.value], v)
@@ -506,68 +584,7 @@ watch(formData, (v) => {
 }, {
     deep: true
 })
-const editIndex = toRef(props, 'editIndex')
-const dataBase = useDataStore()
-const gridOptions = computed(() => {
-    const v: VxeGridProps<CanInterAction> = {
-        border: true,
-        size: "mini",
-        columnConfig: {
-            resizable: true,
-        },
-        height: props.height,
-        showOverflow: true,
-        scrollY: {
-            enabled: true,
-            gt: 0
-        },
-        rowConfig: {
-            isCurrent: true,
 
-        },
-        editConfig: {
-            trigger: 'click',
-            mode: 'cell',
-            showIcon: false,
-            beforeEditMethod({ rowIndex, column, row }) {
-                if (periodTimer.value[rowIndex] == true) {
-                    return false
-                }
-                if (column.field == 'name' && row.database != undefined) {
-                    return false
-                }
-                return true
-            }
-        },
-        toolbarConfig: {
-            slots: {
-                tools: 'toolbar'
-            }
-        },
-        align: 'center',
-        columns: [
-            {
-                type: "seq",
-                width: 50,
-                title: "",
-                align: "center",
-                fixed: "left",
-                resizable: false,
-            },
-            { field: 'send', title: 'Send', width: 100, resizable: false, slots: { default: 'default_send' } },
-            { field: 'trigger', title: 'Trigger', width: 200, resizable: false, slots: { default: 'default_trigger' } },
-            { field: 'name', title: 'Name', width: 100, editRender: {}, slots: { edit: 'default_name' } },
-            { field: 'id', title: 'ID (HEX)', minWidth: 100, editRender: {}, slots: { edit: 'default_id' } },
-            { field: 'channel', title: 'Channel', minWidth: 100, editRender: {}, slots: { default: 'default_channel', edit: 'edit_channel' } },
-            { field: 'type', title: 'Type', width: 100, editRender: {}, slots: { default: 'default_type1', edit: 'default_type' } },
-            { field: 'dlc', title: 'DLC', width: 100, editRender: {}, slots: { edit: 'default_dlc' } },
-
-        ],
-        data: dataBase.ia[props.editIndex]?.action || []
-
-    }
-    return v
-})
 
 
 

@@ -303,7 +303,6 @@ export class TOOMOSS_CAN extends CanBase {
     }
 
     callbackError(err: any) {
-        console.log('callbackError', err)
         this.log.error(getTsUs() - this.startTime, 'bus error')
         this.close(true)
     }
