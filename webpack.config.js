@@ -46,6 +46,7 @@ class MyCustomPlugin {
         fs.copyFileSync(path.resolve(__dirname,'dist','sa.node'),path.resolve(__dirname,'resources','lib','js','sa.node'))
         fs.copyFileSync(path.resolve(__dirname,'dist','crc.js'),path.resolve(__dirname,'resources','lib','js','crc.js'))
         fs.copyFileSync(path.resolve(__dirname,'dist','cryptoExt.js'),path.resolve(__dirname,'resources','lib','js','cryptoExt.js'))
+        fs.copyFileSync(path.resolve(__dirname,'dist','utli.js'),path.resolve(__dirname,'resources','lib','js','utli.js'))
         //copy uds.d.ts
         const udsDTs=path.resolve(__dirname,'dist','src/main/worker','uds.d.ts')
         await bundleDts(udsDTs,udsDTs)
@@ -118,8 +119,13 @@ class MyCustomPlugin {
         //     filePath: cryptoFile,
         // }],)
         await bundleDts(cryptoFile,path.resolve(__dirname,'src','main','share','cryptoExt.d.ts.html'))
+
+        //bundle utli.d.ts
+        const utliFile=path.resolve(__dirname,'dist','src/main/worker','utli.d.ts')
+        await bundleDts(utliFile,path.resolve(__dirname,'src','main','share','utli.d.ts.html'))
         // fs.writeFileSync(path.resolve(__dirname,'src','share','cryptoExt.d.ts.html'),v[0])
         console.log('构建过程完成！');
+
       });
     }
   }
@@ -128,6 +134,7 @@ module.exports = {
         uds:path.resolve(__dirname,'src/main/worker') + '/uds.ts',
         crc:path.resolve(__dirname,'src/main/worker') + '/crc.ts',
         cryptoExt:path.resolve(__dirname,'src/main/worker') + '/cryptoExt.ts',
+        utli:path.resolve(__dirname,'src/main/worker') + '/utli.ts',
     },
     output: {
         path: path.resolve(__dirname,'dist'),

@@ -9,6 +9,9 @@ export type DataType = 'NUM' | 'ARRAY' | 'ASCII' | 'UNICODE' | 'FLOAT' | 'DOUBLE
 export type HardwareType = "can" | 'lin' | 'eth'
 //serviceDetail所有的key作为serviceId
 
+/**
+ * @category UDS
+ */
 export interface ServiceItem {
   id: string
   name: string

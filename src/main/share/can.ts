@@ -93,7 +93,7 @@ export enum CAN_ID_TYPE {
 /**
  * Enumeration representing different CAN (Controller Area Network) address types.
  * 
- * @category CAN-TP
+ * @category CAN
  * @enum {string}
  * @readonly
  */
@@ -105,7 +105,7 @@ export enum CAN_ADDR_TYPE {
 /**
  * Enumeration representing different CAN (Controller Area Network) address formats.
  * 
- * @category CAN-TP
+ * @category CAN
  * @enum {string}
  * @readonly
  */

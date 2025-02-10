@@ -51,6 +51,9 @@ export interface VinInfo {
   
 }
 
+/**
+ * @category DOIP
+ */
 export interface EntityAddr extends VinInfo {
   nodeType?:'node'|'gateway'
   nodeAddr?:number

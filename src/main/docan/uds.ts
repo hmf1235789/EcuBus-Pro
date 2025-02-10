@@ -25,6 +25,7 @@ import fs from 'fs'
 import udsHeaderStr from '../share/uds.d.ts.html?raw'
 import crcStr from '../share/crc.d.ts.html?raw'
 import cryptoExtStr from '../share/cryptoExt.d.ts.html?raw'
+import utliStr from '../share/utli.d.ts.html?raw'
 import zlibStr from '../share/node/zlib.d.ts.html?raw'
 import assertStr from '../share/node/assert.d.ts.html?raw'
 import async_hooksStr from '../share/node/async_hooks.d.ts.html?raw'
@@ -977,10 +978,12 @@ declare global {
 export * from './uds'
 export * from './crc'
 export * from './cryptoExt'
+export * from './utli'
     `)
   await fsP.writeFile(path.join(vendorPath, 'uds.d.ts'), updateUdsDts(data))
   await fsP.writeFile(path.join(vendorPath, 'crc.d.ts'), crcStr)
   await fsP.writeFile(path.join(vendorPath, 'cryptoExt.d.ts'), cryptoExtStr)
+  await fsP.writeFile(path.join(vendorPath, 'utli.d.ts'), utliStr)
   //create tsconfig.json
   const tsconfigFile = path.join(projectPath, 'tsconfig.json')
   if (!fs.existsSync(tsconfigFile)) {
