@@ -766,7 +766,8 @@ export class DiagRequest extends Service {
   static from(serviceName: ServiceName) {
 
     const service = serviceMap.get(serviceName)
-    if (service && service.serviceId != 'Job') {
+    //request can accept job
+    if (service) {
       return new DiagRequest(service)
     } else {
       throw new Error(`service ${serviceName} not found`)

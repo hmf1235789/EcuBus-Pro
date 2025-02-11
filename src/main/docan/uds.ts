@@ -481,7 +481,7 @@ export class UDSTesterMain {
         log.systemMsg(`====== Running cycle #${i}, delay 1000ms ======`, this.lastActiveTs)
         await this.delay(1000)
       }
-      for (const [serviceIndex, service] of targetSeq.services.entries()) {
+      for (const [_serviceIndex, service] of targetSeq.services.entries()) {
         if (this.ac.signal.aborted) {
           break
         }
@@ -497,24 +497,24 @@ export class UDSTesterMain {
         }
         if (service.enable && addrItem && targetService) {
 
-          const baseRun = async (seqName: string, s: ServiceItem, fromJob = false) => {
-            if (this.ac.signal.aborted) {
+          const serviceRun = async function(tester:UDSTesterMain, s: ServiceItem){
+            if (tester.ac.signal.aborted) {
               throw new Error('aborted')
             }
             // await this.pool?.triggerPreSend(s.name)
             const txBuffer = getTxPdu(s)
             if (txBuffer.length == 0) {
               // throw new Error(`serivce ${s.name} tx length is 0`)
-              await this.delay(service.delay)
+              await tester.delay(service.delay)
               return true
             }
             const socket = await canTp.createSocket(addrItem)
-            this.activeId = s.id
+            tester.activeId = s.id
             const sentTs = await socket.write(txBuffer)
-            this.lastActiveTs = sentTs
+            tester.lastActiveTs = sentTs
 
             // log.sent(s, sentTs)
-            await this.pool?.triggerSend(s, this.lastActiveTs)
+            await tester.pool?.triggerSend(s, tester.lastActiveTs)
 
 
             const hasSub = serviceDetail[s.serviceId].hasSubFunction
@@ -526,30 +526,30 @@ export class UDSTesterMain {
               const subFunction = s.params[0].value[0]
 
               if ((subFunction & 0x80) == 0x80) {
-                await this.delay(service.delay)
+                await tester.delay(service.delay)
                 socket.close()
                 return true
               }
             }
             do {
               let rxData = undefined
-              let timeout = this.tester.udsTime.pTime
+              let timeout = tester.tester.udsTime.pTime
               try {
                 const curUs = getTsUs()
-                if (this.ac.signal.aborted) {
+                if (tester.ac.signal.aborted) {
                   throw new Error('aborted')
                 }
-                rxData = await socket.read(this.tester.udsTime.pTime).catch((e) => {
-                  this.lastActiveTs += (getTsUs() - curUs)
+                rxData = await socket.read(tester.tester.udsTime.pTime).catch((e) => {
+                  tester.lastActiveTs += (getTsUs() - curUs)
                   throw e
                 })
 
-                this.lastActiveTs = rxData.ts
+                tester.lastActiveTs = rxData.ts
                 //node handle the response
                 const cs = cloneDeep(s)
                 // log.recv(s,rxData.ts, rxData.data)
                 applyBuffer(cs, rxData.data, false)
-                await this.pool?.triggerRecv(cs, this.lastActiveTs)
+                await tester.pool?.triggerRecv(cs, tester.lastActiveTs)
 
                 const rxBuffer = getRxPdu(s)
 
@@ -563,7 +563,7 @@ export class UDSTesterMain {
                       throw new Error(`negative response with wrong service id, expect ${s.serviceId}, got ${rxData.data[1]}`)
                     }
                     if (rxData.data[2] == 0x78) {
-                      timeout = this.tester.udsTime.pExtTime
+                      timeout = tester.tester.udsTime.pExtTime
                       continue
                     }
                     const nrcMsg = NRCMsg[rxData.data[2]]
@@ -592,19 +592,20 @@ export class UDSTesterMain {
                 socket.close()
                 break
               } catch (e: any) {
-
+                //find real service index
+                const serviceIndex = targetSeq.services.findIndex(s => s.serviceId === s.serviceId)
                 service.retryNum--
                 if (service.retryNum < 0) {
                   if (service.failBehavior == 'stop') {
                     socket.close()
                     throw e
                   } else {
-                    log.warning(s, targetSeq, seqIndex, serviceIndex, this.lastActiveTs, rxData?.data, `Failed and continue: ${e.message}`)
+                    log.warning(s, targetSeq, seqIndex, serviceIndex, tester.lastActiveTs, rxData?.data, `Failed and continue: ${e.message}`)
                     socket.close()
                     return true
                   }
                 } else {
-                  log.warning(s, targetSeq, seqIndex, serviceIndex, this.lastActiveTs, rxData?.data, `Failed and retry #${service.retryNum}: ${e.message}`)
+                  log.warning(s, targetSeq, seqIndex, serviceIndex, tester.lastActiveTs, rxData?.data, `Failed and retry #${service.retryNum}: ${e.message}`)
                   socket.close()
                   return false
                 }
@@ -616,11 +617,10 @@ export class UDSTesterMain {
 
             return true
           }
-          log.udsIndex(serviceIndex, targetService.name, 'start')
-          if (targetService.serviceId === 'Job') {
-            if (this.pool) {
+          const jobRun = async function(tester:UDSTesterMain, s: ServiceItem){
+            if (tester.pool) {
               const params: (string | number)[] = []
-              for (const p of targetService.params) {
+              for (const p of s.params) {
                 if (p.type == 'ASCII' || p.type == 'UNICODE') {
                   let str = p.phyValue as string
                   str = str.replace(/\$\{(\w+)\}/g, (match, p1) => {
@@ -635,45 +635,49 @@ export class UDSTesterMain {
                   params.push(Number(p.phyValue))
                 }
               }
-
-              const services = await this.execJob(targetService.name, params)
+              const serviceIndex = targetSeq.services.findIndex(s => s.serviceId === s.serviceId)
+              const services = await tester.execJob(s.name, params)
+           
               if (services) {
                 let percent = 0
                 const step = (100 / services.length)
                 for (const ser of services) {
-
-                  // eslint-disable-next-line no-constant-condition
-                  while (true) {
-                    const r = await baseRun(targetSeq.name, ser, true)
-                    await this.delay(service.delay)
-                    if (r) {
-                      break
-                    }
-                  }
+                  await baseRun(tester, ser)
+                  
                   percent += step
                   log.udsIndex(serviceIndex, ser.name, 'progress', percent)
                 }
 
               }
-              log.udsIndex(serviceIndex, targetService.name, 'finished')
+              log.udsIndex(serviceIndex, s.name, 'finished')
             } else {
               throw new Error('the pool has been terminated')
             }
-          } else {
-            // eslint-disable-next-line no-constant-condition
-            while (true) {
-
-              const r = await baseRun(targetSeq.name, targetService)
-
-              if (r) {
-                break
-              }
-              await this.delay(service.delay)
-            }
-            log.udsIndex(serviceIndex, targetService.name, 'finished')
-
           }
-          await this.delay(service.delay)
+          const baseRun= async function(tester:UDSTesterMain, s: ServiceItem){
+            if (s.serviceId === 'Job') {
+              await jobRun(tester, s)
+            } else {
+              const serviceIndex = targetSeq.services.findIndex(s => s.serviceId === s.serviceId)
+              // eslint-disable-next-line no-constant-condition
+              while (true) {
+  
+                const r = await serviceRun(tester, s)
+  
+                if (r) {
+                  break
+                }
+                await tester.delay(service.delay)
+              }
+              log.udsIndex(serviceIndex, s.name, 'finished')
+  
+            }
+            await tester.delay(service.delay)
+          }
+          log.udsIndex(_serviceIndex, targetService.name, 'start')
+          await baseRun(this, targetService)
+         
+         
         }
       }
     }

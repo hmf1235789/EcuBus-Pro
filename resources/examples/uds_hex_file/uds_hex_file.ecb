@@ -36,13 +36,23 @@
             "services": [
               {
                 "enable": true,
-                "checkResp": true,
+                "checkResp": false,
                 "retryNum": 0,
                 "addressIndex": 0,
                 "failBehavior": "stop",
-                "serviceId": "6ebe102f-df6c-4149-9d2d-ee731a819764",
+                "serviceId": "9df86c3a-6a6e-40f5-bea7-195286cbd3b7",
                 "delay": 50,
                 "_X_ROW_KEY": "row_82"
+              },
+              {
+                "enable": true,
+                "checkResp": false,
+                "retryNum": 0,
+                "addressIndex": 0,
+                "failBehavior": "stop",
+                "serviceId": "3521f481-98a1-4012-9060-4f10c4880196",
+                "delay": 50,
+                "_X_ROW_KEY": "row_53"
               }
             ]
           }
@@ -198,7 +208,7 @@
                 {
                   "id": "ec250091-e065-4980-a53e-1d7ed07e2a60",
                   "name": "maxNumberOfBlockLength",
-                  "bitLen": 8,
+                  "bitLen": 32,
                   "deletable": true,
                   "editable": true,
                   "type": "ARRAY",
@@ -361,7 +371,7 @@
           "x": 383,
           "y": 105,
           "w": 2562,
-          "h": 286
+          "h": 332
         },
         "options": {
           "params": {}
@@ -373,8 +383,8 @@
       },
       "f304259b-dc7d-460b-9729-4eee2d1156de_services": {
         "pos": {
-          "x": 183,
-          "y": 57.5,
+          "x": 33,
+          "y": 105,
           "w": 1658,
           "h": 404
         },
@@ -390,8 +400,8 @@
       },
       "f304259b-dc7d-460b-9729-4eee2d1156de_sequence": {
         "pos": {
-          "x": 847,
-          "y": 86,
+          "x": 678,
+          "y": 368,
           "w": 1590,
           "h": 400
         },
@@ -407,10 +417,10 @@
       },
       "trace": {
         "pos": {
-          "x": 1148,
-          "y": 486,
-          "w": 1283,
-          "h": 400
+          "x": 398,
+          "y": 51,
+          "w": 1619,
+          "h": 566
         },
         "title": "trace",
         "label": "Trace",
@@ -419,8 +429,8 @@
       },
       "network": {
         "pos": {
-          "x": 348,
-          "y": 446,
+          "x": 311,
+          "y": 105,
           "w": 600,
           "h": 400
         },
