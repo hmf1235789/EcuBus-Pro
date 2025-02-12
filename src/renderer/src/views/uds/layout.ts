@@ -238,11 +238,14 @@ export class Layout {
 
     for (const l of Object.keys(this.data.project.wins)) {
       if (this.winEl[l]) {
-        const offset = this.winEl[l].offset()
-        const topGap = offset.top - this.data.project.wins[l].pos.y
-        if (this.data.project.wins[l].layoutType!='bottom') {
-          this.winEl[l].draggable('option', 'containment', [200 - this.data.project.wins[l].pos.w, topGap, this.width - 100, topGap + this.height - 50])
-        }
+        nextTick(()=>{
+          const offset = this.winEl[l].offset()
+          const topGap = offset.top - this.data.project.wins[l].pos.y
+          if (this.data.project.wins[l].layoutType!='bottom') {
+            this.winEl[l].draggable('option', 'containment', [200 - this.data.project.wins[l].pos.w, topGap, this.width - 100, topGap + this.height - 50])
+          }
+        })
+       
       }
     }
   }
@@ -343,6 +346,12 @@ export class Layout {
 
             data.pos.w = ui.size.width
             data.pos.h = ui.size.height
+            if(layoutType == 'bottom'){
+              //remove element height and top style
+              this.winEl[id].css('height', '')
+              this.winEl[id].css('top', '')
+            }
+            
           }
         }
       )
@@ -350,6 +359,7 @@ export class Layout {
         //get this.winEl[id] offset form client
         const offset = this.winEl[id].offset()
         const topGap = offset.top - data.pos.y
+      
         this.winEl[id].draggable({
           snapTolerance: 10,
           handle: drag,
@@ -569,7 +579,7 @@ export class Layout {
       item.hide = false
       item.isMax = true
       this.layoutInit(key, `#win${key} .uds-draggable`, `#win${key}`, false, layoutType)
-      this.event.emit(`max:${key}`, item, false)
+      this.event.emit(`max:${key}`, item, false)     
     }
   }
   changeWinName(id: string, name: string) {
@@ -755,6 +765,18 @@ export class Layout {
     if (q) {
       this.clickWin(id)
       q.hide = false
+      if (this.winEl[id]) {
+        
+        nextTick(()=>{
+          const offset = this.winEl[id].offset()
+          const topGap = offset.top - this.data.project.wins[id].pos.y
+          
+          if (this.data.project.wins[id].layoutType!='bottom') {
+            this.winEl[id].draggable('option', 'containment', [200 - this.data.project.wins[id].pos.w, topGap, this.width - 100, topGap + this.height - 50])
+          }
+        })
+       
+      }
       this.event.emit('show', q)
     }
   }
