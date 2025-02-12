@@ -49,6 +49,7 @@ import { Marked, MarkedExtension, Token, Tokens } from 'marked';
 import './readme.css'
 import { cloneDeep } from 'lodash';
 import log from 'electron-log'
+import mermaid from 'mermaid'
 
 
 interface exampleL1 {
@@ -99,11 +100,25 @@ function createTemplateProject() {
 }
 
 const readme = ref<string>("")
-const handleTemplateSelect = (template: example) => {
+const handleTemplateSelect = async (template: example) => {
     if (template.data.level == 2) {
         selectedTemplate.value = template
         window.readmePath = template.data.folderPath
         readme.value = marked.parse(template.data.readme) as string
+        
+        // Wait for DOM update then render mermaid diagrams
+        await nextTick()
+        const elements = document.getElementsByClassName('mermaid')
+        Array.from(elements).forEach((element) => {
+            mermaid.render(`mermaid-${Date.now()}`, element.textContent || '')
+                .then(({ svg }) => {
+                    element.innerHTML = svg
+                })
+                .catch(err => {
+                    console.error('Mermaid rendering failed:', err)
+                    element.innerHTML = `<pre>${element.textContent}</pre>`
+                })
+        })
     }
     else
         selectedTemplate.value = null
@@ -159,6 +174,35 @@ const videoRenderer = {
             }
         };
 
+// Add mermaid configuration before onMounted
+const mermaidConfig = {
+    startOnLoad: false,
+    theme: 'default',
+    securityLevel: 'loose',
+}
+
+// Add mermaid renderer
+const mermaidRenderer = {
+    name: 'mermaid',
+    level: 'block',
+    start(src) { return src.match(/```mermaid/)?.index },
+    tokenizer(src) {
+        const rule = /^```mermaid\n([\s\S]*?)\n```/;
+        const match = rule.exec(src);
+        if (match) {
+            return {
+                type: 'mermaid',
+                raw: match[0],
+                text: match[1].trim()
+            };
+        }
+        return undefined;
+    },
+    renderer(token) {
+        return `<div class="mermaid">${token.text}</div>`;
+    }
+};
+
 onMounted(() => {
     window.electron.ipcRenderer.invoke('ipc-examples').then((data: example[]) => {
         templates.value = data
@@ -166,7 +210,7 @@ onMounted(() => {
         ElMessage.error('Failed to load templates')
     })
     marked = new Marked()
-    marked.use({ extensions: [videoRenderer] });
+    marked.use({ extensions: [videoRenderer, mermaidRenderer] });
     /** base url */
     marked.use(addLocalBaseUrl())
     
@@ -180,6 +224,9 @@ onMounted(() => {
             window.electron.ipcRenderer.send('ipc-open-link', href)
         }
     })
+    
+    // Initialize mermaid
+    mermaid.initialize(mermaidConfig as any)
 })
 
 </script>
@@ -198,6 +245,10 @@ onMounted(() => {
     width: 100%;
     height: 500px;
 
+}
+.mermaid {
+    text-align: center;
+    margin: 20px 0;
 }
 </style>
 <style scoped>
