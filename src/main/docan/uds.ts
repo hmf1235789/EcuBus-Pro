@@ -481,7 +481,7 @@ export class UDSTesterMain {
         log.systemMsg(`====== Running cycle #${i}, delay 1000ms ======`, this.lastActiveTs)
         await this.delay(1000)
       }
-      for (const [_serviceIndex, service] of targetSeq.services.entries()) {
+      for (const [serviceIndex, service] of targetSeq.services.entries()) {
         if (this.ac.signal.aborted) {
           break
         }
@@ -592,8 +592,8 @@ export class UDSTesterMain {
                 socket.close()
                 break
               } catch (e: any) {
-                //find real service index
-                const serviceIndex = targetSeq.services.findIndex(s => s.serviceId === s.serviceId)
+                
+              
                 service.retryNum--
                 if (service.retryNum < 0) {
                   if (service.failBehavior == 'stop') {
@@ -635,7 +635,7 @@ export class UDSTesterMain {
                   params.push(Number(p.phyValue))
                 }
               }
-              const serviceIndex = targetSeq.services.findIndex(s => s.serviceId === s.serviceId)
+             
               const services = await tester.execJob(s.name, params)
            
               if (services) {
@@ -658,7 +658,7 @@ export class UDSTesterMain {
             if (s.serviceId === 'Job') {
               await jobRun(tester, s)
             } else {
-              const serviceIndex = targetSeq.services.findIndex(s => s.serviceId === s.serviceId)
+              
               // eslint-disable-next-line no-constant-condition
               while (true) {
   
@@ -669,13 +669,14 @@ export class UDSTesterMain {
                 }
                 await tester.delay(service.delay)
               }
-              log.udsIndex(serviceIndex, s.name, 'finished')
+            
   
             }
             await tester.delay(service.delay)
           }
-          log.udsIndex(_serviceIndex, targetService.name, 'start')
+          log.udsIndex(serviceIndex, targetService.name, 'start')
           await baseRun(this, targetService)
+          log.udsIndex(serviceIndex, targetService.name, 'finished')
          
          
         }

@@ -41,7 +41,7 @@
                 "addressIndex": 0,
                 "failBehavior": "stop",
                 "serviceId": "9df86c3a-6a6e-40f5-bea7-195286cbd3b7",
-                "delay": 50,
+                "delay": 0,
                 "_X_ROW_KEY": "row_82"
               },
               {
@@ -51,7 +51,7 @@
                 "addressIndex": 0,
                 "failBehavior": "stop",
                 "serviceId": "3521f481-98a1-4012-9060-4f10c4880196",
-                "delay": 50,
+                "delay": 0,
                 "_X_ROW_KEY": "row_53"
               }
             ]
@@ -438,6 +438,19 @@
         "label": "Network",
         "id": "network",
         "options": {}
+      },
+      "tester": {
+        "pos": {
+          "x": 331,
+          "y": 125,
+          "w": 906,
+          "h": 400
+        },
+        "title": "tester",
+        "label": "UDS Tester",
+        "id": "tester",
+        "options": {},
+        "hide": true
       }
     }
   }
