@@ -56,7 +56,7 @@ declare enum CAN_ID_TYPE {
 /**
  * Enumeration representing different CAN (Controller Area Network) address types.
  *
- * @category CAN-TP
+ * @category CAN
  * @enum {string}
  * @readonly
  */
@@ -67,7 +67,7 @@ declare enum CAN_ADDR_TYPE {
 /**
  * Enumeration representing different CAN (Controller Area Network) address formats.
  *
- * @category CAN-TP
+ * @category CAN
  * @enum {string}
  * @readonly
  */
@@ -106,6 +106,9 @@ interface CanMsgType {
     uuid?: string;
 }
 
+/**
+ * @category UDS
+ */
 type ServiceId = "0x10" | "0x11" | "0x27" | "0x28" | "0x29" | "0x3E" | "0x83" | "0x84" | "0x85" | "0x87" | "0x22" | "0x23" | "0x24" | "0x2A" | "0x2C" | "0x2E" | "0x3D" | "0x14" | "0x19" | "0x2F" | "0x31" | "0x34" | "0x35" | "0x36" | "0x37" | "0x38" | "Job";
 
 interface VinInfo {
@@ -114,6 +117,9 @@ interface VinInfo {
     eid: string;
     gid: string;
 }
+/**
+ * @category DOIP
+ */
 interface EntityAddr extends VinInfo {
     nodeType?: 'node' | 'gateway';
     nodeAddr?: number;
@@ -130,19 +136,31 @@ interface EntityAddr extends VinInfo {
     syncStatus?: number;
 }
 
+/**
+ * @category LIN
+ */
 declare enum LinDirection {
     SEND = "SEND",
     RECV = "RECV",
     RECV_AUTO_LEN = "RECV_AUTO_LEN"
 }
+/**
+ * @category LIN
+ */
 declare enum LinMode {
     MASTER = "MASTER",
     SLAVE = "SLAVE"
 }
+/**
+ * @category LIN
+ */
 declare enum LinChecksumType {
     CLASSIC = "CLASSIC",
     ENHANCED = "ENHANCED"
 }
+/**
+ * @category LIN
+ */
 interface LinMsg {
     frameId: number;
     data: Buffer;
@@ -159,6 +177,9 @@ interface LinMsg {
 }
 
 type DataType = 'NUM' | 'ARRAY' | 'ASCII' | 'UNICODE' | 'FLOAT' | 'DOUBLE';
+/**
+ * @category UDS
+ */
 interface ServiceItem {
     id: string;
     name: string;
@@ -187,6 +208,9 @@ interface Param {
     editable?: boolean;
 }
 
+/**
+ * @category UDS
+ */
 declare class SecureAccessDll {
     _ref: any;
     constructor(dllPath: string);

@@ -1,6 +1,6 @@
 # EcuBus-Pro Release Notes
 
-## Unreleased
+## v0.8.16
 Changes from v0.8.16 to v0.8.15:
 
  

@@ -3,6 +3,9 @@ import saNode from './build/Release/sa.node';
 // const require = createRequire(import.meta.url)
 // const saNode = require('./build/Release/sa.node')
 
+/**
+ * @category UDS
+ */
 export default class SecureAccessDll {
     _ref:any
     constructor(dllPath:string){

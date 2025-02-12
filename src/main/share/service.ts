@@ -175,6 +175,9 @@ export const SupportServiceId: ServiceId[] = [
   "0x38",
   "Job",
 ];
+/**
+ * @category UDS
+ */
 export type ServiceId =
   | "0x10"
   | "0x11"

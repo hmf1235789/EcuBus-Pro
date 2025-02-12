@@ -90,6 +90,9 @@
           }
         }
       }
+    },
+    "example": {
+      "catalog": "UDS"
     }
   }
 }

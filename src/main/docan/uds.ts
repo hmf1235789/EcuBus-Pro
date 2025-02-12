@@ -25,6 +25,7 @@ import fs from 'fs'
 import udsHeaderStr from '../share/uds.d.ts.html?raw'
 import crcStr from '../share/crc.d.ts.html?raw'
 import cryptoExtStr from '../share/cryptoExt.d.ts.html?raw'
+import utliStr from '../share/utli.d.ts.html?raw'
 import zlibStr from '../share/node/zlib.d.ts.html?raw'
 import assertStr from '../share/node/assert.d.ts.html?raw'
 import async_hooksStr from '../share/node/async_hooks.d.ts.html?raw'
@@ -152,40 +153,41 @@ interface ProjectConfig {
   projectPath: string
   projectName: string
 }
-export function updateUdsDts(data:DataSet) {
+export function updateUdsDts(data: DataSet) {
   const nameString: string[] = []
   const jobs: { name: string; param: string[] }[] = []
   for (const tester of Object.values(data.tester)) {
     nameString.push(`${tester.name}.*`)
     for (const items of Object.values(tester.allServiceList)) {
       for (const item of items) {
-        if (item.serviceId != 'Job') {
+        {
           nameString.push(`${tester.name}.${item.name}`)
-        } else {
-          const param = item.params.map((item) => {
-            let ty = 'number'
-            if (item.type == 'ASCII' || item.type == 'UNICODE') {
-              ty = 'string'
-            }
-            return `${item.name}:${ty}`
-          })
-          jobs.push({ name: `${tester.name}.${item.name}`, param: param })
+          if (item.serviceId == 'Job') {
+            const param = item.params.map((item) => {
+              let ty = 'number'
+              if (item.type == 'ASCII' || item.type == 'UNICODE') {
+                ty = 'string'
+              }
+              return `${item.name}:${ty}`
+            })
+            jobs.push({ name: `${tester.name}.${item.name}`, param: param })
+          }
         }
       }
     }
   }
   //const Signals
-  const signals:string[]=[]
-  for(const ldf of Object.values(data.database.lin)){
-    for(const sig of Object.values(ldf.signals)){
+  const signals: string[] = []
+  for (const ldf of Object.values(data.database.lin)) {
+    for (const sig of Object.values(ldf.signals)) {
       signals.push(`${ldf.name}.${sig.signalName}`)
     }
   }
-  for(const dbc of Object.values(data.database.can)){
-    for(const msg of Object.values(dbc.messages)){
-       for(const sig of Object.values(msg.signals)){
+  for (const dbc of Object.values(data.database.can)) {
+    for (const msg of Object.values(dbc.messages)) {
+      for (const sig of Object.values(msg.signals)) {
         signals.push(`${dbc.name}.${sig.name}`)
-       }
+      }
     }
   }
   //lib
@@ -195,7 +197,7 @@ export function updateUdsDts(data:DataSet) {
     testers: Object.values(data.tester).map((item) => item.name),
     services: [...new Set(nameString)],
     jobs: jobs,
-    signals:signals
+    signals: signals
   })
   return libResult
 }
@@ -208,7 +210,7 @@ export class UDSTesterMain {
 
   project: ProjectConfig
   runningCanBase?: CanBase
-  runningDoip?:DOIP
+  runningDoip?: DOIP
   runningLinBase?: LinBase
   services: Record<string, ServiceItem> = {}
   constructor(project: ProjectConfig, tester: TesterInfo, private device: UdsDevice) {
@@ -246,9 +248,9 @@ export class UDSTesterMain {
     this.runningCanBase = base
     this.closeBase = false
   }
-  setDoip(doip?:DOIP){
-    this.runningDoip=doip
-    this.closeBase=false
+  setDoip(doip?: DOIP) {
+    this.runningDoip = doip
+    this.closeBase = false
   }
   setLinBase(base?: LinBase) {
     this.runningLinBase = base
@@ -316,7 +318,7 @@ export class UDSTesterMain {
             throw e
           }
         }
-      }else if (targetDevice.type == 'eth' && targetDevice.ethDevice) {
+      } else if (targetDevice.type == 'eth' && targetDevice.ethDevice) {
 
         try {
           if (this.runningDoip) {
@@ -334,8 +336,8 @@ export class UDSTesterMain {
             throw e
           }
         }
-      }else if (targetDevice.type == 'lin' && targetDevice.linDevice) {
-        
+      } else if (targetDevice.type == 'lin' && targetDevice.linDevice) {
+
         try {
           if (this.runningLinBase) {
             await this.runLinSequenceWithBase(this.runningLinBase, seqIndex, log, cycleCount)
@@ -361,34 +363,34 @@ export class UDSTesterMain {
   private async runCanSequenceWithBase(base: CanBase, seqIndex: number, log: UdsLOG, cycleCount: number) {
     const tp = new CAN_TP(base)
     await this.runCanTp({
-      createSocket:async (addr:UdsAddress)=>{
-        if(addr.canAddr==undefined){
+      createSocket: async (addr: UdsAddress) => {
+        if (addr.canAddr == undefined) {
           throw new Error('address not found')
         }
-        return new CAN_TP_SOCKET(tp,addr.canAddr)
+        return new CAN_TP_SOCKET(tp, addr.canAddr)
       },
-      close:(base:boolean)=>{
-      
-          tp.close(base)
-        
+      close: (base: boolean) => {
+
+        tp.close(base)
+
       }
     }, seqIndex, log, cycleCount).finally(() => {
       tp.close(this.closeBase)
     })
   }
   private async runEthSequenceWithBase(base: DOIP, seqIndex: number, log: UdsLOG, cycleCount: number) {
- 
+
     await this.runCanTp({
-      createSocket:async (addr:UdsAddress)=>{
-        if(addr.ethAddr==undefined){
+      createSocket: async (addr: UdsAddress) => {
+        if (addr.ethAddr == undefined) {
           throw new Error('address not found')
         }
-        if(this.ac.signal.aborted){
+        if (this.ac.signal.aborted) {
           throw new Error('aborted')
         }
-        return await DOIP_SOCKET.create(base,addr.ethAddr,'client')
+        return await DOIP_SOCKET.create(base, addr.ethAddr, 'client')
       },
-      close:(base:boolean)=>{
+      close: (base: boolean) => {
         null
       }
     }, seqIndex, log, cycleCount)
@@ -396,17 +398,17 @@ export class UDSTesterMain {
   private async runLinSequenceWithBase(base: LinBase, seqIndex: number, log: UdsLOG, cycleCount: number) {
     const tp = new LIN_TP(base)
     await this.runCanTp({
-      createSocket:async (addr:UdsAddress)=>{
-        if(addr.linAddr==undefined){
+      createSocket: async (addr: UdsAddress) => {
+        if (addr.linAddr == undefined) {
           throw new Error('address not found')
         }
-        if(this.ac.signal.aborted){
+        if (this.ac.signal.aborted) {
           throw new Error('aborted')
         }
-     
-        return new LIN_TP_SOCKET(tp,addr.linAddr,LinMode.MASTER)
+
+        return new LIN_TP_SOCKET(tp, addr.linAddr, LinMode.MASTER)
       },
-      close:(base:boolean)=>{
+      close: (base: boolean) => {
         tp.close(base)
       }
     }, seqIndex, log, cycleCount)
@@ -460,12 +462,12 @@ export class UDSTesterMain {
     return obj
   }
   private async runCanTp(canTp: {
-    createSocket:(addr:UdsAddress)=>Promise<{
-      write:(data:Buffer)=>Promise<number>
-      read:(timeout:number)=>Promise<{ts:number,data:Buffer}>
-      close:()=>void
+    createSocket: (addr: UdsAddress) => Promise<{
+      write: (data: Buffer) => Promise<number>
+      read: (timeout: number) => Promise<{ ts: number, data: Buffer }>
+      close: () => void
     }>
-    close:(base:boolean)=>void
+    close: (base: boolean) => void
 
   }, seqIndex: number, log: UdsLOG, cycleCount: number) {
 
@@ -495,24 +497,24 @@ export class UDSTesterMain {
         }
         if (service.enable && addrItem && targetService) {
 
-          const baseRun = async (seqName: string, s: ServiceItem, fromJob = false) => {
-            if(this.ac.signal.aborted){
+          const serviceRun = async function(tester:UDSTesterMain, s: ServiceItem){
+            if (tester.ac.signal.aborted) {
               throw new Error('aborted')
             }
             // await this.pool?.triggerPreSend(s.name)
             const txBuffer = getTxPdu(s)
             if (txBuffer.length == 0) {
               // throw new Error(`serivce ${s.name} tx length is 0`)
-              await this.delay(service.delay)
+              await tester.delay(service.delay)
               return true
             }
             const socket = await canTp.createSocket(addrItem)
-            this.activeId = s.id
+            tester.activeId = s.id
             const sentTs = await socket.write(txBuffer)
-            this.lastActiveTs = sentTs
+            tester.lastActiveTs = sentTs
 
             // log.sent(s, sentTs)
-            await this.pool?.triggerSend(s, this.lastActiveTs)
+            await tester.pool?.triggerSend(s, tester.lastActiveTs)
 
 
             const hasSub = serviceDetail[s.serviceId].hasSubFunction
@@ -520,35 +522,35 @@ export class UDSTesterMain {
               if (txBuffer.length < 2) {
                 throw new Error(`service ${s.name} tx length ${txBuffer.length} is invalid`)
               }
-              
+
               const subFunction = s.params[0].value[0]
-              
+
               if ((subFunction & 0x80) == 0x80) {
-                await this.delay(service.delay)
+                await tester.delay(service.delay)
                 socket.close()
                 return true
               }
             }
             do {
               let rxData = undefined
-              let timeout=this.tester.udsTime.pTime
+              let timeout = tester.tester.udsTime.pTime
               try {
                 const curUs = getTsUs()
-                if(this.ac.signal.aborted){
+                if (tester.ac.signal.aborted) {
                   throw new Error('aborted')
                 }
-                rxData = await socket.read(this.tester.udsTime.pTime).catch((e) => {
-                  this.lastActiveTs += (getTsUs() - curUs)
+                rxData = await socket.read(tester.tester.udsTime.pTime).catch((e) => {
+                  tester.lastActiveTs += (getTsUs() - curUs)
                   throw e
                 })
 
-                this.lastActiveTs = rxData.ts
+                tester.lastActiveTs = rxData.ts
                 //node handle the response
-                const cs=cloneDeep(s)
+                const cs = cloneDeep(s)
                 // log.recv(s,rxData.ts, rxData.data)
                 applyBuffer(cs, rxData.data, false)
-                await this.pool?.triggerRecv(cs, this.lastActiveTs)
-                
+                await tester.pool?.triggerRecv(cs, tester.lastActiveTs)
+
                 const rxBuffer = getRxPdu(s)
 
 
@@ -561,7 +563,7 @@ export class UDSTesterMain {
                       throw new Error(`negative response with wrong service id, expect ${s.serviceId}, got ${rxData.data[1]}`)
                     }
                     if (rxData.data[2] == 0x78) {
-                      timeout=this.tester.udsTime.pExtTime
+                      timeout = tester.tester.udsTime.pExtTime
                       continue
                     }
                     const nrcMsg = NRCMsg[rxData.data[2]]
@@ -576,8 +578,8 @@ export class UDSTesterMain {
                 }
                 //compare
                 const minLen = Math.min(rxBuffer.length, rxData.data.length)
-                const ret = Buffer.compare(rxBuffer.subarray(0,minLen),rxData.data.subarray(0,minLen))  
-                
+                const ret = Buffer.compare(rxBuffer.subarray(0, minLen), rxData.data.subarray(0, minLen))
+
                 if (ret != 0) {
                   if (service.checkResp) {
                     throw new Error(
@@ -590,19 +592,20 @@ export class UDSTesterMain {
                 socket.close()
                 break
               } catch (e: any) {
-
+                
+              
                 service.retryNum--
                 if (service.retryNum < 0) {
                   if (service.failBehavior == 'stop') {
                     socket.close()
                     throw e
                   } else {
-                    log.warning(s, targetSeq, seqIndex, serviceIndex, this.lastActiveTs, rxData?.data, `Failed and continue: ${e.message}`)
+                    log.warning(s, targetSeq, seqIndex, serviceIndex, tester.lastActiveTs, rxData?.data, `Failed and continue: ${e.message}`)
                     socket.close()
                     return true
                   }
                 } else {
-                  log.warning(s, targetSeq, seqIndex, serviceIndex, this.lastActiveTs, rxData?.data, `Failed and retry #${service.retryNum}: ${e.message}`)
+                  log.warning(s, targetSeq, seqIndex, serviceIndex, tester.lastActiveTs, rxData?.data, `Failed and retry #${service.retryNum}: ${e.message}`)
                   socket.close()
                   return false
                 }
@@ -614,11 +617,10 @@ export class UDSTesterMain {
 
             return true
           }
-          log.udsIndex(serviceIndex,targetService.name, 'start')
-          if (targetService.serviceId === 'Job') {
-            if (this.pool) {
+          const jobRun = async function(tester:UDSTesterMain, s: ServiceItem){
+            if (tester.pool) {
               const params: (string | number)[] = []
-              for (const p of targetService.params) {
+              for (const p of s.params) {
                 if (p.type == 'ASCII' || p.type == 'UNICODE') {
                   let str = p.phyValue as string
                   str = str.replace(/\$\{(\w+)\}/g, (match, p1) => {
@@ -633,45 +635,50 @@ export class UDSTesterMain {
                   params.push(Number(p.phyValue))
                 }
               }
-
-              const services = await this.execJob(targetService.name, params)
+             
+              const services = await tester.execJob(s.name, params)
+           
               if (services) {
                 let percent = 0
                 const step = (100 / services.length)
                 for (const ser of services) {
-
-                  // eslint-disable-next-line no-constant-condition
-                  while (true) {
-                    const r = await baseRun(targetSeq.name, ser, true)
-                    await this.delay(service.delay)
-                    if (r) {
-                      break
-                    }
-                  }
+                  await baseRun(tester, ser)
+                  
                   percent += step
-                  log.udsIndex(serviceIndex,ser.name,'progress', percent)
+                  log.udsIndex(serviceIndex, ser.name, 'progress', percent)
                 }
 
               }
-              log.udsIndex(serviceIndex, targetService.name,'finished')
+              log.udsIndex(serviceIndex, s.name, 'finished')
             } else {
               throw new Error('the pool has been terminated')
             }
-          } else {
-            // eslint-disable-next-line no-constant-condition
-            while (true) {
-              
-              const r = await baseRun(targetSeq.name, targetService)
-
-              if (r) {
-                break
-              }
-              await this.delay(service.delay)
-            }
-            log.udsIndex(serviceIndex,targetService.name,'finished')
-
           }
-          await this.delay(service.delay)
+          const baseRun= async function(tester:UDSTesterMain, s: ServiceItem){
+            if (s.serviceId === 'Job') {
+              await jobRun(tester, s)
+            } else {
+              
+              // eslint-disable-next-line no-constant-condition
+              while (true) {
+  
+                const r = await serviceRun(tester, s)
+  
+                if (r) {
+                  break
+                }
+                await tester.delay(service.delay)
+              }
+            
+  
+            }
+            await tester.delay(service.delay)
+          }
+          log.udsIndex(serviceIndex, targetService.name, 'start')
+          await baseRun(this, targetService)
+          log.udsIndex(serviceIndex, targetService.name, 'finished')
+         
+         
         }
       }
     }
@@ -681,28 +688,28 @@ export class UDSTesterMain {
 
 export function findService(tester: TesterInfo, data: Buffer, isReq: boolean): ServiceItem | undefined {
   let sid = data[0]
-  let isNeg=false
+  let isNeg = false
   if (!isReq) {
-    if(sid==0x7f){
-      isNeg=true
+    if (sid == 0x7f) {
+      isNeg = true
       sid = data[1]
-    }else{
+    } else {
       sid -= 0x40
     }
   }
   const serviceId = `0x${sid.toString(16)}` as ServiceId
   const service = serviceDetail[serviceId]
-  if (service&&isNeg==false) {
+  if (service && isNeg == false) {
     let matchLen = 0
-    if(isReq){
+    if (isReq) {
       for (const p of service.defaultParams) {
-        if(p.param.deletable==false){
+        if (p.param.deletable == false) {
           matchLen += p.param.bitLen
         }
       }
-    }else{
+    } else {
       for (const p of service.defaultRespParams) {
-        if(p.param.deletable==false){
+        if (p.param.deletable == false) {
           matchLen += p.param.bitLen
         }
       }
@@ -912,7 +919,7 @@ export async function deleteTester(projectPath: string, projectName: string, nod
     await fsP.writeFile(tsconfigFile, JSON.stringify(tsconfig, null, 4))
   }
 }
-export async function createProject(projectPath: string, projectName: string, data:DataSet,vendor = 'YT') {
+export async function createProject(projectPath: string, projectName: string, data: DataSet, vendor = 'YT') {
   //create node_modules
   const nodeModulesPath = path.join(projectPath, 'node_modules')
   if (!fs.existsSync(nodeModulesPath)) {
@@ -977,10 +984,12 @@ declare global {
 export * from './uds'
 export * from './crc'
 export * from './cryptoExt'
+export * from './utli'
     `)
   await fsP.writeFile(path.join(vendorPath, 'uds.d.ts'), updateUdsDts(data))
   await fsP.writeFile(path.join(vendorPath, 'crc.d.ts'), crcStr)
   await fsP.writeFile(path.join(vendorPath, 'cryptoExt.d.ts'), cryptoExtStr)
+  await fsP.writeFile(path.join(vendorPath, 'utli.d.ts'), utliStr)
   //create tsconfig.json
   const tsconfigFile = path.join(projectPath, 'tsconfig.json')
   if (!fs.existsSync(tsconfigFile)) {
@@ -1088,7 +1097,7 @@ export async function refreshProject(projectPath: string, projectName: string, d
 
 export async function compileTsc(projectPath: string, projectName: string, data: DataSet, entry: string, esbuildPath: string, libPath: string, vendor = 'YT') {
 
-  await createProject(projectPath, projectName,data)
+  await createProject(projectPath, projectName, data)
   if (entry) {
     let script = entry
     if (path.isAbsolute(script) === false) {
@@ -1100,7 +1109,7 @@ export async function compileTsc(projectPath: string, projectName: string, data:
       }]
     }
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const tt=require('ts-morph')
+    const tt = require('ts-morph')
     const project = new tt.Project({
       tsConfigFilePath: path.join(projectPath, 'tsconfig.json'),
     });
@@ -1190,13 +1199,13 @@ async function compileTscEntry(
   }
   //copy *.node to outputDir
   //glob libPath/*.node
-  const nodeFiles = await glob( '*.node',{
+  const nodeFiles = await glob('*.node', {
     cwd: libPath
   })
   for (const nodeFile of nodeFiles) {
     const src = path.join(libPath, nodeFile)
     const dest = path.join(outputDir, nodeFile)
-    if(!fs.existsSync(dest)){
+    if (!fs.existsSync(dest)) {
       await fsP.copyFile(src, dest)
     }
   }

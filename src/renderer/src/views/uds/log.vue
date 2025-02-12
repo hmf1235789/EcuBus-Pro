@@ -98,7 +98,8 @@ const gridOptions = computed(() => {
         },
         rowConfig: {
             isCurrent: true,
-            height: 30
+            height: 30,
+            keyField:'id'
         },
         toolbarConfig: {
             slots: {
@@ -157,17 +158,18 @@ function udsLog(datas) {
         time: string,
         label: string,
         level: string,
-        message: string
+        message: string,
+        id:number
     }[] = []
     datas.forEach(data => {
         logData.push({
             time: new Date().toLocaleTimeString(),
             label: data.label,
             level: data.level,
-            message: data.message.data.msg
+            message: data.message.data.msg,
+            id:cnt++
         })
     })
-
     xGrid.value.insertAt(logData, -1).then((v: any) => {
         xGrid.value.scrollToRow(v.row)
     })
@@ -176,11 +178,14 @@ function udsLog(datas) {
 
 
 let mainLog
+let cnt=0
 onMounted(() => {
+    cnt=0
     mainLog = window.electron.ipcRenderer.on('ipc-log-main', (event, data) => {
-
+       
         data.time = new Date().toLocaleTimeString()
-        xGrid.value?.insert(data, -1).then((v: any) => {
+        data.id=cnt++
+        xGrid.value?.insertAt(data, -1).then((v: any) => {
             xGrid.value.scrollToRow(v.row)
         })
 

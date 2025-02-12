@@ -37,18 +37,28 @@ export interface LinNode {
 }
 
 
+/**
+ * @category LIN
+ */
 export enum LinDirection {
     SEND = 'SEND',
     RECV = 'RECV',
     RECV_AUTO_LEN = 'RECV_AUTO_LEN'
 }
 
+/**
+ * @category LIN
+ */
 export enum LinMode {
     MASTER = 'MASTER',
     SLAVE = 'SLAVE'
 }
 
 
+
+/**
+ * @category LIN
+ */
 export enum LinChecksumType {
     CLASSIC = 'CLASSIC',
     ENHANCED = 'ENHANCED'
@@ -75,6 +85,9 @@ const linErrorMap: Record<LIN_ERROR_ID, string> = {
 
 }
 
+/**
+ * @category LIN
+ */
 export interface LinMsg {
     frameId: number
     data: Buffer

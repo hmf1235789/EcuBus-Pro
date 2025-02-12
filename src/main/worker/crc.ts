@@ -2,6 +2,9 @@
 /* eslint-disable no-var */
 import CrcUtil from './crcUtil';
 
+/**
+ * @category Util
+ */
 export class CRC {
 
     private _width!: number;
