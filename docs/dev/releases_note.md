@@ -1,11 +1,19 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.17
+Changes since v0.8.16:
+
+ 
+* [bug]:fix windows drag resize bug 
+* [feat]:add example readme mermaid support 
+* [feat]:add hex parse/write script ability
+---
+
 ## v0.8.16
-Changes from v0.8.16 to v0.8.15:
+Changes from v0.8.15 to v0.8.16:
 
  
 * [opt]:opt cani channel choose
-* [feat]:add toomoss can/can-fd support
 ---
 
 ## v0.8.15
