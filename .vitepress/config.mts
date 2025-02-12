@@ -1,5 +1,8 @@
 import { createRequire } from 'module'
 import { defineConfig, type DefaultTheme } from 'vitepress'
+import { withMermaid } from "vitepress-plugin-mermaid";
+
+
 const require = createRequire(import.meta.url)
 const pkg = require('../package.json')
 function nav(): DefaultTheme.NavItem[] {
@@ -23,7 +26,7 @@ function nav(): DefaultTheme.NavItem[] {
 }
 // https://vitepress.dev/reference/site-config
 
-export default defineConfig({
+export default withMermaid({
   title: "EcuBus-Pro",
   ignoreDeadLinks: true,
   description: 'A powerful automotive ECU development tool',
@@ -93,7 +96,7 @@ export default defineConfig({
         text: 'Example',
 
         items: [
-          { text: 'Secure Access dll', link: '/examples/secure_access_dll/readme' },
+         
           {
             text: 'CAN', items: [
               { text: 'CAN Basic', link: '/examples/can/readme', },
@@ -112,6 +115,13 @@ export default defineConfig({
             text: 'DOIP', items: [
               { text: 'DoIP Tester', link: '/examples/doip/readme' },
               { text: 'DoIP Simulate Entity', link: '/examples/doip_sim_entity/readme' },
+            ],
+            collapsed: true
+          },
+          {
+            text: 'UDS', items: [
+              { text: 'UDS Hex File', link: '/examples/uds_hex_file/readme' },
+              { text: 'Secure Access dll', link: '/examples/secure_access_dll/readme' },
             ],
             collapsed: true
           },
