@@ -101,41 +101,5 @@ We welcome contributions! Please review our [contribution guidelines](./.github/
 ## License
 Apache-2.0
 
----
-
-<script setup>
-  import 'viewerjs/dist/viewer.css';
-import Viewer from 'viewerjs';
-import { onMounted,onUnmounted} from 'vue';
-onMounted(() => {
-  const images = document.querySelectorAll('img[alt="base1"]');
-  
-   const viewerContainer = document.createElement('div');
-   //setup attribute id for viewerContainer
-    viewerContainer.setAttribute('id', 'viewerContainer');
-
-
-  viewerContainer.style.display = 'none';
-  document.body.appendChild(viewerContainer);
-  //css pointer
-  images.forEach(img => img.style.cursor = 'pointer');
-  images.forEach(img => viewerContainer.appendChild(img.cloneNode(true)));
-  const viewer = new Viewer(viewerContainer, {
-    inline: false,
-    zoomRatio: 0.1,
-  });
-  images.forEach((img, index) => {
-    img.addEventListener('click', () => {
-      viewer.view(index);
-    });
-  });
-});
-onUnmounted(() => {
-  const viewerContainer = document.getElementById('viewerContainer');
-  if (viewerContainer) {
-    viewerContainer.remove();
-  }
-});
-</script>
 
 
