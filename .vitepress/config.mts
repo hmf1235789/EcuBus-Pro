@@ -164,7 +164,7 @@ export default withMermaid({
           { text: 'CLI', link: '/docs/um/cli' },
           {
             text: 'Script', link: '/docs/um/script', items: [
-              { text: 'Use External Package', link: '/docs/um/scriptExternal' },
+              { text: 'Use External Package', link: '/docs/um/scriptSerialPort' },
             ]
           },
           {
