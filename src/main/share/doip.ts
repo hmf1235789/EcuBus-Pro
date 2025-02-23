@@ -31,16 +31,7 @@ export interface TesterAddr{
 }
 
 
-export interface EthNode{
-  type:'eth'
-  disabled?:boolean
-  id:string
-  name:string
-  channel:string[]
-  script?:string
-  attachTester?:string
-  workNode?:string
-}
+
 
 
 export interface VinInfo {

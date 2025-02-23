@@ -80,7 +80,7 @@ type EventMap = EventMapSend & EventMapRecv
 
 const emitMap = new Map<number, { resolve: any; reject: any }>()
 const serviceMap = new Map<string, ServiceItem>()
-let testerName: string | undefined
+
 
 let id = 0
 /**
@@ -97,8 +97,9 @@ class Service {
   service: ServiceItem
   private params: Param[]
   private isRequest: boolean
-
-  constructor(service: ServiceItem, isRequest: boolean) {
+  testerName: string
+  constructor(testerName: string, service: ServiceItem, isRequest: boolean) {
+    this.testerName = testerName
     this.service = service
     this.isRequest = isRequest
     if (isRequest) {
@@ -133,7 +134,8 @@ class Service {
   async changeService() {
     await this.asyncEmit('set', {
       service: this.service,
-      isRequest: this.isRequest
+      isRequest: this.isRequest,
+      testerName: this.testerName
     })
     serviceMap.set(this.getServiceName(), this.service)
   }
@@ -223,7 +225,7 @@ class Service {
    * ```
    */
   getServiceName() {
-    return `${testerName}.${this.service.name}`
+    return `${this.testerName}.${this.service.name}`
   }
 
   /**
@@ -541,7 +543,8 @@ class Service {
         device: deviceName,
         address: addressName,
         service: this.service,
-        isReq: this.isRequest
+        isReq: this.isRequest,
+        testerName: this.testerName
       })
       return ts
     } catch (e: any) {
@@ -623,15 +626,16 @@ class Service {
  * @category UDS
  */
 export class DiagJob extends Service {
-  constructor(service: ServiceItem) {
+  constructor(testerName: string, service: ServiceItem) {
 
-    super(service, true)
+    super(testerName, cloneDeep(service), true)
 
   }
   from(jobName: keyof Jobs) {
+    const testerName = jobName.split('.')[0]
     const service = serviceMap.get(jobName)
     if (service && service.serviceId == 'Job') {
-      return new DiagJob(service)
+      return new DiagJob(testerName, service)
     } else {
       throw new Error(`job ${jobName} not found`)
     }
@@ -641,8 +645,8 @@ export class DiagJob extends Service {
  * @category UDS
  */
 export class DiagResponse extends Service {
-  constructor(service: ServiceItem) {
-    super(cloneDeep(service), false)
+  constructor(testerName: string, service: ServiceItem) {
+    super(testerName, cloneDeep(service), false)
 
   }
   /**
@@ -663,10 +667,10 @@ export class DiagResponse extends Service {
    *     ```
    */
   static from(serviceName: ServiceName) {
-
+    const testerName = serviceName.split('.')[0]
     const service = serviceMap.get(serviceName)
     if (service && service.serviceId != 'Job') {
-      return new DiagResponse(service)
+      return new DiagResponse(testerName, service)
     } else {
       throw new Error(`service ${serviceName} not found`)
     }
@@ -686,7 +690,7 @@ export class DiagResponse extends Service {
    * ```
    */
   static fromDiagRequest(req: DiagRequest) {
-    return new DiagResponse(req.service)
+    return new DiagResponse(req.testerName, req.service)
   }
   /**
    * This function will return whether the response is a positive response or not.
@@ -743,8 +747,8 @@ export class DiagResponse extends Service {
  */
 export class DiagRequest extends Service {
 
-  constructor(service: ServiceItem) {
-    super(cloneDeep(service), true)
+  constructor(testerName: string, service: ServiceItem) {
+    super(testerName,cloneDeep(service), true)
   }
   /**
    * @param {string} serviceName
@@ -764,11 +768,12 @@ export class DiagRequest extends Service {
    *     ```
    */
   static from(serviceName: ServiceName) {
-
+    const testerName = serviceName.split('.')[0]
     const service = serviceMap.get(serviceName)
     //request can accept job
     if (service) {
-      return new DiagRequest(service)
+      
+      return new DiagRequest(testerName, service)
     } else {
       throw new Error(`service ${serviceName} not found`)
     }
@@ -946,15 +951,16 @@ export class UtilClass {
   ) {
     if (eventName.endsWith('.send')) {
       const warpFunc = async (v: any) => {
-        const req = new DiagRequest(v as any)
+        const testerName = eventName.split('.')[0]
+        const req = new DiagRequest(testerName, v as any)
         await listener(req as any)
       }
       this.event.on(eventName, warpFunc)
       this.funcMap.set(listener, warpFunc)
     } else if (eventName.endsWith('.recv')) {
       const warpFunc = async (v: any) => {
-
-        const resp = new DiagResponse(v)
+        const testerName = eventName.split('.')[0]
+        const resp = new DiagResponse(testerName, v)
         await listener(resp as any)
 
       }
@@ -999,9 +1005,8 @@ export class UtilClass {
       this.event.off(eventName, func)
     }
   }
-  private start(name: string | undefined, val: Record<string, ServiceItem>, projectPath: string, type: 'node' | 'tester') {
+  private start(val: Record<string, ServiceItem>) {
 
-    testerName = name
     // process.chdir(projectPath)
     for (const key of Object.keys(val)) {
       //convert all param.value to buffer

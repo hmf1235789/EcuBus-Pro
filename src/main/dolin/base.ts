@@ -93,12 +93,14 @@ export default abstract class LinBase {
     // }
     setupEntry(workNode: string) {
         if (this.info.database) {
+            const dbName=workNode.split(':')[0]
+            const nodeName=workNode.split(':')[1]
             const db = global.database.lin[this.info.database]
-            if (db) {
+            if (db&&db.name==dbName) {
                 //setup entry for unconditional frames
                 for (const frameName in db.frames) {
                     const frame = db.frames[frameName]
-                    if (frame.publishedBy === workNode) {
+                    if (frame.publishedBy === nodeName) {
                         const checksum = (frame.id == 0x3c || frame.id == 0x3d) ?
                             LinChecksumType.CLASSIC : LinChecksumType.ENHANCED
                         this.setEntry(
@@ -117,7 +119,7 @@ export default abstract class LinBase {
                     const eventFrame = db.eventTriggeredFrames[eventFrameName]
                     // Check if any associated frame is published by this node
                     const containsPublishedFrame = eventFrame.frameNames.some(fname =>
-                        db.frames[fname]?.publishedBy === workNode
+                        db.frames[fname]?.publishedBy == nodeName 
                     )
 
                     if (containsPublishedFrame) {
@@ -198,7 +200,7 @@ export default abstract class LinBase {
     }
     registerNode(db: LDF, nodeName: string) {
         //find node
-
+        nodeName=nodeName.split(':')[1]
         const node = this.nodeList.find(n => n.db.name == db.name && n.nodeName == nodeName)
         if (node) {
             return

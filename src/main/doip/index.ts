@@ -201,7 +201,7 @@ export class DOIP {
         //create tcp server bind to eth port 13400
         this.startTs = getTsUs()
         this.log = new DoipLOG(base.vendor, this.eth.label, this.event, this.startTs)
-        this.udsLog = new UdsLOG(`Tester ${base.name}`, tester?.id)
+        this.udsLog = new UdsLOG(`Tester ${base.name}`)
 
         const udp4Server = dgram.createSocket('udp4')
 
@@ -582,7 +582,7 @@ export class DOIP {
                     if(this.tester){
                         const service = findService(this.tester, data, true)
                         if (service) {
-                            this.udsLog.sent(service, ts, data)
+                            this.udsLog.sent(this.tester.id, service, ts, data)
                         }
                     }
                     this.event.emit(`client-${item.addr.tester.testerLogicalAddr}-${item.addr.entity.logicalAddr}`, {
@@ -627,7 +627,7 @@ export class DOIP {
                         if(this.tester){
                             const service = findService(this.tester, data, false)
                             if (service) {
-                                this.udsLog.recv(service, ts,data)
+                                this.udsLog.recv(this.tester.id, service, ts, data)
 
                             }
                         }
@@ -957,7 +957,7 @@ is in the state “Registered [Routing Active]”.*/
                                 if(this.tester){
                                     const service = findService(this.tester, buffer.subarray(4), true)
                                     if (service) {
-                                        this.udsLog.recv(service, ts, buffer.subarray(4))
+                                        this.udsLog.recv(this.tester.id, service, ts, buffer.subarray(4))
                                     }
                                 }
                                 this.event.emit(`server-${testerAddr}-${this.ethAddr?.logicalAddr}`, {
@@ -1094,7 +1094,7 @@ is in the state “Registered [Routing Active]”.*/
                         if(inputInfo!=selfInfo&&this.tester){
                             const service = findService(this.tester, buffer.subarray(4), false)
                             if (service) {
-                                this.udsLog.recv(service, ts, buffer.subarray(4))
+                                this.udsLog.recv(this.tester.id, service, ts, buffer.subarray(4))
                             }
                         }
 

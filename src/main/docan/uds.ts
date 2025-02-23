@@ -12,7 +12,7 @@ import {
   getUdsDeviceName,
   applyBuffer
 } from '../share/uds'
-import { CanAddr, CanBase, CanBaseInfo, CanNode, getTsUs } from '../share/can'
+import { CanAddr, CanBase, getTsUs } from '../share/can'
 // #v-ifdef IGNORE_NODE!='1'
 import { PEAK_TP } from './peak'
 import { KVASER_CAN } from './kvaser'
@@ -101,7 +101,7 @@ import LinBase from '../dolin/base'
 import { LIN_TP, LIN_TP_SOCKET } from '../dolin/lintp'
 import { LinMode } from '../share/lin'
 import { LDF } from 'src/renderer/src/database/ldfParse'
-import { DataSet } from 'src/preload/data'
+import { DataSet, NodeItem } from 'src/preload/data'
 const NRCMsg: Record<number, string> = {
   0x10: 'General Reject',
   0x11: 'Service Not Supported',
@@ -260,7 +260,7 @@ export class UDSTesterMain {
     this.ac = new AbortController()
     const targetDevice = this.device
     if (targetDevice) {
-      const log = new UdsLOG(`${this.tester.name} Seq#${seqIndex}`, this.tester.id)
+      const log = new UdsLOG(`${this.tester.name} Seq#${seqIndex}`)
       if (this.tester.script) {
 
         let scriptPath
@@ -285,12 +285,12 @@ export class UDSTesterMain {
           PROJECT_NAME: this.project.projectName,
           MODE: 'sequence',
           NAME: this.tester.name,
-        }, jsPath, log, this.tester)
+        }, jsPath, log, {[this.tester.id]:this.tester})
         this.pool?.updateTs(0)
         try {
           await this.pool.start(this.project.projectPath)
         } catch (e: any) {
-          log.error(e.message, 0)
+          log.error(this.tester.id, e.message, 0)
           log.close()
           throw e
         }
@@ -313,7 +313,7 @@ export class UDSTesterMain {
           if (this.ac.signal.aborted) {
             null
           } else {
-            log.error(e.message, this.lastActiveTs, undefined)
+            log.error(this.tester.id, e.message, this.lastActiveTs)
             log.close()
             throw e
           }
@@ -331,7 +331,7 @@ export class UDSTesterMain {
           if (this.ac.signal.aborted) {
             null
           } else {
-            log.error(e.message, this.lastActiveTs, undefined)
+            log.error(this.tester.id, e.message, this.lastActiveTs)
             log.close()
             throw e
           }
@@ -349,7 +349,7 @@ export class UDSTesterMain {
           if (this.ac.signal.aborted) {
             null
           } else {
-            log.error(e.message, this.lastActiveTs, undefined)
+            log.error(this.tester.id, e.message, this.lastActiveTs)
             log.close()
             throw e
           }
@@ -514,7 +514,7 @@ export class UDSTesterMain {
             tester.lastActiveTs = sentTs
 
             // log.sent(s, sentTs)
-            await tester.pool?.triggerSend(s, tester.lastActiveTs)
+            await tester.pool?.triggerSend(tester.tester.name, s, tester.lastActiveTs)
 
 
             const hasSub = serviceDetail[s.serviceId].hasSubFunction
@@ -549,7 +549,7 @@ export class UDSTesterMain {
                 const cs = cloneDeep(s)
                 // log.recv(s,rxData.ts, rxData.data)
                 applyBuffer(cs, rxData.data, false)
-                await tester.pool?.triggerRecv(cs, tester.lastActiveTs)
+                await tester.pool?.triggerRecv(tester.tester.id, cs, tester.lastActiveTs)
 
                 const rxBuffer = getRxPdu(s)
 
@@ -600,12 +600,12 @@ export class UDSTesterMain {
                     socket.close()
                     throw e
                   } else {
-                    log.warning(s, targetSeq, seqIndex, serviceIndex, tester.lastActiveTs, rxData?.data, `Failed and continue: ${e.message}`)
+                    log.warning(tester.tester.id, s, targetSeq, seqIndex, serviceIndex, tester.lastActiveTs, rxData?.data, `Failed and continue: ${e.message}`)
                     socket.close()
                     return true
                   }
                 } else {
-                  log.warning(s, targetSeq, seqIndex, serviceIndex, tester.lastActiveTs, rxData?.data, `Failed and retry #${service.retryNum}: ${e.message}`)
+                  log.warning(tester.tester.id, s, targetSeq, seqIndex, serviceIndex, tester.lastActiveTs, rxData?.data, `Failed and retry #${service.retryNum}: ${e.message}`)
                   socket.close()
                   return false
                 }
@@ -645,11 +645,11 @@ export class UDSTesterMain {
                   await baseRun(tester, ser)
                   
                   percent += step
-                  log.udsIndex(serviceIndex, ser.name, 'progress', percent)
+                  log.udsIndex(tester.tester.id, serviceIndex, ser.name, 'progress', percent)
                 }
 
               }
-              log.udsIndex(serviceIndex, s.name, 'finished')
+              log.udsIndex(tester.tester.id, serviceIndex, s.name, 'finished')
             } else {
               throw new Error('the pool has been terminated')
             }
@@ -674,9 +674,9 @@ export class UDSTesterMain {
             }
             await tester.delay(service.delay)
           }
-          log.udsIndex(serviceIndex, targetService.name, 'start')
+          log.udsIndex(this.tester.id, serviceIndex, targetService.name, 'start')
           await baseRun(this, targetService)
-          log.udsIndex(serviceIndex, targetService.name, 'finished')
+          log.udsIndex(this.tester.id, serviceIndex, targetService.name, 'finished')
          
          
         }
@@ -871,7 +871,7 @@ export async function getBuildStatus(projectPath: string, projectName: string, s
   return 'success'
 }
 
-export async function deleteNode(projectPath: string, projectName: string, node: CanNode) {
+export async function deleteNode(projectPath: string, projectName: string, node: NodeItem) {
   //delete script file from tsconfig.json files
   const tsconfigFile = path.join(projectPath, 'tsconfig.json')
   if (fs.existsSync(tsconfigFile)) {

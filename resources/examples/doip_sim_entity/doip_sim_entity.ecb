@@ -155,7 +155,12 @@
         "attachTester": "4c92bfff-29ef-424c-93f0-f8d2224668f3",
         "script": "node.ts"
       }
-    }
+    },
+    "database": {
+      "lin": {},
+      "can": {}
+    },
+    "graphs": {}
   },
   "project": {
     "wins": {
@@ -177,8 +182,8 @@
       },
       "trace": {
         "pos": {
-          "x": 800,
-          "y": 191,
+          "x": 288,
+          "y": 188,
           "w": 1120,
           "h": 400
         },
@@ -186,12 +191,12 @@
         "label": "Trace",
         "id": "trace",
         "options": {},
-        "hide": true
+        "hide": false
       },
       "network": {
         "pos": {
-          "x": 1160,
-          "y": 420,
+          "x": 56,
+          "y": 1,
           "w": 600,
           "h": 400
         },
@@ -199,12 +204,12 @@
         "label": "Network",
         "id": "network",
         "options": {},
-        "hide": true
+        "hide": false
       },
       "4c92bfff-29ef-424c-93f0-f8d2224668f3_sequence": {
         "pos": {
-          "x": 260,
-          "y": 20,
+          "x": 599,
+          "y": 137,
           "w": 700,
           "h": 400
         },
@@ -217,14 +222,14 @@
           },
           "name": "Tester_eth_1"
         },
-        "hide": true
+        "hide": false
       },
       "tester": {
         "pos": {
-          "x": 0,
-          "y": -28,
-          "w": 2560,
-          "h": 1063
+          "x": 489,
+          "y": 72,
+          "w": 600,
+          "h": 400
         },
         "title": "tester",
         "label": "UDS Tester",
@@ -237,12 +242,11 @@
           "w": 600,
           "h": 400
         },
-        "isMax": true
+        "isMax": false
       }
     },
-    "example":{
-      "catalog":"Ethernet"
+    "example": {
+      "catalog": "Ethernet"
     }
   }
-  
 }

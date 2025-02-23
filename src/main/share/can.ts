@@ -211,16 +211,7 @@ export function formatError(error:Error) {
   // 返回简化的错误信息
   return `Error: ${error.message}, Pos: ${location}`;
 }
-export interface CanNode{
-  type:'can'
-  disabled?:boolean
-  id:string
-  name:string
-  channel:string[]
-  script?:string
-  attachTester?:string
-  workNode?:string
-}
+
 
 export class CanError extends Error {
   errorId:CAN_ERROR_ID

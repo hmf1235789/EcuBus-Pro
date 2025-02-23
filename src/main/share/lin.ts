@@ -25,16 +25,7 @@ export interface LinBaseInfo {
 }
 
 
-export interface LinNode {
-    type: 'lin'
-    disabled?: boolean
-    id: string
-    name: string
-    channel: string[]
-    script?: string
-    attachTester?: string
-    workNode?: string
-}
+
 
 
 /**

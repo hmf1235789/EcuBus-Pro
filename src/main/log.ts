@@ -152,7 +152,7 @@ export function clearFormat() {
 export class UdsLOG {
   log: Logger
   startTime = Date.now()
-  constructor(name: string, private id?: string) {
+  constructor(name: string,) {
     const et = externalTransport.map((t) => t())
     this.log = createLogger({
       transports: [new Base(), ...et],
@@ -163,10 +163,10 @@ export class UdsLOG {
       ),
     })
   }
-  sent(service: ServiceItem, ts: number, recvData?: Buffer, msg?: string) {
+  sent(testerid:string,service: ServiceItem, ts: number, recvData?: Buffer, msg?: string) {
     this.log.info({
       method: 'udsSent',
-      id: this.id,
+      id: testerid,
       data: {
         service,
         ts,
@@ -175,10 +175,10 @@ export class UdsLOG {
       }
     })
   }
-  recv(service: ServiceItem, ts: number, recvData?: Buffer, msg?: string) {
+  recv(testerid:string,service: ServiceItem, ts: number, recvData?: Buffer, msg?: string) {
     this.log.info({
       method: 'udsRecv',
-      id: this.id,
+      id: testerid,
       data: {
         service,
         ts,
@@ -187,10 +187,10 @@ export class UdsLOG {
       }
     })
   }
-  warning(service: ServiceItem, sequence: Sequence, seqIndex: number, index: number, ts: number, recvData?: Buffer, msg?: string) {
+  warning(testerid:string,service: ServiceItem, sequence: Sequence, seqIndex: number, index: number, ts: number, recvData?: Buffer, msg?: string) {
     this.log.warn({
       method: 'udsWarning',
-      id: this.id,
+      id: testerid,
       data: {
         service,
         sequence,
@@ -220,10 +220,10 @@ export class UdsLOG {
       }
     })
   }
-  error(msg: string, ts: number, recvData?: Buffer) {
+  error(testerid:string,msg: string, ts: number, recvData?: Buffer) {
     this.log.error({
       method: 'udsError',
-      id: this.id,
+      id: testerid,
       data: {
         msg,
         ts,
@@ -231,11 +231,11 @@ export class UdsLOG {
       }
     })
   }
-  udsIndex(index: number, serviceName:string,action: 'start' | 'finished' | 'progress', percent?: number) {
+  udsIndex(testerid:string,index: number, serviceName:string,action: 'start' | 'finished' | 'progress', percent?: number) {
     const l=action=='start'?'debug':'info'
     this.log[l]({
       method: 'udsIndex',
-      id: this.id,
+      id: testerid,
       data: {
         serviceName,
         index,
