@@ -263,7 +263,7 @@ function handleRun(data: TestTree) {
     handleRefresh(data).then(() => {
         runtime.testStates.isRunning[data.id] = true
         runtime.testStates.activeTest = data
-        window.electron.ipcRenderer.invoke('ipc-run-test', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.tests[data.id]), null)
+        window.electron.ipcRenderer.invoke('ipc-run-test', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.tests[data.id]), cloneDeep(dataBase.tester))
             .catch((e: any) => {
                 ElMessageBox.alert(e.message, 'Error', {
                     confirmButtonText: 'OK',
@@ -642,7 +642,7 @@ async function handleEditSave() {
         editDialogVisible.value = false
         activeConfig.value = ''
     } catch (error) {
-        return false
+        null
     }
 }
 
@@ -770,7 +770,7 @@ async function handleRefresh(data: TestTree) {
                 await window.electron.ipcRenderer.invoke('ipc-build-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.getData()), val.script, true)
             }
 
-            const testInfo: TestEvent[] = await window.electron.ipcRenderer.invoke('ipc-get-test-info', project.projectInfo.path, project.projectInfo.name, cloneDeep(val))
+            const testInfo: TestEvent[] = await window.electron.ipcRenderer.invoke('ipc-get-test-info', project.projectInfo.path, project.projectInfo.name, cloneDeep(val),cloneDeep(dataBase.tester))
             const target = tData.value[0].children?.find(item => item.id == data.id)
             if (!target) return
 
