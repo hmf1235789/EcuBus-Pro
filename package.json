@@ -19,6 +19,12 @@
       ]
     }
   },
+  "lint-staged": {
+    "*.{ts,vue}": [
+      "prettier --write",
+      "eslint --ext .ts,.vue --fix"
+    ]
+  },
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts,.vue --fix",
@@ -45,7 +51,8 @@
     "dolin": "cd src/main/dolin && npx node-gyp rebuild",
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
-    "docs:preview": "vitepress preview"
+    "docs:preview": "vitepress preview",
+    "prepare": "husky"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
@@ -122,6 +129,8 @@
     "electron-vite": "^2.3.0",
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.20.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.3",
     "mermaid": "^11.4.1",
     "node-addon-api": "^8.2.2",
     "node-gyp": "^10.2.0",
