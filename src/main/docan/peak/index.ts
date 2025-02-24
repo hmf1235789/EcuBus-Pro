@@ -87,9 +87,6 @@ const allDevice: Record<string, number> = {
   PCAN_LANBUS16: peak.PCAN_LANBUS16
 }
 
-
-
-
 function buf2str(buf: Buffer) {
   const nullCharIndex = buf.indexOf(0) // 0 是 '\0' 的 ASCII 码
   if (nullCharIndex === -1) {
@@ -107,8 +104,6 @@ function err2str(err: number, lang = 0x9) {
 function statusIsOk(status: number, strict = true): boolean {
   return peak.CANTP_StatusIsOk_2016(status, peak.PCANTP_STATUS_OK, strict)
 }
-
-
 
 class PeakNetAddr {
   _msg: any
@@ -356,19 +351,33 @@ export class PEAK_TP extends CanBase implements CanTp {
       reject: (reason: CanError) => void
       msgType: CanMsgType
       data: Buffer
-      msg: any,
-      extra?:{database?:string,name?:string}
+      msg: any
+      extra?: { database?: string; name?: string }
     }[]
   >()
-  writeQueueMap = new Map<string, QueueObject<{ addr: CanAddr, data: Buffer, resolve: (ts: number) => void, reject: (err: TpError) => void }>>()
-  rejectMap = new Map<number, {
-    reject: (reason: TpError) => void
-    addr: CanAddr
-  }>()
-  rejectBaseMap = new Map<number, {
-    reject: (reason: CanError) => void
-    msgType: CanMsgType
-  }>()
+  writeQueueMap = new Map<
+    string,
+    QueueObject<{
+      addr: CanAddr
+      data: Buffer
+      resolve: (ts: number) => void
+      reject: (err: TpError) => void
+    }>
+  >()
+  rejectMap = new Map<
+    number,
+    {
+      reject: (reason: TpError) => void
+      addr: CanAddr
+    }
+  >()
+  rejectBaseMap = new Map<
+    number,
+    {
+      reject: (reason: CanError) => void
+      msgType: CanMsgType
+    }
+  >()
   cnt = 0
   startTime = getTsUs()
   tsOffset: number | undefined
@@ -383,7 +392,9 @@ export class PEAK_TP extends CanBase implements CanTp {
     //init
     let str = `f_clock_mhz=${this.info.bitrate.clock},nom_brp=${this.info.bitrate.preScaler},nom_tseg1=${this.info.bitrate.timeSeg1},nom_tseg2=${this.info.bitrate.timeSeg2},nom_sjw=${this.info.bitrate.sjw}`
     if (this.info.canfd && this.info.bitratefd) {
-      str += ',' + `data_brp=${this.info.bitratefd.preScaler},data_tseg1=${this.info.bitratefd.timeSeg1},data_tseg2=${this.info.bitratefd.timeSeg2},data_sjw=${this.info.bitratefd.sjw}`
+      str +=
+        ',' +
+        `data_brp=${this.info.bitratefd.preScaler},data_tseg1=${this.info.bitratefd.timeSeg1},data_tseg2=${this.info.bitratefd.timeSeg2},data_sjw=${this.info.bitratefd.sjw}`
     }
     // console.log(str)
     this.id = this.info.id
@@ -395,35 +406,32 @@ export class PEAK_TP extends CanBase implements CanTp {
         switch (this.info.bitrate.freq) {
           case 1000000:
             baud = peak.PCANTP_BAUDRATE_1M
-            break;
+            break
           case 800000:
             baud = peak.PCANTP_BAUDRATE_800K
-            break;
+            break
           case 500000:
             baud = peak.PCANTP_BAUDRATE_500K
-            break;
+            break
           case 250000:
             baud = peak.PCANTP_BAUDRATE_250K
-            break;
+            break
           case 125000:
             baud = peak.PCANTP_BAUDRATE_125K
-            break;
+            break
           case 100000:
             baud = peak.PCANTP_BAUDRATE_100K
-            break;
+            break
           default:
             throw `SJA1000 does not support ${this.info.bitrate.freq} baudrate`
-
         }
 
-        ret = peak.CANTP_Initialize_2016(this.handle, baud, 0, 0, 0);
+        ret = peak.CANTP_Initialize_2016(this.handle, baud, 0, 0, 0)
         if (ret != 0) {
           throw new Error(err2str(ret))
         }
       } else {
-
         throw new Error(err2str(ret))
-
       }
     }
 
@@ -471,7 +479,6 @@ export class PEAK_TP extends CanBase implements CanTp {
     // }
     this.setOption('PEAK:PCANTP_PARAMETER_SUPPORT_29B_FIXED_NORMAL', 0)
     this.setOption('PEAK:PCANTP_PARAMETER_SUPPORT_29B_MIXED', 0)
-
   }
   reset() {
     const buf = Buffer.alloc(1)
@@ -481,7 +488,6 @@ export class PEAK_TP extends CanBase implements CanTp {
   static getValidDevices() {
     const devices: CanDevice[] = []
     if (process.platform == 'win32') {
-
       const buf = Buffer.alloc(1)
       for (const label of Object.keys(allDevice)) {
         const result = peak.CANTP_GetValue_2016(
@@ -549,34 +555,68 @@ export class PEAK_TP extends CanBase implements CanTp {
   }
   close(isReset = false, msg?: string) {
     try {
-
       this.readAbort.abort()
       for (const [key, value] of this.pendingCmds) {
         peak.CANTP_MsgDataFree_2016(value.msg)
-        value.reject(new TpError(isReset ? TP_ERROR_ID.TP_BUS_ERROR : TP_ERROR_ID.TP_BUS_CLOSED, value.addr, value.data, msg))
+        value.reject(
+          new TpError(
+            isReset ? TP_ERROR_ID.TP_BUS_ERROR : TP_ERROR_ID.TP_BUS_CLOSED,
+            value.addr,
+            value.data,
+            msg
+          )
+        )
       }
       this.pendingCmds.clear()
       for (const [key, value] of this.rejectMap) {
-        value.reject(new TpError(isReset ? TP_ERROR_ID.TP_BUS_ERROR : TP_ERROR_ID.TP_BUS_CLOSED, value.addr, undefined, msg))
+        value.reject(
+          new TpError(
+            isReset ? TP_ERROR_ID.TP_BUS_ERROR : TP_ERROR_ID.TP_BUS_CLOSED,
+            value.addr,
+            undefined,
+            msg
+          )
+        )
       }
       this.rejectMap.clear()
       //handle writeQueueMap
       for (const [key, value] of this.writeQueueMap) {
         const list = value.workersList()
         for (const item of list) {
-          item.data.reject(new TpError(isReset ? TP_ERROR_ID.TP_BUS_ERROR : TP_ERROR_ID.TP_BUS_CLOSED, item.data.addr, undefined, msg))
+          item.data.reject(
+            new TpError(
+              isReset ? TP_ERROR_ID.TP_BUS_ERROR : TP_ERROR_ID.TP_BUS_CLOSED,
+              item.data.addr,
+              undefined,
+              msg
+            )
+          )
         }
       }
       this.writeQueueMap.clear()
       for (const [key, value] of this.rejectBaseMap) {
-        value.reject(new CanError(isReset ? CAN_ERROR_ID.CAN_BUS_ERROR : CAN_ERROR_ID.CAN_BUS_CLOSED, value.msgType, undefined, msg))
+        value.reject(
+          new CanError(
+            isReset ? CAN_ERROR_ID.CAN_BUS_ERROR : CAN_ERROR_ID.CAN_BUS_CLOSED,
+            value.msgType,
+            undefined,
+            msg
+          )
+        )
       }
       this.rejectBaseMap.clear()
       //pendingBaseCmds
       for (const [key, values] of this.pendingBaseCmds) {
         for (const value of values) {
           peak.CANTP_MsgDataFree_2016(value.msg)
-          value.reject(new CanError(isReset ? CAN_ERROR_ID.CAN_BUS_ERROR : CAN_ERROR_ID.CAN_BUS_CLOSED, value.msgType, undefined, msg))
+          value.reject(
+            new CanError(
+              isReset ? CAN_ERROR_ID.CAN_BUS_ERROR : CAN_ERROR_ID.CAN_BUS_CLOSED,
+              value.msgType,
+              undefined,
+              msg
+            )
+          )
         }
       }
       this.pendingBaseCmds.clear()
@@ -606,7 +646,12 @@ export class PEAK_TP extends CanBase implements CanTp {
         // peak.CANTP_MsgDataAlloc_2016(msg.msg, peak.PCANTP_MSGTYPE_ANY)
         // Reads the first message in the queue.
         const tsClass = new peak.TimeStamp()
-        const result = peak.CANTP_Read_2016(this.handle, msg.msg, tsClass.cast(), peak.PCANTP_MSGTYPE_ANY)
+        const result = peak.CANTP_Read_2016(
+          this.handle,
+          msg.msg,
+          tsClass.cast(),
+          peak.PCANTP_MSGTYPE_ANY
+        )
         let ts = tsClass.value()
         if (this.tsOffset == undefined) {
           this.tsOffset = ts - (getTsUs() - this.startTime)
@@ -652,8 +697,6 @@ export class PEAK_TP extends CanBase implements CanTp {
                     progress
                   )
                   if (res == 0) {
-
-
                     if (progress.state == peak.PCANTP_MSGPROGRESS_STATE_COMPLETED) {
                       // this.emit('sendTp', {
                       //   data: isotp.data,
@@ -676,7 +719,6 @@ export class PEAK_TP extends CanBase implements CanTp {
                     }
                   }
                 } else {
-
                   //return timestamp
                   item.resolve(ts)
                   peak.CANTP_MsgDataFree_2016(item.msg)
@@ -705,9 +747,7 @@ export class PEAK_TP extends CanBase implements CanTp {
                     peak.CANTP_MsgDataFree_2016(msg.msg)
                   }
                 }
-
               } else {
-
                 finished = true
                 rts = ts
               }
@@ -725,7 +765,6 @@ export class PEAK_TP extends CanBase implements CanTp {
               const items = this.pendingBaseCmds.get(id)
 
               if (items) {
-
                 const item = items.shift()!
                 //tx notification, item always exists
                 peak.CANTP_MsgDataFree_2016(item.msg)
@@ -737,8 +776,8 @@ export class PEAK_TP extends CanBase implements CanTp {
                   id: msg.canInfo.canId,
                   data: frame.data,
                   ts: ts,
-                  database:item.extra?.database,
-                  name:item.extra?.name,
+                  database: item.extra?.database,
+                  name: item.extra?.name,
                   msgType: {
                     canfd: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_FD) != 0,
                     brs: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_BRS) != 0,
@@ -773,7 +812,7 @@ export class PEAK_TP extends CanBase implements CanTp {
                   idType:
                     msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_EXTENDED
                       ? CAN_ID_TYPE.EXTENDED
-                      : CAN_ID_TYPE.STANDARD,
+                      : CAN_ID_TYPE.STANDARD
                 },
                 device: this.info.name
               }
@@ -790,12 +829,9 @@ export class PEAK_TP extends CanBase implements CanTp {
           if ((msg.type & peak.PCANTP_MSGTYPE_CANINFO) == peak.PCANTP_MSGTYPE_CANINFO) {
             this.log.error(ts, 'bus error')
             this.close(true)
-
-
           }
         }
         peak.CANTP_MsgDataFree_2016(msg.msg)
-
       }
     }
   }
@@ -1002,17 +1038,12 @@ export class PEAK_TP extends CanBase implements CanTp {
       }
     )
   }
-  readBase(
-    id: number,
-    msgType: CanMsgType,
-    timeout: number,
-  ) {
+  readBase(id: number, msgType: CanMsgType, timeout: number) {
     return new Promise<{ data: Buffer; ts: number }>(
       (
         resolve: (value: { data: Buffer; ts: number }) => void,
         reject: (reason: CanError) => void
       ) => {
-
         const cmdId = this.getReadBaseId(id, msgType)
         const cnt = this.cnt
         this.cnt++
@@ -1052,7 +1083,7 @@ export class PEAK_TP extends CanBase implements CanTp {
     id: number,
     msgType: CanMsgType,
     data: Buffer,
-    extra?:{database?:string,name?:string}
+    extra?: { database?: string; name?: string }
   ) {
     let msgTypeNum = 0
     if (msgType.idType === 'STANDARD') {
@@ -1075,7 +1106,6 @@ export class PEAK_TP extends CanBase implements CanTp {
     }
     const cmdId = `writeBase-${id}-${msgTypeNum}`
 
-
     if (msgType.canfd) {
       //detect data.length range by dlc
       if (data.length > 8 && data.length <= 12) {
@@ -1096,12 +1126,17 @@ export class PEAK_TP extends CanBase implements CanTp {
         maxLen = data.length
       }
       data = Buffer.concat([data, Buffer.alloc(maxLen - data.length).fill(0)])
-
-
     }
-    return this._writeBase(id, msgType, msgTypeNum, cmdId, data,extra)
+    return this._writeBase(id, msgType, msgTypeNum, cmdId, data, extra)
   }
-  _writeBase(id: number, msgTypeE: CanMsgType, msgType: number, cmdId: string, data: Buffer,extra?:{database?:string,name?:string}) {
+  _writeBase(
+    id: number,
+    msgTypeE: CanMsgType,
+    msgType: number,
+    cmdId: string,
+    data: Buffer,
+    extra?: { database?: string; name?: string }
+  ) {
     return new Promise<number>(
       (resolve: (value: number) => void, reject: (reason: CanError) => void) => {
         let res = 0
@@ -1126,10 +1161,11 @@ export class PEAK_TP extends CanBase implements CanTp {
         }
         const item = this.pendingBaseCmds.get(cmdId)
         if (item) {
-
-          item.push({ resolve, reject, msg, data, msgType: msgTypeE,extra })
+          item.push({ resolve, reject, msg, data, msgType: msgTypeE, extra })
         } else {
-          this.pendingBaseCmds.set(cmdId, [{ resolve, reject, msg, data, msgType: msgTypeE,extra }])
+          this.pendingBaseCmds.set(cmdId, [
+            { resolve, reject, msg, data, msgType: msgTypeE, extra }
+          ])
         }
         res = peak.CANTP_Write_2016(this.handle, msg)
         if (!statusIsOk(res, false)) {

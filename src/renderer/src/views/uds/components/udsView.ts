@@ -12,7 +12,7 @@ import nodeConfig from './config/node/nodeConfig.vue'
 import { h } from 'vue'
 import { useProjectStore } from '@r/stores/project'
 import { cloneDeep, get } from 'lodash'
-import {Inter, NodeItem} from 'src/preload/data'
+import { Inter, NodeItem } from 'src/preload/data'
 import { nextTick } from 'vue'
 
 export interface udsBase {
@@ -23,108 +23,114 @@ export interface udsBase {
 
 class Region extends joint.dia.Element {
   defaults() {
-    return joint.util.defaultsDeep({
-      type: 'link.region',
-      attrs: {
-        body: {
-          width: 'calc(w)',
-          height: 'calc(h)',
-          strokeWidth: 2,
-          stroke: '#000000',
-          fill: '#FFFFFF'
-        },
-        labelTop: {
-          x: 'calc(1*w)',
-          y: '10',
-          fontSize: 10,
-          fill: '#333333',
-          'font-weight': 700
-        },
-        label: {
-          textVerticalAnchor: 'middle',
-          textAnchor: 'middle',
-          refX: '50%',
-          refY: 'calc(50%+100)',
-          fontSize: 10,
-          fill: '#333333',
-          textWrap: {
-            width: 120, // 相对于元素宽度的偏移
-            height: 22, // 设置为与字体大小相同的固定高度
-            ellipsis: true // 如果文本太长，以省略号结尾
+    return joint.util.defaultsDeep(
+      {
+        type: 'link.region',
+        attrs: {
+          body: {
+            width: 'calc(w)',
+            height: 'calc(h)',
+            strokeWidth: 2,
+            stroke: '#000000',
+            fill: '#FFFFFF'
+          },
+          labelTop: {
+            x: 'calc(1*w)',
+            y: '10',
+            fontSize: 10,
+            fill: '#333333',
+            'font-weight': 700
+          },
+          label: {
+            textVerticalAnchor: 'middle',
+            textAnchor: 'middle',
+            refX: '50%',
+            refY: 'calc(50%+100)',
+            fontSize: 10,
+            fill: '#333333',
+            textWrap: {
+              width: 120, // 相对于元素宽度的偏移
+              height: 22, // 设置为与字体大小相同的固定高度
+              ellipsis: true // 如果文本太长，以省略号结尾
+            }
+          },
+          labelBottom: {
+            textVerticalAnchor: 'middle',
+            textAnchor: 'middle',
+            refX: '50%',
+            refY: '75%',
+            fontSize: 10,
+            fill: '#333333',
+            textWrap: {
+              width: 120, // 修改为所需的宽度，例如 0 表示不限制宽度
+              height: 22, // 设置为与字体大小相同的固定高度
+              ellipsis: true // 如果文本太长，以省略号结尾
+            }
+          },
+          title: {
+            x: 'calc(0.5*w)',
+            y: '9',
+            textVerticalAnchor: 'middle',
+            textAnchor: 'middle',
+            fontSize: 12,
+            fill: '#333333'
+          },
+          line: {
+            x1: 0,
+            y1: 16,
+            x2: 'calc(w)',
+            y2: 16,
+            stroke: '#000000',
+            strokeWidth: 1
           }
-        },
-        labelBottom: {
-          textVerticalAnchor: 'middle',
-          textAnchor: 'middle',
-          refX: '50%',
-          refY: '75%',
-          fontSize: 10,
-          fill: '#333333',
-          textWrap: {
-            width: 120, // 修改为所需的宽度，例如 0 表示不限制宽度
-            height: 22, // 设置为与字体大小相同的固定高度
-            ellipsis: true // 如果文本太长，以省略号结尾
-          }
-        },
-        title: {
-          x: 'calc(0.5*w)',
-          y: '9',
-          textVerticalAnchor: 'middle',
-          textAnchor: 'middle',
-          fontSize: 12,
-          fill: '#333333'
-        },
-        line: {
-          x1: 0,
-          y1: 16,
-          x2: 'calc(w)',
-          y2: 16,
-          stroke: '#000000',
-          strokeWidth: 1
         }
-
-      }
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      /*@ts-ignore*/
-    }, super.defaults);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        /*@ts-ignore*/
+      },
+      super.defaults
+    )
   }
-  markup = [{
-    tagName: 'rect',
-    selector: 'body',
-  }, {
-    tagName: 'text',
-    selector: 'labelTop',
-  }, {
-    tagName: 'text',
-    selector: 'label',
-  }, {
-    tagName: 'text',
-    selector: 'labelBottom',
-  },
+  markup = [
+    {
+      tagName: 'rect',
+      selector: 'body'
+    },
+    {
+      tagName: 'text',
+      selector: 'labelTop'
+    },
+    {
+      tagName: 'text',
+      selector: 'label'
+    },
+    {
+      tagName: 'text',
+      selector: 'labelBottom'
+    },
 
-  {
-    tagName: 'text',
-    selector: 'title',
-  },
-  {
-    tagName: 'line',
-    selector: 'line'
-  },
-  {
-    tagName: 'circle',
-    selector: 'cornerCircle',
-  },
-  {
-    tagName: 'text',
-    selector: 'cornerText',
-  },
-  {
-    tagName: 'text',
-    selector: 'cornerText1',
-  },
+    {
+      tagName: 'text',
+      selector: 'title'
+    },
+    {
+      tagName: 'line',
+      selector: 'line'
+    },
+    {
+      tagName: 'circle',
+      selector: 'cornerCircle'
+    },
+    {
+      tagName: 'text',
+      selector: 'cornerText'
+    },
+    {
+      tagName: 'text',
+      selector: 'cornerText1'
+    }
   ]
 }
-export const colorMap: Record<string, { fill: string, color: string }> = {
+export const colorMap: Record<string, { fill: string; color: string }> = {
   device: {
     fill: 'rgb(51.2, 126.4, 204)',
     color: '#FFFFFF'
@@ -148,30 +154,32 @@ export class udsCeil {
   title?: string
   enable = true
 
-  constructor(paper: joint.dia.Paper, graph: joint.dia.Graph, e: udsBase, private x: number, private y: number, button: {
-    edit: boolean,
-    panel: boolean,
-    remove: boolean,
-    lockY?: boolean
-    lockX?: boolean
-  }) {
-
-
+  constructor(
+    paper: joint.dia.Paper,
+    graph: joint.dia.Graph,
+    e: udsBase,
+    private x: number,
+    private y: number,
+    button: {
+      edit: boolean
+      panel: boolean
+      remove: boolean
+      lockY?: boolean
+      lockX?: boolean
+    }
+  ) {
     this.graph = graph
 
     const width = 150
     const height = 100
     this.data = e
 
-
-
     this.rect = new Region({
       position: { x: x, y: y },
       size: { width: width, height: height },
       attrs: {
         body: {
-          fill: colorMap[e.type].fill,
-
+          fill: colorMap[e.type].fill
         },
         label: {
           text: e.name,
@@ -182,18 +190,14 @@ export class udsCeil {
           text: '',
           fontSize: 10,
           fill: colorMap[e.type].color
-        },
-
+        }
       },
       id: e.id,
       meta: this
-    });
+    })
 
-
-
-
-    this.graph.addCell(this.rect);
-    (this.rect as any).on('change:position', (cell: any, newPos) => {
+    this.graph.addCell(this.rect)
+    ;(this.rect as any).on('change:position', (cell: any, newPos) => {
       if (newPos.x == this.x && newPos.y == this.y) {
         return
       }
@@ -226,11 +230,7 @@ export class udsCeil {
           y: this.y
         })
       }
-
-    });
-
-
-
+    })
 
     this.rect.attr('title', {
       text: e.type.toLocaleUpperCase(),
@@ -239,96 +239,103 @@ export class udsCeil {
     //make name label lower
     this.rect.attr('label/refY', '56%')
 
-
-
     const view = this.rect.findView(paper)
     if (view) {
-
-      const boundaryTool = new joint.elementTools.Boundary();
+      const boundaryTool = new joint.elementTools.Boundary()
       const toolsList = [boundaryTool]
       let offset = -8
-     
+
       if (button.edit) {
         const editButtonClass = (joint.elementTools.Button as any).extend({
           name: 'edit-button',
           options: {
-            markup: [{
-              tagName: 'circle',
-              selector: 'button',
-              attributes: {
-                'r': 7,
-                'fill': 'var(--el-color-warning)',
-                'cursor': 'pointer'
+            markup: [
+              {
+                tagName: 'circle',
+                selector: 'button',
+                attributes: {
+                  r: 7,
+                  fill: 'var(--el-color-warning)',
+                  cursor: 'pointer'
+                }
+              },
+              {
+                tagName: 'path',
+                selector: 'icon',
+                attributes: {
+                  d: [
+                    'M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1',
+                    'M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3'
+                  ],
+                  fill: 'none',
+                  stroke: '#FFFFFF',
+                  'stroke-width': 2,
+                  'pointer-events': 'none',
+                  transform: ['translate(-5.5,-5.5)', 'scale(0.45)']
+                }
               }
-            }, {
-              tagName: 'path',
-              selector: 'icon',
-              attributes: {
-                'd': ['M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1', 'M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3'],
-                'fill': 'none',
-                'stroke': '#FFFFFF',
-                'stroke-width': 2,
-                'pointer-events': 'none',
-                'transform': ['translate(-5.5,-5.5)', 'scale(0.45)'],
-              }
-            }],
+            ],
             x: '0%',
             y: '100%',
             offset: {
               x: 8,
-              y: offset,
+              y: offset
             },
             rotate: true,
             action: () => {
               this.events.emit('edit', this)
             }
           }
-        });
-        const edit = new editButtonClass();
+        })
+        const edit = new editButtonClass()
         toolsList.push(edit)
-        offset-=17
+        offset -= 17
       }
 
-     
-      if(button.panel){
+      if (button.panel) {
         const editButtonClass = (joint.elementTools.Button as any).extend({
           name: 'edit-button',
           options: {
-            markup: [{
-              tagName: 'circle',
-              selector: 'button',
-              attributes: {
-                'r': 7,
-                'fill': 'var(--el-color-primary)',
-                'cursor': 'pointer'
+            markup: [
+              {
+                tagName: 'circle',
+                selector: 'button',
+                attributes: {
+                  r: 7,
+                  fill: 'var(--el-color-primary)',
+                  cursor: 'pointer'
+                }
+              },
+              {
+                tagName: 'path',
+                selector: 'icon',
+                attributes: {
+                  d: [
+                    'M10.05 23q-.75 0-1.4-.337T7.575 21.7L1.2 12.375l.6-.575q.475-.475 1.125-.55t1.175.3L7 13.575V4q0-.425.288-.712T8 3t.713.288T9 4v8h2V2q0-.425.288-.712T12 1t.713.288T13 2v10h2V3q0-.425.288-.712T16 2t.713.288T17 3v9h2V5q0-.425.288-.712T20 4t.713.288T21 5v14q0 1.65-1.175 2.825T17 23z'
+                  ],
+                  fill: 'none',
+                  stroke: '#FFFFFF',
+                  'stroke-width': 2,
+                  'pointer-events': 'none',
+                  transform: ['translate(-5.5,-5.5)', 'scale(0.45)']
+                }
               }
-            }, {
-              tagName: 'path',
-              selector: 'icon',
-              attributes: {
-                'd': ['M10.05 23q-.75 0-1.4-.337T7.575 21.7L1.2 12.375l.6-.575q.475-.475 1.125-.55t1.175.3L7 13.575V4q0-.425.288-.712T8 3t.713.288T9 4v8h2V2q0-.425.288-.712T12 1t.713.288T13 2v10h2V3q0-.425.288-.712T16 2t.713.288T17 3v9h2V5q0-.425.288-.712T20 4t.713.288T21 5v14q0 1.65-1.175 2.825T17 23z'],
-                'fill': 'none',
-                'stroke': '#FFFFFF',
-                'stroke-width': 2,
-                'pointer-events': 'none',
-                'transform': ['translate(-5.5,-5.5)', 'scale(0.45)'],
-              }
-            }],
+            ],
             x: '0%',
             y: '100%',
             offset: {
               x: 8,
-              y: offset,
+              y: offset
             },
             rotate: true,
             action: () => {
               this.events.emit('panel', this)
             }
           }
-        });
-        const edit = new editButtonClass();
+        })
+        const edit = new editButtonClass()
         toolsList.push(edit)
-        offset-=17
+        offset -= 17
       }
 
       if (button.remove) {
@@ -337,27 +344,27 @@ export class udsCeil {
           y: '100%',
           offset: {
             x: 8,
-            y: offset,
+            y: offset
           },
           action: () => {
             this.events.emit('remove', this)
           }
-        });
+        })
         toolsList.push(removeTools)
-        offset-=17
+        offset -= 17
       }
 
       const toolsView = new joint.dia.ToolsView({
         tools: toolsList
-      });
-      view.addTools(toolsView);
-      view.hideTools();
+      })
+      view.addTools(toolsView)
+      view.hideTools()
     }
   }
   getId() {
     return this.data.id
   }
-  on(event: 'edit' | 'add' | 'remove'|'panel', cb: (ceil: udsCeil) => void) {
+  on(event: 'edit' | 'add' | 'remove' | 'panel', cb: (ceil: udsCeil) => void) {
     this.events.on(event, cb)
   }
   changeName(name: string) {
@@ -371,7 +378,6 @@ export class udsCeil {
     this.enable = enable
     if (enable) {
       this.rect.attr('body/opacity', 1)
-
     } else {
       this.rect.attr('body/opacity', 0.2)
     }
@@ -381,8 +387,6 @@ export class udsCeil {
     this.events.removeAllListeners()
   }
 }
-
-
 
 export class udsHardware extends udsCeil {
   vendor = ''
@@ -394,14 +398,13 @@ export class udsHardware extends udsCeil {
     x = 100,
     y = 100
   ) {
-
     let name = 'Device'
     if (device.type == 'can' && device.canDevice) {
       name = device.canDevice.name
-    }else if(device.type=='eth'&& device.ethDevice ){
-      name= device.ethDevice.name
-    }else if(device.type=='lin'&& device.linDevice ){
-      name= device.linDevice.name
+    } else if (device.type == 'eth' && device.ethDevice) {
+      name = device.ethDevice.name
+    } else if (device.type == 'lin' && device.linDevice) {
+      name = device.linDevice.name
     }
     super(
       paper,
@@ -414,15 +417,13 @@ export class udsHardware extends udsCeil {
       x,
       y,
       {
-        panel:false,
+        panel: false,
         edit: true,
         remove: false,
         lockX: true,
         lockY: false
       }
     )
-
-
   }
 }
 export class IG extends udsCeil {
@@ -435,8 +436,6 @@ export class IG extends udsCeil {
     x: number,
     y: number
   ) {
-
-
     super(
       paper,
       graph,
@@ -448,15 +447,13 @@ export class IG extends udsCeil {
       x,
       y,
       {
-        panel:false,
+        panel: false,
         edit: true,
         remove: true,
         lockX: false,
         lockY: true
       }
     )
-
-
   }
 }
 
@@ -470,8 +467,6 @@ export class Node extends udsCeil {
     x: number,
     y: number
   ) {
-
-    
     super(
       paper,
       graph,
@@ -483,28 +478,23 @@ export class Node extends udsCeil {
       x,
       y,
       {
-        panel:true,
+        panel: true,
         edit: true,
         remove: true,
         lockX: false,
         lockY: true
       }
     )
-    const t=this.getNodeBottomName()
+    const t = this.getNodeBottomName()
     this.changeNameBottom(t)
-
   }
-  getNodeBottomName(){
-   
-      this.rect.attr('labelBottom/text', '')
-      if(this.ig.workNode){
-     
-          const txt=`${this.ig.workNode}`
-          return txt
-        
-      
-      }
-    
+  getNodeBottomName() {
+    this.rect.attr('labelBottom/text', '')
+    if (this.ig.workNode) {
+      const txt = `${this.ig.workNode}`
+      return txt
+    }
+
     return ''
   }
 }
@@ -528,7 +518,10 @@ export class UDSView {
   graph: joint.dia.Graph
   paper?: joint.dia.Paper
   ceilMap: Map<string, udsCeil> = new Map()
-  constructor(graph: joint.dia.Graph, private layout: Layout) {
+  constructor(
+    graph: joint.dia.Graph,
+    private layout: Layout
+  ) {
     this.graph = graph
     const t: any = this.graph
   }
@@ -548,9 +541,9 @@ export class UDSView {
       this.graph.clear()
     }
   }
-  changeName(key:string,name:string){
-    const item=this.ceilMap.get(key)
-    if(item){
+  changeName(key: string, name: string) {
+    const item = this.ceilMap.get(key)
+    if (item) {
       item.changeName(name)
     }
   }
@@ -581,8 +574,6 @@ export class UDSView {
     } else {
       return e
     }
-
-
   }
   addIg(id: string, data: Inter) {
     /* check name exist*/
@@ -602,23 +593,22 @@ export class UDSView {
     element.on('edit', (ceil) => {
       const dataBase = useDataStore()
       const id = ceil.getId()
-      const item=dataBase.ia[id]
+      const item = dataBase.ia[id]
       if (item.type == 'can') {
         this.layout.addWin('cani', `${id}_ia`, {
           name: item.name,
           params: {
-            'edit-index': id,
+            'edit-index': id
           }
         })
-      }else if(item.type=='lin'){
+      } else if (item.type == 'lin') {
         this.layout.addWin('lini', `${id}_ia`, {
           name: item.name,
           params: {
-            'edit-index': id,
+            'edit-index': id
           }
         })
       }
-
     })
     this.ceilMap.set(id, element)
 
@@ -634,100 +624,99 @@ export class UDSView {
     nodeXOffset -= 250
     element.on('remove', (ceil) => {
       const dataBase = useDataStore()
-      const project=useProjectStore()
-      window.electron.ipcRenderer.invoke('ipc-delete-node',project.projectInfo.path,project.projectInfo.name,cloneDeep(dataBase.nodes[ceil.getId()]))
+      const project = useProjectStore()
+      window.electron.ipcRenderer.invoke(
+        'ipc-delete-node',
+        project.projectInfo.path,
+        project.projectInfo.name,
+        cloneDeep(dataBase.nodes[ceil.getId()])
+      )
       delete dataBase.nodes[ceil.getId()]
       ceil.events.removeAllListeners()
       this.graph.removeCells([ceil.rect])
       this.layout.removeWin(ceil.getId())
-
     })
     element.on('edit', (ceil) => {
       const dataBase = useDataStore()
       const id = ceil.getId()
-      const item=dataBase.nodes[id]
-     
-        ElMessageBox({
-          buttonSize: 'small',
-          showConfirmButton:false,
-          title: `Edit Node ${item.name}`,
-          showClose: false,
-          customStyle:{
-            width:'600px',
-            maxWidth:'none',
-          
-          },
-          message:()=>h(nodeConfig,{
-           editIndex:id,
-           ceil:ceil
-          })
-        }).catch(null)
-      
+      const item = dataBase.nodes[id]
 
+      ElMessageBox({
+        buttonSize: 'small',
+        showConfirmButton: false,
+        title: `Edit Node ${item.name}`,
+        showClose: false,
+        customStyle: {
+          width: '600px',
+          maxWidth: 'none'
+        },
+        message: () =>
+          h(nodeConfig, {
+            editIndex: id,
+            ceil: ceil
+          })
+      }).catch(null)
     })
     element.on('panel', (ceil) => {
       const dataBase = useDataStore()
-      const item=dataBase.nodes[id]
-      const workNode=item.workNode
-      if(workNode){
-        const dbName=workNode.split(':')[0] 
-      
-        for(const ld of Object.values(dataBase.database.lin)){
-          if(ld.name==dbName){
-            this.layout.addWin('linPanel',id,{
-              name:item.name,
-              params:{
-                editIndex:id,
+      const item = dataBase.nodes[id]
+      const workNode = item.workNode
+      if (workNode) {
+        const dbName = workNode.split(':')[0]
+
+        for (const ld of Object.values(dataBase.database.lin)) {
+          if (ld.name == dbName) {
+            this.layout.addWin('linPanel', id, {
+              name: item.name,
+              params: {
+                editIndex: id
               }
             })
             return
           }
         }
-       
-      }else{
+      } else {
         ElMessageBox.alert('Please select a work node')
       }
-      
-
     })
     this.ceilMap.set(id, element)
 
     return element
   }
   addLink(from: string, to: string) {
-    if(this.getLink(from,to)){
+    if (this.getLink(from, to)) {
       return
     }
     const link = new joint.shapes.standard.Link()
     link.source({
-      id: from, anchor: {
-        name: 'bottom',
+      id: from,
+      anchor: {
+        name: 'bottom'
       }
     })
     link.target({
       id: to,
 
       anchor: {
-        name: 'left',
+        name: 'left'
       }
-
     })
     link.router('rightAngle')
     // link.connector('rounded')
     this.graph.addCell(link)
   }
-  getLink(from:string,to:string){
-    const links=this.graph.getLinks()
-    for(const link of links){
-      if(link.source().id==from && link.target().id==to){
+  getLink(from: string, to: string) {
+    const links = this.graph.getLinks()
+    for (const link of links) {
+      if (link.source().id == from && link.target().id == to) {
         return link
       }
     }
     return undefined
   }
   removeLink(from: string, to: string) {
-    const link = this.getLink(from,to)
-    if(link){
+    const link = this.getLink(from, to)
+    if (link) {
       this.graph.removeCells([link])
     }
   }

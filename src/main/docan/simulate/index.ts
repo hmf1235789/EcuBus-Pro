@@ -1,4 +1,15 @@
-import { CanAddr, CanBase, CAN_ID_TYPE, CanMsgType, CAN_ERROR_ID, getLenByDlc, CanBaseInfo, CanDevice, getTsUs, CanMessage } from '../../share/can'
+import {
+  CanAddr,
+  CanBase,
+  CAN_ID_TYPE,
+  CanMsgType,
+  CAN_ERROR_ID,
+  getLenByDlc,
+  CanBaseInfo,
+  CanDevice,
+  getTsUs,
+  CanMessage
+} from '../../share/can'
 import { EventEmitter } from 'events'
 import { cloneDeep, set } from 'lodash'
 import { addrToId, CanError } from '../../share/can'
@@ -14,22 +25,23 @@ for (let i = 0; i < vBusCount; i++) {
 
 const busInitStatus = new Array(vBusCount).fill(false)
 
-
-
 export class SIMULATE_CAN extends CanBase {
   event: EventEmitter
   info: CanBaseInfo
   closed = false
-  cnt = 0;
+  cnt = 0
   log: CanLOG
   busCb: any
   startTime = getTsUs()
   private readAbort = new AbortController()
 
-  rejectBaseMap = new Map<number, {
-    reject: (reason: CanError) => void
-    msgType: CanMsgType
-  }>()
+  rejectBaseMap = new Map<
+    number,
+    {
+      reject: (reason: CanError) => void
+      msgType: CanMsgType
+    }
+  >()
 
   rejectMap = new Map<number, Function>()
   constructor(info: CanBaseInfo) {
@@ -43,7 +55,6 @@ export class SIMULATE_CAN extends CanBase {
     this.log = new CanLOG('SIMULATE', info.name, this.event)
     this.busCb = this.busCbFunction.bind(this)
     this.event.on('bus', this.busCb)
-
   }
   busCbFunction(val: CanMessage) {
     //rxNotify
@@ -62,7 +73,7 @@ export class SIMULATE_CAN extends CanBase {
         handle: i,
         id: `Simulate-${i}`,
         label: `Simulate-${i}`,
-        busy: false,
+        busy: false
       }
     })
   }
@@ -86,7 +97,7 @@ export class SIMULATE_CAN extends CanBase {
     id: number,
     msgType: CanMsgType,
     data: Buffer,
-    extra?:{database?:string,name?:string}
+    extra?: { database?: string; name?: string }
   ) {
     let maxLen = msgType.canfd ? 64 : 8
     if (data.length > maxLen) {
@@ -94,7 +105,7 @@ export class SIMULATE_CAN extends CanBase {
     }
     const cmdId = `writeBase-${this.getReadBaseId(id, msgType)}`
     //queue
-    
+
     if (msgType.canfd) {
       //detect data.length range by dlc
       if (data.length > 8 && data.length <= 12) {
@@ -115,12 +126,16 @@ export class SIMULATE_CAN extends CanBase {
         maxLen = data.length
       }
       data = Buffer.concat([data, Buffer.alloc(maxLen - data.length).fill(0)])
-
-
     }
-    return this._writeBase(id, msgType, cmdId, data,extra)
+    return this._writeBase(id, msgType, cmdId, data, extra)
   }
-  _writeBase(id: number, msgType: CanMsgType, cmdId: string, data: Buffer,extra?:{database?:string,name?:string}) {
+  _writeBase(
+    id: number,
+    msgType: CanMsgType,
+    cmdId: string,
+    data: Buffer,
+    extra?: { database?: string; name?: string }
+  ) {
     return new Promise<number>(
       (resolve: (value: number) => void, reject: (reason: CanError) => void) => {
         const msg: CanMessage = {
@@ -130,8 +145,8 @@ export class SIMULATE_CAN extends CanBase {
           id,
           msgType,
           device: this.info.name,
-          database:extra?.database,
-          name:extra?.name
+          database: extra?.database,
+          name: extra?.name
         }
         setTimeout(() => {
           //txNotify
@@ -141,12 +156,9 @@ export class SIMULATE_CAN extends CanBase {
               if (i != this.info.handle) {
                 event.emit('bus', cloneDeep(msg))
               }
-
-
-
             }
           }
-        }, 1);
+        }, 1)
         setImmediate(() => {
           const us = getTsUs() - this.startTime
           msg.ts = us
@@ -162,17 +174,12 @@ export class SIMULATE_CAN extends CanBase {
   getReadBaseId(id: number, msgType: CanMsgType): string {
     return `readBase-${id}-${msgType.brs}-${msgType.remote}-${msgType.canfd}-${msgType.idType}`
   }
-  readBase(
-    id: number,
-    msgType: CanMsgType,
-    timeout: number,
-  ) {
+  readBase(id: number, msgType: CanMsgType, timeout: number) {
     return new Promise<{ data: Buffer; ts: number }>(
       (
         resolve: (value: { data: Buffer; ts: number }) => void,
         reject: (reason: CanError) => void
       ) => {
-
         const cmdId = this.getReadBaseId(id, msgType)
         const cnt = this.cnt
         this.cnt++
@@ -208,9 +215,7 @@ export class SIMULATE_CAN extends CanBase {
       }
     )
   }
-
 }
-
 
 export function getVBusEventInfo() {
   const num = []

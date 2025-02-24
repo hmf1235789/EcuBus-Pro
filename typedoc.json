@@ -1,24 +1,18 @@
 {
-    "$schema": "https://typedoc.org/schema.json",
-    "entryPoints": ["./src/main/worker/index.ts"],
-    "disableSources": true,
-    "out": "./resources/docs/scriptApi",
-    "name":"EcuBus-Pro Script API Documentation",
-    "readme": "docs/um/script.md",
-    "skipErrorChecking": true,
-   
-   "navigationLinks": {
-        "Home": "https://app.whyengineer.com",
-        "GitHub": "https://github.com/ecubus/EcuBus-Pro",
-    },
-    "favicon": "./resources/icon.png",
-    "navigation": {
-        "includeCategories": true,
-       
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["./src/main/worker/index.ts"],
+  "disableSources": true,
+  "out": "./resources/docs/scriptApi",
+  "name": "EcuBus-Pro Script API Documentation",
+  "readme": "docs/um/script.md",
+  "skipErrorChecking": true,
 
-
-    },
-  
-    
-    
+  "navigationLinks": {
+    "Home": "https://app.whyengineer.com",
+    "GitHub": "https://github.com/ecubus/EcuBus-Pro"
+  },
+  "favicon": "./resources/icon.png",
+  "navigation": {
+    "includeCategories": true
+  }
 }

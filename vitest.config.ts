@@ -1,6 +1,6 @@
 import { defineConfig, mergeConfig } from 'vitest/config'
 import path from 'path'
-import config from "./electron.vite.config";
+import config from './electron.vite.config'
 export const nodejsPolarsDirnamePlugin = () => {
   const name = 'nodejs-polars-dirname-plugin'
   return {
@@ -25,7 +25,7 @@ export const nodejsPolarsDirnamePlugin = () => {
       }
       // else return the original code (leave code unrelated to nodejs-polars untouched)
       return code
-    },
+    }
   }
 }
 //export default mergeConfig(config.main as any, defineConfig({
@@ -33,7 +33,5 @@ export default defineConfig({
   test: {
     // ...
   },
-  plugins: [
-    nodejsPolarsDirnamePlugin()
-  ]
+  plugins: [nodejsPolarsDirnamePlugin()]
 })

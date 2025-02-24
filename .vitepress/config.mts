@@ -1,21 +1,18 @@
 import { createRequire } from 'module'
 import { defineConfig, type DefaultTheme } from 'vitepress'
-import { withMermaid } from "vitepress-plugin-mermaid";
-
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
 const require = createRequire(import.meta.url)
 const pkg = require('../package.json')
 function nav(): DefaultTheme.NavItem[] {
   return [
-
     {
       text: pkg.version,
       items: [
         {
           text: 'Changelog',
           link: 'https://github.com/ecubus/EcuBus-Pro/blob/master/docs/dev/releases_note.md'
-        },
-
+        }
       ]
     },
     {
@@ -27,20 +24,41 @@ function nav(): DefaultTheme.NavItem[] {
 // https://vitepress.dev/reference/site-config
 
 export default withMermaid({
-  title: "EcuBus-Pro",
+  title: 'EcuBus-Pro',
   ignoreDeadLinks: true,
   description: 'A powerful automotive ECU development tool',
   head: [
-    ['link', { rel: 'icon', type: 'image/png', href: 'https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png' }],
-   
+    [
+      'link',
+      {
+        rel: 'icon',
+        type: 'image/png',
+        href: 'https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png'
+      }
+    ],
+
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:locale', content: 'en' }],
-    ['meta', { property: 'og:title', content: 'EcuBus-Pro | A powerful automotive ECU development tool' }],
+    [
+      'meta',
+      { property: 'og:title', content: 'EcuBus-Pro | A powerful automotive ECU development tool' }
+    ],
     ['meta', { property: 'og:site_name', content: 'EcuBus-Pro' }],
-    ['meta', { property: 'og:image', content: 'https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png' }],
+    [
+      'meta',
+      {
+        property: 'og:image',
+        content: 'https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png'
+      }
+    ],
     ['meta', { property: 'og:url', content: 'https://app.whyengineer.com' }],
-    ['meta', { name: 'google-site-verification', content: '8p_3SCSQGHvWlpmik3zhY902wyQ0QwxQsHaBJocrxfA' }],
-    ['script', {},
+    [
+      'meta',
+      { name: 'google-site-verification', content: '8p_3SCSQGHvWlpmik3zhY902wyQ0QwxQsHaBJocrxfA' }
+    ],
+    [
+      'script',
+      {},
       `
       window.__rum = {
     pid: 'fx08lzooek@df6c2cc04f6d757',
@@ -71,9 +89,20 @@ export default withMermaid({
       `
     ],
     ['script', { src: 'https://sdk.rum.aliyuncs.com/v2/browser-sdk.js', crossorigin: 'anonymous' }],
-    ['script', { src: 'https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/viewerjs/1.10.4/viewer.min.js'}],
-    ['link', { rel: 'stylesheet', href: 'https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/viewerjs/1.10.4/viewer.min.css' }],
-    ['script', {},
+    [
+      'script',
+      { src: 'https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/viewerjs/1.10.4/viewer.min.js' }
+    ],
+    [
+      'link',
+      {
+        rel: 'stylesheet',
+        href: 'https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/viewerjs/1.10.4/viewer.min.css'
+      }
+    ],
+    [
+      'script',
+      {},
       `
      
       // 初始化图片查看器
@@ -119,8 +148,7 @@ export default withMermaid({
       });
 
       `
-    ],
-
+    ]
   ],
 
   lastUpdated: true,
@@ -163,53 +191,56 @@ export default withMermaid({
           { text: 'Graph', link: '/docs/um/graph/graph.md' },
           { text: 'CLI', link: '/docs/um/cli' },
           {
-            text: 'Script', link: '/docs/um/script', items: [
-              { text: 'Use External Package', link: '/docs/um/scriptSerialPort' },
-            ]
+            text: 'Script',
+            link: '/docs/um/script',
+            items: [{ text: 'Use External Package', link: '/docs/um/scriptSerialPort' }]
           },
           {
-            text: 'Database', link: '/docs/um/database', items: [
+            text: 'Database',
+            link: '/docs/um/database',
+            items: [
               { text: 'LIN LDF', link: '/docs/um/ldf' },
-              { text: 'CAN DBC', link: '/docs/um/dbc' },
+              { text: 'CAN DBC', link: '/docs/um/dbc' }
             ]
-          },
+          }
         ]
       },
       {
         text: 'Example',
 
         items: [
-
           {
-            text: 'CAN', items: [
-              { text: 'CAN Basic', link: '/examples/can/readme', },
-              { text: 'NXP UDS Bootloader', link: '/examples/nxp_bootloader/readme' },
-            ], collapsed: true
+            text: 'CAN',
+            items: [
+              { text: 'CAN Basic', link: '/examples/can/readme' },
+              { text: 'NXP UDS Bootloader', link: '/examples/nxp_bootloader/readme' }
+            ],
+            collapsed: true
           },
           {
-            text: 'LIN', items: [
-
+            text: 'LIN',
+            items: [
               { text: 'LIN General', link: '/examples/lin/readme' },
-              { text: 'LIN TP', link: '/examples/lin_tp/readme' },
+              { text: 'LIN TP', link: '/examples/lin_tp/readme' }
             ],
             collapsed: true
           },
           {
-            text: 'DOIP', items: [
+            text: 'DOIP',
+            items: [
               { text: 'DoIP Tester', link: '/examples/doip/readme' },
-              { text: 'DoIP Simulate Entity', link: '/examples/doip_sim_entity/readme' },
+              { text: 'DoIP Simulate Entity', link: '/examples/doip_sim_entity/readme' }
             ],
             collapsed: true
           },
           {
-            text: 'UDS', items: [
+            text: 'UDS',
+            items: [
               { text: 'UDS Hex File', link: '/examples/uds_hex_file/readme' },
-              { text: 'Secure Access dll', link: '/examples/secure_access_dll/readme' },
+              { text: 'Secure Access dll', link: '/examples/secure_access_dll/readme' }
             ],
             collapsed: true
-          },
-
-
+          }
         ]
       },
       {
@@ -218,26 +249,24 @@ export default withMermaid({
         items: [
           { text: 'Arch', link: '/docs/dev/arch' },
           {
-            text: 'Setup', link: '/docs/dev/setup',
+            text: 'Setup',
+            link: '/docs/dev/setup',
             items: [
               {
-                text: 'Learning Resources', link: '/docs/dev/jslearn'
+                text: 'Learning Resources',
+                link: '/docs/dev/jslearn'
               }
-
             ]
           },
           { text: 'Test', link: '/docs/dev/test' },
           { text: 'Addon', link: '/docs/dev/addon' },
 
-          { text: 'Releases Note', link: '/docs/dev/releases_note' },
+          { text: 'Releases Note', link: '/docs/dev/releases_note' }
         ]
       }
     ],
 
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/ecubus/EcuBus-Pro' }
-    ],
-
+    socialLinks: [{ icon: 'github', link: 'https://github.com/ecubus/EcuBus-Pro' }]
   },
   rewrites: {
     'README.md': 'index.md',
@@ -246,5 +275,4 @@ export default withMermaid({
   sitemap: {
     hostname: 'https://app.whyengineer.com'
   }
-
 })

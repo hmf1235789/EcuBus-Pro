@@ -1,6 +1,14 @@
 <template>
-  <el-form :model="data" label-width="130px" size="small" :disabled="globalStart" :rules="rules" ref="ruleFormRef"
-    class="hardware" hide-required-asterisk>
+  <el-form
+    ref="ruleFormRef"
+    :model="data"
+    label-width="130px"
+    size="small"
+    :disabled="globalStart"
+    :rules="rules"
+    class="hardware"
+    hide-required-asterisk
+  >
     <el-form-item label="Address name" required prop="name">
       <el-input v-model="data.name" />
     </el-form-item>
@@ -10,51 +18,38 @@
         <el-option value="functional" label="Functional"></el-option>
       </el-select>
     </el-form-item>
-    <el-divider content-position="left">
-      Tester
-    </el-divider>
+    <el-divider content-position="left"> Tester </el-divider>
     <el-form-item label="logical address" required prop="tester.testerLogicalAddr">
-          <el-input v-model.number="data.tester.testerLogicalAddr" placeholder="0"/>
-        </el-form-item>
+      <el-input v-model.number="data.tester.testerLogicalAddr" placeholder="0" />
+    </el-form-item>
     <el-form-item label-width="0">
       <el-row>
-    
-    
-      <el-col :span="12">
-        <el-form-item label="Connect delay" required prop="tester.createConnectDelay">
-          <el-input v-model="data.tester.createConnectDelay" />
-        </el-form-item>
-
-      </el-col>
-      <el-col :span="12">
-        <el-form-item label="Active delay" required prop="tester.routeActiveTime">
-          <el-input v-model="data.tester.routeActiveTime" />
-        </el-form-item>
-
-      </el-col>
-    </el-row>
+        <el-col :span="12">
+          <el-form-item label="Connect delay" required prop="tester.createConnectDelay">
+            <el-input v-model="data.tester.createConnectDelay" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="Active delay" required prop="tester.routeActiveTime">
+            <el-input v-model="data.tester.routeActiveTime" />
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form-item>
-    <el-divider content-position="left">
-      ECU
-    </el-divider>
+    <el-divider content-position="left"> ECU </el-divider>
     <el-form-item label-width="0">
-     
       <el-col :span="12">
         <el-form-item label="logical address" required prop="entity.logicalAddr">
-          <el-input v-model.number="data.entity.logicalAddr" placeholder="0"/>
+          <el-input v-model.number="data.entity.logicalAddr" placeholder="0" />
         </el-form-item>
-
       </el-col>
       <el-col :span="12">
         <el-form-item label="EID" required prop="entity.eid">
           <el-input v-model="data.entity.eid" />
         </el-form-item>
-
       </el-col>
-  
     </el-form-item>
     <el-form-item label-width="0">
-     
       <el-col :span="12">
         <el-form-item label="Entity Type" required prop="entity.nodeType">
           <el-select v-model.number="data.entity.nodeType" placeholder="Node">
@@ -62,44 +57,43 @@
             <el-option value="gateway" label="Gateway"></el-option>
           </el-select>
         </el-form-item>
-
       </el-col>
       <el-col :span="12">
-        <el-form-item label="node address" :required="data.entity.nodeType=='gateway'" prop="entity.nodeAddr">
-          <el-input v-model.number="data.entity.nodeAddr" placeholder="0" :disabled="data.entity.nodeType=='node'"/>
+        <el-form-item
+          label="node address"
+          :required="data.entity.nodeType == 'gateway'"
+          prop="entity.nodeAddr"
+        >
+          <el-input
+            v-model.number="data.entity.nodeAddr"
+            placeholder="0"
+            :disabled="data.entity.nodeType == 'node'"
+          />
         </el-form-item>
       </el-col>
-    
     </el-form-item>
     <el-form-item label-width="0">
-   
       <el-col :span="12">
-
         <el-form-item label="VIN" required prop="entity.vin">
           <el-input v-model="data.entity.vin" :max="17" />
         </el-form-item>
       </el-col>
       <el-col :span="12">
-
         <el-form-item label="GID" required prop="entity.gid">
           <el-input v-model="data.entity.gid" :max="17" />
         </el-form-item>
       </el-col>
-   
     </el-form-item>
-    <el-divider content-position="left">
-      Vehicle Identify Request Behavior
-    </el-divider>
+    <el-divider content-position="left"> Vehicle Identify Request Behavior </el-divider>
     <el-form-item label="VIN Request method" required prop="virReqType">
-        <el-select v-model="data.virReqType">
-          <el-option value="unicast" label="Unicast VIN Request"></el-option>
-          <el-option value="omit" label="Omit VIN, tcp connect directly"></el-option>
-          <el-option value="broadcast" label="Broadcast UDP4"></el-option>
-          <el-option value="multicast" label="Multicast UDP6" disabled></el-option>
-        </el-select>
-      </el-form-item>
+      <el-select v-model="data.virReqType">
+        <el-option value="unicast" label="Unicast VIN Request"></el-option>
+        <el-option value="omit" label="Omit VIN, tcp connect directly"></el-option>
+        <el-option value="broadcast" label="Broadcast UDP4"></el-option>
+        <el-option value="multicast" label="Multicast UDP6" disabled></el-option>
+      </el-select>
+    </el-form-item>
     <el-form-item label-width="0">
-     
       <el-col :span="12">
         <el-form-item label="Request Address" prop="virReqAddr">
           <el-input v-model="data.virReqAddr" />
@@ -114,7 +108,6 @@
             <el-option value="withEid" label="Send EID Request"></el-option>
           </el-select>
         </el-form-item>
-
       </el-col>
     </el-form-item>
   </el-form>
@@ -130,178 +123,172 @@ import {
   onUnmounted,
   ref,
   toRef,
-  watch,
-} from "vue";
+  watch
+} from 'vue'
 import {
   CanAddr,
   calcCanIdMixed,
   calcCanIdNormalFixed,
   CAN_ADDR_FORMAT,
   CAN_ID_TYPE,
-  CAN_ADDR_TYPE,
-} from "nodeCan/can";
-import { v4 } from "uuid";
-import { type FormRules, type FormInstance, ElMessageBox } from "element-plus";
-import { assign, cloneDeep } from "lodash";
-import { UdsAddress } from "nodeCan/uds";
-import { EntityAddr, EthAddr } from "nodeCan/doip";
+  CAN_ADDR_TYPE
+} from 'nodeCan/can'
+import { v4 } from 'uuid'
+import { type FormRules, type FormInstance, ElMessageBox } from 'element-plus'
+import { assign, cloneDeep } from 'lodash'
+import { UdsAddress } from 'nodeCan/uds'
+import { EntityAddr, EthAddr } from 'nodeCan/doip'
 
-const ruleFormRef = ref<FormInstance>();
+const ruleFormRef = ref<FormInstance>()
 const globalStart = toRef(window, 'globalStart')
 const data = defineModel<EthAddr>({
   required: true
-});
-
-
+})
 
 const nameCheck = (rule: any, value: any, callback: any) => {
   if (value) {
     for (let i = 0; i < addrs.value.length; i++) {
-      const hasName = addrs.value[i].ethAddr?.name;
+      const hasName = addrs.value[i].ethAddr?.name
       if (hasName == value && i != editIndex.value) {
-        callback(new Error("The name already exists"));
+        callback(new Error('The name already exists'))
       }
     }
-    callback();
+    callback()
   } else {
-    callback(new Error("Please input node name"));
+    callback(new Error('Please input node name'))
   }
-};
+}
 
 const addrCheck = (rule: any, value: any, callback: any) => {
   if (value.toString().length > 0) {
     for (let i = 0; i < addrs.value.length; i++) {
-      if(data.value.entity.nodeType == "gateway"){
-        const hasName = `${addrs.value[i].ethAddr?.entity.logicalAddr}.${addrs.value[i].ethAddr?.entity.nodeAddr}`;
-        const selfValue = `${data.value.entity.logicalAddr}.${data.value.entity.nodeAddr}`;
+      if (data.value.entity.nodeType == 'gateway') {
+        const hasName = `${addrs.value[i].ethAddr?.entity.logicalAddr}.${addrs.value[i].ethAddr?.entity.nodeAddr}`
+        const selfValue = `${data.value.entity.logicalAddr}.${data.value.entity.nodeAddr}`
         if (hasName == selfValue && i != editIndex.value) {
-          callback(new Error("The address already exists"));
+          callback(new Error('The address already exists'))
         }
-      }else{
-        const hasName = addrs.value[i].ethAddr?.entity.logicalAddr;
+      } else {
+        const hasName = addrs.value[i].ethAddr?.entity.logicalAddr
         if (hasName == value && i != editIndex.value) {
-          callback(new Error("The address already exists"));
+          callback(new Error('The address already exists'))
         }
       }
-
-     
     }
-    if(value < 0 || value > 0xFFFF){
-      callback(new Error("0 ~ 0xFFFF"));
+    if (value < 0 || value > 0xffff) {
+      callback(new Error('0 ~ 0xFFFF'))
     }
-    if(value==data.value.tester.testerLogicalAddr){
-      callback(new Error("Tester address can't be the same as Tester address"));
+    if (value == data.value.tester.testerLogicalAddr) {
+      callback(new Error("Tester address can't be the same as Tester address"))
     }
-    callback();
+    callback()
   } else {
-    callback(new Error("Logical address is required"));
+    callback(new Error('Logical address is required'))
   }
-};
+}
 const taddrCheck = (rule: any, value: any, callback: any) => {
   if (value.toString().length > 0) {
     for (let i = 0; i < addrs.value.length; i++) {
-      const hasName = addrs.value[i].ethAddr?.tester.testerLogicalAddr;
+      const hasName = addrs.value[i].ethAddr?.tester.testerLogicalAddr
       if (hasName == value && i != editIndex.value) {
-        callback(new Error("The address already exists"));
+        callback(new Error('The address already exists'))
       }
     }
-    if(value < 0 || value > 0xFFFF){
-      callback(new Error("0 ~ 0xFFFF"));
+    if (value < 0 || value > 0xffff) {
+      callback(new Error('0 ~ 0xFFFF'))
     }
-    if(value==data.value.entity.logicalAddr){
-      callback(new Error("Tester address can't be the same as ECU address"));
+    if (value == data.value.entity.logicalAddr) {
+      callback(new Error("Tester address can't be the same as ECU address"))
     }
-    callback();
+    callback()
   } else {
-    callback(new Error("Logical address is required"));
+    callback(new Error('Logical address is required'))
   }
-};
+}
 const vaddrCheck = (rule: any, value: any, callback: any) => {
-  if(data.value.virReqType == "unicast"||data.value.virReqType == "omit"){
-    if(value){
+  if (data.value.virReqType == 'unicast' || data.value.virReqType == 'omit') {
+    if (value) {
       //must be ip address
-      const reg=/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
-      if(!reg.test(value)){
-        callback(new Error("Invalid IP address"));
+      const reg = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/
+      if (!reg.test(value)) {
+        callback(new Error('Invalid IP address'))
       }
-      callback();
-    }else{
-      callback(new Error("Request address is required"));
+      callback()
+    } else {
+      callback(new Error('Request address is required'))
     }
-  }else{
-    callback();
+  } else {
+    callback()
   }
-};
+}
 
 const rules: FormRules<EthAddr> = {
-  "name": [
+  name: [
     {
       required: true,
-      message: "Please input addr name",
-      trigger: "blur",
-      validator: nameCheck,
-    },
+      message: 'Please input addr name',
+      trigger: 'blur',
+      validator: nameCheck
+    }
   ],
-  "entity.logicalAddr": [
+  'entity.logicalAddr': [
     {
       required: true,
-      trigger: "change",
-      type: "number",
-      transform:(v)=>Number(v),
-      validator: addrCheck,
-    },
+      trigger: 'change',
+      type: 'number',
+      transform: (v) => Number(v),
+      validator: addrCheck
+    }
   ],
-  "tester.testerLogicalAddr": [
+  'tester.testerLogicalAddr': [
     {
       required: true,
-      trigger: "change",
-      type: "number",
-      transform:(v)=>Number(v),
-      validator: taddrCheck,
-    },
+      trigger: 'change',
+      type: 'number',
+      transform: (v) => Number(v),
+      validator: taddrCheck
+    }
   ],
-  "entity.eid": [
+  'entity.eid': [
     {
       required: true,
-      trigger: "change",
-      message: "xx-xx-xx-xx-xx-xx",
-      pattern: /^([0-9A-Fa-f]{2}-){5}[0-9A-Fa-f]{2}$/,
-    },
+      trigger: 'change',
+      message: 'xx-xx-xx-xx-xx-xx',
+      pattern: /^([0-9A-Fa-f]{2}-){5}[0-9A-Fa-f]{2}$/
+    }
   ],
-  "entity.gid":[
+  'entity.gid': [
     {
       required: true,
-      trigger: "change",
-      message: "xx-xx-xx-xx-xx-xx",
-      pattern: /^([0-9A-Fa-f]{2}-){5}[0-9A-Fa-f]{2}$/,
-    },
+      trigger: 'change',
+      message: 'xx-xx-xx-xx-xx-xx',
+      pattern: /^([0-9A-Fa-f]{2}-){5}[0-9A-Fa-f]{2}$/
+    }
   ],
-  "entity.vin": [
+  'entity.vin': [
     {
       required: true,
-      trigger: "change",
-      message: "17 characters",
+      trigger: 'change',
+      message: '17 characters',
       min: 17,
-      max: 17,
-    },
+      max: 17
+    }
   ],
-  "virReqAddr": [
+  virReqAddr: [
     {
-      trigger: "change",
-      validator: vaddrCheck,
-    },
-  ],
-};
-
-
+      trigger: 'change',
+      validator: vaddrCheck
+    }
+  ]
+}
 
 const props = defineProps<{
-  index: number;
-  addrs: UdsAddress[];
-}>();
+  index: number
+  addrs: UdsAddress[]
+}>()
 
-const editIndex = toRef(props, "index");
-const addrs = toRef(props, "addrs")
+const editIndex = toRef(props, 'index')
+const addrs = toRef(props, 'addrs')
 
 onMounted(() => {
   ruleFormRef.value?.validate().catch(null)
@@ -313,8 +300,6 @@ async function dataValid() {
 defineExpose({
   dataValid
 })
-
-
 </script>
 <style scoped>
 .hardware {

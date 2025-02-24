@@ -5,22 +5,22 @@
  * Released under the MIT License.
  */
 
-'use strict';
+'use strict'
 
 function falsey(val, keywords) {
-  if (!val) return true;
-  let words = keywords || falsey.keywords;
-  if (!Array.isArray(words)) words = [words];
-  const lower = typeof val === 'string' ? val.toLowerCase() : null;
+  if (!val) return true
+  let words = keywords || falsey.keywords
+  if (!Array.isArray(words)) words = [words]
+  const lower = typeof val === 'string' ? val.toLowerCase() : null
   for (const word of words) {
     if (word === val) {
-      return true;
+      return true
     }
     if (word === lower) {
-      return true;
+      return true
     }
   }
-  return false;
+  return false
 }
 
 falsey.keywords = [
@@ -41,6 +41,6 @@ falsey.keywords = [
   'uh-uh',
   'veto',
   'zero'
-];
+]
 
-export default falsey;
+export default falsey

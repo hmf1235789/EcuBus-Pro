@@ -1,54 +1,49 @@
 <!--.vitepress/theme/MyLayout.vue-->
 <script setup>
 import DefaultTheme from 'vitepress/theme'
-import 'viewerjs/dist/viewer.css';
-import Viewer from 'viewerjs';
-import { onMounted } from 'vue';
-import {version} from '../../package.json'
+import 'viewerjs/dist/viewer.css'
+import Viewer from 'viewerjs'
+import { onMounted } from 'vue'
+import { version } from '../../package.json'
 const { Layout } = DefaultTheme
 
 function getVerion() {
- 
-  const actionElements = document.querySelectorAll('.action');
-    
-    // Iterate over each 'action' element
-    actionElements.forEach(actionElement => {
-      // Find all <a> elements within the current 'action' element
-      const anchorElements = actionElement.querySelectorAll('a');
-      
-      // Modify the content of each <a> element
-      anchorElements.forEach(anchor => {
-        if(anchor.textContent=='Download'){
-          anchor.textContent= `Download ${version}`
-          //修改src
-          anchor.href=`https://ecubus.oss-cn-chengdu.aliyuncs.com/app/EcuBus-Pro%20${data.version}.exe`
-        }
-        
-      });
-    });
+  const actionElements = document.querySelectorAll('.action')
+
+  // Iterate over each 'action' element
+  actionElements.forEach((actionElement) => {
+    // Find all <a> elements within the current 'action' element
+    const anchorElements = actionElement.querySelectorAll('a')
+
+    // Modify the content of each <a> element
+    anchorElements.forEach((anchor) => {
+      if (anchor.textContent == 'Download') {
+        anchor.textContent = `Download ${version}`
+        //修改src
+        anchor.href = `https://ecubus.oss-cn-chengdu.aliyuncs.com/app/EcuBus-Pro%20${data.version}.exe`
+      }
+    })
+  })
 }
 
 onMounted(() => {
   //viewer.js all class="featureImg" elements
-  const images = document.querySelectorAll('.featureImg');
-  const viewerContainer = document.createElement('div');
-  viewerContainer.style.display = 'none';
-  document.body.appendChild(viewerContainer);
-  images.forEach(img => viewerContainer.appendChild(img.cloneNode(true)));
+  const images = document.querySelectorAll('.featureImg')
+  const viewerContainer = document.createElement('div')
+  viewerContainer.style.display = 'none'
+  document.body.appendChild(viewerContainer)
+  images.forEach((img) => viewerContainer.appendChild(img.cloneNode(true)))
   const viewer = new Viewer(viewerContainer, {
     inline: false,
-    zoomRatio: 0.1,
-  });
+    zoomRatio: 0.1
+  })
   images.forEach((img, index) => {
     img.addEventListener('click', () => {
-      viewer.view(index);
-    });
-  });
+      viewer.view(index)
+    })
+  })
   getVerion()
-
-
-});
-
+})
 </script>
 
 <template>
@@ -62,26 +57,31 @@ onMounted(() => {
       </p>
     </template> -->
     <template #home-features-before>
-
       <div class="container">
         <div class="item">
           <h2>发送和接收消息</h2>
           <div class="description">
             <p>支持手动发送、快捷键发送和循环发送。</p>
           </div>
-          <img src="https://ecubus.oss-cn-chengdu.aliyuncs.com/main/main1.png" alt="发送和接收消息界面" class="featureImg">
+          <img
+            src="https://ecubus.oss-cn-chengdu.aliyuncs.com/main/main1.png"
+            alt="发送和接收消息界面"
+            class="featureImg"
+          />
         </div>
         <div class="item">
           <h2>UDS 诊断</h2>
           <div class="description">
             <p>全面支持 UDS 服务，将多个服务整合为简化的序列，并具有强大的 TS 脚本功能。</p>
           </div>
-          <img src="https://ecubus.oss-cn-chengdu.aliyuncs.com/main/main2.png" alt="加载数据库界面" class="featureImg">
+          <img
+            src="https://ecubus.oss-cn-chengdu.aliyuncs.com/main/main2.png"
+            alt="加载数据库界面"
+            class="featureImg"
+          />
         </div>
       </div>
-
     </template>
-
   </Layout>
 </template>
 <style scoped>
@@ -100,13 +100,16 @@ onMounted(() => {
   background-color: white;
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 6px 12px rgba(0, 0, 0, 0.15),
+    0 3px 6px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease-in-out;
 }
 
-
 .item:hover {
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2), 0 6px 12px rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.2),
+    0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 h1 {

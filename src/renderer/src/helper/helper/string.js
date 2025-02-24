@@ -1,9 +1,9 @@
 import Handlebars from 'handlebars'
 import { optionsFn } from './utils'
-import { isString } from 'lodash';
-import { isNumber } from 'lodash';
-import { isObject } from "lodash";
-const helpers = {};
+import { isString } from 'lodash'
+import { isNumber } from 'lodash'
+import { isObject } from 'lodash'
+const helpers = {}
 
 /**
  * Append the specified `suffix` to the given string.
@@ -20,30 +20,29 @@ const helpers = {};
  */
 
 helpers.append = function (str, suffix) {
-    if (typeof str === 'string' && typeof suffix === 'string') {
-        return str + suffix;
-    }
-    return str;
-};
-
+  if (typeof str === 'string' && typeof suffix === 'string') {
+    return str + suffix
+  }
+  return str
+}
 
 function chop(str) {
-    if (!isString(str)) return '';
-    var re = /^[-_.\W\s]+|[-_.\W\s]+$/g;
-    return str.trim().replace(re, '');
+  if (!isString(str)) return ''
+  const re = /^[-_.\W\s]+|[-_.\W\s]+$/g
+  return str.trim().replace(re, '')
 }
 function changecase(str, fn) {
-    if (!isString(str)) return '';
-    if (str.length === 1) {
-        return str.toLowerCase();
-    }
+  if (!isString(str)) return ''
+  if (str.length === 1) {
+    return str.toLowerCase()
+  }
 
-    str = chop(str).toLowerCase();
+  str = chop(str).toLowerCase()
 
-    var re = /[-_.\W\s]+(\w|$)/g;
-    return str.replace(re, function (_, ch) {
-        return fn(ch);
-    });
+  const re = /[-_.\W\s]+(\w|$)/g
+  return str.replace(re, function (_, ch) {
+    return fn(ch)
+  })
 }
 /**
  * camelCase the characters in the given `string`.
@@ -58,11 +57,11 @@ function changecase(str, fn) {
  */
 
 helpers.camelcase = function (str) {
-    if (!isString(str)) return '';
-    return changecase(str, function (ch) {
-        return ch.toUpperCase();
-    });
-};
+  if (!isString(str)) return ''
+  return changecase(str, function (ch) {
+    return ch.toUpperCase()
+  })
+}
 
 /**
  * Capitalize the first word in a sentence.
@@ -77,9 +76,9 @@ helpers.camelcase = function (str) {
  */
 
 helpers.capitalize = function (str) {
-    if (!isString(str)) return '';
-    return str.charAt(0).toUpperCase() + str.slice(1);
-};
+  if (!isString(str)) return ''
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
 
 /**
  * Capitalize all words in a string.
@@ -94,13 +93,13 @@ helpers.capitalize = function (str) {
  */
 
 helpers.capitalizeAll = function (str) {
-    if (!isString(str)) return '';
-    if (isString(str)) {
-        return str.replace(/\w\S*/g, function (word) {
-            return helpers.capitalize(word);
-        });
-    }
-};
+  if (!isString(str)) return ''
+  if (isString(str)) {
+    return str.replace(/\w\S*/g, function (word) {
+      return helpers.capitalize(word)
+    })
+  }
+}
 
 /**
  * Center a string using non-breaking spaces
@@ -112,15 +111,15 @@ helpers.capitalizeAll = function (str) {
  */
 
 helpers.center = function (str, spaces) {
-    if (!isString(str)) return '';
-    var space = '';
-    var i = 0;
-    while (i < spaces) {
-        space += '&nbsp;';
-        i++;
-    }
-    return space + str + space;
-};
+  if (!isString(str)) return ''
+  let space = ''
+  let i = 0
+  while (i < spaces) {
+    space += '&nbsp;'
+    i++
+  }
+  return space + str + space
+}
 
 /**
  * Like trim, but removes both extraneous whitespace **and
@@ -142,9 +141,9 @@ helpers.center = function (str, spaces) {
  */
 
 helpers.chop = function (str) {
-    if (!isString(str)) return '';
-    return chop(str);
-};
+  if (!isString(str)) return ''
+  return chop(str)
+}
 
 /**
  * dash-case the characters in `string`. Replaces non-word
@@ -160,11 +159,11 @@ helpers.chop = function (str) {
  */
 
 helpers.dashcase = function (str) {
-    if (!isString(str)) return '';
-    return changecase(str, function (ch) {
-        return '-' + ch;
-    });
-};
+  if (!isString(str)) return ''
+  return changecase(str, function (ch) {
+    return '-' + ch
+  })
+}
 
 /**
  * dot.case the characters in `string`.
@@ -179,11 +178,11 @@ helpers.dashcase = function (str) {
  */
 
 helpers.dotcase = function (str) {
-    if (!isString(str)) return '';
-    return changecase(str, function (ch) {
-        return '.' + ch;
-    });
-};
+  if (!isString(str)) return ''
+  return changecase(str, function (ch) {
+    return '.' + ch
+  })
+}
 
 /**
  * Lowercase all of the characters in the given string. Alias for [lowercase](#lowercase).
@@ -199,8 +198,8 @@ helpers.dotcase = function (str) {
  */
 
 helpers.downcase = function () {
-    return helpers.lowercase.apply(this, arguments);
-};
+  return helpers.lowercase.apply(this, arguments)
+}
 
 /**
  * Truncates a string to the specified `length`, and appends
@@ -219,13 +218,13 @@ helpers.downcase = function () {
  */
 
 helpers.ellipsis = function (str, limit) {
-    if (isString(str)) {
-        if (str.length <= limit) {
-            return str;
-        }
-        return helpers.truncate(str, limit) + '…';
+  if (isString(str)) {
+    if (str.length <= limit) {
+      return str
     }
-};
+    return helpers.truncate(str, limit) + '…'
+  }
+}
 
 /**
  * Replace spaces in a string with hyphens.
@@ -240,9 +239,9 @@ helpers.ellipsis = function (str, limit) {
  */
 
 helpers.hyphenate = function (str) {
-    if (!isString(str)) return '';
-    return str.split(' ').join('-');
-};
+  if (!isString(str)) return ''
+  return str.split(' ').join('-')
+}
 
 /**
  * Return true if `value` is a string.
@@ -257,8 +256,8 @@ helpers.hyphenate = function (str) {
  */
 
 helpers.isString = function (value) {
-    return typeof value === 'string';
-};
+  return typeof value === 'string'
+}
 
 /**
  * Lowercase all characters in the given string.
@@ -273,12 +272,12 @@ helpers.isString = function (value) {
  */
 
 helpers.lowercase = function (str) {
-    if (isObject(str) && str.fn) {
-        return str.fn(this).toLowerCase();
-    }
-    if (!isString(str)) return '';
-    return str.toLowerCase();
-};
+  if (isObject(str) && str.fn) {
+    return str.fn(this).toLowerCase()
+  }
+  if (!isString(str)) return ''
+  return str.toLowerCase()
+}
 
 /**
  * Return the number of occurrences of `substring` within the
@@ -295,17 +294,17 @@ helpers.lowercase = function (str) {
  */
 
 helpers.occurrences = function (str, substring) {
-    if (!isString(str)) return '';
-    var len = substring.length;
-    var pos = 0;
-    var n = 0;
+  if (!isString(str)) return ''
+  const len = substring.length
+  let pos = 0
+  let n = 0
 
-    while ((pos = str.indexOf(substring, pos)) > -1) {
-        n++;
-        pos += len;
-    }
-    return n;
-};
+  while ((pos = str.indexOf(substring, pos)) > -1) {
+    n++
+    pos += len
+  }
+  return n
+}
 
 /**
  * PascalCase the characters in `string`.
@@ -320,12 +319,12 @@ helpers.occurrences = function (str, substring) {
  */
 
 helpers.pascalcase = function (str) {
-    if (!isString(str)) return '';
-    str = changecase(str, function (ch) {
-        return ch.toUpperCase();
-    });
-    return str.charAt(0).toUpperCase() + str.slice(1);
-};
+  if (!isString(str)) return ''
+  str = changecase(str, function (ch) {
+    return ch.toUpperCase()
+  })
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
 
 /**
  * path/case the characters in `string`.
@@ -340,11 +339,11 @@ helpers.pascalcase = function (str) {
  */
 
 helpers.pathcase = function (str) {
-    if (!isString(str)) return '';
-    return changecase(str, function (ch) {
-        return '/' + ch;
-    });
-};
+  if (!isString(str)) return ''
+  return changecase(str, function (ch) {
+    return '/' + ch
+  })
+}
 
 /**
  * Replace spaces in the given string with pluses.
@@ -360,10 +359,10 @@ helpers.pathcase = function (str) {
  */
 
 helpers.plusify = function (str, ch) {
-    if (!isString(str)) return '';
-    if (!isString(ch)) ch = ' ';
-    return str.split(ch).join('+');
-};
+  if (!isString(str)) return ''
+  if (!isString(ch)) ch = ' '
+  return str.split(ch).join('+')
+}
 
 /**
  * Prepends the given `string` with the specified `prefix`.
@@ -380,10 +379,8 @@ helpers.plusify = function (str, ch) {
  */
 
 helpers.prepend = function (str, prefix) {
-    return typeof str === 'string' && typeof prefix === 'string'
-        ? (prefix + str)
-        : str;
-};
+  return typeof str === 'string' && typeof prefix === 'string' ? prefix + str : str
+}
 
 /**
  * Render a block without processing mustache templates inside the block.
@@ -402,19 +399,19 @@ helpers.prepend = function (str, prefix) {
  */
 
 helpers.raw = function (options) {
-    var str = options.fn();
-    var opts = optionsFn(this, options);
-    if (opts.escape !== false) {
-        var idx = 0;
-        while (((idx = str.indexOf('{{', idx)) !== -1)) {
-            if (str[idx - 1] !== '\\') {
-                str = str.slice(0, idx) + '\\' + str.slice(idx);
-            }
-            idx += 3;
-        }
+  let str = options.fn()
+  const opts = optionsFn(this, options)
+  if (opts.escape !== false) {
+    let idx = 0
+    while ((idx = str.indexOf('{{', idx)) !== -1) {
+      if (str[idx - 1] !== '\\') {
+        str = str.slice(0, idx) + '\\' + str.slice(idx)
+      }
+      idx += 3
     }
-    return str;
-};
+  }
+  return str
+}
 
 /**
  * Remove all occurrences of `substring` from the given `str`.
@@ -430,10 +427,10 @@ helpers.raw = function (options) {
  */
 
 helpers.remove = function (str, ch) {
-    if (!isString(str)) return '';
-    if (!isString(ch)) return str;
-    return str.split(ch).join('');
-};
+  if (!isString(str)) return ''
+  if (!isString(ch)) return str
+  return str.split(ch).join('')
+}
 
 /**
  * Remove the first occurrence of `substring` from the given `str`.
@@ -449,10 +446,10 @@ helpers.remove = function (str, ch) {
  */
 
 helpers.removeFirst = function (str, ch) {
-    if (!isString(str)) return '';
-    if (!isString(ch)) return str;
-    return str.replace(ch, '');
-};
+  if (!isString(str)) return ''
+  if (!isString(ch)) return str
+  return str.replace(ch, '')
+}
 
 /**
  * Replace all occurrences of substring `a` with substring `b`.
@@ -469,11 +466,11 @@ helpers.removeFirst = function (str, ch) {
  */
 
 helpers.replace = function (str, a, b) {
-    if (!isString(str)) return '';
-    if (!isString(a)) return str;
-    if (!isString(b)) b = '';
-    return str.split(a).join(b);
-};
+  if (!isString(str)) return ''
+  if (!isString(a)) return str
+  if (!isString(b)) b = ''
+  return str.split(a).join(b)
+}
 
 /**
  * Replace the first occurrence of substring `a` with substring `b`.
@@ -490,11 +487,11 @@ helpers.replace = function (str, a, b) {
  */
 
 helpers.replaceFirst = function (str, a, b) {
-    if (!isString(str)) return '';
-    if (!isString(a)) return str;
-    if (!isString(b)) b = '';
-    return str.replace(a, b);
-};
+  if (!isString(str)) return ''
+  if (!isString(a)) return str
+  if (!isString(b)) b = ''
+  return str.replace(a, b)
+}
 
 // /**
 //  * Reverse a string.
@@ -526,12 +523,12 @@ helpers.replaceFirst = function (str, a, b) {
  */
 
 helpers.sentence = function (str) {
-    if (!isString(str)) return '';
-    // eslint-disable-next-line no-useless-escape
-    return str.replace(/((?:\S[^\.\?\!]*)[\.\?\!]*)/g, function (txt) {
-        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-    });
-};
+  if (!isString(str)) return ''
+  // eslint-disable-next-line no-useless-escape
+  return str.replace(/((?:\S[^\.\?\!]*)[\.\?\!]*)/g, function (txt) {
+    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+  })
+}
 
 /**
  * snake_case the characters in the given `string`.
@@ -546,11 +543,11 @@ helpers.sentence = function (str) {
  */
 
 helpers.snakecase = function (str) {
-    if (!isString(str)) return '';
-    return changecase(str, function (ch) {
-        return '_' + ch;
-    });
-};
+  if (!isString(str)) return ''
+  return changecase(str, function (ch) {
+    return '_' + ch
+  })
+}
 
 /**
  * Split `string` by the given `character`.
@@ -565,10 +562,10 @@ helpers.snakecase = function (str) {
  */
 
 helpers.split = function (str, ch) {
-    if (!isString(str)) return '';
-    if (!isString(ch)) ch = ',';
-    return str.split(ch);
-};
+  if (!isString(str)) return ''
+  if (!isString(ch)) ch = ','
+  return str.split(ch)
+}
 
 /**
  * Tests whether a string begins with the given prefix.
@@ -590,16 +587,16 @@ helpers.split = function (str, ch) {
  */
 
 helpers.startsWith = function (prefix, str, options) {
-    var args = [].slice.call(arguments);
-    options = args.pop();
-    if (isString(str) && str.indexOf(prefix) === 0) {
-        return options.fn(this);
-    }
-    if (typeof options.inverse === 'function') {
-        return options.inverse(this);
-    }
-    return '';
-};
+  const args = [].slice.call(arguments)
+  options = args.pop()
+  if (isString(str) && str.indexOf(prefix) === 0) {
+    return options.fn(this)
+  }
+  if (typeof options.inverse === 'function') {
+    return options.inverse(this)
+  }
+  return ''
+}
 
 /**
  * Title case the given string.
@@ -614,18 +611,18 @@ helpers.startsWith = function (prefix, str, options) {
  */
 
 helpers.titleize = function (str) {
-    if (!isString(str)) return '';
-    var title = str.replace(/[- _]+/g, ' ');
-    var words = title.split(' ');
-    var len = words.length;
-    var res = [];
-    var i = 0;
-    while (len--) {
-        var word = words[i++];
-        res.push(helpers.capitalize(word));
-    }
-    return res.join(' ');
-};
+  if (!isString(str)) return ''
+  const title = str.replace(/[- _]+/g, ' ')
+  const words = title.split(' ')
+  let len = words.length
+  const res = []
+  let i = 0
+  while (len--) {
+    const word = words[i++]
+    res.push(helpers.capitalize(word))
+  }
+  return res.join(' ')
+}
 
 /**
  * Removes extraneous whitespace from the beginning and end
@@ -641,8 +638,8 @@ helpers.titleize = function (str) {
  */
 
 helpers.trim = function (str) {
-    return typeof str === 'string' ? str.trim() : '';
-};
+  return typeof str === 'string' ? str.trim() : ''
+}
 
 /**
  * Removes extraneous whitespace from the beginning of a string.
@@ -657,10 +654,10 @@ helpers.trim = function (str) {
  */
 
 helpers.trimLeft = function (str) {
-    if (isString(str)) {
-        return str.replace(/^\s+/, '');
-    }
-};
+  if (isString(str)) {
+    return str.replace(/^\s+/, '')
+  }
+}
 
 /**
  * Removes extraneous whitespace from the end of a string.
@@ -675,10 +672,10 @@ helpers.trimLeft = function (str) {
  */
 
 helpers.trimRight = function (str) {
-    if (isString(str)) {
-        return str.replace(/\s+$/, '');
-    }
-};
+  if (isString(str)) {
+    return str.replace(/\s+$/, '')
+  }
+}
 
 /**
  * Truncate a string to the specified `length`. Also see [ellipsis](#ellipsis).
@@ -698,16 +695,16 @@ helpers.trimRight = function (str) {
  */
 
 helpers.truncate = function (str, limit, suffix) {
-    if (isString(str)) {
-        if (typeof suffix !== 'string') {
-            suffix = '';
-        }
-        if (str.length > limit) {
-            return str.slice(0, limit - suffix.length) + suffix;
-        }
-        return str;
+  if (isString(str)) {
+    if (typeof suffix !== 'string') {
+      suffix = ''
     }
-};
+    if (str.length > limit) {
+      return str.slice(0, limit - suffix.length) + suffix
+    }
+    return str
+  }
+}
 
 /**
  * Truncate a string to have the specified number of words.
@@ -730,21 +727,21 @@ helpers.truncate = function (str, limit, suffix) {
  */
 
 helpers.truncateWords = function (str, count, suffix) {
-    if (isString(str) && isNumber(count)) {
-        if (typeof suffix !== 'string') {
-            suffix = '…';
-        }
-
-        var num = Number(count);
-        var arr = str.split(/[ \t]/);
-        if (num > arr.length) {
-            arr = arr.slice(0, num);
-        }
-
-        var val = arr.join(' ').trim();
-        return val + suffix;
+  if (isString(str) && isNumber(count)) {
+    if (typeof suffix !== 'string') {
+      suffix = '…'
     }
-};
+
+    const num = Number(count)
+    let arr = str.split(/[ \t]/)
+    if (num > arr.length) {
+      arr = arr.slice(0, num)
+    }
+
+    const val = arr.join(' ').trim()
+    return val + suffix
+  }
+}
 
 /**
  * Uppercase all of the characters in the given string. Alias for [uppercase](#uppercase).
@@ -760,8 +757,8 @@ helpers.truncateWords = function (str, count, suffix) {
  */
 
 helpers.upcase = function () {
-    return helpers.uppercase.apply(this, arguments);
-};
+  return helpers.uppercase.apply(this, arguments)
+}
 
 /**
  * Uppercase all of the characters in the given string. If used as a
@@ -781,13 +778,13 @@ helpers.upcase = function () {
  */
 
 helpers.uppercase = function (str) {
-    if (isObject(str) && str.fn) {
-        return str.fn(this).toUpperCase();
-    }
-    if (!isString(str)) return '';
-    return str.toUpperCase();
-};
+  if (isObject(str) && str.fn) {
+    return str.fn(this).toUpperCase()
+  }
+  if (!isString(str)) return ''
+  return str.toUpperCase()
+}
 
 for (const key of Object.keys(helpers)) {
-    Handlebars.registerHelper(key, helpers[key])
+  Handlebars.registerHelper(key, helpers[key])
 }

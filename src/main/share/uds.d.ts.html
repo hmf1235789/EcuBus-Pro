@@ -109,7 +109,7 @@ interface CanMsgType {
 /**
  * @category UDS
  */
-type ServiceId = "0x10" | "0x11" | "0x27" | "0x28" | "0x29" | "0x3E" | "0x83" | "0x84" | "0x85" | "0x87" | "0x22" | "0x23" | "0x24" | "0x2A" | "0x2C" | "0x2E" | "0x3D" | "0x14" | "0x19" | "0x2F" | "0x31" | "0x34" | "0x35" | "0x36" | "0x37" | "0x38" | "Job";
+type ServiceId = '0x10' | '0x11' | '0x27' | '0x28' | '0x29' | '0x3E' | '0x83' | '0x84' | '0x85' | '0x87' | '0x22' | '0x23' | '0x24' | '0x2A' | '0x2C' | '0x2E' | '0x3D' | '0x14' | '0x19' | '0x2F' | '0x31' | '0x34' | '0x35' | '0x36' | '0x37' | '0x38' | 'Job';
 
 interface VinInfo {
     vin: string;
@@ -332,8 +332,8 @@ type EventMap = EventMapSend & EventMapRecv;
  * @category UDS
  */
 type ServiceEvent = {
-    'send': DiagRequest;
-    'recv': DiagResponse;
+    send: DiagRequest;
+    recv: DiagResponse;
 };
 /**
  * @category UDS
@@ -1045,10 +1045,10 @@ declare class UtilClass {
  *
  *     ```ts
  *     Util.On('Can.DiagRequest.send', async (req) => {
-   *        // The req is a `DiagRequest`
-   *        console.log(req.getServiceName(), ': send');
-   *     });
-   *     ```
+ *        // The req is a `DiagRequest`
+ *        console.log(req.getServiceName(), ': send');
+ *     });
+ *     ```
  *
  * 3. *recv function*
  *     > * This function will be called after the response message has been received.
@@ -1056,10 +1056,10 @@ declare class UtilClass {
  *
  *     ```ts
  *     Util.On('Can.DiagRequest.recv', async (req) => {
-   *        // The req is a `DiagResponse`
-   *        console.log(req.getServiceName(), ':recv');
-   *     });
-   *     ```
+ *        // The req is a `DiagResponse`
+ *        console.log(req.getServiceName(), ':recv');
+ *     });
+ *     ```
  *
  * 4. **More**
  *     > For more details, please refer to the {@link UDSClass | `UDSClass`} class.

@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <el-header height="35px" style="margin: 0px;padding: 0px;">
+    <el-header height="35px" style="margin: 0px; padding: 0px">
       <HeaderView />
     </el-header>
     <div>
@@ -9,19 +9,17 @@
   </el-container>
 </template>
 
-
 <script setup lang="ts">
 import HeaderView from '@r/views/header/header.vue'
-import { onMounted, ref } from 'vue';
-import { ElMessage, ElNotification } from 'element-plus';
-import { useDataStore } from './stores/data';
-import { useProjectStore } from './stores/project';
-
+import { onMounted, ref } from 'vue'
+import { ElMessage, ElNotification } from 'element-plus'
+import { useDataStore } from './stores/data'
+import { useProjectStore } from './stores/project'
 
 const data = useDataStore()
 const project = useProjectStore()
 
-window.globalStart=ref(false)
+window.globalStart = ref(false)
 
 data.$subscribe(() => {
   if (project.open) {
@@ -29,18 +27,17 @@ data.$subscribe(() => {
   }
 })
 
-
 window.electron.ipcRenderer.on('ipc-global-stop', () => {
   window.globalStart.value = false
 })
-
 </script>
 <style lang="scss">
 body {
   margin: 0px;
   padding: 0px;
-  font-family: Inter, 'Helvetica Neue', Helvetica, 'PingFang SC',
-    'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+  font-family:
+    Inter, 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    '微软雅黑', Arial, sans-serif;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
   -moz-user-select: none;

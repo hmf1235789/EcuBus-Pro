@@ -1,6 +1,4 @@
-import crypto from 'crypto';
-import CMAC from './cmac';
+import crypto from 'crypto'
+import CMAC from './cmac'
 
-
-export { CMAC };
-
+export { CMAC }

@@ -19,9 +19,8 @@ import panelIcon from '@iconify/icons-material-symbols/pan-tool'
 import log from 'electron-log'
 import graphIcon from '@iconify/icons-ep/histogram'
 
-
-type WinsType = ProjectState["project"]['wins'];
-type WinValueType = WinsType[keyof WinsType];
+type WinsType = ProjectState['project']['wins']
+type WinValueType = WinsType[keyof WinsType]
 export interface LayoutItem {
   i: string
   x: number
@@ -190,7 +189,7 @@ const layoutMap: Record<string, LayoutItem> = {
     key: 'DBC',
     component: defineAsyncComponent(() => import('../../database/dbc/index.vue')),
     icon: database
-  },  
+  }
   // script: {
   //   i: 'Script',
   //   x: 0,
@@ -238,25 +237,29 @@ export class Layout {
 
     for (const l of Object.keys(this.data.project.wins)) {
       if (this.winEl[l]) {
-        nextTick(()=>{
+        nextTick(() => {
           const offset = this.winEl[l].offset()
           const topGap = offset.top - this.data.project.wins[l].pos.y
-          if (this.data.project.wins[l].layoutType!='bottom') {
-            this.winEl[l].draggable('option', 'containment', [200 - this.data.project.wins[l].pos.w, topGap, this.width - 100, topGap + this.height - 50])
+          if (this.data.project.wins[l].layoutType != 'bottom') {
+            this.winEl[l].draggable('option', 'containment', [
+              200 - this.data.project.wins[l].pos.w,
+              topGap,
+              this.width - 100,
+              topGap + this.height - 50
+            ])
           }
         })
-       
       }
     }
   }
   async restoreWin() {
     if (Object.values(this.data.project.wins).length == 0) {
       this.data.project.wins['message'] = {
-        "pos": {
-          "x": 383,
-          "y": 219,
-          "w": 1280,
-          "h": 200
+        pos: {
+          x: 383,
+          y: 219,
+          w: 1280,
+          h: 200
         },
         options: {
           params: {}
@@ -266,21 +269,16 @@ export class Layout {
         id: 'message',
         layoutType: 'bottom'
       }
-
-
     }
     for (const l of Object.values(this.data.project.wins)) {
       await this.addWin(l.title, l.id, { name: l.options.name, params: l.options.params }, false)
-
     }
     for (const l of Object.values(this.data.project.wins)) {
       if (l.isMax) {
         this.maxWinId.value = l.id
       }
-
     }
     this.winSizeCheck(this.height, this.width)
-
   }
   setupParentElement(parentSelector: string) {
     this.parentElement = document.querySelector(parentSelector)
@@ -308,7 +306,13 @@ export class Layout {
   getLayoutType(id: string) {
     return this.validLayout[this.data.project.wins[id].title].layoutType
   }
-  layoutInit(id: string, dragSelect: string, resizeSelect: string, enable: boolean, layoutType?: 'bottom' | 'top' | 'left' | 'right') {
+  layoutInit(
+    id: string,
+    dragSelect: string,
+    resizeSelect: string,
+    enable: boolean,
+    layoutType?: 'bottom' | 'top' | 'left' | 'right'
+  ) {
     const target = document.querySelector(resizeSelect) as HTMLElement
     target.style.position = 'absolute'
     target.style.zIndex = `${this.zIndex++}`
@@ -325,41 +329,36 @@ export class Layout {
     const data = this.data.project.wins[id]
     const drag = document.querySelector(dragSelect) as HTMLElement
     if (target && this.parentElement && data) {
-
       let v = 'e, s'
 
       if (layoutType == 'bottom') {
         v = 'n'
       }
 
-      this.winEl[id].resizable(
-        {
-          containment: layoutType == 'bottom' ? false : this.parentElement,
-          handles: v,
-          // grid: [this.grid, this.grid],
-          animate: false,
-          disabled: !enable,
-          aspectRatio: false,
-          minWidth: this.validLayout[data.title].minW || 200,
-          minHeight: this.validLayout[data.title].minH || 100,
-          resize: (e, ui) => {
-
-            data.pos.w = ui.size.width
-            data.pos.h = ui.size.height
-            if(layoutType == 'bottom'){
-              //remove element height and top style
-              this.winEl[id].css('height', '')
-              this.winEl[id].css('top', '')
-            }
-            
+      this.winEl[id].resizable({
+        containment: layoutType == 'bottom' ? false : this.parentElement,
+        handles: v,
+        // grid: [this.grid, this.grid],
+        animate: false,
+        disabled: !enable,
+        aspectRatio: false,
+        minWidth: this.validLayout[data.title].minW || 200,
+        minHeight: this.validLayout[data.title].minH || 100,
+        resize: (e, ui) => {
+          data.pos.w = ui.size.width
+          data.pos.h = ui.size.height
+          if (layoutType == 'bottom') {
+            //remove element height and top style
+            this.winEl[id].css('height', '')
+            this.winEl[id].css('top', '')
           }
         }
-      )
+      })
       if (drag) {
         //get this.winEl[id] offset form client
         const offset = this.winEl[id].offset()
         const topGap = offset.top - data.pos.y
-      
+
         this.winEl[id].draggable({
           snapTolerance: 10,
           handle: drag,
@@ -369,20 +368,18 @@ export class Layout {
 
           cursor: 'move',
           containment: [200 - data.pos.w, topGap, this.width - 100, topGap + this.height - 50],
-          snap: ".uds-window",
-          snapMode: "outer",
+          snap: '.uds-window',
+          snapMode: 'outer',
           drag: (e, ui) => {
             if (data.isMax) {
               e.preventDefault()
             }
-
-
           },
           stop: (e, ui) => {
             data.pos.x = ui.position.left
             data.pos.y = ui.position.top
           }
-        });
+        })
 
         // interact(drag).draggable({
         //   // enable inertial throwing
@@ -500,9 +497,6 @@ export class Layout {
         //       data.pos.x = x
         //       data.pos.y = y
 
-
-
-
         //     },
 
         //     // call this function on every dragend event
@@ -563,7 +557,6 @@ export class Layout {
     }
     const layoutType = this.validLayout[item.title].layoutType
     if (item.isMax) {
-
       item.isMax = false
       this.maxWinId.value = undefined
       item.pos = cloneDeep(item.backupPos ?? item.pos)
@@ -579,7 +572,7 @@ export class Layout {
       item.hide = false
       item.isMax = true
       this.layoutInit(key, `#win${key} .uds-draggable`, `#win${key}`, false, layoutType)
-      this.event.emit(`max:${key}`, item, false)     
+      this.event.emit(`max:${key}`, item, false)
     }
   }
   changeWinName(id: string, name: string) {
@@ -594,26 +587,24 @@ export class Layout {
         item.pos.w = maxW
         item.pos.h = maxH + 28
         if (item.backupPos) {
-          if (item.backupPos.x > (maxW - 50)) {
+          if (item.backupPos.x > maxW - 50) {
             item.backupPos.x = maxW - 50
           }
-          if (item.backupPos.y > (maxH - 50)) {
+          if (item.backupPos.y > maxH - 50) {
             item.backupPos.y = maxH - 50
           }
         }
       } else {
-        if (item.pos.x > (maxW - 50)) {
+        if (item.pos.x > maxW - 50) {
           item.pos.x = maxW - 50
         }
-        if (item.pos.y > (maxH - 50)) {
+        if (item.pos.y > maxH - 50) {
           item.pos.y = maxH - 50
         }
         if (item.pos.y < 0 && !item.isMax) {
           item.pos.y = 0
         }
       }
-
-
     }
   }
   async addWin(
@@ -643,7 +634,6 @@ export class Layout {
           item.options.name = options.name
           // this.data.projectDirty = true
         }
-
       }
       if (options?.params) {
         if (!isEqual(item.options.params, options.params)) {
@@ -666,19 +656,24 @@ export class Layout {
     } else {
       const t1 = this.validLayout[title]
 
-      let x = 0, y = 0
+      let x = 0,
+        y = 0
 
       x = this.width / 2 - t1.w / 2
       y = this.height / 2 - t1.h / 2
       if (this.activeWin.value && this.data.project.wins[this.activeWin.value]) {
         const activePos = this.data.project.wins[this.activeWin.value].pos
 
-
-        if (activePos && activePos.x > 100 && activePos.y > 100 && activePos.x < (this.width - 100) && activePos.y < (this.height - 100)) {
+        if (
+          activePos &&
+          activePos.x > 100 &&
+          activePos.y > 100 &&
+          activePos.x < this.width - 100 &&
+          activePos.y < this.height - 100
+        ) {
           x = activePos.x + 20
           y = activePos.y + 20
         }
-
       }
 
       if (x < 0) {
@@ -702,20 +697,16 @@ export class Layout {
         this.data.project.wins[id].options.params = options.params
       }
 
-
       await nextTick()
       this.layoutInit(id, `#win${id} .uds-draggable`, `#win${id}`, true, layoutType)
       this.event.emit('add', this.data.project.wins[id])
       // this.data.projectDirty = true
       this.clickWin(id)
-
     }
     this.activeWin.value = id
   }
   setWinModified(key: string, modified: boolean) {
     this.modify.value[key] = modified
-
-
   }
   removeWin(key: string, force?: boolean) {
     const item = this.data.project.wins[key]
@@ -766,16 +757,19 @@ export class Layout {
       this.clickWin(id)
       q.hide = false
       if (this.winEl[id]) {
-        
-        nextTick(()=>{
+        nextTick(() => {
           const offset = this.winEl[id].offset()
           const topGap = offset.top - this.data.project.wins[id].pos.y
-          
-          if (this.data.project.wins[id].layoutType!='bottom') {
-            this.winEl[id].draggable('option', 'containment', [200 - this.data.project.wins[id].pos.w, topGap, this.width - 100, topGap + this.height - 50])
+
+          if (this.data.project.wins[id].layoutType != 'bottom') {
+            this.winEl[id].draggable('option', 'containment', [
+              200 - this.data.project.wins[id].pos.w,
+              topGap,
+              this.width - 100,
+              topGap + this.height - 50
+            ])
           }
         })
-       
       }
       this.event.emit('show', q)
     }

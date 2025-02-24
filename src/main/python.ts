@@ -151,7 +151,7 @@ export class Python {
     const buf = Buffer.concat([len, Buffer.from(str)])
     this.pythonShell.send(buf)
   }
-  async send(event: string, data: any){
+  async send(event: string, data: any) {
     if (!this.closed) {
       return new Promise<string>((resolve, reject) => {
         const cmd_id = this.id++
@@ -159,7 +159,7 @@ export class Python {
         this.postMessage(event, cmd_id, JSON.stringify(data))
       })
     } else {
-      throw this.lastErr||new Error('python shell closed')
+      throw this.lastErr || new Error('python shell closed')
     }
   }
 

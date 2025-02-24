@@ -1,10 +1,17 @@
 <template>
-  <el-form :model="data" label-width="120px" size="small" :disabled="globalStart" :rules="rules" ref="ruleFormRef" class="hardware"
-    hide-required-asterisk>
+  <el-form
+    ref="ruleFormRef"
+    :model="data"
+    label-width="120px"
+    size="small"
+    :disabled="globalStart"
+    :rules="rules"
+    class="hardware"
+    hide-required-asterisk
+  >
     <el-form-item label="Address name" required prop="name">
       <el-input v-model="data.name" />
     </el-form-item>
-
 
     <el-form-item label="Addr Format" required prop="addrFormat">
       <el-select v-model="data.addrFormat">
@@ -21,9 +28,7 @@
         <el-option label="ADDR_FUNCTIONAL" :value="CAN_ADDR_TYPE.FUNCTIONAL" />
       </el-select>
     </el-form-item>
-    <el-divider content-position="left">
-      CAN Base
-    </el-divider>
+    <el-divider content-position="left"> CAN Base </el-divider>
     <el-form-item label="CAN-ID Type" required prop="idType">
       <el-select v-model="data.idType">
         <el-option label="STANDARD_ID" :value="CAN_ID_TYPE.STANDARD" />
@@ -31,7 +36,6 @@
       </el-select>
     </el-form-item>
     <el-form-item label-width="0">
-
       <el-col :span="8">
         <el-form-item label="CAN FD" prop="canfd">
           <el-checkbox v-model="data.canfd" />
@@ -47,10 +51,8 @@
           <el-checkbox v-model="data.remote" />
         </el-form-item>
       </el-col>
-
     </el-form-item>
     <el-form-item label-width="0">
-
       <el-col :span="8">
         <el-form-item label="N_SA" prop="SA" required>
           <el-input v-model="data.SA" />
@@ -66,10 +68,8 @@
           <el-input v-model="data.AE" />
         </el-form-item>
       </el-col>
-
     </el-form-item>
     <el-form-item label-width="0">
-
       <el-col :span="12">
         <el-form-item label="CAN_ID TX" prop="canIdTx">
           <el-input v-model="data.canIdTx" :disabled="!canidNeed" />
@@ -80,10 +80,8 @@
           <el-input v-model="data.canIdRx" :disabled="!canidNeed" />
         </el-form-item>
       </el-col>
-
     </el-form-item>
     <el-form-item label-width="0">
-
       <el-col :span="12">
         <el-form-item label="CAN_ID TX (calc)">
           <el-input v-model="canidCalcTx" disabled />
@@ -94,32 +92,28 @@
           <el-input v-model="canidCalcRx" disabled />
         </el-form-item>
       </el-col>
-
     </el-form-item>
     <el-form-item label="DLC" prop="dlc">
-          <template #label="{ label }">
-            <span class="vm">
-              <span style="margin-right: 2px">{{ label }}</span>
-              <el-tooltip>
-                <template #content>
-                  CAN:0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9-15:8<br>
-                  CAN-FD:0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:12,10:16,11:20,12:24,13:32,14:48,15:64
-                </template>
+      <template #label="{ label }">
+        <span class="vm">
+          <span style="margin-right: 2px">{{ label }}</span>
+          <el-tooltip>
+            <template #content>
+              CAN:0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9-15:8<br />
+              CAN-FD:0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:12,10:16,11:20,12:24,13:32,14:48,15:64
+            </template>
 
-                <el-icon>
-                  <InfoFilled />
-                </el-icon>
-              </el-tooltip>
-            </span>
-          </template>
-          <el-input-number :min="8" :max="15" v-model="data.dlc" controls-position="right"/>
-        </el-form-item>
+            <el-icon>
+              <InfoFilled />
+            </el-icon>
+          </el-tooltip>
+        </span>
+      </template>
+      <el-input-number v-model="data.dlc" :min="8" :max="15" controls-position="right" />
+    </el-form-item>
 
-    <el-divider content-position="left">
-      TP Base
-    </el-divider>
-  <el-form-item label-width="0">
-
+    <el-divider content-position="left"> TP Base </el-divider>
+    <el-form-item label-width="0">
       <el-col :span="12">
         <el-form-item label="Padding Enable" prop="padding">
           <el-checkbox v-model="data.padding" />
@@ -130,11 +124,9 @@
           <el-input v-model="data.paddingValue" :disabled="!data.padding" />
         </el-form-item>
       </el-col>
-
     </el-form-item>
-   
-    <el-form-item label-width="0">
 
+    <el-form-item label-width="0">
       <el-col :span="12">
         <el-form-item label="nAs" prop="nAs">
           <template #label="{ label }">
@@ -142,8 +134,8 @@
               <span style="margin-right: 2px">{{ label }}</span>
               <el-tooltip>
                 <template #content>
-                  Time for transmission of the CAN frame (any N-PDU) on the
-                  sender side (see ISO 15765-2)
+                  Time for transmission of the CAN frame (any N-PDU) on the sender side (see ISO
+                  15765-2)
                 </template>
                 <el-icon>
                   <InfoFilled />
@@ -162,8 +154,8 @@
               <span style="margin-right: 2px">{{ label }}</span>
               <el-tooltip>
                 <template #content>
-                  Time for transmission of the CAN frame (any N-PDU) on the
-                  receiver side (see ISO 15765-2)
+                  Time for transmission of the CAN frame (any N-PDU) on the receiver side (see ISO
+                  15765-2)
                 </template>
                 <el-icon>
                   <InfoFilled />
@@ -174,10 +166,8 @@
           <el-input v-model.number="data.nAr" />
         </el-form-item>
       </el-col>
-
     </el-form-item>
     <el-form-item label-width="0">
-
       <el-col :span="12">
         <el-form-item label="nCr" prop="nCr">
           <template #label="{ label }">
@@ -185,8 +175,7 @@
               <span style="margin-right: 2px">{{ label }}</span>
               <el-tooltip>
                 <template #content>
-                  Time until reception of the next consecutive frame N-PDU
-                  (see ISO 15765-2)
+                  Time until reception of the next consecutive frame N-PDU (see ISO 15765-2)
                 </template>
                 <el-icon>
                   <InfoFilled />
@@ -204,8 +193,7 @@
               <span style="margin-right: 2px">{{ label }}</span>
               <el-tooltip>
                 <template #content>
-                  Time until reception of the next flow control N-PDU (see
-                  ISO 15765-2)
+                  Time until reception of the next flow control N-PDU (see ISO 15765-2)
                 </template>
                 <el-icon>
                   <InfoFilled />
@@ -216,10 +204,8 @@
           <el-input v-model.number="data.nBs" />
         </el-form-item>
       </el-col>
-
     </el-form-item>
     <el-form-item label-width="0">
-
       <el-col :span="12">
         <el-form-item label="nBr" prop="nBr">
           <template #label="{ label }">
@@ -227,8 +213,7 @@
               <span style="margin-right: 2px">{{ label }}</span>
               <el-tooltip>
                 <template #content>
-                  Time until transmission of the next FlowControl N_PDU
-                  (see ISO 15765-2)
+                  Time until transmission of the next FlowControl N_PDU (see ISO 15765-2)
                 </template>
                 <el-icon>
                   <InfoFilled />
@@ -246,8 +231,7 @@
               <span style="margin-right: 2px">{{ label }}</span>
               <el-tooltip>
                 <template #content>
-                  Time until transmission of the next ConsecutiveFrame N_PDU (see
-                  ISO 15765-2)
+                  Time until transmission of the next ConsecutiveFrame N_PDU (see ISO 15765-2)
                 </template>
                 <el-icon>
                   <InfoFilled />
@@ -258,10 +242,8 @@
           <el-input v-model.number="data.nCs" />
         </el-form-item>
       </el-col>
-
     </el-form-item>
     <el-form-item label-width="0">
-
       <el-col :span="12">
         <el-form-item label="Block Size" prop="bs">
           <el-input v-model.number="data.bs" />
@@ -272,16 +254,13 @@
           <el-input v-model.number="data.stMin" />
         </el-form-item>
       </el-col>
-
     </el-form-item>
     <el-form-item label-width="0">
-
       <el-col :span="12">
         <el-form-item label="MAX WTF" prop="maxWTF">
           <el-input v-model.number="data.maxWTF" />
         </el-form-item>
       </el-col>
-
     </el-form-item>
   </el-form>
 </template>
@@ -296,236 +275,209 @@ import {
   onUnmounted,
   ref,
   toRef,
-  watch,
-} from "vue";
+  watch
+} from 'vue'
 import {
   CanAddr,
   calcCanIdMixed,
   calcCanIdNormalFixed,
   CAN_ADDR_FORMAT,
   CAN_ID_TYPE,
-  CAN_ADDR_TYPE,
-} from "nodeCan/can";
-import { v4 } from "uuid";
-import { type FormRules, type FormInstance, ElMessageBox } from "element-plus";
-import { assign, cloneDeep } from "lodash";
-import { UdsAddress } from "nodeCan/uds";
+  CAN_ADDR_TYPE
+} from 'nodeCan/can'
+import { v4 } from 'uuid'
+import { type FormRules, type FormInstance, ElMessageBox } from 'element-plus'
+import { assign, cloneDeep } from 'lodash'
+import { UdsAddress } from 'nodeCan/uds'
 
-const ruleFormRef = ref<FormInstance>();
+const ruleFormRef = ref<FormInstance>()
 const globalStart = toRef(window, 'globalStart')
 const data = defineModel<CanAddr>({
   required: true
-});
+})
 
 const canidNeed = computed(() => {
   if (data.value.addrFormat == CAN_ADDR_FORMAT.FIXED_NORMAL) {
-    return false;
+    return false
   }
-  if (
-    data.value.addrFormat == CAN_ADDR_FORMAT.MIXED &&
-    data.value.idType == CAN_ID_TYPE.EXTENDED
-  ) {
-    return false;
+  if (data.value.addrFormat == CAN_ADDR_FORMAT.MIXED && data.value.idType == CAN_ID_TYPE.EXTENDED) {
+    return false
   }
 
-  return true;
-});
+  return true
+})
 
 const idTypeCheck = (rule: any, value: any, callback: any) => {
   if (data.value.addrFormat == CAN_ADDR_FORMAT.FIXED_NORMAL) {
     if (data.value.idType == CAN_ID_TYPE.STANDARD) {
-      callback(
-        new Error(
-          "CAN-ID Type must be EXTENDED_ID when Addr Format is FIXED_NORMAL"
-        )
-      );
+      callback(new Error('CAN-ID Type must be EXTENDED_ID when Addr Format is FIXED_NORMAL'))
     }
   }
-  callback();
-};
+  callback()
+}
 
 const idCheck = (rule: any, value: any, callback: any) => {
   if (canidNeed.value) {
     if (value) {
       if (data.value.idType == CAN_ID_TYPE.STANDARD) {
         if (Number(value) < 0 || Number(value) > 0x7ff) {
-          callback(new Error("CAN-ID must be 0~0x7FF"));
+          callback(new Error('CAN-ID must be 0~0x7FF'))
         }
       } else {
         if (Number(value) < 0 || Number(value) > 0x1fffffff) {
-          callback(new Error("CAN-ID must be 0~0x1FFFFFFF"));
+          callback(new Error('CAN-ID must be 0~0x1FFFFFFF'))
         }
       }
-      if (rule.field == "canIdTx") {
+      if (rule.field == 'canIdTx') {
         if (Number(value) == Number(data.value.canIdRx)) {
-          callback(new Error("CAN-ID TX can't be equal to CAN-ID RX"));
+          callback(new Error("CAN-ID TX can't be equal to CAN-ID RX"))
         }
       }
-      if (rule.field == "canIdRx") {
+      if (rule.field == 'canIdRx') {
         if (Number(value) == Number(data.value.canIdTx)) {
-          callback(new Error("CAN-ID RX can't be equal to CAN-ID TX"));
+          callback(new Error("CAN-ID RX can't be equal to CAN-ID TX"))
         }
       }
     } else {
-      callback(new Error(`CAN-ID is need`));
+      callback(new Error(`CAN-ID is need`))
     }
   }
-  callback();
-};
+  callback()
+}
 const addrCheck = (rule: any, value: any, callback: any) => {
   if (value) {
     if (Number(value) < 0 || Number(value) > 0xff) {
-      callback(new Error("value must be 0~0xFF"));
+      callback(new Error('value must be 0~0xFF'))
     }
-    if (rule.field == "SA") {
+    if (rule.field == 'SA') {
       if (Number(value) == Number(data.value.TA)) {
-        callback(new Error("SA can't be equal to TA"));
+        callback(new Error("SA can't be equal to TA"))
       }
     }
-    if (rule.field == "TA") {
+    if (rule.field == 'TA') {
       if (Number(value) == Number(data.value.SA)) {
-        callback(new Error("TA can't be equal to SA"));
+        callback(new Error("TA can't be equal to SA"))
       }
     }
-    callback();
+    callback()
   } else {
-    callback(new Error(`value is need`));
+    callback(new Error(`value is need`))
   }
-};
+}
 const addrAeCheck = (rule: any, value: any, callback: any) => {
   if (data.value.addrFormat == CAN_ADDR_FORMAT.MIXED) {
     if (value) {
       if (Number(value) < 0 || Number(value) > 0xff) {
-        callback(new Error("value must be 0~0xFF"));
+        callback(new Error('value must be 0~0xFF'))
       }
-      callback();
+      callback()
     } else {
-      callback(new Error(`value is need`));
+      callback(new Error(`value is need`))
     }
   }
-  callback();
-};
+  callback()
+}
 const nameCheck = (rule: any, value: any, callback: any) => {
   if (value) {
     for (let i = 0; i < addrs.value.length; i++) {
-      const hasName = addrs.value[i].canAddr?.name;
+      const hasName = addrs.value[i].canAddr?.name
       if (hasName == value && i != editIndex.value) {
-        callback(new Error("The name already exists"));
+        callback(new Error('The name already exists'))
       }
     }
-    callback();
+    callback()
   } else {
-    callback(new Error("Please input node name"));
+    callback(new Error('Please input node name'))
   }
-};
+}
 const rules: FormRules<CanAddr> = {
-  "name": [
+  name: [
     {
       required: true,
-      message: "Please input addr name",
-      trigger: "blur",
-      validator: nameCheck,
-    },
+      message: 'Please input addr name',
+      trigger: 'blur',
+      validator: nameCheck
+    }
   ],
-  "idType": [{ required: true, validator: idTypeCheck, trigger: "change" }],
-  "canIdRx": [
-    { required: canidNeed.value, validator: idCheck, trigger: "change" },
-  ],
-  "canIdTx": [
-    { required: canidNeed.value, validator: idCheck, trigger: "change" },
-  ],
-  "dlc": [
+  idType: [{ required: true, validator: idTypeCheck, trigger: 'change' }],
+  canIdRx: [{ required: canidNeed.value, validator: idCheck, trigger: 'change' }],
+  canIdTx: [{ required: canidNeed.value, validator: idCheck, trigger: 'change' }],
+  dlc: [
     {
       required: true,
-      message: "Please input DLC from 0-15",
-      trigger: "blur",
-      type: "number",
+      message: 'Please input DLC from 0-15',
+      trigger: 'blur',
+      type: 'number',
       min: 8,
-      max: 15,
-    },
+      max: 15
+    }
   ],
-  "paddingValue": [
+  paddingValue: [
     {
       required: true,
-      message: "Please input padding value from 0-255",
-      trigger: "blur",
-      type: "number",
+      message: 'Please input padding value from 0-255',
+      trigger: 'blur',
+      type: 'number',
       transform: (value) => Number(value),
       min: 0,
-      max: 255,
-    },
+      max: 255
+    }
   ],
-  "SA": [{ required: true, validator: addrCheck, trigger: "change" }],
-  "TA": [{ required: true, validator: addrCheck, trigger: "change" }],
-  "AE": [{ required: false, validator: addrAeCheck, trigger: "change" }],
-  "nAr": [{ required: true, message: "Please input nAr", trigger: "change", type: 'number' }],
-  "nAs": [{ required: true, message: "Please input nAs", trigger: "change", type: 'number' }],
-  "nBs": [{ required: true, message: "Please input nBs", trigger: "change", type: 'number' }],
-  "nCr": [{ required: true, message: "Please input nCr", trigger: "change", type: 'number' }],
-  "nBr": [{ required: false, trigger: "change", type: 'number' }],
-  "nCs": [{ required: false, trigger: "change", type: 'number' }],
-  "stMin": [{ required: true, message: "Please input stMin", type: 'number' }],
-  "bs": [{ required: true, message: "Please input bs", type: 'number' }],
-  "maxWTF": [{ required: true, message: "Please input maxWTF", type: 'number' }]
-};
+  SA: [{ required: true, validator: addrCheck, trigger: 'change' }],
+  TA: [{ required: true, validator: addrCheck, trigger: 'change' }],
+  AE: [{ required: false, validator: addrAeCheck, trigger: 'change' }],
+  nAr: [{ required: true, message: 'Please input nAr', trigger: 'change', type: 'number' }],
+  nAs: [{ required: true, message: 'Please input nAs', trigger: 'change', type: 'number' }],
+  nBs: [{ required: true, message: 'Please input nBs', trigger: 'change', type: 'number' }],
+  nCr: [{ required: true, message: 'Please input nCr', trigger: 'change', type: 'number' }],
+  nBr: [{ required: false, trigger: 'change', type: 'number' }],
+  nCs: [{ required: false, trigger: 'change', type: 'number' }],
+  stMin: [{ required: true, message: 'Please input stMin', type: 'number' }],
+  bs: [{ required: true, message: 'Please input bs', type: 'number' }],
+  maxWTF: [{ required: true, message: 'Please input maxWTF', type: 'number' }]
+}
 
 const canidCalcTx = computed(() => {
   if (canidNeed.value) {
-    return data.value.canIdTx;
+    return data.value.canIdTx
   } else {
     if (data.value.addrFormat == CAN_ADDR_FORMAT.MIXED)
-      return calcCanIdMixed(
-        Number(data.value.SA),
-        Number(data.value.TA),
-        data.value.addrType
-      )
+      return calcCanIdMixed(Number(data.value.SA), Number(data.value.TA), data.value.addrType)
         .toString(16)
-        .toUpperCase();
+        .toUpperCase()
     if (data.value.addrFormat == CAN_ADDR_FORMAT.FIXED_NORMAL) {
-      return calcCanIdNormalFixed(
-        Number(data.value.SA),
-        Number(data.value.TA),
-        data.value.addrType
-      )
+      return calcCanIdNormalFixed(Number(data.value.SA), Number(data.value.TA), data.value.addrType)
         .toString(16)
-        .toUpperCase();
+        .toUpperCase()
     }
-    return "Unsupported";
+    return 'Unsupported'
   }
-});
+})
 
 const canidCalcRx = computed(() => {
   if (canidNeed.value) {
-    return data.value.canIdRx;
+    return data.value.canIdRx
   } else {
     if (data.value.addrFormat == CAN_ADDR_FORMAT.MIXED)
-      return calcCanIdMixed(
-        Number(data.value.TA),
-        Number(data.value.SA),
-        data.value.addrType
-      )
+      return calcCanIdMixed(Number(data.value.TA), Number(data.value.SA), data.value.addrType)
         .toString(16)
-        .toUpperCase();
+        .toUpperCase()
     if (data.value.addrFormat == CAN_ADDR_FORMAT.FIXED_NORMAL) {
-      return calcCanIdNormalFixed(
-        Number(data.value.TA),
-        Number(data.value.SA),
-        data.value.addrType
-      )
+      return calcCanIdNormalFixed(Number(data.value.TA), Number(data.value.SA), data.value.addrType)
         .toString(16)
-        .toUpperCase();
+        .toUpperCase()
     }
-    return "Unsupported";
+    return 'Unsupported'
   }
-});
+})
 
 const props = defineProps<{
-  index: number;
-  addrs: UdsAddress[];
-}>();
+  index: number
+  addrs: UdsAddress[]
+}>()
 
-const editIndex = toRef(props, "index");
-const addrs = toRef(props, "addrs")
+const editIndex = toRef(props, 'index')
+const addrs = toRef(props, 'addrs')
 
 onMounted(() => {
   ruleFormRef.value?.validate().catch(null)
@@ -537,8 +489,6 @@ async function dataValid() {
 defineExpose({
   dataValid
 })
-
-
 </script>
 <style scoped>
 .hardware {

@@ -3,9 +3,7 @@ import { Action, ElMessage, ElMessageBox } from 'element-plus'
 import { defineStore } from 'pinia'
 import { useDataStore } from './data'
 import { sortBy, toPairs, fromPairs, cloneDeep, assign, merge } from 'lodash'
-import { error,info} from 'electron-log'
-
-
+import { error, info } from 'electron-log'
 
 export interface ProjectInfo {
   name: string
@@ -13,25 +11,27 @@ export interface ProjectInfo {
 }
 
 export interface Project {
-  displayName?: string,
-  desc?: string,
-  wins:Record<string,{
-    pos:{x:number,y:number,w:number,h:number}
-    backupPos?:{x:number,y:number,w:number,h:number}
-    title:string,
-    label:string,
-    id:string,
-    layoutType?:'bottom'|'top'|'left'|'right',
-    options: {
-      name?: string
-      params: Record<string, string>
+  displayName?: string
+  desc?: string
+  wins: Record<
+    string,
+    {
+      pos: { x: number; y: number; w: number; h: number }
+      backupPos?: { x: number; y: number; w: number; h: number }
+      title: string
+      label: string
+      id: string
+      layoutType?: 'bottom' | 'top' | 'left' | 'right'
+      options: {
+        name?: string
+        params: Record<string, string>
+      }
+      isMax?: boolean
+      hide?: boolean
     }
-    isMax?:boolean
-    hide?:boolean
-   
-  }>
-  example?:{
-    catalog:string,
+  >
+  example?: {
+    catalog: string
   }
 }
 
@@ -51,7 +51,7 @@ export interface State {
 export const useProjectList = defineStore('projectList', {
   state: () => {
     return {
-      projectList: window.store.get('projectList') as ProjectList[] || []
+      projectList: (window.store.get('projectList') as ProjectList[]) || []
     }
   },
   actions: {
@@ -70,21 +70,21 @@ export const useProjectList = defineStore('projectList', {
         this.projectList.splice(index, 1)
         window.store.set('projectList', cloneDeep(this.projectList))
       }
-    },
+    }
   }
 })
-const historyLimit=window.store.get('historyLimit') as number||20
-function printNestedKeys(obj:any, prefix = '') {
+const historyLimit = (window.store.get('historyLimit') as number) || 20
+function printNestedKeys(obj: any, prefix = '') {
   for (const key in obj) {
     // 构建当前key的完整路径
-    const currentPath = prefix ? `${prefix}.${key}` : key;
-    
+    const currentPath = prefix ? `${prefix}.${key}` : key
+
     // 打印当前key的路径
-    info(currentPath);
-    
+    info(currentPath)
+
     // 如果当前值是对象且不是null，则递归处理
     if (typeof obj[key] === 'object' && obj[key] !== null) {
-      printNestedKeys(obj[key], currentPath);
+      printNestedKeys(obj[key], currentPath)
     }
   }
 }
@@ -94,11 +94,11 @@ export const useProjectStore = defineStore('project', {
     open: false,
     projectInfo: {
       name: 'Untitled',
-      path: '',
+      path: ''
     },
     project: {
       wins: {}
-    },
+    }
   }),
   // could also be defined as
   // state: () => ({ count: 0 })
@@ -121,10 +121,10 @@ export const useProjectStore = defineStore('project', {
           const rdata = JSON.parse(r)
           const data = useDataStore()
           data.$patch((ss) => {
-            assign(ss,rdata.data)
+            assign(ss, rdata.data)
           })
           this.project = rdata.project
-          const info=window.path.parse(example)
+          const info = window.path.parse(example)
           this.projectInfo.name = info.base
           this.projectInfo.path = info.dir
           this.open = true
@@ -137,13 +137,11 @@ export const useProjectStore = defineStore('project', {
       }
     },
     async openProject() {
-
       {
         const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
-          title: 'Open Project', properties: ['openFile '], filters: [
-            { name: 'EcuBus-Pro', extensions: ['ecb'] },
-          ]
-
+          title: 'Open Project',
+          properties: ['openFile '],
+          filters: [{ name: 'EcuBus-Pro', extensions: ['ecb'] }]
         })
         const file = r.filePaths[0]
         if (file == undefined) {
@@ -160,61 +158,62 @@ export const useProjectStore = defineStore('project', {
         skipClose = await this.closeProject(file)
       }
       if (skipClose) {
-        window.electron.ipcRenderer.invoke('ipc-fs-readFile', file).then((r) => {
-          try {
-            const rdata = JSON.parse(r)
-            const parse = window.path.parse(file)
+        window.electron.ipcRenderer
+          .invoke('ipc-fs-readFile', file)
+          .then((r) => {
+            try {
+              const rdata = JSON.parse(r)
+              const parse = window.path.parse(file)
 
-            this.projectInfo.name = parse.base
-            this.projectInfo.path = parse.dir
-            const data = useDataStore()
+              this.projectInfo.name = parse.base
+              this.projectInfo.path = parse.dir
+              const data = useDataStore()
 
-            data.$patch((ss) => {
-              merge(ss,rdata.data)
-            })
-            this.project = rdata.project
-            this.open = true
+              data.$patch((ss) => {
+                merge(ss, rdata.data)
+              })
+              this.project = rdata.project
+              this.open = true
 
-            this.router.push('/uds')
-            //add to history
-            this.addToHistory(file)
-          } catch (e) {
-            ElMessage.error(`${file} is not a valid project file`)
-          }
-        }).catch((e) => {
-          error(e)
-          ElMessage.error(`Failed to open project ${file}`)
-        })
+              this.router.push('/uds')
+              //add to history
+              this.addToHistory(file)
+            } catch (e) {
+              ElMessage.error(`${file} is not a valid project file`)
+            }
+          })
+          .catch((e) => {
+            error(e)
+            ElMessage.error(`Failed to open project ${file}`)
+          })
       }
     },
-    addToHistory(file:string){
+    addToHistory(file: string) {
       const projectList = useProjectList()
       const parse = window.path.parse(file)
-        const exist = projectList.projectList.find((v) => v.path == parse.dir && v.name == parse.base)
-        let pined
-        if (exist) {
-          //remove and reinsert
-          pined = exist.pined
-          const index = projectList.projectList.indexOf(exist)
-          projectList.projectList.splice(index, 1)
-        }
-        //put it first
-        projectList.projectList.unshift({
-          name: parse.base,
-          path: parse.dir,
-          pined: pined,
-          lastOpenTime: Date.now()
-        })
-        
-        if(projectList.projectList.length>historyLimit){
-          projectList.projectList.pop()
-        }
-        window.store.set('projectList', cloneDeep(projectList.projectList))
-     
-    },
-    
-    async saveProject() {
+      const exist = projectList.projectList.find((v) => v.path == parse.dir && v.name == parse.base)
+      let pined
+      if (exist) {
+        //remove and reinsert
+        pined = exist.pined
+        const index = projectList.projectList.indexOf(exist)
+        projectList.projectList.splice(index, 1)
+      }
+      //put it first
+      projectList.projectList.unshift({
+        name: parse.base,
+        path: parse.dir,
+        pined: pined,
+        lastOpenTime: Date.now()
+      })
 
+      if (projectList.projectList.length > historyLimit) {
+        projectList.projectList.pop()
+      }
+      window.store.set('projectList', cloneDeep(projectList.projectList))
+    },
+
+    async saveProject() {
       if (this.open) {
         if (this.projectInfo.path == '') {
           const res = await window.electron.ipcRenderer.invoke('ipc-show-save-dialog', {
@@ -231,19 +230,23 @@ export const useProjectStore = defineStore('project', {
           this.projectInfo.name = parse.base
         }
         const projectData = useDataStore()
-        
+
         const data = cloneDeep({
           project: this.project,
           data: projectData.getData()
         })
-       
+
         //sort
         const sortedPairsProject = sortBy(toPairs(data), 0)
         const sortedData = fromPairs(sortedPairsProject)
 
         const fullPath = window.path.join(this.projectInfo.path, this.projectInfo.name)
         // printNestedKeys(sortedData)
-        await window.electron.ipcRenderer.invoke('ipc-fs-writeFile', fullPath, JSON.stringify(sortedData, null, 2))
+        await window.electron.ipcRenderer.invoke(
+          'ipc-fs-writeFile',
+          fullPath,
+          JSON.stringify(sortedData, null, 2)
+        )
 
         this.projectDirty = false
         //update projectList
@@ -254,44 +257,52 @@ export const useProjectStore = defineStore('project', {
     async closeProject(filePath?: string): Promise<boolean> {
       return new Promise((resolve, reject) => {
         if (filePath && this.open && this.projectDirty) {
-          if (window.path.normalize(window.path.join(this.projectInfo.path, this.projectInfo.name)) == window.path.normalize(filePath)) {
+          if (
+            window.path.normalize(window.path.join(this.projectInfo.path, this.projectInfo.name)) ==
+            window.path.normalize(filePath)
+          ) {
             resolve(true)
             return
-
           }
           //工程没有保存，关闭会丢失数据
-          ElMessageBox.confirm('You have unsaved changes in the current project, do you want to save them?', 'Warning', {
-            confirmButtonText: 'Save',
-            cancelButtonText: 'Don\'t Save',
-            type: 'warning',
-            buttonSize: 'small',
-            distinguishCancelAndClose: true
-          }).then(() => {
-            this.saveProject().then(() => {
-              this.$reset()
-              const data = useDataStore()
-              data.$reset()
-              resolve(true)
-            }).catch((e) => {
-              error('Save project failed', e)
-              ElMessage.error('Save project failed')
-              resolve(false)
-            })
-          }).catch((action: Action) => {
-            if (action == 'cancel') {
-              this.$reset()
-              resolve(true)
-            } else {
-              resolve(false)
+          ElMessageBox.confirm(
+            'You have unsaved changes in the current project, do you want to save them?',
+            'Warning',
+            {
+              confirmButtonText: 'Save',
+              cancelButtonText: "Don't Save",
+              type: 'warning',
+              buttonSize: 'small',
+              distinguishCancelAndClose: true
             }
-          })
+          )
+            .then(() => {
+              this.saveProject()
+                .then(() => {
+                  this.$reset()
+                  const data = useDataStore()
+                  data.$reset()
+                  resolve(true)
+                })
+                .catch((e) => {
+                  error('Save project failed', e)
+                  ElMessage.error('Save project failed')
+                  resolve(false)
+                })
+            })
+            .catch((action: Action) => {
+              if (action == 'cancel') {
+                this.$reset()
+                resolve(true)
+              } else {
+                resolve(false)
+              }
+            })
         } else {
           this.$reset()
           resolve(true)
         }
-
       })
-    },
-
+    }
   }
 })

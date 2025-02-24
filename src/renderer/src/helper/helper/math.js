@@ -1,8 +1,6 @@
-
 import Handlebars from 'handlebars'
-import { isNumber } from 'lodash';
-const helpers = {};
-
+import { isNumber } from 'lodash'
+const helpers = {}
 
 /**
  * Return the magnitude of `a`.
@@ -14,10 +12,10 @@ const helpers = {};
 
 helpers.abs = function (num) {
   if (!isNumber(num)) {
-    throw new TypeError('expected a number');
+    throw new TypeError('expected a number')
   }
-  return Math.abs(num);
-};
+  return Math.abs(num)
+}
 
 /**
  * Return the sum of `a` plus `b`.
@@ -30,13 +28,13 @@ helpers.abs = function (num) {
 
 helpers.add = function (a, b) {
   if (isNumber(a) && isNumber(b)) {
-    return Number(a) + Number(b);
+    return Number(a) + Number(b)
   }
   if (typeof a === 'string' && typeof b === 'string') {
-    return a + b;
+    return a + b
   }
-  return '';
-};
+  return ''
+}
 
 /**
  * Returns the average of all numbers in the given array.
@@ -52,11 +50,11 @@ helpers.add = function (a, b) {
  */
 
 helpers.avg = function () {
-  var args = [].concat.apply([], arguments);
+  const args = [].concat.apply([], arguments)
   // remove handlebars options object
-  args.pop();
-  return helpers.sum(args) / args.length;
-};
+  args.pop()
+  return helpers.sum(args) / args.length
+}
 
 /**
  * Get the `Math.ceil()` of the given value.
@@ -68,10 +66,10 @@ helpers.avg = function () {
 
 helpers.ceil = function (num) {
   if (!isNumber(num)) {
-    throw new TypeError('expected a number');
+    throw new TypeError('expected a number')
   }
-  return Math.ceil(num);
-};
+  return Math.ceil(num)
+}
 
 /**
  * Divide `a` by `b`
@@ -83,13 +81,13 @@ helpers.ceil = function (num) {
 
 helpers.divide = function (a, b) {
   if (!isNumber(a)) {
-    throw new TypeError('expected the first argument to be a number');
+    throw new TypeError('expected the first argument to be a number')
   }
   if (!isNumber(b)) {
-    throw new TypeError('expected the second argument to be a number');
+    throw new TypeError('expected the second argument to be a number')
   }
-  return Number(a) / Number(b);
-};
+  return Number(a) / Number(b)
+}
 
 /**
  * Get the `Math.floor()` of the given value.
@@ -101,10 +99,10 @@ helpers.divide = function (a, b) {
 
 helpers.floor = function (num) {
   if (!isNumber(num)) {
-    throw new TypeError('expected a number');
+    throw new TypeError('expected a number')
   }
-  return Math.floor(num);
-};
+  return Math.floor(num)
+}
 
 /**
  * Return the difference of `a` minus `b`.
@@ -117,13 +115,13 @@ helpers.floor = function (num) {
 
 helpers.minus = function (a, b) {
   if (!isNumber(a)) {
-    throw new TypeError('expected the first argument to be a number');
+    throw new TypeError('expected the first argument to be a number')
   }
   if (!isNumber(b)) {
-    throw new TypeError('expected the second argument to be a number');
+    throw new TypeError('expected the second argument to be a number')
   }
-  return Number(a) - Number(b);
-};
+  return Number(a) - Number(b)
+}
 
 /**
  * Get the remainder of a division operation.
@@ -136,13 +134,13 @@ helpers.minus = function (a, b) {
 
 helpers.modulo = function (a, b) {
   if (!isNumber(a)) {
-    throw new TypeError('expected the first argument to be a number');
+    throw new TypeError('expected the first argument to be a number')
   }
   if (!isNumber(b)) {
-    throw new TypeError('expected the second argument to be a number');
+    throw new TypeError('expected the second argument to be a number')
   }
-  return Number(a) % Number(b);
-};
+  return Number(a) % Number(b)
+}
 
 /**
  * Return the product of `a` times `b`.
@@ -156,13 +154,13 @@ helpers.modulo = function (a, b) {
 
 helpers.multiply = function (a, b) {
   if (!isNumber(a)) {
-    throw new TypeError('expected the first argument to be a number');
+    throw new TypeError('expected the first argument to be a number')
   }
   if (!isNumber(b)) {
-    throw new TypeError('expected the second argument to be a number');
+    throw new TypeError('expected the second argument to be a number')
   }
-  return Number(a) * Number(b);
-};
+  return Number(a) * Number(b)
+}
 
 /**
  * Add `a` by `b`.
@@ -174,13 +172,13 @@ helpers.multiply = function (a, b) {
 
 helpers.plus = function (a, b) {
   if (!isNumber(a)) {
-    throw new TypeError('expected the first argument to be a number');
+    throw new TypeError('expected the first argument to be a number')
   }
   if (!isNumber(b)) {
-    throw new TypeError('expected the second argument to be a number');
+    throw new TypeError('expected the second argument to be a number')
   }
-  return Number(a) + Number(b);
-};
+  return Number(a) + Number(b)
+}
 
 /**
  * Generate a random number between two values
@@ -200,8 +198,8 @@ helpers.plus = function (a, b) {
  */
 
 helpers.remainder = function (a, b) {
-  return a % b;
-};
+  return a % b
+}
 
 /**
  * Round the given number.
@@ -213,10 +211,10 @@ helpers.remainder = function (a, b) {
 
 helpers.round = function (num) {
   if (!isNumber(num)) {
-    throw new TypeError('expected a number');
+    throw new TypeError('expected a number')
   }
-  return Math.round(num);
-};
+  return Math.round(num)
+}
 
 /**
  * Return the product of `a` minus `b`.
@@ -230,13 +228,13 @@ helpers.round = function (num) {
 
 helpers.subtract = function (a, b) {
   if (!isNumber(a)) {
-    throw new TypeError('expected the first argument to be a number');
+    throw new TypeError('expected the first argument to be a number')
   }
   if (!isNumber(b)) {
-    throw new TypeError('expected the second argument to be a number');
+    throw new TypeError('expected the second argument to be a number')
   }
-  return Number(a) - Number(b);
-};
+  return Number(a) - Number(b)
+}
 
 /**
  * Returns the sum of all numbers in the given array.
@@ -251,17 +249,17 @@ helpers.subtract = function (a, b) {
  */
 
 helpers.sum = function () {
-  var args = [].concat.apply([], arguments);
-  var len = args.length;
-  var sum = 0;
+  const args = [].concat.apply([], arguments)
+  let len = args.length
+  let sum = 0
 
   while (len--) {
     if (isNumber(args[len])) {
-      sum += Number(args[len]);
+      sum += Number(args[len])
     }
   }
-  return sum;
-};
+  return sum
+}
 
 /**
  * Multiply number `a` by number `b`.
@@ -275,24 +273,23 @@ helpers.sum = function () {
 
 helpers.pow = function (a, b) {
   if (!isNumber(a)) {
-    throw new TypeError('expected the first argument to be a number');
+    throw new TypeError('expected the first argument to be a number')
   }
   if (!isNumber(b)) {
-    throw new TypeError('expected the second argument to be a number');
+    throw new TypeError('expected the second argument to be a number')
   }
   return Math.pow(Number(a), Number(b))
-};
-
+}
 
 helpers.log = function (base, number) {
   if (!isNumber(base)) {
-    throw new TypeError('expected the first argument to be a number');
+    throw new TypeError('expected the first argument to be a number')
   }
   if (!isNumber(number)) {
-    throw new TypeError('expected the second argument to be a number');
+    throw new TypeError('expected the second argument to be a number')
   }
-  return Math.log(number) / Math.log(base);
-};
+  return Math.log(number) / Math.log(base)
+}
 /**
  * Generate a random number between two values
  *
@@ -304,74 +301,70 @@ helpers.log = function (base, number) {
 
 helpers.random = function (min, max) {
   if (!isNumber(min)) {
-    throw new TypeError('expected minimum to be a number');
+    throw new TypeError('expected minimum to be a number')
   }
   if (!isNumber(max)) {
-    throw new TypeError('expected maximum to be a number');
+    throw new TypeError('expected maximum to be a number')
   }
-  return Math.random() * (max - min) + min;
-};
-
+  return Math.random() * (max - min) + min
+}
 
 helpers.bitOr = function (a, b) {
   if (!isNumber(a)) {
-    throw new TypeError('expected the first argument to be a number');
+    throw new TypeError('expected the first argument to be a number')
   }
   if (!isNumber(b)) {
-    throw new TypeError('expected the second argument to be a number');
+    throw new TypeError('expected the second argument to be a number')
   }
-  return a | b;
-};
-
+  return a | b
+}
 
 helpers.bitAnd = function (a, b) {
   if (!isNumber(a)) {
-    throw new TypeError('expected the first argument to be a number');
+    throw new TypeError('expected the first argument to be a number')
   }
   if (!isNumber(b)) {
-    throw new TypeError('expected the second argument to be a number');
+    throw new TypeError('expected the second argument to be a number')
   }
-  return a & b;
-};
-
+  return a & b
+}
 
 helpers.bitXor = function (a, b) {
   if (!isNumber(a)) {
-    throw new TypeError('expected the first argument to be a number');
+    throw new TypeError('expected the first argument to be a number')
   }
   if (!isNumber(b)) {
-    throw new TypeError('expected the second argument to be a number');
+    throw new TypeError('expected the second argument to be a number')
   }
-  return a ^ b;
-};
+  return a ^ b
+}
 
 helpers.bitNot = function (a) {
   if (!isNumber(a)) {
-    throw new TypeError('expected the first argument to be a number');
+    throw new TypeError('expected the first argument to be a number')
   }
-  return ~a;
-};
+  return ~a
+}
 
 helpers.bitShiftLeft = function (a, b) {
   if (!isNumber(a)) {
-    throw new TypeError('expected the first argument to be a number');
+    throw new TypeError('expected the first argument to be a number')
   }
   if (!isNumber(b)) {
-    throw new TypeError('expected the second argument to be a number');
+    throw new TypeError('expected the second argument to be a number')
   }
-  return a << b;
-};
+  return a << b
+}
 
 helpers.bitShiftRight = function (a, b) {
   if (!isNumber(a)) {
-    throw new TypeError('expected the first argument to be a number');
+    throw new TypeError('expected the first argument to be a number')
   }
   if (!isNumber(b)) {
-    throw new TypeError('expected the second argument to be a number');
+    throw new TypeError('expected the second argument to be a number')
   }
-  return a >> b;
+  return a >> b
 }
-
 
 for (const key of Object.keys(helpers)) {
   Handlebars.registerHelper(key, helpers[key])

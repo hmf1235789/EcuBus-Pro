@@ -1,37 +1,25 @@
 /* eslint-disable no-var */
-import { transport, createLogger, format, Logger, } from 'winston'
+import { transport, createLogger, format, Logger } from 'winston'
 import type { Format } from 'logform'
 import Transport from 'winston-transport'
 import { CAN_ERROR_ID, CanAddr, CanMessage, CanMsgType, getTsUs } from './share/can'
 import EventEmitter from 'events'
 import { Sequence, ServiceItem } from './share/uds'
-import { PayloadType } from './doip';
+import { PayloadType } from './doip'
 import { LinMsg } from './share/lin'
 
-
-
 const isDev = process.env.NODE_ENV !== 'production'
-
 
 type LogFunc = () => Transport
 
 export function createLogs(logs: LogFunc[], formats: Format[]) {
-
   global.sysLog = createLogger({
     transports: logs.map((t) => t()),
-    format: format.combine(
-      format.json(),
-      format.label({ label: 'System' }), 
-      ...formats
-    ),
+    format: format.combine(format.json(), format.label({ label: 'System' }), ...formats)
   })
   global.scriptLog = createLogger({
     transports: logs.map((t) => t()),
-    format: format.combine(
-      format.json(),
-      format.label({ label: 'Script' }
-      ), ...formats
-    ),
+    format: format.combine(format.json(), format.label({ label: 'Script' }), ...formats)
   })
 
   for (const l of logs) {
@@ -41,7 +29,6 @@ export function createLogs(logs: LogFunc[], formats: Format[]) {
     addFormat(f)
   }
 }
-
 
 class Base extends Transport {
   constructor(opts?: Transport.TransportStreamOptions) {
@@ -56,7 +43,6 @@ class Base extends Transport {
 
   log(info: any, callback: () => void) {
     if (process.env.VITEST) {
-
       console.table(info.message)
     }
     // Perform the writing to the remote service
@@ -72,7 +58,11 @@ export class CanLOG {
   vendor: string
   log: Logger
   logTp: Logger
-  constructor(vendor: string, instance: string, private event: EventEmitter) {
+  constructor(
+    vendor: string,
+    instance: string,
+    private event: EventEmitter
+  ) {
     this.vendor = vendor
     const et1 = externalTransport.map((t) => t())
     this.log = createLogger({
@@ -82,8 +72,7 @@ export class CanLOG {
         instanceFormat({ instance: instance }),
         format.label({ label: `Can-${vendor}` }),
         ...externalFormat
-      ),
-
+      )
     })
     const et2 = externalTransport.map((t) => t())
     this.logTp = createLogger({
@@ -93,14 +82,13 @@ export class CanLOG {
         instanceFormat({ instance: instance }),
         format.label({ label: `CanTp-${vendor}` }),
         ...externalFormat
-      ),
+      )
     })
   }
   close() {
     this.log.close()
     this.logTp.close()
     this.event.removeAllListeners()
-
   }
   canBase(data: CanMessage) {
     this.log.debug({
@@ -110,23 +98,19 @@ export class CanLOG {
     this.event.emit('can-frame', data)
   }
   canTp(data: { dir: 'OUT' | 'IN'; data: Buffer; ts: number; addr: CanAddr }) {
-    this.logTp.info(
-      {
-        method: 'canTp',
-        data
-      }
-    )
+    this.logTp.info({
+      method: 'canTp',
+      data
+    })
   }
   error(ts: number, msg?: string) {
-    this.log.error(
-      {
-        method: 'canError',
-        data: {
-          ts: ts,
-          msg: msg
-        }
+    this.log.error({
+      method: 'canError',
+      data: {
+        ts: ts,
+        msg: msg
       }
-    )
+    })
   }
 }
 
@@ -148,22 +132,17 @@ export function clearFormat() {
   externalFormat.splice(0, externalFormat.length)
 }
 
-
 export class UdsLOG {
   log: Logger
   startTime = Date.now()
-  constructor(name: string,) {
+  constructor(name: string) {
     const et = externalTransport.map((t) => t())
     this.log = createLogger({
       transports: [new Base(), ...et],
-      format: format.combine(
-        format.json(),
-        format.label({ label: name }),
-        ...externalFormat
-      ),
+      format: format.combine(format.json(), format.label({ label: name }), ...externalFormat)
     })
   }
-  sent(testerid:string,service: ServiceItem, ts: number, recvData?: Buffer, msg?: string) {
+  sent(testerid: string, service: ServiceItem, ts: number, recvData?: Buffer, msg?: string) {
     this.log.info({
       method: 'udsSent',
       id: testerid,
@@ -175,7 +154,7 @@ export class UdsLOG {
       }
     })
   }
-  recv(testerid:string,service: ServiceItem, ts: number, recvData?: Buffer, msg?: string) {
+  recv(testerid: string, service: ServiceItem, ts: number, recvData?: Buffer, msg?: string) {
     this.log.info({
       method: 'udsRecv',
       id: testerid,
@@ -187,7 +166,16 @@ export class UdsLOG {
       }
     })
   }
-  warning(testerid:string,service: ServiceItem, sequence: Sequence, seqIndex: number, index: number, ts: number, recvData?: Buffer, msg?: string) {
+  warning(
+    testerid: string,
+    service: ServiceItem,
+    sequence: Sequence,
+    seqIndex: number,
+    index: number,
+    ts: number,
+    recvData?: Buffer,
+    msg?: string
+  ) {
     this.log.warn({
       method: 'udsWarning',
       id: testerid,
@@ -207,7 +195,7 @@ export class UdsLOG {
       method: 'udsScript',
       data: {
         msg,
-        ts,
+        ts
       }
     })
   }
@@ -216,11 +204,11 @@ export class UdsLOG {
       method: 'udsSystem',
       data: {
         msg,
-        ts,
+        ts
       }
     })
   }
-  error(testerid:string,msg: string, ts: number, recvData?: Buffer) {
+  error(testerid: string, msg: string, ts: number, recvData?: Buffer) {
     this.log.error({
       method: 'udsError',
       id: testerid,
@@ -231,8 +219,14 @@ export class UdsLOG {
       }
     })
   }
-  udsIndex(testerid:string,index: number, serviceName:string,action: 'start' | 'finished' | 'progress', percent?: number) {
-    const l=action=='start'?'debug':'info'
+  udsIndex(
+    testerid: string,
+    index: number,
+    serviceName: string,
+    action: 'start' | 'finished' | 'progress',
+    percent?: number
+  ) {
+    const l = action == 'start' ? 'debug' : 'info'
     this.log[l]({
       method: 'udsIndex',
       id: testerid,
@@ -243,21 +237,23 @@ export class UdsLOG {
         percent
       }
     })
-
   }
   close() {
     this.log.close()
   }
-
 }
-
 
 export class DoipLOG {
   vendor: string
   log: Logger
   logTp: Logger
 
-  constructor(vendor: string, instance: string, private event: EventEmitter, private ts: number) {
+  constructor(
+    vendor: string,
+    instance: string,
+    private event: EventEmitter,
+    private ts: number
+  ) {
     this.vendor = vendor
     const et1 = externalTransport.map((t) => t())
     this.log = createLogger({
@@ -267,8 +263,7 @@ export class DoipLOG {
         instanceFormat({ instance: instance }),
         format.label({ label: `IP-${vendor}` }),
         ...externalFormat
-      ),
-
+      )
     })
     const et2 = externalTransport.map((t) => t())
     this.logTp = createLogger({
@@ -277,16 +272,21 @@ export class DoipLOG {
         format.json(),
         instanceFormat({ instance: instance }),
         format.label({ label: `CanTp-${vendor}` })
-      ),
+      )
     })
   }
   close() {
     this.log.close()
     this.logTp.close()
     this.event.removeAllListeners()
-
   }
-  ipBase(type: 'tcp' | 'udp', dir: 'OUT' | 'IN', local: { address?: string, port?: number }, remote: { address?: string, port?: number }, data: Buffer) {
+  ipBase(
+    type: 'tcp' | 'udp',
+    dir: 'OUT' | 'IN',
+    local: { address?: string; port?: number },
+    remote: { address?: string; port?: number },
+    data: Buffer
+  ) {
     const payloadType = data.readUint16BE(2)
     let name = ''
     switch (payloadType) {
@@ -338,9 +338,6 @@ export class DoipLOG {
       case PayloadType.DoIP_DiagnosticMessageNegativeAcknowledge:
         name = 'Diagnostic message negative acknowledgement'
         break
-
-
-
     }
     const ts = getTsUs() - this.ts
     const val = {
@@ -350,7 +347,7 @@ export class DoipLOG {
       remote: `${remote.address}:${remote.port}`,
       data,
       ts: ts,
-      name: name,
+      name: name
     }
     this.log.info({
       method: 'ipBase',
@@ -360,23 +357,25 @@ export class DoipLOG {
     return ts
   }
   error(ts: number, msg?: string) {
-    this.log.error(
-      {
-        method: 'ipError',
-        data: {
-          ts: ts,
-          msg: msg
-        }
+    this.log.error({
+      method: 'ipError',
+      data: {
+        ts: ts,
+        msg: msg
       }
-    )
+    })
   }
 }
 
 export class LinLOG {
   vendor: string
   log: Logger
-  
-  constructor(vendor: string, instance: string, private event: EventEmitter) {
+
+  constructor(
+    vendor: string,
+    instance: string,
+    private event: EventEmitter
+  ) {
     this.vendor = vendor
     const et1 = externalTransport.map((t) => t())
     this.log = createLogger({
@@ -386,25 +385,22 @@ export class LinLOG {
         instanceFormat({ instance: instance }),
         format.label({ label: `Lin-${vendor}` }),
         ...externalFormat
-      ),
-
+      )
     })
-    
   }
   close() {
     this.log.close()
-   
-    this.event.removeAllListeners()
 
+    this.event.removeAllListeners()
   }
   linBase(data: LinMsg) {
     this.log.debug({
       method: 'linBase',
-      data,
+      data
     })
     this.event.emit('lin-frame', data)
   }
-  sendEvent(msg:string ,ts:number){
+  sendEvent(msg: string, ts: number) {
     this.log.info({
       method: 'linEvent',
       data: {
@@ -414,15 +410,13 @@ export class LinLOG {
     })
   }
   error(ts: number, msg?: string, data?: LinMsg) {
-    this.log.error(
-      {
-        method: 'linError',
-        data: {
-          ts,
-          msg,
-          data
-        }
+    this.log.error({
+      method: 'linError',
+      data: {
+        ts,
+        msg,
+        data
       }
-    )
+    })
   }
 }

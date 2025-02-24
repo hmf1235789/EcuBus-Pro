@@ -1,6 +1,13 @@
 out
 dist
+cli
+build
+tools
 pnpm-lock.yaml
 LICENSE.md
 tsconfig.json
 tsconfig.*.json
+resources/bin
+resources/lib
+**/*.html
+webpack.config.js

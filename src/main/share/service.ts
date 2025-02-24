@@ -1,230 +1,229 @@
-import { Param } from "./uds";
+import { Param } from './uds'
 
 export const allServiceList: {
-  name: string;
+  name: string
   children: {
-    name: string;
-    serviceId: ServiceId;
-  }[];
+    name: string
+    serviceId: ServiceId
+  }[]
 }[] = [
-    {
-      name: "Diagnostic and Communication Management",
-      children: [
-        {
-          name: "DiagnosticSessionControl",
-          serviceId: "0x10",
-        },
-        {
-          name: "ECUReset",
-          serviceId: "0x11",
-        },
-        {
-          name: "SecurityAccess",
-          serviceId: "0x27",
-        },
-        {
-          name: "CommunicationControl",
-          serviceId: "0x28",
-        },
-        {
-          name: "Authentication",
-          serviceId: "0x29",
-        },
-        {
-          name: "TesterPresent",
-          serviceId: "0x3E",
-        },
-        {
-          name: "AccessTimingParameter",
-          serviceId: "0x83",
-        },
-        {
-          name: "SecuredDataTransmission",
-          serviceId: "0x84",
-        },
-        {
-          name: "ControlDTCSetting",
-          serviceId: "0x85",
-        },
-        // {
-        //   name: "ResponseOnEvent",
-        //   serviceId: "0x86",
-        // },
-        {
-          name: "LinkControl",
-          serviceId: "0x87",
-        },
-      ],
-    },
-    {
-      name: "Data Transmission",
-      children: [
-        {
-          name: "ReadDataByIdentifier",
-          serviceId: "0x22",
-        },
-        {
-          name: "ReadMemoryByAddress",
-          serviceId: "0x23",
-        },
-        {
-          name: "ReadScalingDataByIdentifier",
-          serviceId: "0x24",
-        },
-        {
-          name: "ReadDataByPeriodicIdentifier",
-          serviceId: "0x2A",
-        },
-        {
-          name: "DynamicallyDefineDataIdentifier",
-          serviceId: "0x2C",
-        },
-        {
-          name: "WriteDataByIdentifier",
-          serviceId: "0x2E",
-        },
-        {
-          name: "WriteMemoryByAddress",
-          serviceId: "0x3D",
-        },
-      ],
-    },
-    {
-      name: "Stored Data Transmission",
-      children: [
-        {
-          name: "ClearDiagnosticInformation",
-          serviceId: "0x14",
-        },
-        {
-          name: "ReadDTCInformation",
-          serviceId: "0x19",
-        },
-      ],
-    },
-    {
-      name: "InputOutput Control ",
-      children: [
-        {
-          name: "InputOutputControlByIdentifier",
-          serviceId: "0x2F",
-        },
-      ],
-    },
-    {
-      name: "Routine ",
-      children: [
-        {
-          name: "RoutineControl",
-          serviceId: "0x31",
-        },
-      ],
-    },
-    {
-      name: "Upload Download",
-      children: [
-        {
-          name: "RequestDownload",
-          serviceId: "0x34",
-        },
-        {
-          name: "RequestUpload",
-          serviceId: "0x35",
-        },
-        {
-          name: "TransferData",
-          serviceId: "0x36",
-        },
-        {
-          name: "RequestTransferExit",
-          serviceId: "0x37",
-        },
-        {
-          name: "RequestFileTransfer",
-          serviceId: "0x38",
-        },
-      ],
-    },
-  ];
+  {
+    name: 'Diagnostic and Communication Management',
+    children: [
+      {
+        name: 'DiagnosticSessionControl',
+        serviceId: '0x10'
+      },
+      {
+        name: 'ECUReset',
+        serviceId: '0x11'
+      },
+      {
+        name: 'SecurityAccess',
+        serviceId: '0x27'
+      },
+      {
+        name: 'CommunicationControl',
+        serviceId: '0x28'
+      },
+      {
+        name: 'Authentication',
+        serviceId: '0x29'
+      },
+      {
+        name: 'TesterPresent',
+        serviceId: '0x3E'
+      },
+      {
+        name: 'AccessTimingParameter',
+        serviceId: '0x83'
+      },
+      {
+        name: 'SecuredDataTransmission',
+        serviceId: '0x84'
+      },
+      {
+        name: 'ControlDTCSetting',
+        serviceId: '0x85'
+      },
+      // {
+      //   name: "ResponseOnEvent",
+      //   serviceId: "0x86",
+      // },
+      {
+        name: 'LinkControl',
+        serviceId: '0x87'
+      }
+    ]
+  },
+  {
+    name: 'Data Transmission',
+    children: [
+      {
+        name: 'ReadDataByIdentifier',
+        serviceId: '0x22'
+      },
+      {
+        name: 'ReadMemoryByAddress',
+        serviceId: '0x23'
+      },
+      {
+        name: 'ReadScalingDataByIdentifier',
+        serviceId: '0x24'
+      },
+      {
+        name: 'ReadDataByPeriodicIdentifier',
+        serviceId: '0x2A'
+      },
+      {
+        name: 'DynamicallyDefineDataIdentifier',
+        serviceId: '0x2C'
+      },
+      {
+        name: 'WriteDataByIdentifier',
+        serviceId: '0x2E'
+      },
+      {
+        name: 'WriteMemoryByAddress',
+        serviceId: '0x3D'
+      }
+    ]
+  },
+  {
+    name: 'Stored Data Transmission',
+    children: [
+      {
+        name: 'ClearDiagnosticInformation',
+        serviceId: '0x14'
+      },
+      {
+        name: 'ReadDTCInformation',
+        serviceId: '0x19'
+      }
+    ]
+  },
+  {
+    name: 'InputOutput Control ',
+    children: [
+      {
+        name: 'InputOutputControlByIdentifier',
+        serviceId: '0x2F'
+      }
+    ]
+  },
+  {
+    name: 'Routine ',
+    children: [
+      {
+        name: 'RoutineControl',
+        serviceId: '0x31'
+      }
+    ]
+  },
+  {
+    name: 'Upload Download',
+    children: [
+      {
+        name: 'RequestDownload',
+        serviceId: '0x34'
+      },
+      {
+        name: 'RequestUpload',
+        serviceId: '0x35'
+      },
+      {
+        name: 'TransferData',
+        serviceId: '0x36'
+      },
+      {
+        name: 'RequestTransferExit',
+        serviceId: '0x37'
+      },
+      {
+        name: 'RequestFileTransfer',
+        serviceId: '0x38'
+      }
+    ]
+  }
+]
 export const SupportServiceId: ServiceId[] = [
-  "0x10",
-  "0x11",
-  "0x27",
-  "0x28",
-  "0x29",
-  "0x3E",
-  "0x83",
-  "0x84",
-  "0x85",
-  "0x87",
-  "0x22",
-  "0x23",
-  "0x24",
-  "0x2A",
-  "0x2C",
-  "0x2E",
-  "0x3D",
-  "0x14",
-  "0x19",
-  "0x2F",
-  "0x31",
-  "0x34",
-  "0x35",
-  "0x36",
-  "0x37",
-  "0x38",
-  "Job",
-];
+  '0x10',
+  '0x11',
+  '0x27',
+  '0x28',
+  '0x29',
+  '0x3E',
+  '0x83',
+  '0x84',
+  '0x85',
+  '0x87',
+  '0x22',
+  '0x23',
+  '0x24',
+  '0x2A',
+  '0x2C',
+  '0x2E',
+  '0x3D',
+  '0x14',
+  '0x19',
+  '0x2F',
+  '0x31',
+  '0x34',
+  '0x35',
+  '0x36',
+  '0x37',
+  '0x38',
+  'Job'
+]
 /**
  * @category UDS
  */
 export type ServiceId =
-  | "0x10"
-  | "0x11"
-  | "0x27"
-  | "0x28"
-  | "0x29"
-  | "0x3E"
-  | "0x83"
-  | "0x84"
-  | "0x85"
-  | "0x87"
-  | "0x22"
-  | "0x23"
-  | "0x24"
-  | "0x2A"
-  | "0x2C"
-  | "0x2E"
-  | "0x3D"
-  | "0x14"
-  | "0x19"
-  | "0x2F"
-  | "0x31"
-  | "0x34"
-  | "0x35"
-  | "0x36"
-  | "0x37"
-  | "0x38"
-  | "Job";
+  | '0x10'
+  | '0x11'
+  | '0x27'
+  | '0x28'
+  | '0x29'
+  | '0x3E'
+  | '0x83'
+  | '0x84'
+  | '0x85'
+  | '0x87'
+  | '0x22'
+  | '0x23'
+  | '0x24'
+  | '0x2A'
+  | '0x2C'
+  | '0x2E'
+  | '0x3D'
+  | '0x14'
+  | '0x19'
+  | '0x2F'
+  | '0x31'
+  | '0x34'
+  | '0x35'
+  | '0x36'
+  | '0x37'
+  | '0x38'
+  | 'Job'
 export const serviceDetail: Record<
   ServiceId,
   {
-    name: string;
-    hasSubFunction: boolean;
+    name: string
+    hasSubFunction: boolean
 
     defaultParams: {
-      param: Param;
-      enum?: { name: string, value: string }[]
-    }[];
+      param: Param
+      enum?: { name: string; value: string }[]
+    }[]
     defaultRespParams: {
-      param: Param;
-      enum?: { name: string, value: string }[]
-    }[];
-
+      param: Param
+      enum?: { name: string; value: string }[]
+    }[]
   }
 > = {
-  "0x10": {
-    name: "DiagnosticSessionControl",
+  '0x10': {
+    name: 'DiagnosticSessionControl',
     hasSubFunction: true,
     defaultParams: [
       {
@@ -240,21 +239,21 @@ export const serviceDetail: Record<
         },
         enum: [
           {
-            name: "DefaultSession",
-            value: "0x01",
+            name: 'DefaultSession',
+            value: '0x01'
           },
           {
-            name: "ProgrammingSession",
-            value: "0x02",
+            name: 'ProgrammingSession',
+            value: '0x02'
           },
           {
-            name: "ExtendedDiagnosticSession",
-            value: "0x03",
+            name: 'ExtendedDiagnosticSession',
+            value: '0x03'
           },
           {
-            name: "SafetySystemDiagnosticSession",
-            value: "0x04",
-          },
+            name: 'SafetySystemDiagnosticSession',
+            value: '0x04'
+          }
         ]
       }
     ],
@@ -272,21 +271,21 @@ export const serviceDetail: Record<
         },
         enum: [
           {
-            name: "DefaultSession",
-            value: "0x01",
+            name: 'DefaultSession',
+            value: '0x01'
           },
           {
-            name: "ProgrammingSession",
-            value: "0x02",
+            name: 'ProgrammingSession',
+            value: '0x02'
           },
           {
-            name: "ExtendedDiagnosticSession",
-            value: "0x03",
+            name: 'ExtendedDiagnosticSession',
+            value: '0x03'
           },
           {
-            name: "SafetySystemDiagnosticSession",
-            value: "0x04",
-          },
+            name: 'SafetySystemDiagnosticSession',
+            value: '0x04'
+          }
         ]
       },
       {
@@ -303,8 +302,8 @@ export const serviceDetail: Record<
       }
     ]
   },
-  "0x11": {
-    name: "ECUReset",
+  '0x11': {
+    name: 'ECUReset',
     hasSubFunction: true,
     defaultParams: [
       {
@@ -320,27 +319,27 @@ export const serviceDetail: Record<
         },
         enum: [
           {
-            name: "HardReset",
-            value: "0x01",
+            name: 'HardReset',
+            value: '0x01'
           },
           {
-            name: "KeyOffOnReset",
-            value: "0x02",
+            name: 'KeyOffOnReset',
+            value: '0x02'
           },
           {
-            name: "SoftReset",
-            value: "0x03",
+            name: 'SoftReset',
+            value: '0x03'
           },
           {
-            name: "enableRapidPowerShutDown",
-            value: "0x04",
+            name: 'enableRapidPowerShutDown',
+            value: '0x04'
           },
           {
-            name: "disableRapidPowerShutDown",
-            value: "0x05",
-          },
+            name: 'disableRapidPowerShutDown',
+            value: '0x05'
+          }
         ]
-      },
+      }
     ],
     defaultRespParams: [
       {
@@ -356,25 +355,25 @@ export const serviceDetail: Record<
         },
         enum: [
           {
-            name: "HardReset",
-            value: "0x01",
+            name: 'HardReset',
+            value: '0x01'
           },
           {
-            name: "KeyOffOnReset",
-            value: "0x02",
+            name: 'KeyOffOnReset',
+            value: '0x02'
           },
           {
-            name: "SoftReset",
-            value: "0x03",
+            name: 'SoftReset',
+            value: '0x03'
           },
           {
-            name: "enableRapidPowerShutDown",
-            value: "0x04",
+            name: 'enableRapidPowerShutDown',
+            value: '0x04'
           },
           {
-            name: "disableRapidPowerShutDown",
-            value: "0x05",
-          },
+            name: 'disableRapidPowerShutDown',
+            value: '0x05'
+          }
         ]
       },
       {
@@ -391,8 +390,8 @@ export const serviceDetail: Record<
       }
     ]
   },
-  "0x14": {
-    name: "ClearDiagnosticInformation",
+  '0x14': {
+    name: 'ClearDiagnosticInformation',
     hasSubFunction: false,
 
     defaultParams: [
@@ -411,8 +410,8 @@ export const serviceDetail: Record<
     ],
     defaultRespParams: []
   },
-  "0x19": {
-    name: "ReadDTCInformation",
+  '0x19': {
+    name: 'ReadDTCInformation',
     hasSubFunction: true,
 
     defaultParams: [
@@ -429,109 +428,109 @@ export const serviceDetail: Record<
         },
         enum: [
           {
-            name: "reportNumberOfDTCByStatusMask",
-            value: "0x01",
+            name: 'reportNumberOfDTCByStatusMask',
+            value: '0x01'
           },
           {
-            name: "reportDTCByStatusMask",
-            value: "0x02",
+            name: 'reportDTCByStatusMask',
+            value: '0x02'
           },
           {
-            name: "reportDTCSnapshotIdentification",
-            value: "0x03",
+            name: 'reportDTCSnapshotIdentification',
+            value: '0x03'
           },
           {
-            name: "reportDTCSnapshotRecordByDTCNumber",
-            value: "0x04",
+            name: 'reportDTCSnapshotRecordByDTCNumber',
+            value: '0x04'
           },
           {
-            name: "reportDTCStoredDataByRecordNumber",
-            value: "0x05",
+            name: 'reportDTCStoredDataByRecordNumber',
+            value: '0x05'
           },
           {
-            name: "reportDTCExtDataRecordByDTCNumber",
-            value: "0x06",
+            name: 'reportDTCExtDataRecordByDTCNumber',
+            value: '0x06'
           },
           {
-            name: "reportNumberOfDTCBySeverityMaskRecord",
-            value: "0x07",
+            name: 'reportNumberOfDTCBySeverityMaskRecord',
+            value: '0x07'
           },
           {
-            name: "reportDTCBySeverityMaskRecord",
-            value: "0x08",
+            name: 'reportDTCBySeverityMaskRecord',
+            value: '0x08'
           },
           {
-            name: "reportSeverityInformationOfDTC",
-            value: "0x09",
+            name: 'reportSeverityInformationOfDTC',
+            value: '0x09'
           },
           {
-            name: "reportSupportedDTC",
-            value: "0x0A",
+            name: 'reportSupportedDTC',
+            value: '0x0A'
           },
           {
-            name: "reportFirstTestFailedDTC",
-            value: "0x0B",
+            name: 'reportFirstTestFailedDTC',
+            value: '0x0B'
           },
           {
-            name: "reportFirstConfirmedDTC",
-            value: "0x0C",
+            name: 'reportFirstConfirmedDTC',
+            value: '0x0C'
           },
           {
-            name: "reportMostRecentTestFailedDTC",
-            value: "0x0D",
+            name: 'reportMostRecentTestFailedDTC',
+            value: '0x0D'
           },
           {
-            name: "reportMostRecentConfirmedDTC",
-            value: "0x0E",
+            name: 'reportMostRecentConfirmedDTC',
+            value: '0x0E'
           },
           {
-            name: "reportMirrorMemoryDTCByStatusMask",
-            value: "0x0F",
+            name: 'reportMirrorMemoryDTCByStatusMask',
+            value: '0x0F'
           },
           {
-            name: "reportMirrorMemoryDTCExtDataRecordByDTCNumber",
-            value: "0x10",
+            name: 'reportMirrorMemoryDTCExtDataRecordByDTCNumber',
+            value: '0x10'
           },
           {
-            name: "reportNumberOfMirrorMemoryDTCByStatusMask",
-            value: "0x11",
+            name: 'reportNumberOfMirrorMemoryDTCByStatusMask',
+            value: '0x11'
           },
           {
-            name: "reportNumberOfEmissionsOBDDTCByStatusMask",
-            value: "0x12",
+            name: 'reportNumberOfEmissionsOBDDTCByStatusMask',
+            value: '0x12'
           },
           {
-            name: "reportEmissionsOBDDTCByStatusMask",
-            value: "0x13",
+            name: 'reportEmissionsOBDDTCByStatusMask',
+            value: '0x13'
           },
           {
-            name: "reportDTCFaultDetectionCounter",
-            value: "0x14",
+            name: 'reportDTCFaultDetectionCounter',
+            value: '0x14'
           },
           {
-            name: "reportDTCWithPermanentStatus",
-            value: "0x15",
+            name: 'reportDTCWithPermanentStatus',
+            value: '0x15'
           },
           {
-            name: "reportUserDefMemoryDTCByStatusMask",
-            value: "0x17",
+            name: 'reportUserDefMemoryDTCByStatusMask',
+            value: '0x17'
           },
           {
-            name: "reportUserDefMemoryDTCSnapshotRecordByDTCNumber",
-            value: "0x18",
+            name: 'reportUserDefMemoryDTCSnapshotRecordByDTCNumber',
+            value: '0x18'
           },
           {
-            name: "reportUserDefMemoryDTCExtDataRecordByDTCNumber",
-            value: "0x19",
+            name: 'reportUserDefMemoryDTCExtDataRecordByDTCNumber',
+            value: '0x19'
           },
           {
-            name: "reportWWHOBDDTCByMaskRecord",
-            value: "0x42",
+            name: 'reportWWHOBDDTCByMaskRecord',
+            value: '0x42'
           },
           {
-            name: "reportWWHOBDDTCWithPermanentStatus",
-            value: "0x55",
-          },
+            name: 'reportWWHOBDDTCWithPermanentStatus',
+            value: '0x55'
+          }
         ]
       },
       {
@@ -546,7 +545,6 @@ export const serviceDetail: Record<
           phyValue: '00'
         }
       }
-
     ],
     defaultRespParams: [
       {
@@ -562,109 +560,109 @@ export const serviceDetail: Record<
         },
         enum: [
           {
-            name: "reportNumberOfDTCByStatusMask",
-            value: "0x01",
+            name: 'reportNumberOfDTCByStatusMask',
+            value: '0x01'
           },
           {
-            name: "reportDTCByStatusMask",
-            value: "0x02",
+            name: 'reportDTCByStatusMask',
+            value: '0x02'
           },
           {
-            name: "reportDTCSnapshotIdentification",
-            value: "0x03",
+            name: 'reportDTCSnapshotIdentification',
+            value: '0x03'
           },
           {
-            name: "reportDTCSnapshotRecordByDTCNumber",
-            value: "0x04",
+            name: 'reportDTCSnapshotRecordByDTCNumber',
+            value: '0x04'
           },
           {
-            name: "reportDTCStoredDataByRecordNumber",
-            value: "0x05",
+            name: 'reportDTCStoredDataByRecordNumber',
+            value: '0x05'
           },
           {
-            name: "reportDTCExtDataRecordByDTCNumber",
-            value: "0x06",
+            name: 'reportDTCExtDataRecordByDTCNumber',
+            value: '0x06'
           },
           {
-            name: "reportNumberOfDTCBySeverityMaskRecord",
-            value: "0x07",
+            name: 'reportNumberOfDTCBySeverityMaskRecord',
+            value: '0x07'
           },
           {
-            name: "reportDTCBySeverityMaskRecord",
-            value: "0x08",
+            name: 'reportDTCBySeverityMaskRecord',
+            value: '0x08'
           },
           {
-            name: "reportSeverityInformationOfDTC",
-            value: "0x09",
+            name: 'reportSeverityInformationOfDTC',
+            value: '0x09'
           },
           {
-            name: "reportSupportedDTC",
-            value: "0x0A",
+            name: 'reportSupportedDTC',
+            value: '0x0A'
           },
           {
-            name: "reportFirstTestFailedDTC",
-            value: "0x0B",
+            name: 'reportFirstTestFailedDTC',
+            value: '0x0B'
           },
           {
-            name: "reportFirstConfirmedDTC",
-            value: "0x0C",
+            name: 'reportFirstConfirmedDTC',
+            value: '0x0C'
           },
           {
-            name: "reportMostRecentTestFailedDTC",
-            value: "0x0D",
+            name: 'reportMostRecentTestFailedDTC',
+            value: '0x0D'
           },
           {
-            name: "reportMostRecentConfirmedDTC",
-            value: "0x0E",
+            name: 'reportMostRecentConfirmedDTC',
+            value: '0x0E'
           },
           {
-            name: "reportMirrorMemoryDTCByStatusMask",
-            value: "0x0F",
+            name: 'reportMirrorMemoryDTCByStatusMask',
+            value: '0x0F'
           },
           {
-            name: "reportMirrorMemoryDTCExtDataRecordByDTCNumber",
-            value: "0x10",
+            name: 'reportMirrorMemoryDTCExtDataRecordByDTCNumber',
+            value: '0x10'
           },
           {
-            name: "reportNumberOfMirrorMemoryDTCByStatusMask",
-            value: "0x11",
+            name: 'reportNumberOfMirrorMemoryDTCByStatusMask',
+            value: '0x11'
           },
           {
-            name: "reportNumberOfEmissionsOBDDTCByStatusMask",
-            value: "0x12",
+            name: 'reportNumberOfEmissionsOBDDTCByStatusMask',
+            value: '0x12'
           },
           {
-            name: "reportEmissionsOBDDTCByStatusMask",
-            value: "0x13",
+            name: 'reportEmissionsOBDDTCByStatusMask',
+            value: '0x13'
           },
           {
-            name: "reportDTCFaultDetectionCounter",
-            value: "0x14",
+            name: 'reportDTCFaultDetectionCounter',
+            value: '0x14'
           },
           {
-            name: "reportDTCWithPermanentStatus",
-            value: "0x15",
+            name: 'reportDTCWithPermanentStatus',
+            value: '0x15'
           },
           {
-            name: "reportUserDefMemoryDTCByStatusMask",
-            value: "0x17",
+            name: 'reportUserDefMemoryDTCByStatusMask',
+            value: '0x17'
           },
           {
-            name: "reportUserDefMemoryDTCSnapshotRecordByDTCNumber",
-            value: "0x18",
+            name: 'reportUserDefMemoryDTCSnapshotRecordByDTCNumber',
+            value: '0x18'
           },
           {
-            name: "reportUserDefMemoryDTCExtDataRecordByDTCNumber",
-            value: "0x19",
+            name: 'reportUserDefMemoryDTCExtDataRecordByDTCNumber',
+            value: '0x19'
           },
           {
-            name: "reportWWHOBDDTCByMaskRecord",
-            value: "0x42",
+            name: 'reportWWHOBDDTCByMaskRecord',
+            value: '0x42'
           },
           {
-            name: "reportWWHOBDDTCWithPermanentStatus",
-            value: "0x55",
-          },
+            name: 'reportWWHOBDDTCWithPermanentStatus',
+            value: '0x55'
+          }
         ]
       },
       {
@@ -681,12 +679,11 @@ export const serviceDetail: Record<
       }
     ]
   },
-  "0x22": {
-    name: "ReadDataByIdentifier",
+  '0x22': {
+    name: 'ReadDataByIdentifier',
     hasSubFunction: false,
     defaultParams: [
       {
-
         param: {
           id: 'dataIdentifier',
           name: 'dataIdentifier',
@@ -697,12 +694,10 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0, 0x0]),
           phyValue: '00 00'
         }
-
       }
     ],
     defaultRespParams: [
       {
-
         param: {
           id: 'dataIdentifier',
           name: 'dataIdentifier',
@@ -713,7 +708,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0, 0x0]),
           phyValue: '00 00'
         }
-
       },
       {
         param: {
@@ -729,8 +723,8 @@ export const serviceDetail: Record<
       }
     ]
   },
-  "0x23": {
-    name: "ReadMemoryByAddress",
+  '0x23': {
+    name: 'ReadMemoryByAddress',
     hasSubFunction: false,
 
     defaultParams: [
@@ -744,7 +738,7 @@ export const serviceDetail: Record<
           type: 'NUM',
           value: Buffer.from([0x0]),
           phyValue: '0x00'
-        },
+        }
       },
       {
         param: {
@@ -770,9 +764,6 @@ export const serviceDetail: Record<
           phyValue: '0'
         }
       }
-
-
-
     ],
     defaultRespParams: [
       {
@@ -786,12 +777,11 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       }
     ]
   },
-  "0x24": {
-    name: "ReadScalingDataByIdentifier",
+  '0x24': {
+    name: 'ReadScalingDataByIdentifier',
     hasSubFunction: false,
 
     defaultParams: [
@@ -845,11 +835,10 @@ export const serviceDetail: Record<
           phyValue: '0x00'
         }
       }
-    ],
-
+    ]
   },
-  "0x27": {
-    name: "SecurityAccess",
+  '0x27': {
+    name: 'SecurityAccess',
     hasSubFunction: true,
     defaultParams: [
       {
@@ -865,35 +854,34 @@ export const serviceDetail: Record<
         },
         enum: [
           {
-            name: "requestSeed",
-            value: "0x01",
+            name: 'requestSeed',
+            value: '0x01'
           },
           {
-            name: "sendKey",
-            value: "0x02",
+            name: 'sendKey',
+            value: '0x02'
           },
           {
-            name: "requestSeed",
-            value: "0x03",
+            name: 'requestSeed',
+            value: '0x03'
           },
           {
-            name: "sendKey",
-            value: "0x04",
+            name: 'sendKey',
+            value: '0x04'
           },
           {
-            name: "requestSeed",
-            value: "0x05",
+            name: 'requestSeed',
+            value: '0x05'
           },
           {
-            name: "sendKey",
-            value: "0x06",
+            name: 'sendKey',
+            value: '0x06'
           },
           {
-            name: "requestSeed",
-            value: "0x07",
-          },
+            name: 'requestSeed',
+            value: '0x07'
+          }
         ]
-
       },
       {
         param: {
@@ -922,33 +910,33 @@ export const serviceDetail: Record<
         },
         enum: [
           {
-            name: "requestSeed",
-            value: "0x01",
+            name: 'requestSeed',
+            value: '0x01'
           },
           {
-            name: "sendKey",
-            value: "0x02",
+            name: 'sendKey',
+            value: '0x02'
           },
           {
-            name: "requestSeed",
-            value: "0x03",
+            name: 'requestSeed',
+            value: '0x03'
           },
           {
-            name: "sendKey",
-            value: "0x04",
+            name: 'sendKey',
+            value: '0x04'
           },
           {
-            name: "requestSeed",
-            value: "0x05",
+            name: 'requestSeed',
+            value: '0x05'
           },
           {
-            name: "sendKey",
-            value: "0x06",
+            name: 'sendKey',
+            value: '0x06'
           },
           {
-            name: "requestSeed",
-            value: "0x07",
-          },
+            name: 'requestSeed',
+            value: '0x07'
+          }
         ]
       },
       {
@@ -965,8 +953,8 @@ export const serviceDetail: Record<
       }
     ]
   },
-  "0x28": {
-    name: "CommunicationControl",
+  '0x28': {
+    name: 'CommunicationControl',
     hasSubFunction: true,
 
     defaultParams: [
@@ -983,30 +971,30 @@ export const serviceDetail: Record<
         },
         enum: [
           {
-            name: "enableRxAndTx",
-            value: "0x00",
+            name: 'enableRxAndTx',
+            value: '0x00'
           },
           {
-            name: "enableRxAndDisableTx",
-            value: "0x01",
+            name: 'enableRxAndDisableTx',
+            value: '0x01'
           },
           {
-            name: "disableRxAndEnableTx",
-            value: "0x02",
+            name: 'disableRxAndEnableTx',
+            value: '0x02'
           },
           {
-            name: "disableRxAndTx",
-            value: "0x03",
+            name: 'disableRxAndTx',
+            value: '0x03'
           },
           {
-            name: "enableRxAndDisableTxWithEnhancedAddressInformation",
-            value: "0x04",
+            name: 'enableRxAndDisableTxWithEnhancedAddressInformation',
+            value: '0x04'
           },
           {
-            name: "enableRxAndTxWithEnhancedAddressInformation",
-            value: "0x05",
-          },
-        ],
+            name: 'enableRxAndTxWithEnhancedAddressInformation',
+            value: '0x05'
+          }
+        ]
       },
       {
         param: {
@@ -1019,7 +1007,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '0x00'
         }
-
       }
     ],
     defaultRespParams: [
@@ -1036,35 +1023,35 @@ export const serviceDetail: Record<
         },
         enum: [
           {
-            name: "enableRxAndTx",
-            value: "0x00",
+            name: 'enableRxAndTx',
+            value: '0x00'
           },
           {
-            name: "enableRxAndDisableTx",
-            value: "0x01",
+            name: 'enableRxAndDisableTx',
+            value: '0x01'
           },
           {
-            name: "disableRxAndEnableTx",
-            value: "0x02",
+            name: 'disableRxAndEnableTx',
+            value: '0x02'
           },
           {
-            name: "disableRxAndTx",
-            value: "0x03",
+            name: 'disableRxAndTx',
+            value: '0x03'
           },
           {
-            name: "enableRxAndDisableTxWithEnhancedAddressInformation",
-            value: "0x04",
+            name: 'enableRxAndDisableTxWithEnhancedAddressInformation',
+            value: '0x04'
           },
           {
-            name: "enableRxAndTxWithEnhancedAddressInformation",
-            value: "0x05",
-          },
-        ],
+            name: 'enableRxAndTxWithEnhancedAddressInformation',
+            value: '0x05'
+          }
+        ]
       }
     ]
   },
-  "0x29": {
-    name: "Authentication",
+  '0x29': {
+    name: 'Authentication',
     hasSubFunction: true,
 
     defaultParams: [
@@ -1081,41 +1068,41 @@ export const serviceDetail: Record<
         },
         enum: [
           {
-            name: "deAuthenticate",
-            value: "0x00",
+            name: 'deAuthenticate',
+            value: '0x00'
           },
           {
-            name: "verifyCertificateUnidirectional",
-            value: "0x01",
+            name: 'verifyCertificateUnidirectional',
+            value: '0x01'
           },
           {
-            name: "verifyCertificateBidirectional",
-            value: "0x02",
+            name: 'verifyCertificateBidirectional',
+            value: '0x02'
           },
           {
-            name: "proofOfOwnership",
-            value: "0x03",
+            name: 'proofOfOwnership',
+            value: '0x03'
           },
           {
-            name: "transmitCertificate",
-            value: "0x04",
+            name: 'transmitCertificate',
+            value: '0x04'
           },
           {
-            name: "requestChallengeForAuthentication",
-            value: "0x05",
+            name: 'requestChallengeForAuthentication',
+            value: '0x05'
           },
           {
-            name: "verifyProofOfOwnershipUnidirectional",
-            value: "0x06",
+            name: 'verifyProofOfOwnershipUnidirectional',
+            value: '0x06'
           },
           {
-            name: "verifyProofOfOwnershipBidirectional",
-            value: "0x07",
+            name: 'verifyProofOfOwnershipBidirectional',
+            value: '0x07'
           },
           {
-            name: "authenticationConfiguration",
-            value: "0x08",
-          },
+            name: 'authenticationConfiguration',
+            value: '0x08'
+          }
         ]
       }
     ],
@@ -1133,47 +1120,47 @@ export const serviceDetail: Record<
         },
         enum: [
           {
-            name: "deAuthenticate",
-            value: "0x00",
+            name: 'deAuthenticate',
+            value: '0x00'
           },
           {
-            name: "verifyCertificateUnidirectional",
-            value: "0x01",
+            name: 'verifyCertificateUnidirectional',
+            value: '0x01'
           },
           {
-            name: "verifyCertificateBidirectional",
-            value: "0x02",
+            name: 'verifyCertificateBidirectional',
+            value: '0x02'
           },
           {
-            name: "proofOfOwnership",
-            value: "0x03",
+            name: 'proofOfOwnership',
+            value: '0x03'
           },
           {
-            name: "transmitCertificate",
-            value: "0x04",
+            name: 'transmitCertificate',
+            value: '0x04'
           },
           {
-            name: "requestChallengeForAuthentication",
-            value: "0x05",
+            name: 'requestChallengeForAuthentication',
+            value: '0x05'
           },
           {
-            name: "verifyProofOfOwnershipUnidirectional",
-            value: "0x06",
+            name: 'verifyProofOfOwnershipUnidirectional',
+            value: '0x06'
           },
           {
-            name: "verifyProofOfOwnershipBidirectional",
-            value: "0x07",
+            name: 'verifyProofOfOwnershipBidirectional',
+            value: '0x07'
           },
           {
-            name: "authenticationConfiguration",
-            value: "0x08",
-          },
+            name: 'authenticationConfiguration',
+            value: '0x08'
+          }
         ]
       }
-    ],
+    ]
   },
-  "0x2A": {
-    name: "ReadDataByPeriodicIdentifier",
+  '0x2A': {
+    name: 'ReadDataByPeriodicIdentifier',
     hasSubFunction: false,
 
     defaultParams: [
@@ -1200,9 +1187,7 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
-      },
-
+      }
     ],
     defaultRespParams: [
       {
@@ -1231,12 +1216,11 @@ export const serviceDetail: Record<
       }
     ]
   },
-  "0x2C": {
-    name: "DynamicallyDefineDataIdentifier",
+  '0x2C': {
+    name: 'DynamicallyDefineDataIdentifier',
     hasSubFunction: true,
     defaultParams: [
       {
-
         param: {
           id: 'definitionType',
           name: 'definitionType',
@@ -1249,15 +1233,14 @@ export const serviceDetail: Record<
         },
         enum: [
           {
-            name: "defineByIdentifier",
-            value: "0x01",
+            name: 'defineByIdentifier',
+            value: '0x01'
           },
           {
-            name: "defineByMemoryAddress",
-            value: "0x02",
-          },
+            name: 'defineByMemoryAddress',
+            value: '0x02'
+          }
         ]
-
       },
       {
         param: {
@@ -1281,13 +1264,11 @@ export const serviceDetail: Record<
           type: 'ARRAY',
           value: Buffer.from([0x0]),
           phyValue: '00'
-
         }
       }
     ],
     defaultRespParams: [
       {
-
         param: {
           id: 'definitionType',
           name: 'definitionType',
@@ -1300,15 +1281,14 @@ export const serviceDetail: Record<
         },
         enum: [
           {
-            name: "defineByIdentifier",
-            value: "0x01",
+            name: 'defineByIdentifier',
+            value: '0x01'
           },
           {
-            name: "defineByMemoryAddress",
-            value: "0x02",
-          },
+            name: 'defineByMemoryAddress',
+            value: '0x02'
+          }
         ]
-
       },
       {
         param: {
@@ -1321,11 +1301,11 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0, 0x0]),
           phyValue: '00 00'
         }
-      },
+      }
     ]
   },
-  "0x2E": {
-    name: "WriteDataByIdentifier",
+  '0x2E': {
+    name: 'WriteDataByIdentifier',
     hasSubFunction: false,
 
     defaultParams: [
@@ -1339,7 +1319,7 @@ export const serviceDetail: Record<
           type: 'NUM',
           value: Buffer.from([0x0, 0x0]),
           phyValue: '00'
-        },
+        }
       },
       {
         param: {
@@ -1352,7 +1332,7 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-      },
+      }
     ],
     defaultRespParams: [
       {
@@ -1365,12 +1345,12 @@ export const serviceDetail: Record<
           type: 'NUM',
           value: Buffer.from([0x0, 0x0]),
           phyValue: '00'
-        },
-      },
+        }
+      }
     ]
   },
-  "0x2F": {
-    name: "InputOutputControlByIdentifier",
+  '0x2F': {
+    name: 'InputOutputControlByIdentifier',
     hasSubFunction: false,
     defaultParams: [
       {
@@ -1383,8 +1363,7 @@ export const serviceDetail: Record<
           type: 'NUM',
           value: Buffer.from([0x0, 0x0]),
           phyValue: '00'
-        },
-
+        }
       },
       {
         param: {
@@ -1409,7 +1388,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       }
     ],
     defaultRespParams: [
@@ -1423,8 +1401,7 @@ export const serviceDetail: Record<
           type: 'NUM',
           value: Buffer.from([0x0, 0x0]),
           phyValue: '00'
-        },
-
+        }
       },
       {
         param: {
@@ -1449,13 +1426,12 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       }
-    ],
+    ]
   },
 
-  "0x31": {
-    name: "RoutineControl",
+  '0x31': {
+    name: 'RoutineControl',
     hasSubFunction: true,
     defaultParams: [
       {
@@ -1471,19 +1447,18 @@ export const serviceDetail: Record<
         },
         enum: [
           {
-            name: "startRoutine",
-            value: "0x01",
+            name: 'startRoutine',
+            value: '0x01'
           },
           {
-            name: "stopRoutine",
-            value: "0x02",
+            name: 'stopRoutine',
+            value: '0x02'
           },
           {
-            name: "requestRoutineResults",
-            value: "0x03",
-          },
+            name: 'requestRoutineResults',
+            value: '0x03'
+          }
         ]
-
       },
       {
         param: {
@@ -1496,7 +1471,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0, 0x0]),
           phyValue: '00'
         }
-
       },
       {
         param: {
@@ -1525,19 +1499,18 @@ export const serviceDetail: Record<
         },
         enum: [
           {
-            name: "startRoutine",
-            value: "0x01",
+            name: 'startRoutine',
+            value: '0x01'
           },
           {
-            name: "stopRoutine",
-            value: "0x02",
+            name: 'stopRoutine',
+            value: '0x02'
           },
           {
-            name: "requestRoutineResults",
-            value: "0x03",
-          },
+            name: 'requestRoutineResults',
+            value: '0x03'
+          }
         ]
-
       },
       {
         param: {
@@ -1550,7 +1523,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0, 0x0]),
           phyValue: '00'
         }
-
       },
       {
         param: {
@@ -1566,8 +1538,8 @@ export const serviceDetail: Record<
       }
     ]
   },
-  "0x34": {
-    name: "RequestDownload",
+  '0x34': {
+    name: 'RequestDownload',
     hasSubFunction: false,
     defaultParams: [
       {
@@ -1581,7 +1553,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       },
       {
         param: {
@@ -1594,7 +1565,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       },
       {
         param: {
@@ -1607,7 +1577,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0, 0x0, 0x0, 0x0]),
           phyValue: '00'
         }
-
       },
       {
         param: {
@@ -1634,7 +1603,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       },
       {
         param: {
@@ -1647,12 +1615,11 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       }
     ]
   },
-  "0x35": {
-    name: "RequestUpload",
+  '0x35': {
+    name: 'RequestUpload',
     hasSubFunction: false,
     defaultParams: [
       {
@@ -1666,7 +1633,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       },
       {
         param: {
@@ -1679,7 +1645,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       },
       {
         param: {
@@ -1692,7 +1657,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0, 0x0, 0x0, 0x0]),
           phyValue: '00'
         }
-
       },
       {
         param: {
@@ -1719,7 +1683,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       },
       {
         param: {
@@ -1732,12 +1695,11 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       }
     ]
   },
-  "0x36": {
-    name: "TransferData",
+  '0x36': {
+    name: 'TransferData',
     hasSubFunction: false,
 
     defaultParams: [
@@ -1752,7 +1714,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       },
       {
         param: {
@@ -1765,7 +1726,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       }
     ],
     defaultRespParams: [
@@ -1780,7 +1740,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       },
       {
         param: {
@@ -1793,13 +1752,11 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       }
     ]
-
   },
-  "0x37": {
-    name: "RequestTransferExit",
+  '0x37': {
+    name: 'RequestTransferExit',
     hasSubFunction: false,
 
     defaultParams: [
@@ -1814,7 +1771,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       }
     ],
     defaultRespParams: [
@@ -1829,21 +1785,18 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       }
     ]
   },
-  "0x38": {
-    name: "RequestFileTransfer",
+  '0x38': {
+    name: 'RequestFileTransfer',
     hasSubFunction: false,
-    defaultParams: [
-
-    ],
+    defaultParams: [],
     defaultRespParams: []
   },
 
-  "0x3D": {
-    name: "WriteMemoryByAddress",
+  '0x3D': {
+    name: 'WriteMemoryByAddress',
     hasSubFunction: false,
 
     defaultParams: [
@@ -1858,7 +1811,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       },
       {
         param: {
@@ -1871,7 +1823,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0, 0x0, 0x0, 0x0]),
           phyValue: '00'
         }
-
       },
       {
         param: {
@@ -1884,7 +1835,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0, 0x0, 0x0, 0x0]),
           phyValue: '00'
         }
-
       },
       {
         param: {
@@ -1897,7 +1847,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       }
     ],
     defaultRespParams: [
@@ -1912,7 +1861,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       },
       {
         param: {
@@ -1925,7 +1873,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0, 0x0, 0x0, 0x0]),
           phyValue: '00'
         }
-
       },
       {
         param: {
@@ -1938,12 +1885,11 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0, 0x0, 0x0, 0x0]),
           phyValue: '00'
         }
-
-      },
-    ],
+      }
+    ]
   },
-  "0x3E": {
-    name: "TesterPresent",
+  '0x3E': {
+    name: 'TesterPresent',
     hasSubFunction: false,
     defaultParams: [
       {
@@ -1957,7 +1903,6 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       }
     ],
     defaultRespParams: [
@@ -1972,12 +1917,11 @@ export const serviceDetail: Record<
           value: Buffer.from([0x0]),
           phyValue: '00'
         }
-
       }
     ]
   },
-  "0x83": {
-    name: "AccessTimingParameter",
+  '0x83': {
+    name: 'AccessTimingParameter',
     hasSubFunction: true,
     defaultParams: [
       {
@@ -1993,21 +1937,21 @@ export const serviceDetail: Record<
         },
         enum: [
           {
-            name: "readExtendedTimingParameterSet",
-            value: "0x01",
+            name: 'readExtendedTimingParameterSet',
+            value: '0x01'
           },
           {
-            name: "setTimingParametersToDefaultValues",
-            value: "0x02",
+            name: 'setTimingParametersToDefaultValues',
+            value: '0x02'
           },
           {
-            name: "readCurrentlyActiveTimingParameters",
-            value: "0x03",
+            name: 'readCurrentlyActiveTimingParameters',
+            value: '0x03'
           },
           {
-            name: "setTimingParametersToGivenValues",
-            value: "0x04",
-          },
+            name: 'setTimingParametersToGivenValues',
+            value: '0x04'
+          }
         ]
       },
       {
@@ -2022,7 +1966,6 @@ export const serviceDetail: Record<
           phyValue: '00'
         }
       }
-
     ],
 
     defaultRespParams: [
@@ -2039,21 +1982,21 @@ export const serviceDetail: Record<
         },
         enum: [
           {
-            name: "readExtendedTimingParameterSet",
-            value: "0x01",
+            name: 'readExtendedTimingParameterSet',
+            value: '0x01'
           },
           {
-            name: "setTimingParametersToDefaultValues",
-            value: "0x02",
+            name: 'setTimingParametersToDefaultValues',
+            value: '0x02'
           },
           {
-            name: "readCurrentlyActiveTimingParameters",
-            value: "0x03",
+            name: 'readCurrentlyActiveTimingParameters',
+            value: '0x03'
           },
           {
-            name: "setTimingParametersToGivenValues",
-            value: "0x04",
-          },
+            name: 'setTimingParametersToGivenValues',
+            value: '0x04'
+          }
         ]
       },
       {
@@ -2068,12 +2011,10 @@ export const serviceDetail: Record<
           phyValue: '00'
         }
       }
-
-
     ]
   },
-  "0x84": {
-    name: "SecuredDataTransmission",
+  '0x84': {
+    name: 'SecuredDataTransmission',
     hasSubFunction: false,
 
     defaultParams: [
@@ -2105,8 +2046,8 @@ export const serviceDetail: Record<
       }
     ]
   },
-  "0x85": {
-    name: "ControlDTCSetting",
+  '0x85': {
+    name: 'ControlDTCSetting',
     hasSubFunction: true,
 
     defaultParams: [
@@ -2119,22 +2060,21 @@ export const serviceDetail: Record<
           type: 'NUM',
           value: Buffer.from([0x0]),
           phyValue: '00',
-          id: 'dtcSettingType',
+          id: 'dtcSettingType'
         },
         enum: [
           {
-            name: "on",
-            value: "0x01",
+            name: 'on',
+            value: '0x01'
           },
           {
-            name: "off",
-            value: "0x02",
-          },
+            name: 'off',
+            value: '0x02'
+          }
         ]
       },
       {
-        param:
-        {
+        param: {
           name: 'dtcSettingControlOptionRecord',
           bitLen: 8,
           deletable: false,
@@ -2142,9 +2082,8 @@ export const serviceDetail: Record<
           type: 'ARRAY',
           value: Buffer.from([0x0]),
           phyValue: '00',
-          id: 'dtcSettingControlOptionRecord',
-        },
-
+          id: 'dtcSettingControlOptionRecord'
+        }
       }
     ],
     defaultRespParams: [
@@ -2157,17 +2096,17 @@ export const serviceDetail: Record<
           type: 'NUM',
           value: Buffer.from([0x0]),
           phyValue: '00',
-          id: 'dtcSettingType',
+          id: 'dtcSettingType'
         },
         enum: [
           {
-            name: "on",
-            value: "0x01",
+            name: 'on',
+            value: '0x01'
           },
           {
-            name: "off",
-            value: "0x02",
-          },
+            name: 'off',
+            value: '0x02'
+          }
         ]
       }
     ]
@@ -2185,96 +2124,84 @@ export const serviceDetail: Record<
   //     }
   //   ],
   // },
-  "0x87": {
-    name: "LinkControl",
+  '0x87': {
+    name: 'LinkControl',
     hasSubFunction: true,
-  
+
     defaultParams: [
-     
       {
-        param:{
-          name: "linkControlType",
+        param: {
+          name: 'linkControlType',
           bitLen: 8,
           deletable: false,
           editable: true,
           type: 'NUM',
           value: Buffer.from([0x0]),
           phyValue: '00',
-          id: 'linkControlType',
+          id: 'linkControlType'
         },
         enum: [
           {
-            name: "verifyModeTransitionWithFixedParameter",
-            value: "0x01",
+            name: 'verifyModeTransitionWithFixedParameter',
+            value: '0x01'
           },
           {
-            name: "verifyModeTransitionWithSpecificParameter",
-            value: "0x02",
+            name: 'verifyModeTransitionWithSpecificParameter',
+            value: '0x02'
           },
           {
-            name: "transitionMode",
-            value: "0x03",
-          },
+            name: 'transitionMode',
+            value: '0x03'
+          }
         ]
-      
       },
       {
-        param:{
-          name: "baudrate",
+        param: {
+          name: 'baudrate',
           bitLen: 8,
           deletable: true,
           editable: true,
           type: 'ARRAY',
           value: Buffer.from([0x0]),
           phyValue: '00',
-          id: 'baudrate',
+          id: 'baudrate'
         }
       }
     ],
     defaultRespParams: [
-     
       {
-        param:{
-          name: "linkControlType",
+        param: {
+          name: 'linkControlType',
           bitLen: 8,
           deletable: false,
           editable: true,
           type: 'NUM',
           value: Buffer.from([0x0]),
           phyValue: '00',
-          id: 'linkControlType',
+          id: 'linkControlType'
         },
         enum: [
           {
-            name: "verifyModeTransitionWithFixedParameter",
-            value: "0x01",
+            name: 'verifyModeTransitionWithFixedParameter',
+            value: '0x01'
           },
           {
-            name: "verifyModeTransitionWithSpecificParameter",
-            value: "0x02",
+            name: 'verifyModeTransitionWithSpecificParameter',
+            value: '0x02'
           },
           {
-            name: "transitionMode",
-            value: "0x03",
-          },
+            name: 'transitionMode',
+            value: '0x03'
+          }
         ]
-      
-      },
-      
-    ],
-   
+      }
+    ]
   },
-
-
-
-
-
-
 
   Job: {
-    name: "JobFunction",
+    name: 'JobFunction',
     hasSubFunction: false,
     defaultParams: [],
-    defaultRespParams: [],
-  },
-};
+    defaultRespParams: []
+  }
+}

@@ -1,1 +1,1 @@
-export type {User} from '../main/ipc/casdoor'
+export type { User } from '../main/ipc/casdoor'

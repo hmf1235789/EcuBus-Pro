@@ -1,23 +1,34 @@
 <template>
   <div>
-    <div class="w" id="networkMain">
+    <div id="networkMain" class="w">
       <div class="left">
         <el-scrollbar :height="h + 'px'">
-          <el-tree default-expand-all :data="tData" :props="defaultProps" :expand-on-click-node="false">
+          <el-tree
+            default-expand-all
+            :data="tData"
+            :props="defaultProps"
+            :expand-on-click-node="false"
+          >
             <template #default="{ node, data }">
               <span class="tree-node">
                 <span class="tree-label">
                   <Icon v-if="data.icon" style="margin-right: 5px" :icon="data.icon" />
 
+                  <span
+                    :class="{
+                      isTop: node.level === 1,
 
-                  <span :class="{
-                    isTop: node.level === 1,
-
-                    treeLabel: true
-                  }">{{ node.label }}</span>
-
+                      treeLabel: true
+                    }"
+                    >{{ node.label }}</span
+                  >
                 </span>
-                <el-button link type="primary" v-if="data.canAdd" @click.stop="addNode(data.type, node.parent?.data)">
+                <el-button
+                  v-if="data.canAdd"
+                  link
+                  type="primary"
+                  @click.stop="addNode(data.type, node.parent?.data)"
+                >
                   <Icon :icon="circlePlusFilled" />
                 </el-button>
               </span>
@@ -26,18 +37,18 @@
         </el-scrollbar>
       </div>
       <div id="networkShift" class="shift" />
-      <div class="right" v-loading="loading">
+      <div v-loading="loading" class="right">
         <div id="networkGraph" />
       </div>
       <div class="help">
         <span>
-          <Icon :icon="zoomInRounded" @click="scalePaper1('in')" class="helpButton" />
+          <Icon :icon="zoomInRounded" class="helpButton" @click="scalePaper1('in')" />
         </span>
         <span>
-          <Icon :icon="zoomOutRounded" @click="scalePaper1('out')" class="helpButton" />
+          <Icon :icon="zoomOutRounded" class="helpButton" @click="scalePaper1('out')" />
         </span>
         <span>
-          <Icon :icon="fullscreenIcon" @click="fitPater" class="helpButton" />
+          <Icon :icon="fullscreenIcon" class="helpButton" @click="fitPater" />
         </span>
       </div>
     </div>
@@ -45,7 +56,18 @@
 </template>
 <script lang="ts" setup>
 import * as joint from '@joint/core'
-import { computed, onMounted, toRef, ref, nextTick, watch, provide, inject, onUnmounted, watchEffect } from 'vue'
+import {
+  computed,
+  onMounted,
+  toRef,
+  ref,
+  nextTick,
+  watch,
+  provide,
+  inject,
+  onUnmounted,
+  watchEffect
+} from 'vue'
 import { UDSView, udsCeil, udsHardware } from './udsView'
 import fullscreenIcon from '@iconify/icons-material-symbols/fullscreen'
 import zoomInRounded from '@iconify/icons-material-symbols/zoom-in-rounded'
@@ -108,7 +130,6 @@ function addChild(parent: Tree) {
         }
         c.children.push(cc)
       }
-
     }
   } else if (parent.type == 'eth') {
     for (const key of Object.keys(dataBase.devices)) {
@@ -125,7 +146,6 @@ function addChild(parent: Tree) {
         }
         c.children.push(cc)
       }
-
     }
   } else if (parent.type == 'lin') {
     for (const key of Object.keys(dataBase.devices)) {
@@ -142,7 +162,6 @@ function addChild(parent: Tree) {
         }
         c.children.push(cc)
       }
-
     }
   }
   parent.children.push(c)
@@ -192,9 +211,6 @@ function addChild(parent: Tree) {
     parent.children.push(i)
   }
   //node
-
-
-
 }
 const tData = computed(() => {
   const can: Tree = {
@@ -243,17 +259,13 @@ const tData = computed(() => {
       id: key
     }
     node.children.push(cc)
-
-
   }
-
 
   addChild(can)
   addChild(lin)
   addChild(eth)
   // addChild(node)
   return [can, lin, eth, node]
-
 })
 
 const defaultProps = {
@@ -287,12 +299,10 @@ onMounted(() => {
     containment: '#networkMain',
     // resize from all edges and corners
     resize: (e, ui) => {
-
       leftWidth.value = ui.size.width
-
     },
     maxWidth: 400,
-    minWidth: 200,
+    minWidth: 200
   })
 
   paper = new joint.dia.Paper({
@@ -307,12 +317,11 @@ onMounted(() => {
     },
     interactive: {
       elementMove: true,
-      linkMove: false,
+      linkMove: false
     },
     snapLabels: true,
     defaultLink: () => new joint.shapes.standard.Link(),
-    linkPinning: true,
-
+    linkPinning: true
   })
 
   paper.el.addEventListener('wheel', function (event) {
@@ -338,7 +347,6 @@ onMounted(() => {
     }
   })
   udsView.setPaper(paper)
-
 
   // Mouse down event to start panning
   paper.on('blank:pointerdown', function (event, x, y) {
@@ -377,8 +385,6 @@ onMounted(() => {
     }
   })
 
-
-
   paper.on('element:mouseenter', function (elementView) {
     elementView.showTools()
   })
@@ -388,19 +394,21 @@ onMounted(() => {
   })
   nextTick(() => {
     if (project.project.wins['network'].hide) {
-      const q = watch(() => project.project.wins['network'].hide, (v) => {
-        if (v) {
-          //hide
-        } else {
-          nextTick(() => {
-            buildView()
-            initDone.value = true
-            loading.value = false
-          })
-
+      const q = watch(
+        () => project.project.wins['network'].hide,
+        (v) => {
+          if (v) {
+            //hide
+          } else {
+            nextTick(() => {
+              buildView()
+              initDone.value = true
+              loading.value = false
+            })
+          }
+          q()
         }
-        q()
-      })
+      )
     } else {
       buildView()
       initDone.value = true
@@ -409,10 +417,8 @@ onMounted(() => {
 
     // fitPater()
   })
-
 })
 const layout = inject('layout') as Layout
-
 
 watchEffect(() => {
   if (initDone.value) {
@@ -445,9 +451,7 @@ watchEffect(() => {
     //check link
     for (const from of Object.keys(dataBase.ia)) {
       for (const to of Object.keys(dataBase.devices)) {
-
         if (dataBase.ia[from].devices.indexOf(to) == -1) {
-
           udsView.removeLink(from, to)
         }
       }
@@ -458,15 +462,12 @@ watchEffect(() => {
         if (dataBase.devices[to]) {
           udsView.addLink(key, to)
         }
-
       }
     }
     //check link
     for (const from of Object.keys(dataBase.nodes)) {
       for (const to of Object.keys(dataBase.devices)) {
-
         if (dataBase.nodes[from].channel.indexOf(to) == -1) {
-
           udsView.removeLink(from, to)
         }
       }
@@ -481,7 +482,6 @@ watchEffect(() => {
     }
   }
 })
-
 
 function buildView() {
   for (const key of Object.keys(dataBase.devices)) {
@@ -520,7 +520,6 @@ function buildView() {
 
   layout.on(`max:network`, fitPater)
 }
-
 
 function editNode(data: Tree) {
   layout.addWin(data.type, data.id, {
@@ -572,7 +571,6 @@ function addNode(type: string, parent?: Tree) {
       //   }
       // }
 
-
       dataBase.ia[id] = {
         name: parent?.label + ' IA',
         type: 'can',
@@ -585,7 +583,6 @@ function addNode(type: string, parent?: Tree) {
       for (const key of devices) {
         udsView.addLink(id, key)
       }
-
     } else if (parent?.type == 'lin') {
       const devices: string[] = []
       // for (const key of Object.keys(dataBase.devices)) {
@@ -595,7 +592,6 @@ function addNode(type: string, parent?: Tree) {
       //   }
       // }
       //lin only one device
-
 
       dataBase.ia[id] = {
         name: parent?.label + ' IA',
@@ -610,8 +606,7 @@ function addNode(type: string, parent?: Tree) {
         udsView.addLink(id, key)
       }
     }
-  }
-  else if (type == 'node') {
+  } else if (type == 'node') {
     const id = v4()
     {
       const devices: string[] = []
@@ -625,22 +620,18 @@ function addNode(type: string, parent?: Tree) {
         name: `Node ${Object.keys(dataBase.nodes).length + 1}`,
 
         id: id,
-        channel: devices, // Add an empty array for devices,
-
+        channel: devices // Add an empty array for devices,
       }
       udsView.addNode(id, dataBase.nodes[id])
       // add link
       for (const key of devices) {
         udsView.addLink(id, key)
       }
-
     }
   }
   //fit
   fitPater()
 }
-
-
 
 function scalePaper1(command: 'in' | 'out') {
   if (paper) {
@@ -665,16 +656,12 @@ function scalePaper1(command: 'in' | 'out') {
     // Update the origin and scale
     paper.translate(newOriginX, newOriginY)
     paper.scale(newScale, newScale)
-
   }
 }
 
-
 function fitPater() {
   nextTick(() => {
-
     if (paper) {
-
       paper.transformToFitContent({
         horizontalAlign: 'middle',
         verticalAlign: 'middle',
@@ -685,9 +672,6 @@ function fitPater() {
     }
   })
 }
-
-
-
 
 onUnmounted(() => {
   udsView.clear()

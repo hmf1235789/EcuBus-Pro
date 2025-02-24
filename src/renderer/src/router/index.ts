@@ -17,7 +17,7 @@ const routes: Array<RouteRecordRaw> = [
 
 const router = createRouter({
   history: createMemoryHistory(),
-  routes: routes,
+  routes: routes
 })
 
 export default router

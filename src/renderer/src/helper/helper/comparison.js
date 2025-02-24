@@ -2,15 +2,15 @@
 /* eslint-disable no-var */
 import Handlebars from 'handlebars'
 import { containsFn, valueFn, isOptions } from './utils'
-import { isString } from 'lodash';
-import { isNumber } from 'lodash';
-import { isObject } from "lodash";
-import { has } from 'lodash';
-import falsey from './falsey';
-const helpers = {};
+import { isString } from 'lodash'
+import { isNumber } from 'lodash'
+import { isObject } from 'lodash'
+import { has } from 'lodash'
+import falsey from './falsey'
+const helpers = {}
 
 function isEven(n) {
-    return n % 2 == 0;
+  return n % 2 == 0
 }
 /**
  * Helper that renders the block if **both** of the given values
@@ -32,19 +32,19 @@ function isEven(n) {
  */
 
 helpers.and = function () {
-    var len = arguments.length - 1;
-    var options = arguments[len];
-    var val = true;
+  var len = arguments.length - 1
+  var options = arguments[len]
+  var val = true
 
-    for (var i = 0; i < len; i++) {
-        if (!arguments[i]) {
-            val = false;
-            break;
-        }
+  for (var i = 0; i < len; i++) {
+    if (!arguments[i]) {
+      val = false
+      break
     }
+  }
 
-    return valueFn(val, this, options);
-};
+  return valueFn(val, this, options)
+}
 
 /**
  * Render a block when a comparison of the first and third
@@ -62,48 +62,48 @@ helpers.and = function () {
  */
 
 helpers.compare = function (a, operator, b, options) {
-    /*eslint eqeqeq: 0*/
+  /*eslint eqeqeq: 0*/
 
-    if (arguments.length < 4) {
-        throw new Error('handlebars Helper {{compare}} expects 4 arguments');
+  if (arguments.length < 4) {
+    throw new Error('handlebars Helper {{compare}} expects 4 arguments')
+  }
+
+  var result
+  switch (operator) {
+    case '==':
+      result = a == b
+      break
+    case '===':
+      result = a === b
+      break
+    case '!=':
+      result = a != b
+      break
+    case '!==':
+      result = a !== b
+      break
+    case '<':
+      result = a < b
+      break
+    case '>':
+      result = a > b
+      break
+    case '<=':
+      result = a <= b
+      break
+    case '>=':
+      result = a >= b
+      break
+    case 'typeof':
+      result = typeof a === b
+      break
+    default: {
+      throw new Error('helper {{compare}}: invalid operator: `' + operator + '`')
     }
+  }
 
-    var result;
-    switch (operator) {
-        case '==':
-            result = a == b;
-            break;
-        case '===':
-            result = a === b;
-            break;
-        case '!=':
-            result = a != b;
-            break;
-        case '!==':
-            result = a !== b;
-            break;
-        case '<':
-            result = a < b;
-            break;
-        case '>':
-            result = a > b;
-            break;
-        case '<=':
-            result = a <= b;
-            break;
-        case '>=':
-            result = a >= b;
-            break;
-        case 'typeof':
-            result = typeof a === b;
-            break;
-        default: {
-            throw new Error('helper {{compare}}: invalid operator: `' + operator + '`');
-        }
-    }
-
-    return valueFn(result, this, options);
-};
+  return valueFn(result, this, options)
+}
 
 /**
  * Block helper that renders the block if `collection` has the
@@ -129,13 +129,13 @@ helpers.compare = function (a, operator, b, options) {
  */
 
 helpers.contains = function (collection, value, startIndex, options) {
-    if (typeof startIndex === 'object') {
-        options = startIndex;
-        startIndex = undefined;
-    }
-    var val = containsFn(collection, value, startIndex);
-    return valueFn(val, this, options);
-};
+  if (typeof startIndex === 'object') {
+    options = startIndex
+    startIndex = undefined
+  }
+  var val = containsFn(collection, value, startIndex)
+  return valueFn(val, this, options)
+}
 
 /**
  * Returns the first value that is not undefined, otherwise the "default" value is returned.
@@ -148,11 +148,11 @@ helpers.contains = function (collection, value, startIndex, options) {
  */
 
 helpers.default = function () {
-    for (var i = 0; i < arguments.length - 1; i++) {
-        if (arguments[i] != null) return arguments[i];
-    }
-    return '';
-};
+  for (var i = 0; i < arguments.length - 1; i++) {
+    if (arguments[i] != null) return arguments[i]
+  }
+  return ''
+}
 
 /**
  * Block helper that renders a block if `a` is **equal to** `b`.
@@ -170,12 +170,12 @@ helpers.default = function () {
  */
 
 helpers.eq = function (a, b, options) {
-    if (arguments.length === 2) {
-        options = b;
-        b = options.hash.compare;
-    }
-    return valueFn(a === b, this, options);
-};
+  if (arguments.length === 2) {
+    options = b
+    b = options.hash.compare
+  }
+  return valueFn(a === b, this, options)
+}
 
 /**
  * Block helper that renders a block if `a` is **greater than** `b`.
@@ -193,12 +193,12 @@ helpers.eq = function (a, b, options) {
  */
 
 helpers.gt = function (a, b, options) {
-    if (arguments.length === 2) {
-        options = b;
-        b = options.hash.compare;
-    }
-    return valueFn(a > b, this, options);
-};
+  if (arguments.length === 2) {
+    options = b
+    b = options.hash.compare
+  }
+  return valueFn(a > b, this, options)
+}
 
 /**
  * Block helper that renders a block if `a` is **greater than or
@@ -217,12 +217,12 @@ helpers.gt = function (a, b, options) {
  */
 
 helpers.gte = function (a, b, options) {
-    if (arguments.length === 2) {
-        options = b;
-        b = options.hash.compare;
-    }
-    return valueFn(a >= b, this, options);
-};
+  if (arguments.length === 2) {
+    options = b
+    b = options.hash.compare
+  }
+  return valueFn(a >= b, this, options)
+}
 
 /**
  * Block helper that renders a block if `value` has `pattern`.
@@ -237,35 +237,35 @@ helpers.gte = function (a, b, options) {
  */
 
 helpers.has = function (value, pattern, options) {
-    if (isOptions(value)) {
-        options = value;
-        pattern = null;
-        value = null;
-    }
+  if (isOptions(value)) {
+    options = value
+    pattern = null
+    value = null
+  }
 
-    if (isOptions(pattern)) {
-        options = pattern;
-        pattern = null;
-    }
+  if (isOptions(pattern)) {
+    options = pattern
+    pattern = null
+  }
 
-    if (value === null) {
-        return valueFn(false, this, options);
-    }
+  if (value === null) {
+    return valueFn(false, this, options)
+  }
 
-    if (arguments.length === 2) {
-        return valueFn(has(this, value), this, options);
-    }
+  if (arguments.length === 2) {
+    return valueFn(has(this, value), this, options)
+  }
 
-    if ((Array.isArray(value) || isString(value)) && isString(pattern)) {
-        if (value.indexOf(pattern) > -1) {
-            return options.fn(true, this, options);
-        }
+  if ((Array.isArray(value) || isString(value)) && isString(pattern)) {
+    if (value.indexOf(pattern) > -1) {
+      return options.fn(true, this, options)
     }
-    if (isObject(value) && isString(pattern) && pattern in value) {
-        return options.fn(true, this, options);
-    }
-    return options.inverse(false, this, options);
-};
+  }
+  if (isObject(value) && isString(pattern) && pattern in value) {
+    return options.fn(true, this, options)
+  }
+  return options.inverse(false, this, options)
+}
 
 /**
  * Returns true if the given `value` is falsey. Uses the [falsey][]
@@ -279,8 +279,8 @@ helpers.has = function (value, pattern, options) {
  */
 
 helpers.isFalsey = function (val, options) {
-    return valueFn(falsey(val), this, options);
-};
+  return valueFn(falsey(val), this, options)
+}
 
 /**
  * Returns true if the given `value` is truthy. Uses the [falsey][]
@@ -294,8 +294,8 @@ helpers.isFalsey = function (val, options) {
  */
 
 helpers.isTruthy = function (val, options) {
-    return valueFn(!falsey(val), this, options);
-};
+  return valueFn(!falsey(val), this, options)
+}
 
 /**
  * Return true if the given value is an even number.
@@ -315,8 +315,8 @@ helpers.isTruthy = function (val, options) {
  */
 
 helpers.ifEven = function (num, options) {
-    return valueFn(isEven(num), this, options);
-};
+  return valueFn(isEven(num), this, options)
+}
 
 /**
  * Conditionally renders a block if the remainder is zero when
@@ -332,9 +332,9 @@ helpers.ifEven = function (num, options) {
  */
 
 helpers.ifNth = function (a, b, options) {
-    var isNth = isNumber(a) && isNumber(b) && b % a === 0;
-    return valueFn(isNth, this, options);
-};
+  var isNth = isNumber(a) && isNumber(b) && b % a === 0
+  return valueFn(isNth, this, options)
+}
 
 /**
  * Block helper that renders a block if `value` is **an odd number**.
@@ -355,8 +355,8 @@ helpers.ifNth = function (a, b, options) {
  */
 
 helpers.ifOdd = function (val, options) {
-    return valueFn(!isEven(val), this, options);
-};
+  return valueFn(!isEven(val), this, options)
+}
 
 /**
  * Block helper that renders a block if `a` is **equal to** `b`.
@@ -372,12 +372,12 @@ helpers.ifOdd = function (val, options) {
  */
 
 helpers.is = function (a, b, options) {
-    if (arguments.length === 2) {
-        options = b;
-        b = options.hash.compare;
-    }
-    return valueFn(a == b, this, options);
-};
+  if (arguments.length === 2) {
+    options = b
+    b = options.hash.compare
+  }
+  return valueFn(a == b, this, options)
+}
 
 /**
  * Block helper that renders a block if `a` is **not equal to** `b`.
@@ -394,12 +394,12 @@ helpers.is = function (a, b, options) {
  */
 
 helpers.isnt = function (a, b, options) {
-    if (arguments.length === 2) {
-        options = b;
-        b = options.hash.compare;
-    }
-    return valueFn(a != b, this, options);
-};
+  if (arguments.length === 2) {
+    options = b
+    b = options.hash.compare
+  }
+  return valueFn(a != b, this, options)
+}
 
 /**
  * Block helper that renders a block if `a` is **less than** `b`.
@@ -416,12 +416,12 @@ helpers.isnt = function (a, b, options) {
  */
 
 helpers.lt = function (a, b, options) {
-    if (arguments.length === 2) {
-        options = b;
-        b = options.hash.compare;
-    }
-    return valueFn(a < b, this, options);
-};
+  if (arguments.length === 2) {
+    options = b
+    b = options.hash.compare
+  }
+  return valueFn(a < b, this, options)
+}
 
 /**
  * Block helper that renders a block if `a` is **less than or
@@ -440,12 +440,12 @@ helpers.lt = function (a, b, options) {
  */
 
 helpers.lte = function (a, b, options) {
-    if (arguments.length === 2) {
-        options = b;
-        b = options.hash.compare;
-    }
-    return valueFn(a <= b, this, options);
-};
+  if (arguments.length === 2) {
+    options = b
+    b = options.hash.compare
+  }
+  return valueFn(a <= b, this, options)
+}
 
 /**
  * Block helper that renders a block if **neither of** the given values
@@ -461,8 +461,8 @@ helpers.lte = function (a, b, options) {
  */
 
 helpers.neither = function (a, b, options) {
-    return valueFn(!a && !b, this, options);
-};
+  return valueFn(!a && !b, this, options)
+}
 
 /**
  * Returns true if `val` is falsey. Works as a block or inline helper.
@@ -475,8 +475,8 @@ helpers.neither = function (a, b, options) {
  */
 
 helpers.not = function (val, options) {
-    return valueFn(!val, this, options);
-};
+  return valueFn(!val, this, options)
+}
 
 /**
  * Block helper that renders a block if **any of** the given values
@@ -497,18 +497,18 @@ helpers.not = function (val, options) {
  */
 
 helpers.or = function (/* any, any, ..., options */) {
-    var len = arguments.length - 1;
-    var options = arguments[len];
-    var val = false;
+  var len = arguments.length - 1
+  var options = arguments[len]
+  var val = false
 
-    for (var i = 0; i < len; i++) {
-        if (arguments[i]) {
-            val = true;
-            break;
-        }
+  for (var i = 0; i < len; i++) {
+    if (arguments[i]) {
+      val = true
+      break
     }
-    return valueFn(val, this, options);
-};
+  }
+  return valueFn(val, this, options)
+}
 
 /**
  * Block helper that always renders the inverse block **unless `a` is
@@ -523,12 +523,12 @@ helpers.or = function (/* any, any, ..., options */) {
  */
 
 helpers.unlessEq = function (a, b, options) {
-    if (isOptions(b)) {
-        options = b;
-        b = options.hash.compare;
-    }
-    return valueFn(a !== b, this, options);
-};
+  if (isOptions(b)) {
+    options = b
+    b = options.hash.compare
+  }
+  return valueFn(a !== b, this, options)
+}
 
 /**
  * Block helper that always renders the inverse block **unless `a` is
@@ -543,12 +543,12 @@ helpers.unlessEq = function (a, b, options) {
  */
 
 helpers.unlessGt = function (a, b, options) {
-    if (isOptions(b)) {
-        options = b;
-        b = options.hash.compare;
-    }
-    return valueFn(a <= b, this, options);
-};
+  if (isOptions(b)) {
+    options = b
+    b = options.hash.compare
+  }
+  return valueFn(a <= b, this, options)
+}
 
 /**
  * Block helper that always renders the inverse block **unless `a` is
@@ -563,12 +563,12 @@ helpers.unlessGt = function (a, b, options) {
  */
 
 helpers.unlessLt = function (a, b, options) {
-    if (isOptions(b)) {
-        options = b;
-        b = options.hash.compare;
-    }
-    return valueFn(a >= b, this, options);
-};
+  if (isOptions(b)) {
+    options = b
+    b = options.hash.compare
+  }
+  return valueFn(a >= b, this, options)
+}
 
 /**
  * Block helper that always renders the inverse block **unless `a` is
@@ -583,12 +583,12 @@ helpers.unlessLt = function (a, b, options) {
  */
 
 helpers.unlessGteq = function (a, b, options) {
-    if (isOptions(b)) {
-        options = b;
-        b = options.hash.compare;
-    }
-    return valueFn(a < b, this, options);
-};
+  if (isOptions(b)) {
+    options = b
+    b = options.hash.compare
+  }
+  return valueFn(a < b, this, options)
+}
 
 /**
  * Block helper that always renders the inverse block **unless `a` is
@@ -603,14 +603,13 @@ helpers.unlessGteq = function (a, b, options) {
  */
 
 helpers.unlessLteq = function (a, b, options) {
-    if (isOptions(b)) {
-        options = b;
-        b = options.hash.compare;
-    }
-    return valueFn(a > b, this, options);
-};
-
+  if (isOptions(b)) {
+    options = b
+    b = options.hash.compare
+  }
+  return valueFn(a > b, this, options)
+}
 
 for (const key of Object.keys(helpers)) {
-    Handlebars.registerHelper(key, helpers[key])
+  Handlebars.registerHelper(key, helpers[key])
 }

@@ -2,23 +2,20 @@ import { app, shell, BrowserWindow, ipcMain, dialog, protocol as eProtocol, net 
 import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import Store from 'electron-store';
+import Store from 'electron-store'
 import './ipc'
-import log from 'electron-log/main';
-import { createLogs } from './log';
+import log from 'electron-log/main'
+import { createLogs } from './log'
 import './update'
-import { globalStop } from './ipc/uds';
+import { globalStop } from './ipc/uds'
 import Transport from 'winston-transport'
-
-
 
 log.initialize()
 
-
 let mainWindow: BrowserWindow
 
-const protocol = "ecubuspro";
-const ProtocolRegExp = new RegExp(`^${protocol}://`);
+const protocol = 'ecubuspro'
+const ProtocolRegExp = new RegExp(`^${protocol}://`)
 /* single instance */
 const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) {
@@ -32,8 +29,7 @@ function registerLocalResourceProtocol() {
     const decodedUrl = decodeURI(url) // Needed in case URL contains spaces
     try {
       return callback(decodedUrl)
-    }
-    catch (error) {
+    } catch (error) {
       console.error('ERROR: registerLocalResourceProtocol: Could not get file path:', error)
     }
   })
@@ -41,66 +37,63 @@ function registerLocalResourceProtocol() {
 
 /* login */
 
-
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient(protocol, process.execPath, [
-      path.resolve(process.argv[1]),
-    ]);
+    app.setAsDefaultProtocolClient(protocol, process.execPath, [path.resolve(process.argv[1])])
   }
 } else {
-  app.setAsDefaultProtocolClient(protocol);
+  app.setAsDefaultProtocolClient(protocol)
 }
-
 
 // process.env.PYTHON_PATH=pythonPath
 const isDev = process.env.NODE_ENV === 'development'
 
-const store = new Store();
+const store = new Store()
 
 ipcMain.on('electron-store-get', async (event, val) => {
-  event.returnValue = store.get(val);
-});
+  event.returnValue = store.get(val)
+})
 ipcMain.on('electron-store-set', async (event, key, val) => {
-  store.set(key, val);
-});
-
+  store.set(key, val)
+})
 
 class LogQueue {
   list: any[] = []
   timer: any
-  constructor(private win: BrowserWindow, private period = 100) {
+  constructor(
+    private win: BrowserWindow,
+    private period = 100
+  ) {
     this.timer = setInterval(() => {
       if (this.list.length) {
-       
         this.win.webContents.send('ipc-log', this.list)
         this.list = []
       }
-
     }, this.period)
   }
 }
 
 class ElectronLog extends Transport {
   win: BrowserWindow
-  constructor(private q: LogQueue, win: BrowserWindow, opts?: Transport.TransportStreamOptions) {
+  constructor(
+    private q: LogQueue,
+    win: BrowserWindow,
+    opts?: Transport.TransportStreamOptions
+  ) {
     super(opts)
     this.win = win
   }
 
   log(info: any, callback: () => void) {
-   
     if (info.message?.method) {
       this.q.list.push(info)
-    }else{
+    } else {
       this.win.webContents.send('ipc-log-main', info)
     }
-    
+
     callback()
   }
 }
-
-
 
 function createWindow(): void {
   // Create the browser window.
@@ -116,10 +109,16 @@ function createWindow(): void {
       contextIsolation: true
     }
   })
-  const logQ= new LogQueue(mainWindow)
-  createLogs([() => new ElectronLog(logQ,mainWindow, {
-    level: 'debug'
-  })], [])
+  const logQ = new LogQueue(mainWindow)
+  createLogs(
+    [
+      () =>
+        new ElectronLog(logQ, mainWindow, {
+          level: 'debug'
+        })
+    ],
+    []
+  )
   ipcMain.on('minimize', () => {
     mainWindow?.minimize()
   })
@@ -141,7 +140,6 @@ function createWindow(): void {
     if (isDev) {
       mainWindow.webContents.openDevTools()
     }
-
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {

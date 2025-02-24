@@ -1,14 +1,10 @@
 import Handlebars from 'handlebars'
-import { isOptions, get, resultFn, isUndefined, valueFn} from './utils'
-import { sortBy } from 'lodash';
-import { isString } from 'lodash';
-import { isNumber } from 'lodash';
-import { isObject} from "lodash";
-const helpers = {};
-
-
-
-
+import { isOptions, get, resultFn, isUndefined, valueFn } from './utils'
+import { sortBy } from 'lodash'
+import { isString } from 'lodash'
+import { isNumber } from 'lodash'
+import { isObject } from 'lodash'
+const helpers = {}
 
 /**
  * Returns all of the items in an array after the specified index.
@@ -26,9 +22,9 @@ const helpers = {};
  */
 
 helpers.after = function (array, n) {
-    if (isUndefined(array)) return '';
-    return array.slice(n);
-};
+  if (isUndefined(array)) return ''
+  return array.slice(n)
+}
 
 /**
  * Cast the given `value` to an array.
@@ -43,8 +39,8 @@ helpers.after = function (array, n) {
  */
 
 helpers.arrayify = function (value) {
-    return value ? (Array.isArray(value) ? value : [value]) : [];
-};
+  return value ? (Array.isArray(value) ? value : [value]) : []
+}
 
 /**
  * Return all of the items in the collection before the specified
@@ -62,9 +58,9 @@ helpers.arrayify = function (value) {
  */
 
 helpers.before = function (array, n) {
-    if (isUndefined(array)) return '';
-    return array.slice(0, -n);
-};
+  if (isUndefined(array)) return ''
+  return array.slice(0, -n)
+}
 
 /**
  * ```handlebars
@@ -81,12 +77,12 @@ helpers.before = function (array, n) {
  */
 
 helpers.eachIndex = function (array, options) {
-    var result = '';
-    for (var i = 0; i < array.length; i++) {
-        result += options.fn({ item: array[i], index: i });
-    }
-    return result;
-};
+  let result = ''
+  for (let i = 0; i < array.length; i++) {
+    result += options.fn({ item: array[i], index: i })
+  }
+  return result
+}
 
 /**
  * Block helper that filters the given array and renders the block for values that
@@ -106,41 +102,38 @@ helpers.eachIndex = function (array, options) {
  */
 
 helpers.filter = function (array, value, options) {
-    var content = '';
-    var results = [];
+  let content = ''
+  let results = []
 
-    // filter on a specific property
-    var prop = options.hash && (options.hash.property || options.hash.prop);
-    if (prop) {
-        results = array.filter(function (val) {
-            return value === get(val, prop);
-        });
+  // filter on a specific property
+  const prop = options.hash && (options.hash.property || options.hash.prop)
+  if (prop) {
+    results = array.filter(function (val) {
+      return value === get(val, prop)
+    })
+  } else {
+    // filter on a string value
+    results = array.filter(function (v) {
+      return value === v
+    })
+  }
+
+  if (results && results.length > 0) {
+    if (options.fn) {
+      for (let i = 0; i < results.length; i++) {
+        content += options.fn(results[i])
+      }
+      return content
     } else {
-
-        // filter on a string value
-        results = array.filter(function (v) {
-            return value === v;
-        });
+      return results
     }
-
-    if (results && results.length > 0) {
-        if(options.fn){
-            for (var i = 0; i < results.length; i++) {
-                content += options.fn(results[i]);
-            }
-            return content;
-        }else{
-            return results
-        }
-        
-    }
-    if(isUndefined(options.inverse)){
-        return []
-    }else{
-        return options.inverse(this);
-    }
-   
-};
+  }
+  if (isUndefined(options.inverse)) {
+    return []
+  } else {
+    return options.inverse(this)
+  }
+}
 
 /**
  * Returns the first item, or first `n` items of an array.
@@ -156,12 +149,12 @@ helpers.filter = function (array, value, options) {
  */
 
 helpers.first = function (array, n) {
-    if (isUndefined(array)) return '';
-    if (!isNumber(n)) {
-        return array[0];
-    }
-    return array.slice(0, n);
-};
+  if (isUndefined(array)) return ''
+  if (!isNumber(n)) {
+    return array[0]
+  }
+  return array.slice(0, n)
+}
 
 /**
  * Iterates over each item in an array and exposes the current item
@@ -198,22 +191,22 @@ helpers.first = function (array, n) {
  */
 
 helpers.forEach = function (array, options) {
-    var data = Handlebars.createFrame(options.data);
-    var len = array.length;
-    var buffer = '';
-    var i = -1;
+  const data = Handlebars.createFrame(options.data)
+  const len = array.length
+  let buffer = ''
+  let i = -1
 
-    while (++i < len) {
-        var item = array[i];
-        data.index = i;
-        item.index = i + 1;
-        item.total = len;
-        item.isFirst = i === 0;
-        item.isLast = i === (len - 1);
-        buffer += options.fn(item, { data: data });
-    }
-    return buffer;
-};
+  while (++i < len) {
+    const item = array[i]
+    data.index = i
+    item.index = i + 1
+    item.total = len
+    item.isFirst = i === 0
+    item.isLast = i === len - 1
+    buffer += options.fn(item, { data: data })
+  }
+  return buffer
+}
 
 /**
  * Block helper that renders the block if an array has the
@@ -237,63 +230,56 @@ helpers.forEach = function (array, options) {
  * @api public
  */
 
- function indexOf(array, value) {
-    for (var i = 0, len = array.length; i < len; i++) {
-      if (JSON.stringify(array[i]) == JSON.stringify(value)) {
-        return i;
-      }
+function indexOf(array, value) {
+  for (let i = 0, len = array.length; i < len; i++) {
+    if (JSON.stringify(array[i]) == JSON.stringify(value)) {
+      return i
     }
-    return -1;
   }
-
+  return -1
+}
 
 helpers.inArray = function (array, value, options) {
-    return valueFn(indexOf(array, value) > -1, this, options);
-};
+  return valueFn(indexOf(array, value) > -1, this, options)
+}
 
-helpers.indexOf = function (array, value,) {
-    return indexOf(array,value)
-};
+helpers.indexOf = function (array, value) {
+  return indexOf(array, value)
+}
 
 helpers.concatSub = function (array, name) {
-    let result=[]
-    for(const val of array){
-        if(Array.isArray(val[name])){
-            result=result.concat(val[name])
-        }else{
-            if(isObject(val[name])){
-                result=result.concat(Object.values(val[name]))
-            }else{
-                result=result.concat([val[name]])
-            }   
-            
-        }
+  let result = []
+  for (const val of array) {
+    if (Array.isArray(val[name])) {
+      result = result.concat(val[name])
+    } else {
+      if (isObject(val[name])) {
+        result = result.concat(Object.values(val[name]))
+      } else {
+        result = result.concat([val[name]])
+      }
     }
-    return result
-};
-
+  }
+  return result
+}
 
 helpers.concat = function () {
-    let result=''
-    var len = arguments.length - 1;
-    for (var i = 0; i < len; i++) {
-        result+=arguments[i]
-    }
-    return result
-};
-
-
+  let result = ''
+  const len = arguments.length - 1
+  for (let i = 0; i < len; i++) {
+    result += arguments[i]
+  }
+  return result
+}
 
 helpers.push = function (array, val) {
-    array.push(val)
-    return array
-};
-
+  array.push(val)
+  return array
+}
 
 helpers.push2 = function (array, val) {
-    array.push(val)
-};
-
+  array.push(val)
+}
 
 /**
  * Returns true if `value` is an es5 array.
@@ -312,8 +298,8 @@ helpers.push2 = function (array, val) {
  */
 
 helpers.isArray = function (value) {
-    return Array.isArray(value);
-};
+  return Array.isArray(value)
+}
 
 /**
  * Returns the item from `array` at index `idx`.
@@ -331,17 +317,17 @@ helpers.isArray = function (value) {
  */
 
 helpers.itemAt = function (array, idx) {
-    array = resultFn(array);
-    if (Array.isArray(array)) {
-        idx = isNumber(idx) ? +idx : 0;
-        if (idx < 0) {
-            return array[array.length + idx];
-        }
-        if (idx < array.length) {
-            return array[idx];
-        }
+  array = resultFn(array)
+  if (Array.isArray(array)) {
+    idx = isNumber(idx) ? +idx : 0
+    if (idx < 0) {
+      return array[array.length + idx]
     }
-};
+    if (idx < array.length) {
+      return array[idx]
+    }
+  }
+}
 
 /**
  * Join all elements of array into a string, optionally using a
@@ -362,11 +348,11 @@ helpers.itemAt = function (array, idx) {
  */
 
 helpers.join = function (array, separator) {
-    if (typeof array === 'string') return array;
-    if (!Array.isArray(array)) return '';
-    separator = isString(separator) ? separator : ', ';
-    return array.join(separator);
-};
+  if (typeof array === 'string') return array
+  if (!Array.isArray(array)) return ''
+  separator = isString(separator) ? separator : ', '
+  return array.join(separator)
+}
 
 /**
  * Returns true if the the length of the given `value` is equal
@@ -381,18 +367,18 @@ helpers.join = function (array, separator) {
  */
 
 helpers.equalsLength = function (value, length, options) {
-    if (isOptions(length)) {
-        options = length;
-        length = 0;
-    }
+  if (isOptions(length)) {
+    options = length
+    length = 0
+  }
 
-    var len = 0;
-    if (typeof value === 'string' || Array.isArray(value)) {
-        len = value.length;
-    }
+  let len = 0
+  if (typeof value === 'string' || Array.isArray(value)) {
+    len = value.length
+  }
 
-    return valueFn(len === length, this, options);
-};
+  return valueFn(len === length, this, options)
+}
 
 /**
  * Returns the last item, or last `n` items of an array or string.
@@ -417,14 +403,14 @@ helpers.equalsLength = function (value, length, options) {
  */
 
 helpers.last = function (value, n) {
-    if (!Array.isArray(value) && typeof value !== 'string') {
-        return '';
-    }
-    if (!isNumber(n)) {
-        return value[value.length - 1];
-    }
-    return value.slice(-Math.abs(n));
-};
+  if (!Array.isArray(value) && typeof value !== 'string') {
+    return ''
+  }
+  if (!isNumber(n)) {
+    return value[value.length - 1]
+  }
+  return value.slice(-Math.abs(n))
+}
 
 /**
  * Returns the length of the given string or array.
@@ -447,15 +433,14 @@ helpers.last = function (value, n) {
  */
 
 helpers.length = function (value) {
-    if (isObject(value) && !isOptions(value)) {
-
-        value = Object.keys(value);
-    }
-    if (typeof value === 'string' || Array.isArray(value)) {
-        return value.length;
-    }
-    return 0;
-};
+  if (isObject(value) && !isOptions(value)) {
+    value = Object.keys(value)
+  }
+  if (typeof value === 'string' || Array.isArray(value)) {
+    return value.length
+  }
+  return 0
+}
 
 /**
  * Alias for [equalsLength](#equalsLength)
@@ -463,7 +448,7 @@ helpers.length = function (value) {
  * @api public
  */
 
-helpers.lengthEqual = helpers.equalsLength;
+helpers.lengthEqual = helpers.equalsLength
 
 /**
  * Returns a new array, created by calling `function` on each
@@ -483,20 +468,20 @@ helpers.lengthEqual = helpers.equalsLength;
  */
 
 helpers.map = function (array, iter) {
-    if (!Array.isArray(array)) return '';
-    var len = array.length;
-    var res = new Array(len);
-    var i = -1;
+  if (!Array.isArray(array)) return ''
+  const len = array.length
+  const res = new Array(len)
+  let i = -1
 
-    if (typeof iter !== 'function') {
-        return array;
-    }
+  if (typeof iter !== 'function') {
+    return array
+  }
 
-    while (++i < len) {
-        res[i] = iter(array[i], i, array);
-    }
-    return res;
-};
+  while (++i < len) {
+    res[i] = iter(array[i], i, array)
+  }
+  return res
+}
 
 /**
  * Map over the given object or array or objects and create an array of values
@@ -514,16 +499,16 @@ helpers.map = function (array, iter) {
  */
 
 helpers.pluck = function (arr, prop) {
-    if (isUndefined(arr)) return '';
-    var res = [];
-    for (var i = 0; i < arr.length; i++) {
-        var val = get(arr[i], prop);
-        if (typeof val !== 'undefined') {
-            res.push(val);
-        }
+  if (isUndefined(arr)) return ''
+  const res = []
+  for (let i = 0; i < arr.length; i++) {
+    const val = get(arr[i], prop)
+    if (typeof val !== 'undefined') {
+      res.push(val)
     }
-    return res;
-};
+  }
+  return res
+}
 
 /**
  * Reverse the elements in an array, or the characters in a string.
@@ -542,14 +527,14 @@ helpers.pluck = function (arr, prop) {
  */
 
 helpers.reverse = function (val) {
-    if (Array.isArray(val)) {
-        val.reverse();
-        return val;
-    }
-    if (val && typeof val === 'string') {
-        return val.split('').reverse().join('');
-    }
-};
+  if (Array.isArray(val)) {
+    val.reverse()
+    return val
+  }
+  if (val && typeof val === 'string') {
+    return val.split('').reverse().join('')
+  }
+}
 
 /**
  * Block helper that returns the block if the callback returns true
@@ -573,15 +558,15 @@ helpers.reverse = function (val) {
  */
 
 helpers.some = function (array, iter, options) {
-    if (Array.isArray(array)) {
-        for (var i = 0; i < array.length; i++) {
-            if (iter(array[i], i, array)) {
-                return options.fn(this);
-            }
-        }
+  if (Array.isArray(array)) {
+    for (let i = 0; i < array.length; i++) {
+      if (iter(array[i], i, array)) {
+        return options.fn(this)
+      }
     }
-    return options.inverse(this);
-};
+  }
+  return options.inverse(this)
+}
 
 /**
  * Sort the given `array`. If an array of objects is passed,
@@ -601,12 +586,12 @@ helpers.some = function (array, iter, options) {
  */
 
 helpers.sort = function (array, options) {
-    if (!Array.isArray(array)) return '';
-    if (get(options, 'hash.reverse')) {
-        return array.sort().reverse();
-    }
-    return array.sort();
-};
+  if (!Array.isArray(array)) return ''
+  if (get(options, 'hash.reverse')) {
+    return array.sort().reverse()
+  }
+  return array.sort()
+}
 
 /**
  * Sort an `array`. If an array of objects is passed,
@@ -626,17 +611,17 @@ helpers.sort = function (array, options) {
  */
 
 helpers.sortBy = function (array, prop, options) {
-    if (!Array.isArray(array)) return '';
-    var args = [].slice.call(arguments);
-    // remove handlebars options
-    args.pop();
+  if (!Array.isArray(array)) return ''
+  const args = [].slice.call(arguments)
+  // remove handlebars options
+  args.pop()
 
-    if (!isString(prop) && typeof prop !== 'function' && !Array.isArray(prop)) {
-        return array.sort();
-    }
-    const ret=sortBy(array,prop)
-    return ret
-};
+  if (!isString(prop) && typeof prop !== 'function' && !Array.isArray(prop)) {
+    return array.sort()
+  }
+  const ret = sortBy(array, prop)
+  return ret
+}
 
 /**
  * Use the items in the array _after_ the specified index
@@ -658,15 +643,15 @@ helpers.sortBy = function (array, prop, options) {
  */
 
 helpers.withAfter = function (array, idx, options) {
-    if (!Array.isArray(array)) return '';
-    array = array.slice(idx);
-    var result = '';
+  if (!Array.isArray(array)) return ''
+  array = array.slice(idx)
+  let result = ''
 
-    for (var i = 0; i < array.length; i++) {
-        result += options.fn(array[i]);
-    }
-    return result;
-};
+  for (let i = 0; i < array.length; i++) {
+    result += options.fn(array[i])
+  }
+  return result
+}
 
 /**
  * Use the items in the array _before_ the specified index
@@ -688,15 +673,15 @@ helpers.withAfter = function (array, idx, options) {
  */
 
 helpers.withBefore = function (array, idx, options) {
-    if (!Array.isArray(array)) return '';
-    array = array.slice(0, -idx);
-    var result = '';
+  if (!Array.isArray(array)) return ''
+  array = array.slice(0, -idx)
+  let result = ''
 
-    for (var i = 0; i < array.length; i++) {
-        result += options.fn(array[i]);
-    }
-    return result;
-};
+  for (let i = 0; i < array.length; i++) {
+    result += options.fn(array[i])
+  }
+  return result
+}
 
 /**
  * Use the first item in a collection inside a handlebars
@@ -718,25 +703,25 @@ helpers.withBefore = function (array, idx, options) {
  */
 
 helpers.withFirst = function (array, idx, options) {
-    if (isUndefined(array)) return '';
-    array = resultFn(array);
+  if (isUndefined(array)) return ''
+  array = resultFn(array)
 
-    if (!isUndefined(idx)) {
-        idx = parseFloat(resultFn(idx));
-    }
+  if (!isUndefined(idx)) {
+    idx = parseFloat(resultFn(idx))
+  }
 
-    if (isUndefined(idx)) {
-        options = idx;
-        return options.fn(array[0]);
-    }
+  if (isUndefined(idx)) {
+    options = idx
+    return options.fn(array[0])
+  }
 
-    array = array.slice(0, idx);
-    var result = '';
-    for (var i = 0; i < array.length; i++) {
-        result += options.fn(array[i]);
-    }
-    return result;
-};
+  array = array.slice(0, idx)
+  let result = ''
+  for (let i = 0; i < array.length; i++) {
+    result += options.fn(array[i])
+  }
+  return result
+}
 
 /**
  * Block helper that groups array elements by given group `size`.
@@ -762,20 +747,20 @@ helpers.withFirst = function (array, idx, options) {
  */
 
 helpers.withGroup = function (array, size, options) {
-    var result = '';
-    if (Array.isArray(array) && array.length > 0) {
-        var subcontext = [];
-        for (var i = 0; i < array.length; i++) {
-            if (i > 0 && (i % size) === 0) {
-                result += options.fn(subcontext);
-                subcontext = [];
-            }
-            subcontext.push(array[i]);
-        }
-        result += options.fn(subcontext);
+  let result = ''
+  if (Array.isArray(array) && array.length > 0) {
+    let subcontext = []
+    for (let i = 0; i < array.length; i++) {
+      if (i > 0 && i % size === 0) {
+        result += options.fn(subcontext)
+        subcontext = []
+      }
+      subcontext.push(array[i])
     }
-    return result;
-};
+    result += options.fn(subcontext)
+  }
+  return result
+}
 
 /**
  * Use the last item or `n` items in an array as context inside a block.
@@ -797,26 +782,27 @@ helpers.withGroup = function (array, size, options) {
  */
 
 helpers.withLast = function (array, idx, options) {
-    if (isUndefined(array)) return '';
-    array = resultFn(array);
+  if (isUndefined(array)) return ''
+  array = resultFn(array)
 
-    if (!isUndefined(idx)) {
-        idx = parseFloat(resultFn(idx));
-    }
+  if (!isUndefined(idx)) {
+    idx = parseFloat(resultFn(idx))
+  }
 
-    if (isUndefined(idx)) {
-        options = idx;
-        return options.fn(array[array.length - 1]);
-    }
+  if (isUndefined(idx)) {
+    options = idx
+    return options.fn(array[array.length - 1])
+  }
 
-    array = array.slice(-idx);
-    var len = array.length, i = -1;
-    var result = '';
-    while (++i < len) {
-        result += options.fn(array[i]);
-    }
-    return result;
-};
+  array = array.slice(-idx)
+  let len = array.length,
+    i = -1
+  let result = ''
+  while (++i < len) {
+    result += options.fn(array[i])
+  }
+  return result
+}
 
 /**
  * Block helper that sorts a collection and exposes the sorted
@@ -836,49 +822,50 @@ helpers.withLast = function (array, idx, options) {
  */
 
 helpers.withSort = function (array, prop, options) {
-    if (isUndefined(array)) return '';
-    var result = '';
+  if (isUndefined(array)) return ''
+  let result = ''
 
-    if (isUndefined(prop)) {
-        options = prop;
+  if (isUndefined(prop)) {
+    options = prop
 
-        array = array.sort();
-        if (get(options, 'hash.reverse')) {
-            array = array.reverse();
-        }
-
-        for (var i = 0, len = array.length; i < len; i++) {
-            result += options.fn(array[i]);
-        }
-        return result;
-    }
-
-    array.sort(function (a, b) {
-        a = get(a, prop);
-        b = get(b, prop);
-        return a > b ? 1 : (a < b ? -1 : 0);
-    });
-
+    array = array.sort()
     if (get(options, 'hash.reverse')) {
-        array = array.reverse();
+      array = array.reverse()
     }
 
-    var alen = array.length, j = -1;
-    while (++j < alen) {
-        result += options.fn(array[j]);
+    for (let i = 0, len = array.length; i < len; i++) {
+      result += options.fn(array[i])
     }
-    return result;
-};
+    return result
+  }
+
+  array.sort(function (a, b) {
+    a = get(a, prop)
+    b = get(b, prop)
+    return a > b ? 1 : a < b ? -1 : 0
+  })
+
+  if (get(options, 'hash.reverse')) {
+    array = array.reverse()
+  }
+
+  let alen = array.length,
+    j = -1
+  while (++j < alen) {
+    result += options.fn(array[j])
+  }
+  return result
+}
 
 /**
  * Block helper that return an array with all duplicate
  * values removed. Best used along with a [each](#each) helper.
  *
-  * ```handlebars
-  * <!-- array: ['a', 'a', 'c', 'b', 'e', 'e'] -->
-  * {{#each (unique array)}}{{.}}{{/each}}
-  * <!-- results in: 'acbe' -->
-  * ```
+ * ```handlebars
+ * <!-- array: ['a', 'a', 'c', 'b', 'e', 'e'] -->
+ * {{#each (unique array)}}{{.}}{{/each}}
+ * <!-- results in: 'acbe' -->
+ * ```
  * @param {Array} `array`
  * @param {Object} `options`
  * @return {Array}
@@ -886,19 +873,18 @@ helpers.withSort = function (array, prop, options) {
  */
 
 helpers.unique = function (array, options) {
-    if (isUndefined(array)) return '';
+  if (isUndefined(array)) return ''
 
-    return array.filter(function (item, index, arr) {
-        return arr.indexOf(item) === index;
-    });
-};
+  return array.filter(function (item, index, arr) {
+    return arr.indexOf(item) === index
+  })
+}
 
 helpers.splice = function (array, start, deleteCount, ...items) {
-    const r=items.slice(0,-1)
-    array.splice(start, deleteCount, ...r)
-};
-
+  const r = items.slice(0, -1)
+  array.splice(start, deleteCount, ...r)
+}
 
 for (const key of Object.keys(helpers)) {
-    Handlebars.registerHelper(key, helpers[key])
+  Handlebars.registerHelper(key, helpers[key])
 }

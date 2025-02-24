@@ -1,4 +1,10 @@
 node_modules
 dist
 out
+cli
+build
+tools
 .gitignore
+resources/bin
+resources/lib
+resources/docs/scriptApi

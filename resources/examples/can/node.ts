@@ -1,5 +1,5 @@
-import {setSignal} from 'ECB'
-let val=0;
+import { setSignal } from 'ECB'
+let val = 0
 setInterval(() => {
-    setSignal("Model3CAN.VCLEFT_liftgateLatchRequest",(val++)%5);
-}, 1000);
+  setSignal('Model3CAN.VCLEFT_liftgateLatchRequest', val++ % 5)
+}, 1000)

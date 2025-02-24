@@ -18,7 +18,7 @@ import { ElectronAPI } from '@electron-toolkit/preload'
 import type { Api } from './api'
 import type { Ref } from 'vue'
 import path from 'path'
-import { Logger} from 'winston'
+import { Logger } from 'winston'
 import EventBus from './../renderer/src/event'
 
 declare global {
@@ -26,16 +26,16 @@ declare global {
     electron: ElectronAPI
     api: Api
     jQuery: any
-    logBus:EventBus
-    dataParseWorker:Worker
-    store:{
-      set:(property:string, val:unknown)=>void
-      get:(key: string)=>unknown
+    logBus: EventBus
+    dataParseWorker: Worker
+    store: {
+      set: (property: string, val: unknown) => void
+      get: (key: string) => unknown
     }
-    globalStart:Ref<boolean>
-    startTime:number
-    path:typeof path
-    MonacoEnvironment:any
-    readmePath:string
+    globalStart: Ref<boolean>
+    startTime: number
+    path: typeof path
+    MonacoEnvironment: any
+    readmePath: string
   }
 }

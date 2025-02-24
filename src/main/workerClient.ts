@@ -11,28 +11,35 @@ import { VinInfo } from './share/doip'
 import { LinMsg } from './share/lin'
 type HandlerMap = {
   output: (pool: UdsTester, data: any) => Promise<number>
-  sendDiag: (pool: UdsTester, data: {
-    device?: string
-    address?: string
-    service: ServiceItem
-    isReq: boolean
-    testerName: string
-  }) => Promise<number>
-  setSignal: (pool: UdsTester, data: {
-    signal: string,
-    value: number|number[]|string
-  }) => void
-  registerEthVirtualEntity: (pool: UdsTester, data: {
-    entity:VinInfo,
-    ip?:string,
-  }) => Promise<void>
-};
+  sendDiag: (
+    pool: UdsTester,
+    data: {
+      device?: string
+      address?: string
+      service: ServiceItem
+      isReq: boolean
+      testerName: string
+    }
+  ) => Promise<number>
+  setSignal: (
+    pool: UdsTester,
+    data: {
+      signal: string
+      value: number | number[] | string
+    }
+  ) => void
+  registerEthVirtualEntity: (
+    pool: UdsTester,
+    data: {
+      entity: VinInfo
+      ip?: string
+    }
+  ) => Promise<void>
+}
 
 type EventHandlerMap = {
-  [K in keyof HandlerMap]: HandlerMap[K];
-};
-
-
+  [K in keyof HandlerMap]: HandlerMap[K]
+}
 
 export default class UdsTester {
   pool: Pool
@@ -41,18 +48,18 @@ export default class UdsTester {
   log: UdsLOG
   serviceMap: Record<string, ServiceItem> = {}
   ts = 0
-  cb:any
+  cb: any
   eventHandlerMap: Partial<EventHandlerMap> = {}
   constructor(
     private env: {
-      PROJECT_ROOT:string,
-      PROJECT_NAME:string,
-      MODE:'node'|'sequence',
-      NAME:string
+      PROJECT_ROOT: string
+      PROJECT_NAME: string
+      MODE: 'node' | 'sequence'
+      NAME: string
     },
     jsFilePath: string,
     log: UdsLOG,
-    private testers?: Record<string, TesterInfo>,
+    private testers?: Record<string, TesterInfo>
   ) {
     if (testers) {
       for (const tester of Object.values(testers)) {
@@ -69,27 +76,29 @@ export default class UdsTester {
       maxWorkers: 1,
       workerType: 'thread',
       emitStdStreams: false,
-      workerTerminateTimeout:0,
+      workerTerminateTimeout: 0,
       workerThreadOpts: {
         stderr: true,
         stdout: true,
         env: this.env,
-        execArgv:['--enable-source-maps']
+        execArgv: ['--enable-source-maps']
       },
 
-      onTerminateWorker: (v:any) => {
+      onTerminateWorker: (v: any) => {
         if (!this.selfStop) {
-
           this.log.systemMsg('worker terminated', this.ts, 'error')
         }
         this.stop()
-      },
-
+      }
     })
     const d = (this.pool as any)._getWorker()
     this.worker = d
-    d.worker.globalOn=(payload:any)=>{
-      this.eventHandler(payload,()=>{},()=>{})
+    d.worker.globalOn = (payload: any) => {
+      this.eventHandler(
+        payload,
+        () => {},
+        () => {}
+      )
     }
     d.worker.stdout.on('data', (data: any) => {
       if (!this.selfStop) {
@@ -103,15 +112,15 @@ export default class UdsTester {
         this.log.systemMsg(str, this.ts, 'error')
       }
     })
-    this.cb=this.keyHandle.bind(this)
-    globalThis.keyEvent.on('keydown',this.cb)
+    this.cb = this.keyHandle.bind(this)
+    globalThis.keyEvent.on('keydown', this.cb)
   }
   updateTs(ts: number) {
     this.ts = ts
   }
   keyHandle(key: string) {
-    if(!this.selfStop){
-      this.workerEmit('__keyDown', key).catch((e:any) => {
+    if (!this.selfStop) {
+      this.workerEmit('__keyDown', key).catch((e: any) => {
         this.log.systemMsg(e.toString(), this.ts, 'error')
       })
     }
@@ -135,15 +144,15 @@ export default class UdsTester {
 
     if (event == 'set' && this.testers) {
       const service = data.service as ServiceItem
-      const isReq= data.isRequest as boolean
+      const isReq = data.isRequest as boolean
       const name = data.testerName as string
       if (this.serviceMap[`${name}.${service.name}`]) {
-        if(isReq){
+        if (isReq) {
           service.params = service.params.map((p: any) => {
             p.value = Buffer.from(p.value)
             return p
           })
-        }else{
+        } else {
           service.respParams = service.respParams.map((p: any) => {
             p.value = Buffer.from(p.value)
             return p
@@ -160,29 +169,56 @@ export default class UdsTester {
         try {
           const result = handler(this, data)
           if (result instanceof Promise) {
-            result.then(r => {
-              this.worker.exec('__eventDone', [id, {
-                data: r
-              }]).catch(reject)
-            }).catch(e => {
-              this.worker.exec('__eventDone', [id, {
-                err: e.toString()
-              }]).catch(reject)
-            })
+            result
+              .then((r) => {
+                this.worker
+                  .exec('__eventDone', [
+                    id,
+                    {
+                      data: r
+                    }
+                  ])
+                  .catch(reject)
+              })
+              .catch((e) => {
+                this.worker
+                  .exec('__eventDone', [
+                    id,
+                    {
+                      err: e.toString()
+                    }
+                  ])
+                  .catch(reject)
+              })
           } else {
-            this.worker.exec('__eventDone', [id, {
-              data: result
-            }]).catch(reject)
+            this.worker
+              .exec('__eventDone', [
+                id,
+                {
+                  data: result
+                }
+              ])
+              .catch(reject)
           }
         } catch (e) {
-          this.worker.exec('__eventDone', [id, {
-            err: e instanceof Error ? e.toString() : 'Unknown error'
-          }]).catch(reject)
+          this.worker
+            .exec('__eventDone', [
+              id,
+              {
+                err: e instanceof Error ? e.toString() : 'Unknown error'
+              }
+            ])
+            .catch(reject)
         }
       } else {
-        this.worker.exec('__eventDone', [id, {
-          err: 'no handler found'
-        }]).catch(reject)
+        this.worker
+          .exec('__eventDone', [
+            id,
+            {
+              err: 'no handler found'
+            }
+          ])
+          .catch(reject)
       }
     }
   }
@@ -195,44 +231,43 @@ export default class UdsTester {
   //   }
 
   // }
-  async triggerSend(testerName: string,service: ServiceItem, ts: number) {
+  async triggerSend(testerName: string, service: ServiceItem, ts: number) {
     this.updateTs(ts)
     if (this.testers) {
-      try{
+      try {
         await this.workerEmit(`${testerName}.${service.name}.send`, service)
-      }catch(e:any){
-         throw formatError(e)
+      } catch (e: any) {
+        throw formatError(e)
       }
     }
   }
-  async triggerRecv(testerName: string,service: ServiceItem, ts: number) {
+  async triggerRecv(testerName: string, service: ServiceItem, ts: number) {
     this.updateTs(ts)
     if (this.testers) {
-      try{
+      try {
         await this.workerEmit(`${testerName}.${service.name}.recv`, service)
-      }catch(e:any){
-         throw  formatError(e)
+      } catch (e: any) {
+        throw formatError(e)
       }
     }
   }
   async triggerCanFrame(msg: CanMessage) {
-    try{
-      const r=await this.workerEmit('__canMsg', msg)
+    try {
+      const r = await this.workerEmit('__canMsg', msg)
       return r
-    }catch(e:any){
+    } catch (e: any) {
       throw formatError(e)
     }
   }
   async triggerLinFrame(msg: LinMsg) {
-    try{
-      const r=await this.workerEmit('__linMsg', msg)
+    try {
+      const r = await this.workerEmit('__linMsg', msg)
       return r
-    }catch(e:any){
+    } catch (e: any) {
       throw formatError(e)
     }
   }
   async start(projectPath: string) {
-
     await this.pool.exec('__start', [this.serviceMap])
     await this.workerEmit('__varFc', null)
   }
@@ -252,7 +287,7 @@ export default class UdsTester {
         .then((value: any) => {
           resolve(value)
         })
-        .catch((e:any) => {
+        .catch((e: any) => {
           reject(formatError(e))
         })
     })
@@ -261,6 +296,6 @@ export default class UdsTester {
     this.selfStop = true
     this.pool.terminate(true).catch(null)
     this.worker.worker.terminate()
-    globalThis.keyEvent.off('keydown',this.cb)
+    globalThis.keyEvent.off('keydown', this.cb)
   }
 }

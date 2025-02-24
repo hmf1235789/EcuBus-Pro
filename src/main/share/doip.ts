@@ -1,4 +1,4 @@
-import {NetworkInterfaceInfo} from 'os'
+import { NetworkInterfaceInfo } from 'os'
 
 export interface EthDevice {
   label: string
@@ -15,39 +15,41 @@ export interface EthBaseInfo {
 }
 
 export interface EthAddr {
-  name:string
-  entity:EntityAddr
-  tester:TesterAddr
-  virReqType:'unicast'|'omit'|'broadcast'|'multicast'
+  name: string
+  entity: EntityAddr
+  tester: TesterAddr
+  virReqType: 'unicast' | 'omit' | 'broadcast' | 'multicast'
   virReqAddr: string
-  entityNotFoundBehavior?: 'no' | 'normal' | 'withVin' | 'withEid' | 'forceNormal' | 'forceWithVin' | 'forceWithEid'
+  entityNotFoundBehavior?:
+    | 'no'
+    | 'normal'
+    | 'withVin'
+    | 'withEid'
+    | 'forceNormal'
+    | 'forceWithVin'
+    | 'forceWithEid'
   taType: 'physical' | 'functional'
 }
 
-export interface TesterAddr{
+export interface TesterAddr {
   routeActiveTime: number
   createConnectDelay: number
   testerLogicalAddr: number
 }
 
-
-
-
-
 export interface VinInfo {
-  vin: string,
-  logicalAddr: number,
-  eid: string,
+  vin: string
+  logicalAddr: number
+  eid: string
   gid: string
-  
 }
 
 /**
  * @category DOIP
  */
 export interface EntityAddr extends VinInfo {
-  nodeType?:'node'|'gateway'
-  nodeAddr?:number
+  nodeType?: 'node' | 'gateway'
+  nodeAddr?: number
   ta?: string
   ip?: string
   mcts?: number
@@ -56,7 +58,7 @@ export interface EntityAddr extends VinInfo {
   powerMode?: number
   localPort?: number
   sendSync?: boolean
-  udpLocalPort?: number 
+  udpLocalPort?: number
   furtherAction?: number
   syncStatus?: number
 }

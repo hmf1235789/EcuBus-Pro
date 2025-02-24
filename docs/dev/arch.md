@@ -1,8 +1,10 @@
 # Architecture
+
 The architecture of the project is based on the `Electron` framework, which is a popular framework for building cross-platform desktop applications with JavaScript, HTML, and CSS.
 More information about the `Electron` framework can be found [here](https://www.electronjs.org/).
 
 ## Technology Stack
+
 - `Electron` - The core framework for building the desktop application.
 - `Vue` - The front-end framework for building the user interface.
 - `TypeScript` - The programming language for building the application.

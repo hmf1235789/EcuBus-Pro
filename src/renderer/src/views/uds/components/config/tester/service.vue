@@ -1,25 +1,48 @@
 <template>
-  <div class="main" v-loading="loading">
+  <div v-loading="loading" class="main">
     <div class="left">
       <el-scrollbar :height="h + 'px'">
-        <el-tree ref="treeRef" class="serviceTree" node-key="id" :id="editIndex + 'tree'" default-expand-all
-          :data="tData" highlight-current style="margin-right: 5px; padding: 5px" :expand-on-click-node="false"
-          @node-click="nodeClick">
+        <el-tree
+          :id="editIndex + 'tree'"
+          ref="treeRef"
+          class="serviceTree"
+          node-key="id"
+          default-expand-all
+          :data="tData"
+          highlight-current
+          style="margin-right: 5px; padding: 5px"
+          :expand-on-click-node="false"
+          @node-click="nodeClick"
+        >
           <template #default="{ node, data }">
             <div class="tree-node">
-              <span :class="{
-                isServiceTop: !(data.id == data.serviceId),
-                isJob: data.id == 'Job' || node.parent?.data.id == 'Job',
-                treeLabel: true
-              }">{{ node.label }}
-                <span v-if="data.parent && data.serviceId != 'Job'">({{ data.serviceId }})</span></span>
-              <el-button :disabled="globalStart" link v-if="data.parent" type="primary"
-                @click.stop="addNewService(data.label, data.serviceId)">
-
+              <span
+                :class="{
+                  isServiceTop: !(data.id == data.serviceId),
+                  isJob: data.id == 'Job' || node.parent?.data.id == 'Job',
+                  treeLabel: true
+                }"
+                >{{ node.label }}
+                <span v-if="data.parent && data.serviceId != 'Job'"
+                  >({{ data.serviceId }})</span
+                ></span
+              >
+              <el-button
+                v-if="data.parent"
+                :disabled="globalStart"
+                link
+                type="primary"
+                @click.stop="addNewService(data.label, data.serviceId)"
+              >
                 <Icon :icon="circlePlusFilled" />
               </el-button>
-              <el-button :disabled="globalStart" link v-else type="danger"
-                @click.stop="removeService(data.serviceId, data.id)">
+              <el-button
+                v-else
+                :disabled="globalStart"
+                link
+                type="danger"
+                @click.stop="removeService(data.serviceId, data.id)"
+              >
                 <Icon class="tree-delete" :icon="removeIcon" />
               </el-button>
             </div>
@@ -27,10 +50,19 @@
         </el-tree>
       </el-scrollbar>
     </div>
-    <div class="shift" id="testerServiceShift" />
+    <div id="testerServiceShift" class="shift" />
     <div class="right">
-      <el-form :disabled="globalStart" v-if="activeService" :model="model" label-width="140px" size="small"
-        class="hardware" ref="ruleFormRef" :rules="rules" hide-required-asterisk>
+      <el-form
+        v-if="activeService"
+        ref="ruleFormRef"
+        :disabled="globalStart"
+        :model="model"
+        label-width="140px"
+        size="small"
+        class="hardware"
+        :rules="rules"
+        hide-required-asterisk
+      >
         <el-form-item label="Name" prop="name" required>
           <el-input v-model="model.name" style="width: 100%" @change="reqParamChange" />
         </el-form-item>
@@ -72,10 +104,16 @@
           </el-select>
          
         </el-form-item> -->
-        <el-form-item label="Job Description" v-if="model.serviceId == 'Job'">
-          <el-input v-model="model.desc" style="width: 100%" @change="reqParamChange" :rows="2" type="textarea" />
+        <el-form-item v-if="model.serviceId == 'Job'" label="Job Description">
+          <el-input
+            v-model="model.desc"
+            style="width: 100%"
+            :rows="2"
+            type="textarea"
+            @change="reqParamChange"
+          />
         </el-form-item>
-        <el-form-item label-width='0' v-if="model.serviceId != 'Job'">
+        <el-form-item v-if="model.serviceId != 'Job'" label-width="0">
           <el-col :span="12">
             <el-form-item label="AutoSync Func / ID" prop="serviceId" required>
               <el-checkbox v-model="model.autoSubfunc" @change="reqParamChange" />
@@ -83,36 +121,63 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="Suppress Response" prop="serviceId" required>
-              <el-checkbox v-model="model.suppress" :disabled="!serviceDetail[model.serviceId].hasSubFunction"
-                @change="suppressChange" />
+              <el-checkbox
+                v-model="model.suppress"
+                :disabled="!serviceDetail[model.serviceId].hasSubFunction"
+                @change="suppressChange"
+              />
             </el-form-item>
           </el-col>
         </el-form-item>
 
-        <el-form-item label="TX PDU" v-if="model.serviceId != 'Job'">
+        <el-form-item v-if="model.serviceId != 'Job'" label="TX PDU">
           <div style="white-space: nowrap; overflow-x: auto">
-            <span v-for="(item, index) in reqArrayStr" :key="index" :style="{
-              backgroundColor:
-                index % 2 == 0
-                  ? 'var(--el-color-info-light-9)'
-                  : 'var(--el-color-primary-light-9)'
-            }" class="param">{{ item }}</span>
+            <span
+              v-for="(item, index) in reqArrayStr"
+              :key="index"
+              :style="{
+                backgroundColor:
+                  index % 2 == 0
+                    ? 'var(--el-color-info-light-9)'
+                    : 'var(--el-color-primary-light-9)'
+              }"
+              class="param"
+              >{{ item }}</span
+            >
           </div>
         </el-form-item>
-        <el-form-item label="RX PDU" v-if="model.serviceId != 'Job' && !model.suppress">
+        <el-form-item v-if="model.serviceId != 'Job' && !model.suppress" label="RX PDU">
           <div style="white-space: nowrap; overflow-x: auto">
-            <span v-for="(item, index) in respArrayStr" :key="index" :style="{
-              backgroundColor:
-                index % 2 == 0
-                  ? 'var(--el-color-info-light-9)'
-                  : 'var(--el-color-primary-light-9)'
-            }" class="param">{{ item }}</span>
+            <span
+              v-for="(item, index) in respArrayStr"
+              :key="index"
+              :style="{
+                backgroundColor:
+                  index % 2 == 0
+                    ? 'var(--el-color-info-light-9)'
+                    : 'var(--el-color-primary-light-9)'
+              }"
+              class="param"
+              >{{ item }}</span
+            >
           </div>
         </el-form-item>
-        <el-alert title="The job requires these request parameters to serve as the function's input arguments."
-          style="margin-bottom: 5px" effect="light" type="info" :closable="false" v-if="model.serviceId == 'Job'" />
-        <el-alert title="ASCII Param Env Variable" effect="light" style="margin-bottom: 5px" type="success"
-          :closable="false" v-if="model.serviceId == 'Job'">
+        <el-alert
+          v-if="model.serviceId == 'Job'"
+          title="The job requires these request parameters to serve as the function's input arguments."
+          style="margin-bottom: 5px"
+          effect="light"
+          type="info"
+          :closable="false"
+        />
+        <el-alert
+          v-if="model.serviceId == 'Job'"
+          title="ASCII Param Env Variable"
+          effect="light"
+          style="margin-bottom: 5px"
+          type="success"
+          :closable="false"
+        >
           <template #default>
             <ul style="margin: 0">
               <li><strong>${ProPath}:</strong> project root path</li>
@@ -126,14 +191,36 @@
           <div style="width: 100%">
             <el-tabs v-model="activeName" type="border-card">
               <el-tab-pane label="Request" name="request">
-                <paramVue :parent-id="editIndex" v-model="model.params" ref="repParamRef" :sid="model.id" :id="'req'"
-                  :serviceId="model.serviceId" @change="reqParamChange" :other-service="serviceList[model.serviceId]" />
+                <paramVue
+                  :id="'req'"
+                  ref="repParamRef"
+                  v-model="model.params"
+                  :parent-id="editIndex"
+                  :sid="model.id"
+                  :service-id="model.serviceId"
+                  :other-service="serviceList[model.serviceId]"
+                  @change="reqParamChange"
+                />
               </el-tab-pane>
-              <el-tab-pane label="Response" name="response"
-                v-if="model.serviceId != 'Job' && !(serviceDetail[model.serviceId].hasSubFunction && model.suppress)">
-                <paramVue :parent-id="editIndex" :sid="model.id" @change="reqParamChange" ref="respParamRef" v-model="model.respParams"
-                  :id="'resp'" :serviceId="model.serviceId" :disabled="model.autoSubfunc"
-                  :other-service="serviceList[model.serviceId]" />
+              <el-tab-pane
+                v-if="
+                  model.serviceId != 'Job' &&
+                  !(serviceDetail[model.serviceId].hasSubFunction && model.suppress)
+                "
+                label="Response"
+                name="response"
+              >
+                <paramVue
+                  :id="'resp'"
+                  ref="respParamRef"
+                  v-model="model.respParams"
+                  :parent-id="editIndex"
+                  :sid="model.id"
+                  :service-id="model.serviceId"
+                  :disabled="model.autoSubfunc"
+                  :other-service="serviceList[model.serviceId]"
+                  @change="reqParamChange"
+                />
               </el-tab-pane>
             </el-tabs>
           </div>
@@ -164,28 +251,38 @@
             @click="addNewService('Service', '0x10')" />
         </div> -->
       </div>
-
     </div>
-    <el-dialog v-if="dialogVisible" v-model="dialogVisible" title="ODX File Import" width="80%"
-      :append-to='`#win${editIndex}_services`' align-center :before-close="handleClose">
-      <el-form :model="odxForm" label-width="auto" size="small" style="margin:10px" ref="odxFormRef">
+    <el-dialog
+      v-if="dialogVisible"
+      v-model="dialogVisible"
+      title="ODX File Import"
+      width="80%"
+      :append-to="`#win${editIndex}_services`"
+      align-center
+      :before-close="handleClose"
+    >
+      <el-form
+        ref="odxFormRef"
+        :model="odxForm"
+        label-width="auto"
+        size="small"
+        style="margin: 10px"
+      >
         <el-form-item label="Ecu" prop="ecuName" required>
           <el-select v-model="odxForm.ecuName">
-            <el-option :label="ecu" :value="ecu" v-for="ecu in ecuList" :key="ecu" />
+            <el-option v-for="ecu in ecuList" :key="ecu" :label="ecu" :value="ecu" />
           </el-select>
         </el-form-item>
         <el-form-item label="Variant" prop="variant" required>
           <el-select v-model="odxForm.variant">
-            <el-option :label="v" :value="v" v-for="v in variants[odxForm.ecuName]" :key="v" />
+            <el-option v-for="v in variants[odxForm.ecuName]" :key="v" :label="v" :value="v" />
           </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="cancelImportOdx" size="small" plain>Cancel</el-button>
-          <el-button type="primary" @click="realImportOdx" size="small" plain>
-            Import
-          </el-button>
+          <el-button size="small" plain @click="cancelImportOdx">Cancel</el-button>
+          <el-button type="primary" size="small" plain @click="realImportOdx"> Import </el-button>
         </div>
       </template>
     </el-dialog>
@@ -193,7 +290,15 @@
 </template>
 
 <script lang="tsx" setup>
-import { ServiceItem, param2raw, getTxPduStr, getRxPduStr, Sequence, paramSetVal, paramSetValRaw } from 'nodeCan/uds'
+import {
+  ServiceItem,
+  param2raw,
+  getTxPduStr,
+  getRxPduStr,
+  Sequence,
+  paramSetVal,
+  paramSetValRaw
+} from 'nodeCan/uds'
 import { cloneDeep } from 'lodash'
 import { v4, validate } from 'uuid'
 import { Ref, computed, inject, nextTick, onMounted, onUnmounted, ref, toRef, watch } from 'vue'
@@ -208,7 +313,6 @@ import { ServiceId, serviceDetail } from 'nodeCan/service'
 import { useDataStore } from '@r/stores/data'
 import { Layout } from '@r/views/uds/layout'
 
-
 const dialogVisible = ref(false)
 const loading = ref(false)
 const activeService = ref('')
@@ -216,14 +320,14 @@ const ruleFormRef = ref<FormInstance>()
 const props = defineProps<{
   editIndex: string
   serviceId?: string[]
-  width: number,
+  width: number
   height: number
 }>()
 const h = toRef(props, 'height')
 const w = toRef(props, 'width')
 const leftWidth = ref(300)
 const activeName = ref('request')
-const dataBase = useDataStore();
+const dataBase = useDataStore()
 const editIndex = toRef(props, 'editIndex')
 const serviceList = toRef(dataBase.tester[editIndex.value], 'allServiceList')
 const sequence = toRef(dataBase.tester[editIndex.value], 'seqList')
@@ -239,27 +343,20 @@ const respParamRef = ref()
 const globalStart = toRef(window, 'globalStart')
 const layout = inject('layout') as Layout
 
-
 function nodeClick(data: any) {
   ruleFormRef.value?.clearValidate()
 
   const targetService = serviceList.value[data.serviceId]
 
-
   if (!data.parent && targetService) {
     activeService.value = data.serviceId
     const index = targetService.findIndex((item) => item.id == data.id)
     if (index > -1) {
-
       model.value = cloneDeep(targetService[index])
-
     }
-
   } else {
-
     activeService.value = ''
   }
-
 }
 function removeService(serviceId: ServiceId, id: string) {
   // if(activeService.value&&dataModify.value&&id!=model.value.id){
@@ -316,8 +413,6 @@ function removeService(serviceId: ServiceId, id: string) {
 }
 
 function addNewService(name: string, id: ServiceId) {
-
-
   let deletedCnt = 0
 
   serviceDetail[id].defaultParams.map((item) => {
@@ -325,11 +420,11 @@ function addNewService(name: string, id: ServiceId) {
       deletedCnt++
     }
   })
-  if (deletedCnt == 0 && serviceList.value[id]?.length&&id!='Job') {
+  if (deletedCnt == 0 && serviceList.value[id]?.length && id != 'Job') {
     ElMessageBox({
-      message: "This service may only be created once.",
-      type: "warning",
-      title: "Warning",
+      message: 'This service may only be created once.',
+      type: 'warning',
+      title: 'Warning',
       buttonSize: 'small',
       appendTo: `#win${editIndex.value}_services`
     })
@@ -339,8 +434,6 @@ function addNewService(name: string, id: ServiceId) {
   // treeRef.value.setCurrentKey(id)
   activeService.value = id
 
-
-
   model.value = {
     id: v4(),
     name: '',
@@ -348,8 +441,7 @@ function addNewService(name: string, id: ServiceId) {
     params: [],
     respParams: [],
     suppress: false,
-    autoSubfunc: true,
-
+    autoSubfunc: true
   }
   if (serviceList.value[id] == undefined) {
     serviceList.value[id] = []
@@ -365,7 +457,6 @@ function addNewService(name: string, id: ServiceId) {
         const s = cloneDeep(p.param)
         s.id = v4()
         model.value.params.push(s)
-
       }
     }
     if (serviceDetail[id].defaultRespParams) {
@@ -379,30 +470,30 @@ function addNewService(name: string, id: ServiceId) {
   for (const [index, p] of model.value.params.entries()) {
     if (p.deletable == false) {
       // 将当前值转换为十六进制数值
-      const currentValue = parseInt(p.value.toString('hex'), 16);
-      let maxValue = currentValue;
+      const currentValue = parseInt(p.value.toString('hex'), 16)
+      let maxValue = currentValue
 
       // 查找所有目标服务中的最大值
       for (const v of targetService) {
-        const b = Buffer.from(v.params[index].value);
-        const compareValue = parseInt(b.toString('hex'), 16);
+        const b = Buffer.from(v.params[index].value)
+        const compareValue = parseInt(b.toString('hex'), 16)
 
         if (compareValue >= maxValue) {
-          maxValue = compareValue;
+          maxValue = compareValue
         }
       }
 
       // 如果当前值不是唯一的，使用最大值+1
       if (maxValue >= currentValue) {
         // 将新值转回Buffer
-        const newValueHex = (maxValue + 1).toString(16).padStart(p.value.length * 2, '0');
-        p.value = Buffer.from(newValueHex, 'hex');
+        const newValueHex = (maxValue + 1).toString(16).padStart(p.value.length * 2, '0')
+        p.value = Buffer.from(newValueHex, 'hex')
         if (p.value.length * 8 > p.bitLen) {
           activeService.value = ''
           ElMessageBox({
-            message: "The value is out of range",
-            type: "warning",
-            title: "Warning",
+            message: 'The value is out of range',
+            type: 'warning',
+            title: 'Warning',
             buttonSize: 'small',
             appendTo: `#win${editIndex.value}_services`
           })
@@ -410,8 +501,8 @@ function addNewService(name: string, id: ServiceId) {
         }
       }
       paramSetValRaw(p, p.value)
-      reqParamChange();
-      break;
+      reqParamChange()
+      break
     }
   }
   if (targetService == undefined) {
@@ -441,7 +532,6 @@ function addNewService(name: string, id: ServiceId) {
     id
   )
   treeRef.value.setCurrentKey(model.value.id)
-
 }
 
 const odxFormRef = ref<FormInstance>()
@@ -456,7 +546,6 @@ function cancelImportOdx() {
 }
 
 function reqParamChange() {
-
   if (model.value.autoSubfunc) {
     for (const v of model.value.params) {
       if (v.deletable == false) {
@@ -477,12 +566,14 @@ function realImportOdx() {
       if (valid) {
         const ecu = odxForm.value.ecuName
         const variant = odxForm.value.variant
-        if (Object.prototype.hasOwnProperty.call(importData, ecu) && Object.prototype.hasOwnProperty.call(importData[ecu], variant)) {
+        if (
+          Object.prototype.hasOwnProperty.call(importData, ecu) &&
+          Object.prototype.hasOwnProperty.call(importData[ecu], variant)
+        ) {
           const data = importData[ecu][variant] as Record<string, ServiceItem[]>
           for (const key of Object.keys(data)) {
             const parent = treeRef.value.getNode(key)
             for (const addItem of data[key]) {
-
               if (serviceList.value[key] == undefined) {
                 serviceList.value[key] = []
               }
@@ -501,9 +592,6 @@ function realImportOdx() {
                 parent
               )
             }
-
-
-
           }
           dialogVisible.value = false
           ElMessage.success('Import success')
@@ -596,7 +684,6 @@ function buildTree() {
 //   { deep: true }
 // )
 
-
 const reqArrayStr = computed(() => {
   return getTxPduStr(model.value)
 })
@@ -609,11 +696,10 @@ const model = ref<ServiceItem>({
   serviceId: '0x10',
   params: [],
   respParams: [],
-  autoSubfunc: true,
+  autoSubfunc: true
 })
 
 function suppressChange(val) {
-
   const lastVal = model.value.params[0].value[0]
   if (val) {
     paramSetVal(model.value.params[0], lastVal | 0x80)
@@ -622,7 +708,6 @@ function suppressChange(val) {
   }
   reqParamChange()
 }
-
 
 const paramCheck = (rule: any, value: any, callback: any) => {
   const ps = [model.value.params, model.value.respParams]
@@ -659,7 +744,7 @@ const paramCheck = (rule: any, value: any, callback: any) => {
 }
 
 const globalNameCheck = (rule: any, value: any, callback: any) => {
-  const names: { name: string, id: string }[] = []
+  const names: { name: string; id: string }[] = []
   for (const item of Object.values(serviceList.value)) {
     if (item) {
       for (const i of item) {
@@ -679,7 +764,7 @@ const rules: FormRules = {
     { validator: globalNameCheck, trigger: 'blur' }
   ],
   params: [{ validator: paramCheck, trigger: 'blur' }],
-  serviceId: [{ required: true, message: 'Please choose service', trigger: 'change' }],
+  serviceId: [{ required: true, message: 'Please choose service', trigger: 'change' }]
 }
 
 function onSubmit() {
@@ -702,9 +787,7 @@ function onSubmit() {
         if (serviceList.value[serviceId] == undefined) {
           serviceList.value[serviceId] = []
         }
-        const index = serviceList.value[serviceId].findIndex(
-          (item) => item.id == model.value.id
-        )
+        const index = serviceList.value[serviceId].findIndex((item) => item.id == model.value.id)
 
         if (index > -1) {
           const t = cloneDeep(model.value)
@@ -716,41 +799,32 @@ function onSubmit() {
       }
     })
   })
-
 }
 
 function viewService(serviceId: string, id: string) {
   treeRef.value.setCurrentKey(id)
   activeService.value = serviceId
   if (serviceList.value[serviceId]) {
-
     const index = serviceList.value[serviceId].findIndex((item) => item.id == id)
     if (index > -1) {
-
       model.value = cloneDeep(serviceList.value[serviceId][index])
     }
   }
-
 }
 defineExpose({
   viewService
 })
 
-
-
 onMounted(() => {
   window.jQuery('#testerServiceShift').resizable({
-        handles:'e',
-        // resize from all edges and corners
-        resize: (e, ui) => {
-
-            leftWidth.value = ui.size.width
-           
-        },
-        maxWidth:400,
-        minWidth:200,
-    })
-  
+    handles: 'e',
+    // resize from all edges and corners
+    resize: (e, ui) => {
+      leftWidth.value = ui.size.width
+    },
+    maxWidth: 400,
+    minWidth: 200
+  })
 
   nextTick(() => {
     buildTree()

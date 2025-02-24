@@ -1,6 +1,14 @@
 <template>
-  <el-form :model="data" label-width="130px" size="small" :disabled="globalStart" :rules="rules" ref="ruleFormRef"
-    class="hardware" hide-required-asterisk>
+  <el-form
+    ref="ruleFormRef"
+    :model="data"
+    label-width="130px"
+    size="small"
+    :disabled="globalStart"
+    :rules="rules"
+    class="hardware"
+    hide-required-asterisk
+  >
     <el-form-item label="Address name" required prop="name">
       <el-input v-model="data.name" />
     </el-form-item>
@@ -10,32 +18,23 @@
         <el-option value="functional" label="Functional"></el-option>
       </el-select>
     </el-form-item>
-    <el-divider content-position="left">
-      TP Base
-    </el-divider>
-
+    <el-divider content-position="left"> TP Base </el-divider>
 
     <el-form-item label-width="0">
-
       <el-col :span="12">
         <el-form-item label="nCr" prop="nCr">
-
           <el-input v-model.number="data.nCr" />
         </el-form-item>
-
       </el-col>
 
       <el-col :span="12">
         <el-form-item label="nAs" prop="nAs">
-
           <el-input v-model.number="data.nAs" />
         </el-form-item>
       </el-col>
-
     </el-form-item>
 
     <el-form-item label-width="0">
-
       <el-col :span="12">
         <el-form-item label="NAD" prop="nad">
           <el-input-number v-model.number="data.nad" controls-position="right" />
@@ -46,12 +45,9 @@
           <el-input v-model.number="data.stMin" />
         </el-form-item>
       </el-col>
-
     </el-form-item>
-    <el-divider content-position="left">
-      Scheduling Settings
-    </el-divider>
-    <el-radio-group v-model="data.schType" style="margin-left: 30px;">
+    <el-divider content-position="left"> Scheduling Settings </el-divider>
+    <el-radio-group v-model="data.schType" style="margin-left: 30px">
       <el-radio value="DIAG_ONLY" size="small" border>Diagnostic only</el-radio>
       <el-radio value="DIAG_INTERLEAVED" size="small" border>Interleaved</el-radio>
     </el-radio-group>
@@ -68,67 +64,60 @@ import {
   onUnmounted,
   ref,
   toRef,
-  watch,
-} from "vue";
+  watch
+} from 'vue'
 import {
   CanAddr,
   calcCanIdMixed,
   calcCanIdNormalFixed,
   CAN_ADDR_FORMAT,
   CAN_ID_TYPE,
-  CAN_ADDR_TYPE,
-} from "nodeCan/can";
-import { v4 } from "uuid";
-import { type FormRules, type FormInstance, ElMessageBox } from "element-plus";
-import { assign, cloneDeep } from "lodash";
-import { UdsAddress } from "nodeCan/uds";
-import { LinAddr } from "nodeCan/lin";
+  CAN_ADDR_TYPE
+} from 'nodeCan/can'
+import { v4 } from 'uuid'
+import { type FormRules, type FormInstance, ElMessageBox } from 'element-plus'
+import { assign, cloneDeep } from 'lodash'
+import { UdsAddress } from 'nodeCan/uds'
+import { LinAddr } from 'nodeCan/lin'
 
-const ruleFormRef = ref<FormInstance>();
+const ruleFormRef = ref<FormInstance>()
 const globalStart = toRef(window, 'globalStart')
 const data = defineModel<LinAddr>({
   required: true
-});
-
-
+})
 
 const nameCheck = (rule: any, value: any, callback: any) => {
   if (value) {
     for (let i = 0; i < addrs.value.length; i++) {
-      const hasName = addrs.value[i].ethAddr?.name;
+      const hasName = addrs.value[i].ethAddr?.name
       if (hasName == value && i != editIndex.value) {
-        callback(new Error("The name already exists"));
+        callback(new Error('The name already exists'))
       }
     }
-    callback();
+    callback()
   } else {
-    callback(new Error("Please input node name"));
+    callback(new Error('Please input node name'))
   }
-};
-
-
+}
 
 const rules: FormRules<LinAddr> = {
-  "name": [
+  name: [
     {
       required: true,
-      message: "Please input addr name",
-      trigger: "blur",
-      validator: nameCheck,
-    },
-  ],
-
-};
-
-
+      message: 'Please input addr name',
+      trigger: 'blur',
+      validator: nameCheck
+    }
+  ]
+}
 
 const props = defineProps<{
-  index: number;
-  addrs: UdsAddress[];
-}>();
+  index: number
+  addrs: UdsAddress[]
+}>()
 
-const editIndex = toRef(props, "index");
-const addrs = toRef(props, "addrs")
+const editIndex = toRef(props, 'index')
+const addrs = toRef(props, 'addrs')
 
 onMounted(() => {
   ruleFormRef.value?.validate().catch(null)
@@ -140,8 +129,6 @@ async function dataValid() {
 defineExpose({
   dataValid
 })
-
-
 </script>
 <style scoped>
 .hardware {

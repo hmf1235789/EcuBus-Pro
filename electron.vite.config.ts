@@ -3,17 +3,16 @@ import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
-import ConditionalCompile from "vite-plugin-conditional-compiler";
+import ConditionalCompile from 'vite-plugin-conditional-compiler'
 
 export default defineConfig({
   main: {
     resolve: {
       alias: {
-        'src': resolve(__dirname, 'src'),
+        src: resolve(__dirname, 'src')
       }
     },
-    plugins: [externalizeDepsPlugin(), ConditionalCompile(),
-    ],
+    plugins: [externalizeDepsPlugin(), ConditionalCompile()]
   },
   preload: {
     plugins: [externalizeDepsPlugin()]
@@ -22,17 +21,18 @@ export default defineConfig({
     resolve: {
       alias: {
         '@r': resolve('src/renderer/src'),
-        'nodeCan': resolve(__dirname, 'src/main/share'),
+        nodeCan: resolve(__dirname, 'src/main/share')
       }
     },
-    plugins: [vue(), vueJsx(),
-    nodePolyfills({
-      include: ['buffer'],
-      globals: {
-        Buffer: true
-      }
-    })
-
+    plugins: [
+      vue(),
+      vueJsx(),
+      nodePolyfills({
+        include: ['buffer'],
+        globals: {
+          Buffer: true
+        }
+      })
     ]
   }
 })

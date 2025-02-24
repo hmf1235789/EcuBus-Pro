@@ -1,6 +1,5 @@
 import {
   CanAddr,
-
   CanBase,
   CAN_ID_TYPE,
   CanMsgType,
@@ -49,10 +48,10 @@ export class ZLG_CAN extends CanBase {
       reject: (reason: CanError) => void
       msgType: CanMsgType
       data: Buffer
-      extra?:{database?:string,name?:string}
+      extra?: { database?: string; name?: string }
     }[]
   >()
-  
+
   rejectBaseMap = new Map<
     number,
     {
@@ -73,8 +72,7 @@ export class ZLG_CAN extends CanBase {
       throw new Error('Invalid handle')
     }
     this.event = new EventEmitter()
-    this.log = new CanLOG('ZLG', info.name,this.event)
-   
+    this.log = new CanLOG('ZLG', info.name, this.event)
 
     this.deviceType = parseInt(info.handle.split('_')[0])
     this.index = parseInt(info.handle.split('_')[1])
@@ -97,7 +95,6 @@ export class ZLG_CAN extends CanBase {
     // if (ret != 1) {
     //   throw new Error('Set device recv merge failed')
     // }
-    
 
     ZLG.ZCAN_SetValue(this.handle, `${this.deviceIndex}/initenal_resistance`, '0')
 
@@ -143,7 +140,6 @@ export class ZLG_CAN extends CanBase {
       throw new Error(`Init channel ${this.deviceIndex} failed`)
     }
 
-
     ret = ZLG.ZCAN_StartCAN(this.channel)
     if (ret != 1) {
       throw new Error(`Start channel ${this.deviceIndex} failed`)
@@ -159,17 +155,15 @@ export class ZLG_CAN extends CanBase {
       this.id + 'error',
       this.callbackError.bind(this)
     )
-    
   }
-  callbackError(){
-    this.log.error((getTsUs() - this.startTime),'bus error')
+  callbackError() {
+    this.log.error(getTsUs() - this.startTime, 'bus error')
     this.close(true)
   }
   static loadDllPath(dllPath: string) {
-    if(process.platform=='win32'){
+    if (process.platform == 'win32') {
       ZLG.LoadDll(dllPath)
     }
-    
   }
   _read(frame: CANFrame, ts: number) {
     if (this.tsOffset == undefined) {
@@ -183,27 +177,27 @@ export class ZLG_CAN extends CanBase {
       if (items) {
         const item = items.shift()!
         frame.msgType.uuid = item.msgType.uuid
-        if(items.length==0){
+        if (items.length == 0) {
           this.pendingBaseCmds.delete(cmdId)
         }
         console.log('writeBase', items.length)
-        const message:CanMessage = {
+        const message: CanMessage = {
           device: this.info.name,
           dir: 'OUT',
           id: frame.canId,
           data: frame.data,
           ts: ts,
           msgType: frame.msgType,
-          database:item.extra?.database,
-          name:item.extra?.name
+          database: item.extra?.database,
+          name: item.extra?.name
         }
         this.log.canBase(message)
-        this.event.emit(this.getReadBaseId(frame.canId,message.msgType), message)
+        this.event.emit(this.getReadBaseId(frame.canId, message.msgType), message)
         item.resolve(ts)
       }
     } else {
       //rx
-      const message:CanMessage = {
+      const message: CanMessage = {
         device: this.info.name,
         dir: 'IN',
         id: frame.canId,
@@ -213,12 +207,11 @@ export class ZLG_CAN extends CanBase {
       }
       this.log.canBase(message)
       this.event.emit(cmdId, message)
-      
     }
     // console.log('read',id.value(),dlc.value(),flag.value(),time.value())
   }
   async callback(num: number) {
-    if(num==0){
+    if (num == 0) {
       return
     }
     const frames = new ZLG.ReceiveDataArray(num)
@@ -254,10 +247,9 @@ export class ZLG_CAN extends CanBase {
       }
       // setImmediate(()=>{this.callback(100)})
     }
-   
   }
   async callbackFd(num: number) {
-    if(num==0){
+    if (num == 0) {
       return
     }
     const frames = new ZLG.ReceiveFDDataArray(num)
@@ -324,35 +316,31 @@ export class ZLG_CAN extends CanBase {
     }
     return []
   }
-  
+
   static override getLibVersion(): string {
     if (process.platform == 'win32') {
       return '24.4.3.11'
     }
     return 'only support windows'
   }
-  
+
   close(isReset = false, msg?: string) {
     // clearInterval(this.timer)
 
     this.readAbort.abort()
 
-
     for (const [key, value] of this.rejectBaseMap) {
       value.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, value.msgType))
     }
     this.rejectBaseMap.clear()
-    
+
     //pendingBaseCmds
     for (const [key, vals] of this.pendingBaseCmds) {
-      for(const val of vals){
+      for (const val of vals) {
         val.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, val.msgType))
       }
     }
     this.pendingBaseCmds.clear()
-
-
-
 
     if (isReset) {
       ZLG.ZCAN_ResetCAN(this.channel)
@@ -361,7 +349,7 @@ export class ZLG_CAN extends CanBase {
     } else {
       this.closed = true
       this.log.close()
-  
+
       const target = deviceMap.get(`${this.deviceType}_${this.index}`)
       if (target) {
         //remove this channel
@@ -377,7 +365,12 @@ export class ZLG_CAN extends CanBase {
     }
   }
 
-  writeBase(id: number, msgType: CanMsgType, data: Buffer,extra?:{database?:string,name?:string}) {
+  writeBase(
+    id: number,
+    msgType: CanMsgType,
+    data: Buffer,
+    extra?: { database?: string; name?: string }
+  ) {
     let maxLen = msgType.canfd ? 64 : 8
     if (data.length > maxLen) {
       throw new CanError(CAN_ERROR_ID.CAN_PARAM_ERROR, msgType, data)
@@ -398,27 +391,30 @@ export class ZLG_CAN extends CanBase {
         maxLen = 48
       } else if (data.length > 48) {
         maxLen = 64
-      }
-      else {
+      } else {
         maxLen = data.length
       }
       data = Buffer.concat([data, Buffer.alloc(maxLen - data.length).fill(0)])
-
-
     }
-   
+
     const cmdId = this.getReadBaseId(id, msgType)
     //queue
-    return this._writeBase(id, msgType, cmdId, data,extra)
+    return this._writeBase(id, msgType, cmdId, data, extra)
   }
-  _writeBase(id: number, msgType: CanMsgType, cmdId: string, data: Buffer,extra?:{database?:string,name?:string}) {
+  _writeBase(
+    id: number,
+    msgType: CanMsgType,
+    cmdId: string,
+    data: Buffer,
+    extra?: { database?: string; name?: string }
+  ) {
     return new Promise<number>(
       (resolve: (value: number) => void, reject: (reason: CanError) => void) => {
         const item = this.pendingBaseCmds.get(cmdId)
         if (item) {
-          item.push({ resolve, reject, data, msgType,extra })
+          item.push({ resolve, reject, data, msgType, extra })
         } else {
-          this.pendingBaseCmds.set(cmdId, [{ resolve, reject, data, msgType,extra }])
+          this.pendingBaseCmds.set(cmdId, [{ resolve, reject, data, msgType, extra }])
         }
 
         if (msgType.canfd) {
@@ -451,9 +447,7 @@ export class ZLG_CAN extends CanBase {
             // this.close(true)
             reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data))
             // this.log.error((getTsUs() - this.startTime),'bus error')
-
           }
-
         } else {
           const frame = new ZLG.ZCAN_Transmit_Data()
           frame.transmit_type = 0

@@ -24,6 +24,7 @@ npm install
 ```
 
 `build native module`
+
 ```bash
 cd src/main/docan
 npx node-gyp rebuild
@@ -31,7 +32,7 @@ cd ../..
 
 cd src/main/dolin
 npx node-gyp rebuild
-cd ../.. 
+cd ../..
 ```
 
 `run`
@@ -45,7 +46,6 @@ npm run dev
 ```bash
 npm run build:win
 ```
-
 
 ## Get From Github Action
 

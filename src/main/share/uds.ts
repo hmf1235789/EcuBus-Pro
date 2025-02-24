@@ -1,12 +1,12 @@
 // import { Param, param2raw, ServiceItem } from '../views/Uds/service'
 import { v4 } from 'uuid'
 import { CAN_ADDR_FORMAT, CAN_ID_TYPE, CanAddr, CanBaseInfo } from './can'
-import {serviceDetail, ServiceId, SupportServiceId} from './service'
-import {EthBaseInfo,EthAddr, EntityAddr} from './doip'
+import { serviceDetail, ServiceId, SupportServiceId } from './service'
+import { EthBaseInfo, EthAddr, EntityAddr } from './doip'
 import { LinAddr, LinBaseInfo } from './lin'
 
 export type DataType = 'NUM' | 'ARRAY' | 'ASCII' | 'UNICODE' | 'FLOAT' | 'DOUBLE'
-export type HardwareType = "can" | 'lin' | 'eth'
+export type HardwareType = 'can' | 'lin' | 'eth'
 //serviceDetail所有的key作为serviceId
 
 /**
@@ -57,13 +57,12 @@ export function param2raw(param: Param): Buffer {
 }
 
 export function getTxPdu(service: ServiceItem, paddingVal = 0) {
-
   const buffer = Buffer.alloc(4096, paddingVal)
   buffer[0] = Number(service.serviceId)
   let allLen = 1
   for (const p of service.params) {
     const t = param2raw(p)
-    const len=Math.ceil(p.bitLen / 8)
+    const len = Math.ceil(p.bitLen / 8)
     t.copy(buffer, allLen)
     allLen += len
   }
@@ -71,31 +70,32 @@ export function getTxPdu(service: ServiceItem, paddingVal = 0) {
 }
 
 export function getRxPdu(service: ServiceItem, paddingVal = 0) {
-
   const buffer = Buffer.alloc(4096, paddingVal)
-  buffer[0] = Number(service.serviceId)+0x40
+  buffer[0] = Number(service.serviceId) + 0x40
   let allLen = 1
   for (const p of service.respParams) {
     const t = param2raw(p)
-    const len=Math.ceil(p.bitLen / 8)
+    const len = Math.ceil(p.bitLen / 8)
     t.copy(buffer, allLen)
     allLen += len
   }
   return buffer.subarray(0, allLen)
 }
-export function applyBuffer(service:ServiceItem,data: Buffer,isReq:boolean) {
-  if (data[0] == 0x7F) {
+export function applyBuffer(service: ServiceItem, data: Buffer, isReq: boolean) {
+  if (data[0] == 0x7f) {
     return
   }
-  let sid=data[0]
-  if(!isReq){
-    sid-=0x40
+  let sid = data[0]
+  if (!isReq) {
+    sid -= 0x40
   }
 
-  if(sid!=Number(service.serviceId)){
-    throw new Error(`serviceId not match, expect ${service.serviceId} but got 0x${sid.toString(16)}`)
+  if (sid != Number(service.serviceId)) {
+    throw new Error(
+      `serviceId not match, expect ${service.serviceId} but got 0x${sid.toString(16)}`
+    )
   }
-  const params=isReq?service.params:service.respParams
+  const params = isReq ? service.params : service.respParams
   /* remove left param */
   if (params.length > 0) {
     const lastParam = params[params.length - 1]
@@ -107,7 +107,7 @@ export function applyBuffer(service:ServiceItem,data: Buffer,isReq:boolean) {
   if (allLen > data.length) {
     throw new Error(`response buffer length not enough, expect ${allLen} but got ${data.length}`)
   }
-  let len = 1;
+  let len = 1
   for (const param of params) {
     paramSetValRaw(param, data.subarray(len, len + Math.ceil(param.bitLen / 8)))
     len += Math.ceil(param.bitLen / 8)
@@ -120,14 +120,18 @@ export function applyBuffer(service:ServiceItem,data: Buffer,isReq:boolean) {
       type: 'ARRAY',
       value: Buffer.alloc(0),
       phyValue: '',
-      bitLen: (data.length - len) * 8,
+      bitLen: (data.length - len) * 8
     }
     paramSetValRaw(param, data.subarray(len))
     params.push(param)
   }
 }
 export function getTxPduStr(service: ServiceItem) {
-  const str: string[] = [Buffer.from([Number(service.serviceId)]).toString('hex').toUpperCase()]
+  const str: string[] = [
+    Buffer.from([Number(service.serviceId)])
+      .toString('hex')
+      .toUpperCase()
+  ]
 
   for (let i = 0; i < service.params.length; i++) {
     const pa = service.params[i]
@@ -141,8 +145,12 @@ export function getTxPduStr(service: ServiceItem) {
   return str
 }
 export function getRxPduStr(service: ServiceItem) {
-  const str: string[] = [Buffer.from([Number(service.serviceId)+0x40]).toString('hex').toUpperCase()]
-  if(service.suppress){
+  const str: string[] = [
+    Buffer.from([Number(service.serviceId) + 0x40])
+      .toString('hex')
+      .toUpperCase()
+  ]
+  if (service.suppress) {
     return ['SUPPRESS']
   }
   for (let i = 0; i < service.respParams.length; i++) {
@@ -190,7 +198,6 @@ export function paramSetVal(param: Param, str: string | number) {
           throw new Error('value should be a 00 F4 33 5a')
         }
         const byte = Math.floor(param.bitLen / 8)
-
 
         const s = str.toString().split(' ')
         if (s.length > byte) {
@@ -287,28 +294,28 @@ export function paramSetValRaw(param: Param, val: Buffer) {
 
     case 'ARRAY': {
       param.phyValue = splitStr2(val.toString('hex').padStart(byte * 2, '0'))
-      param.value=val
+      param.value = val
       break
     }
 
     case 'ASCII': {
       param.phyValue = val.toString('ascii')
-      param.value=val
+      param.value = val
       break
     }
     case 'UNICODE': {
       param.phyValue = val.toString('utf-8')
-      param.value=val
+      param.value = val
       break
     }
     case 'FLOAT': {
       param.phyValue = val.readFloatBE(0)
-      param.value=val
+      param.value = val
       break
     }
     case 'DOUBLE': {
       param.phyValue = val.readDoubleBE(0)
-      param.value=val
+      param.value = val
       break
     }
     default:
@@ -322,16 +329,16 @@ export function paramSetSize(param: Param, bitSize: number) {
   const lastByte = Math.ceil(param.bitLen / 8)
   const minLen = Math.min(byte, lastByte)
   param.bitLen = bitSize
-  const newValue=Buffer.alloc(byte).fill(0)
+  const newValue = Buffer.alloc(byte).fill(0)
   //copy value to new buffer
-  param.value.copy(newValue,0,0,minLen)
-  param.value=newValue
+  param.value.copy(newValue, 0, 0, minLen)
+  param.value = newValue
 }
 export interface SequenceItem {
   enable: boolean
   checkResp: boolean
   retryNum: number
-  addressIndex:number
+  addressIndex: number
   failBehavior: 'stop' | 'continue'
   serviceId: string
   delay: number
@@ -351,43 +358,41 @@ export interface SubFunction {
   name: string
   subFunction: string
 }
-export interface UdsInfo{
-  pTime:number,
-  pExtTime:number,
-  s3Time:number,
-  testerPresentEnable:boolean,
+export interface UdsInfo {
+  pTime: number
+  pExtTime: number
+  s3Time: number
+  testerPresentEnable: boolean
 }
 
 export interface UdsAddress {
   type: HardwareType
-  canAddr?:CanAddr
-  ethAddr?:EthAddr
-  linAddr?:LinAddr
+  canAddr?: CanAddr
+  ethAddr?: EthAddr
+  linAddr?: LinAddr
 }
 
-export function getUdsAddrName(item?:UdsAddress){
-  if(item){
-    if(item.type=='can'){
-      return item.canAddr?.name||''
-    }else if(item.type=='eth'){
-      return item.ethAddr?.name||''
-    }else if(item.type=='lin'){
-      return item.linAddr?.name||''
+export function getUdsAddrName(item?: UdsAddress) {
+  if (item) {
+    if (item.type == 'can') {
+      return item.canAddr?.name || ''
+    } else if (item.type == 'eth') {
+      return item.ethAddr?.name || ''
+    } else if (item.type == 'lin') {
+      return item.linAddr?.name || ''
     }
   }
   return ''
 }
-export function getUdsDeviceName(item:UdsDevice){
-  if(item.type=='can'){
-    return item.canDevice?.name||''
+export function getUdsDeviceName(item: UdsDevice) {
+  if (item.type == 'can') {
+    return item.canDevice?.name || ''
   }
   return ''
 }
 
-
-
 export interface UdsDevice {
-  type: HardwareType,
+  type: HardwareType
   canDevice?: CanBaseInfo
   ethDevice?: EthBaseInfo
   linDevice?: LinBaseInfo

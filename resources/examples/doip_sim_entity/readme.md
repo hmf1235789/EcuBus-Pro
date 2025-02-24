@@ -14,22 +14,21 @@ Add a node item and attach the script(`node.ts`)
 ![alt text](image-1.png)
 
 ```typescript
-import {DiagResponse, RegisterEthVirtualEntity} from 'ECB'
-
+import { DiagResponse, RegisterEthVirtualEntity } from 'ECB'
 
 UDS.Init(async () => {
-    console.log('Registering virtual entity')
-    await RegisterEthVirtualEntity('127.0.0.1',{
-        vin:'123456789',
-        eid:'00-00-00-00-00-00',
-        gid:'00-00-00-00-00-00',
-        logicalAddr:100
-    })
+  console.log('Registering virtual entity')
+  await RegisterEthVirtualEntity('127.0.0.1', {
+    vin: '123456789',
+    eid: '00-00-00-00-00-00',
+    gid: '00-00-00-00-00-00',
+    logicalAddr: 100
+  })
 })
 
-UDS.On("Tester_eth_1.DiagnosticSessionControl160.send",async (req)=>{
-    const resp=DiagResponse.fromDiagRequest(req)
-    await resp.outputDiag()
+UDS.On('Tester_eth_1.DiagnosticSessionControl160.send', async (req) => {
+  const resp = DiagResponse.fromDiagRequest(req)
+  await resp.outputDiag()
 })
 ```
 
@@ -37,8 +36,8 @@ UDS.On("Tester_eth_1.DiagnosticSessionControl160.send",async (req)=>{
 
 Address information need same as your register entity
 
-* Tester addr:200
-* Gateway addr:100
+- Tester addr:200
+- Gateway addr:100
 
 ![alt text](image-2.png)
 

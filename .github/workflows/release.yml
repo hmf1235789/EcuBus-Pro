@@ -142,7 +142,7 @@ jobs:
           asset_path: ./resources/bin/ecb_cli
           asset_name: ecb_cli
           asset_content_type: application/octet-stream
-    
+
       - name: Upload DEB
         uses: actions/upload-release-asset@v1
         env:

@@ -46,10 +46,10 @@ export class KVASER_CAN extends CanBase {
       reject: (reason: CanError) => void
       msgType: CanMsgType
       data: Buffer
-      extra?:{database?:string,name?:string}
+      extra?: { database?: string; name?: string }
     }[]
   >()
-  
+
   rejectBaseMap = new Map<
     number,
     {
@@ -81,7 +81,6 @@ export class KVASER_CAN extends CanBase {
     this.event = new EventEmitter()
     this.log = new CanLOG('KVASER', info.name, this.event)
 
-
     KV.canBusOff(this.handle)
 
     const buf = Buffer.alloc(4)
@@ -104,12 +103,26 @@ export class KVASER_CAN extends CanBase {
     }
 
     //bitrate
-    ret = KV.canSetBusParams(this.handle, Number(info.bitrate.freq), info.bitrate.timeSeg1, info.bitrate.timeSeg2, info.bitrate.sjw, 1, 0);
+    ret = KV.canSetBusParams(
+      this.handle,
+      Number(info.bitrate.freq),
+      info.bitrate.timeSeg1,
+      info.bitrate.timeSeg2,
+      info.bitrate.sjw,
+      1,
+      0
+    )
     if (ret < 0) {
       throw new Error(err2str(ret))
     }
     if (info.canfd && info.bitratefd) {
-      ret = KV.canSetBusParamsFd(this.handle, Number(info.bitratefd.freq), info.bitratefd.timeSeg1, info.bitratefd.timeSeg2, info.bitratefd.sjw);
+      ret = KV.canSetBusParamsFd(
+        this.handle,
+        Number(info.bitratefd.freq),
+        info.bitratefd.timeSeg1,
+        info.bitratefd.timeSeg2,
+        info.bitratefd.sjw
+      )
       if (ret != 0) {
         throw new Error(err2str(ret))
       }
@@ -123,13 +136,13 @@ export class KVASER_CAN extends CanBase {
     KV.CreateTSFN(this.handle, this.id, this.callback.bind(this))
   }
   static loadDllPath(dllPath: string) {
-    if(process.platform=='win32'){
+    if (process.platform == 'win32') {
       KV.LoadDll(dllPath)
       KV.canInitializeLibrary()
     }
   }
   static unloadDll() {
-    if(process.platform=='win32'){
+    if (process.platform == 'win32') {
       KV.canUnloadLibrary()
     }
   }
@@ -140,7 +153,14 @@ export class KVASER_CAN extends CanBase {
       const time = new KV.JSUINT64()
       const id = new KV.JSINT64()
       const data = new KV.ByteArray(64)
-      const ret = KV.canRead(this.handle, id.cast(), data.cast(), dlc.cast(), flag.cast(), time.cast())
+      const ret = KV.canRead(
+        this.handle,
+        id.cast(),
+        data.cast(),
+        dlc.cast(),
+        flag.cast(),
+        time.cast()
+      )
       if (ret == KV.canERR_NOMSG) {
         break
       } else if (ret < 0) {
@@ -178,21 +198,21 @@ export class KVASER_CAN extends CanBase {
           if (items) {
             const item = items.shift()!
             msgType.uuid = item.msgType.uuid
-            if(items.length==0){
+            if (items.length == 0) {
               this.pendingBaseCmds.delete(cmdId)
             }
-            const message:CanMessage = {
+            const message: CanMessage = {
               dir: 'OUT',
               id: id.value(),
               data: buf,
               ts: ts,
               msgType: msgType,
               device: this.info.name,
-              database:item.extra?.database,
-              name:item.extra?.name
+              database: item.extra?.database,
+              name: item.extra?.name
             }
             this.log.canBase(message)
-            this.event.emit(this.getReadBaseId(message.id,message.msgType), message)
+            this.event.emit(this.getReadBaseId(message.id, message.msgType), message)
             item.resolve(ts)
           }
           setImmediate(this.callback.bind(this))
@@ -230,11 +250,9 @@ export class KVASER_CAN extends CanBase {
             this.timeOffset = ts
             this.close(true)
           }
-
-
         } else {
           //rx
-          const message:CanMessage = {
+          const message: CanMessage = {
             dir: 'IN',
             id: id.value(),
             data: buf,
@@ -286,16 +304,13 @@ export class KVASER_CAN extends CanBase {
   }
 
   close(isReset = false, msg?: string) {
-
     this.readAbort.abort()
-
-
 
     for (const [key, value] of this.rejectBaseMap) {
       value.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, value.msgType))
     }
     this.rejectBaseMap.clear()
-   
+
     //pendingBaseCmds
     for (const [key, vals] of this.pendingBaseCmds) {
       for (const val of vals) {
@@ -314,7 +329,12 @@ export class KVASER_CAN extends CanBase {
       this.event.emit('close', msg)
     }
   }
-  writeBase(id: number, msgType: CanMsgType, data: Buffer,extra?:{database?:string,name?:string}) {
+  writeBase(
+    id: number,
+    msgType: CanMsgType,
+    data: Buffer,
+    extra?: { database?: string; name?: string }
+  ) {
     let maxLen = msgType.canfd ? 64 : 8
     if (data.length > maxLen) {
       throw new CanError(CAN_ERROR_ID.CAN_PARAM_ERROR, msgType, data)
@@ -338,24 +358,27 @@ export class KVASER_CAN extends CanBase {
         maxLen = 48
       } else if (data.length > 48) {
         maxLen = 64
-      }else {
+      } else {
         maxLen = data.length
       }
       data = Buffer.concat([data, Buffer.alloc(maxLen - data.length).fill(0)])
-
-
     }
-    return this._writeBase(id, msgType, cmdId, data,extra)
+    return this._writeBase(id, msgType, cmdId, data, extra)
   }
-  _writeBase(id: number, msgType: CanMsgType, cmdId: string, data: Buffer,extra?:{database?:string,name?:string}) {
+  _writeBase(
+    id: number,
+    msgType: CanMsgType,
+    cmdId: string,
+    data: Buffer,
+    extra?: { database?: string; name?: string }
+  ) {
     return new Promise<number>(
       (resolve: (value: number) => void, reject: (reason: CanError) => void) => {
-
         const item = this.pendingBaseCmds.get(cmdId)
         if (item) {
-          item.push({ resolve, reject, data, msgType,extra })
+          item.push({ resolve, reject, data, msgType, extra })
         } else {
-          this.pendingBaseCmds.set(cmdId, [{ resolve, reject, data, msgType,extra}])
+          this.pendingBaseCmds.set(cmdId, [{ resolve, reject, data, msgType, extra }])
         }
         let flag = 0
         if (msgType.idType == CAN_ID_TYPE.EXTENDED) {
@@ -374,7 +397,6 @@ export class KVASER_CAN extends CanBase {
           flag |= KV.canMSG_RTR
         }
 
-
         const array = new KV.ByteArray(data.length)
         for (let i = 0; i < data.length; i++) {
           array.setitem(i, data[i])
@@ -388,7 +410,6 @@ export class KVASER_CAN extends CanBase {
 
           this.close(false, str)
         }
-
       }
     )
   }
