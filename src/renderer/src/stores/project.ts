@@ -176,6 +176,8 @@ export const useProjectStore = defineStore('project', {
             this.open = true
 
             this.router.push('/uds')
+            //add to history
+            this.addToHistory(file)
           } catch (e) {
             ElMessage.error(`${file} is not a valid project file`)
           }
@@ -185,6 +187,32 @@ export const useProjectStore = defineStore('project', {
         })
       }
     },
+    addToHistory(file:string){
+      const projectList = useProjectList()
+      const parse = window.path.parse(file)
+        const exist = projectList.projectList.find((v) => v.path == parse.dir && v.name == parse.base)
+        let pined
+        if (exist) {
+          //remove and reinsert
+          pined = exist.pined
+          const index = projectList.projectList.indexOf(exist)
+          projectList.projectList.splice(index, 1)
+        }
+        //put it first
+        projectList.projectList.unshift({
+          name: parse.base,
+          path: parse.dir,
+          pined: pined,
+          lastOpenTime: Date.now()
+        })
+        
+        if(projectList.projectList.length>historyLimit){
+          projectList.projectList.pop()
+        }
+        window.store.set('projectList', cloneDeep(projectList.projectList))
+     
+    },
+    
     async saveProject() {
 
       if (this.open) {
@@ -220,27 +248,7 @@ export const useProjectStore = defineStore('project', {
         this.projectDirty = false
         //update projectList
         //if file exist
-        const projectList = useProjectList()
-        const exist = projectList.projectList.find((v) => v.path == this.projectInfo.path && v.name == this.projectInfo.name)
-        let pined
-        if (exist) {
-          //remove and reinsert
-          pined = exist.pined
-          const index = projectList.projectList.indexOf(exist)
-          projectList.projectList.splice(index, 1)
-        }
-        //put it first
-        projectList.projectList.unshift({
-          name: this.projectInfo.name,
-          path: this.projectInfo.path,
-          pined: pined,
-          lastOpenTime: Date.now()
-        })
-        
-        if(projectList.projectList.length>historyLimit){
-          projectList.projectList.pop()
-        }
-        window.store.set('projectList', cloneDeep(projectList.projectList))
+        this.addToHistory(fullPath)
       }
     },
     async closeProject(filePath?: string): Promise<boolean> {

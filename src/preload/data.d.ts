@@ -1,10 +1,9 @@
-import type { CanInterAction, CanNode } from 'src/main/share/can';
+import type { CanInterAction } from 'src/main/share/can';
 import type { UdsDevice } from 'src/main/share/uds';
 import type { TesterInfo } from 'src/main/share/tester';
-import type { EthNode } from 'src/main/share/doip';
 import type {LDF} from 'src/renderer/src/database/ldfParse'
 import type {DBC} from 'src/renderer/src/database/dbc/dbcVisitor'
-import type {LinNode} from 'src/main/share/lin'
+
 import type {YAXisOption,XAXisOption,LineSeriesOption} from 'echarts/types/dist/shared'
 
 
@@ -27,7 +26,14 @@ export interface LinInter {
     action: any[],
 }
 export type Inter = CanInter | LinInter
-export type NodeItem = CanNode | EthNode | LinNode
+export interface NodeItem {
+  disabled?:boolean
+  id:string
+  name:string
+  channel:string[]
+  script?:string
+  workNode?:string
+}
 
 
 export type GraphBindSignalValue = {

@@ -16,6 +16,7 @@ type HandlerMap = {
     address?: string
     service: ServiceItem
     isReq: boolean
+    testerName: string
   }) => Promise<number>
   setSignal: (pool: UdsTester, data: {
     signal: string,
@@ -43,7 +44,7 @@ export default class UdsTester {
   cb:any
   eventHandlerMap: Partial<EventHandlerMap> = {}
   constructor(
-    env: {
+    private env: {
       PROJECT_ROOT:string,
       PROJECT_NAME:string,
       MODE:'node'|'sequence',
@@ -51,12 +52,14 @@ export default class UdsTester {
     },
     jsFilePath: string,
     log: UdsLOG,
-    private tester?: TesterInfo,
+    private testers?: Record<string, TesterInfo>,
   ) {
-    if (tester) {
-      for (const [_name, serviceList] of Object.entries(tester.allServiceList)) {
-        for (const service of serviceList) {
-          this.serviceMap[`${tester.name}.${service.name}`] = service
+    if (testers) {
+      for (const tester of Object.values(testers)) {
+        for (const [_name, serviceList] of Object.entries(tester.allServiceList)) {
+          for (const service of serviceList) {
+            this.serviceMap[`${tester.name}.${service.name}`] = service
+          }
         }
       }
     }
@@ -70,7 +73,7 @@ export default class UdsTester {
       workerThreadOpts: {
         stderr: true,
         stdout: true,
-        env: env,
+        env: this.env,
         execArgv:['--enable-source-maps']
       },
 
@@ -130,10 +133,10 @@ export default class UdsTester {
     const event = payload.event
     const data = payload.data
 
-    if (event == 'set' && this.tester) {
+    if (event == 'set' && this.testers) {
       const service = data.service as ServiceItem
       const isReq= data.isRequest as boolean
-      const name = this.tester.name
+      const name = data.testerName as string
       if (this.serviceMap[`${name}.${service.name}`]) {
         if(isReq){
           service.params = service.params.map((p: any) => {
@@ -192,21 +195,21 @@ export default class UdsTester {
   //   }
 
   // }
-  async triggerSend(service: ServiceItem, ts: number) {
+  async triggerSend(testerName: string,service: ServiceItem, ts: number) {
     this.updateTs(ts)
-    if (this.tester) {
+    if (this.testers) {
       try{
-        await this.workerEmit(`${this.tester.name}.${service.name}.send`, service)
+        await this.workerEmit(`${testerName}.${service.name}.send`, service)
       }catch(e:any){
          throw formatError(e)
       }
     }
   }
-  async triggerRecv(service: ServiceItem, ts: number) {
+  async triggerRecv(testerName: string,service: ServiceItem, ts: number) {
     this.updateTs(ts)
-    if (this.tester) {
+    if (this.testers) {
       try{
-        await this.workerEmit(`${this.tester.name}.${service.name}.recv`, service)
+        await this.workerEmit(`${testerName}.${service.name}.recv`, service)
       }catch(e:any){
          throw  formatError(e)
       }
@@ -230,7 +233,7 @@ export default class UdsTester {
   }
   async start(projectPath: string) {
 
-    await this.pool.exec('__start', [this.tester?.name, this.serviceMap, projectPath])
+    await this.pool.exec('__start', [this.serviceMap])
     await this.workerEmit('__varFc', null)
   }
 

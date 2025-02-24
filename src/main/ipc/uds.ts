@@ -3,27 +3,28 @@ import scriptIndex from '../../../resources/docs/.gitkeep?asset&asarUnpack'
 import esbuildWin from '../../../resources/bin/esbuild.exe?asset&asarUnpack'
 import path from 'path'
 import { compileTsc, createProject, deleteNode, deleteTester, findService, getBuildStatus, refreshProject, UDSTesterMain } from '../docan/uds'
-import { CAN_ID_TYPE, CAN_SOCKET, CanBase, CanInterAction, CanNode, formatError, swapAddr } from '../share/can'
+import { CAN_ID_TYPE, CAN_SOCKET, CanBase, CanInterAction, formatError, swapAddr } from '../share/can'
 import { CAN_TP, TpError } from '../docan/cantp'
 import { UdsAddress, UdsDevice } from '../share/uds'
 import { TesterInfo } from '../share/tester'
 import log from 'electron-log'
-import { NodeItem } from '../docan/nodeItem'
+
 import { UdsLOG } from '../log'
 import { clientTcp, DOIP, getEthDevices } from './../doip'
-import { EthAddr, EthBaseInfo, EthNode } from '../share/doip'
-import { NodeEthItem } from '../doip/nodeItem'
+import { EthAddr, EthBaseInfo } from '../share/doip'
+
 import { getCanDevices, openCanDevice } from '../docan/can'
 import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
-import { getLinDevices, NodeLinItem, openLinDevice, updateSignalVal } from '../dolin'
+import { getLinDevices, openLinDevice, updateSignalVal } from '../dolin'
 import EventEmitter from 'events'
 import LinBase from '../dolin/base'
-import { DataSet, LinInter } from 'src/preload/data'
-import { LinMode, LinNode } from '../share/lin'
+import { DataSet, LinInter, NodeItem } from 'src/preload/data'
+import { LinMode } from '../share/lin'
 import { LIN_TP } from '../dolin/lintp'
 import { TpError as LinTpError } from '../dolin/lintp'
 import type { DBC, Message, Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
 import { getMessageData } from 'src/renderer/src/database/dbc/calc'
+import { NodeClass } from '../nodeItem'
 
 const libPath = path.dirname(dllLib)
 log.info('dll lib path:', libPath)
@@ -136,7 +137,7 @@ let cantps: {
 let doips: DOIP[] = []
 
 
-async function globalStart(devices: Record<string, UdsDevice>, testers: Record<string, TesterInfo>, nodes: Record<string, CanNode | EthNode | LinNode>, projectInfo: { path: string, name: string }) {
+async function globalStart(devices: Record<string, UdsDevice>, testers: Record<string, TesterInfo>, nodes: Record<string, NodeItem>, projectInfo: { path: string, name: string }) {
     let activeKey = ''
     try {
         for (const key in devices) {
@@ -196,10 +197,10 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
                         const id = cantp.getReadId(addr.canAddr)
                         cantp.event.on(id, (data) => {
                             if (!(data instanceof TpError)) {
-                                const log = new UdsLOG(tester.name, tester.id)
+                                const log = new UdsLOG(tester.name)
                                 const item = findService(tester, data.data, true)
                                 if (item) {
-                                    log.sent(item, data.ts, data.data)
+                                    log.sent(tester.id, item, data.ts, data.data)
                                 }
 
                                 log.close()
@@ -209,10 +210,10 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
                         const idR = cantp.getReadId(swapAddr(addr.canAddr))
                         cantp.event.on(idR, (data) => {
                             if (!(data instanceof TpError)) {
-                                const log = new UdsLOG(tester.name, tester.id)
+                                const log = new UdsLOG(tester.name, )
                                 const item = findService(tester, data.data, false)
                                 if (item) {
-                                    log.recv(item, data.ts, data.data)
+                                    log.recv(tester.id, item, data.ts, data.data)
                                 }
                                 log.close()
 
@@ -257,11 +258,11 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
                         const id = lintp.getReadId(LinMode.MASTER, addr.linAddr)
                         lintp.event.on(id, (data) => {
                             if (!(data instanceof LinTpError)) {
-                                const log = new UdsLOG(tester.name, tester.id)
+                                const log = new UdsLOG(tester.name,)
 
                                 const item = findService(tester, data.data, true)
                                 if (item) {
-                                    log.sent(item, data.ts, data.data)
+                                    log.sent(tester.id, item, data.ts, data.data)
                                 }
 
                                 log.close()
@@ -270,11 +271,11 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
                         const idR = lintp.getReadId(LinMode.SLAVE, addr.linAddr)
                         lintp.event.on(idR, (data) => {
                             if (!(data instanceof LinTpError)) {
-                                const log = new UdsLOG(tester.name, tester.id)
+                                const log = new UdsLOG(tester.name)
 
                                 const item = findService(tester, data.data, false)
                                 if (item) {
-                                    log.recv(item, data.ts, data.data)
+                                    log.recv(tester.id, item, data.ts, data.data)
                                 }
                                 log.close()
 
@@ -293,37 +294,13 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
     //nodes
     for (const key in nodes) {
         const node = nodes[key]
-        if (node.type == 'can') {
-            const nodeItem = new NodeItem(node, canBaseMap, projectInfo.path, projectInfo.name, testers)
-
-            try {
-                await nodeItem.start()
-                nodeMap.set(key, nodeItem)
-            } catch (err: any) {
-                nodeItem.log?.systemMsg(formatError(err), 0, 'error')
-                nodeItem.close()
-
-            }
-        } else if (node.type == 'eth') {
-            const nodeItem = new NodeEthItem(node, doips, ethBaseMap, projectInfo.path, projectInfo.name, testers)
-            try {
-                await nodeItem.start()
-                nodeMap.set(key, nodeItem)
-            } catch (err: any) {
-                nodeItem.log?.systemMsg(formatError(err), 0, 'error')
-                nodeItem.close()
-            }
-        } else if (node.type == 'lin') {
-            const nodeItem = new NodeLinItem(node, linBaseMap, projectInfo.path, projectInfo.name, testers)
-
-            try {
-                await nodeItem.start()
-                nodeMap.set(key, nodeItem)
-            } catch (err: any) {
-                nodeItem.log?.systemMsg(formatError(err), 0, 'error')
-                nodeItem.close()
-
-            }
+        const nodeItem = new NodeClass(node,canBaseMap,linBaseMap,doips,ethBaseMap,projectInfo.path,projectInfo.name,testers)
+        try {
+            await nodeItem.start()
+            nodeMap.set(key, nodeItem)
+        } catch (err: any) {
+            nodeItem.log?.systemMsg(formatError(err), 0, 'error')
+            nodeItem.close()
         }
 
     }
@@ -353,7 +330,7 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
     }
     const devices = arg[i++] as Record<string, UdsDevice>
     const testers = arg[i++] as Record<string, TesterInfo>
-    const nodes = arg[i++] as Record<string, CanNode>
+    const nodes = arg[i++] as Record<string, NodeItem>
 
     global.database = arg[i++]
 

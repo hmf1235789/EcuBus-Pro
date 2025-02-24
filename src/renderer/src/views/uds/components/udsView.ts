@@ -1,7 +1,7 @@
 // stores/counter.js
 import * as joint from '@joint/core'
 import { EventEmitter } from 'events'
-import { CanBaseInfo, CanNode } from 'nodeCan/can'
+import { CanBaseInfo } from 'nodeCan/can'
 import { TesterInfo } from 'nodeCan/tester'
 import { v4 } from 'uuid'
 import { ElMessageBox } from 'element-plus'
@@ -13,6 +13,7 @@ import { h } from 'vue'
 import { useProjectStore } from '@r/stores/project'
 import { cloneDeep, get } from 'lodash'
 import {Inter, NodeItem} from 'src/preload/data'
+import { nextTick } from 'vue'
 
 export interface udsBase {
   name: string
@@ -47,13 +48,12 @@ class Region extends joint.dia.Element {
           fontSize: 10,
           fill: '#333333',
           textWrap: {
-            width: -10, // 相对于元素宽度的偏移
+            width: 120, // 相对于元素宽度的偏移
             height: 22, // 设置为与字体大小相同的固定高度
             ellipsis: true // 如果文本太长，以省略号结尾
           }
         },
         labelBottom: {
-
           textVerticalAnchor: 'middle',
           textAnchor: 'middle',
           refX: '50%',
@@ -61,7 +61,7 @@ class Region extends joint.dia.Element {
           fontSize: 10,
           fill: '#333333',
           textWrap: {
-            width: -10, // 相对于元素宽度的偏移
+            width: 120, // 修改为所需的宽度，例如 0 表示不限制宽度
             height: 22, // 设置为与字体大小相同的固定高度
             ellipsis: true // 如果文本太长，以省略号结尾
           }
@@ -483,7 +483,7 @@ export class Node extends udsCeil {
       x,
       y,
       {
-        panel:ig.type=='lin',
+        panel:true,
         edit: true,
         remove: true,
         lockX: false,
@@ -651,7 +651,7 @@ export class UDSView {
           buttonSize: 'small',
           showConfirmButton:false,
           title: `Edit Node ${item.name}`,
-          showClose: true,
+          showClose: false,
           customStyle:{
             width:'600px',
             maxWidth:'none',
@@ -659,26 +659,34 @@ export class UDSView {
           },
           message:()=>h(nodeConfig,{
            editIndex:id,
-           type:item.type
+           ceil:ceil
           })
-        }).catch(null).finally(()=>{
-          //modify name
-          ceil.changeName(dataBase.nodes[id].name)
-          const t=element.getNodeBottomName()
-          ceil.changeNameBottom(t)
-        })
+        }).catch(null)
       
 
     })
     element.on('panel', (ceil) => {
       const dataBase = useDataStore()
       const item=dataBase.nodes[id]
-      this.layout.addWin('linPanel',id,{
-        name:item.name,
-        params:{
-          editIndex:id,
+      const workNode=item.workNode
+      if(workNode){
+        const dbName=workNode.split(':')[0] 
+      
+        for(const ld of Object.values(dataBase.database.lin)){
+          if(ld.name==dbName){
+            this.layout.addWin('linPanel',id,{
+              name:item.name,
+              params:{
+                editIndex:id,
+              }
+            })
+            return
+          }
         }
-      })
+       
+      }else{
+        ElMessageBox.alert('Please select a work node')
+      }
       
 
     })

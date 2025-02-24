@@ -39,9 +39,9 @@
         "channel": [
           "e4179991-1b87-4889-b365-25b1fd93d97e"
         ],
-        "workNode": "Motor2",
+        "workNode": "lin:Motor2",
         "attachTester": "5459ce47-1751-4a82-94a0-9bd33ae289ab",
-        "script": "node.ts"
+        "script": ""
       },
       "69c0b8cc-f674-4142-99fc-9eed944cacf9": {
         "name": "Node 2",
@@ -50,7 +50,7 @@
         "channel": [
           "e4179991-1b87-4889-b365-25b1fd93d97e"
         ],
-        "workNode": "SeatECU"
+        "workNode": "lin:SeatECU"
       }
     },
     "database": {
@@ -625,8 +625,10 @@
           },
           "name": "lin"
         }
-      }
-    }
+      },
+      "can": {}
+    },
+    "graphs": {}
   },
   "project": {
     "wins": {
@@ -648,10 +650,10 @@
       },
       "network": {
         "pos": {
-          "x": 0,
-          "y": -28,
-          "w": 1707,
-          "h": 670
+          "x": 431,
+          "y": 148,
+          "w": 600,
+          "h": 400
         },
         "title": "network",
         "label": "Network",
@@ -664,12 +666,12 @@
           "w": 600,
           "h": 400
         },
-        "isMax": true
+        "isMax": false
       },
       "25cec12a-572d-4221-b85e-2728628134f7_ia": {
         "pos": {
-          "x": 0,
-          "y": 0,
+          "x": 1279,
+          "y": 150,
           "w": 700,
           "h": 400
         },
@@ -682,7 +684,7 @@
           },
           "name": "Lin IA"
         },
-        "hide": true
+        "hide": false
       },
       "trace": {
         "pos": {

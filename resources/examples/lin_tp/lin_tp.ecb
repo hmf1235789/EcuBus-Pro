@@ -163,7 +163,7 @@
         "channel": [
           "e4179991-1b87-4889-b365-25b1fd93d97e"
         ],
-        "workNode": "SeatECU",
+        "workNode": "lin:Motor2",
         "attachTester": "5459ce47-1751-4a82-94a0-9bd33ae289ab",
         "script": "node.ts"
       }
@@ -272,7 +272,8 @@
               "subscribedBy": [
                 "SeatECU"
               ],
-              "singleType": "Scalar"
+              "singleType": "Scalar",
+              "value": 7
             },
             "Motor2_Dynamic_Sig": {
               "signalName": "Motor2_Dynamic_Sig",
@@ -806,8 +807,8 @@
       },
       "network": {
         "pos": {
-          "x": 950,
-          "y": 8,
+          "x": 610,
+          "y": 29,
           "w": 600,
           "h": 400
         },
@@ -819,8 +820,8 @@
       },
       "25cec12a-572d-4221-b85e-2728628134f7_ia": {
         "pos": {
-          "x": 314,
-          "y": 198,
+          "x": 400,
+          "y": 144,
           "w": 700,
           "h": 400
         },
@@ -851,12 +852,12 @@
           },
           "name": "Tester_lin_1"
         },
-        "hide": true
+        "hide": false
       },
       "trace": {
         "pos": {
-          "x": 658,
-          "y": 34,
+          "x": 900,
+          "y": 19,
           "w": 700,
           "h": 400
         },
@@ -867,14 +868,26 @@
       },
       "graph": {
         "pos": {
-          "x": 25,
-          "y": 27,
+          "x": 22,
+          "y": 23,
           "w": 600,
           "h": 400
         },
         "title": "graph",
         "label": "Graph",
         "id": "graph",
+        "options": {}
+      },
+      "tester": {
+        "pos": {
+          "x": 200,
+          "y": 191,
+          "w": 1095,
+          "h": 400
+        },
+        "title": "tester",
+        "label": "UDS Tester",
+        "id": "tester",
         "options": {}
       }
     },

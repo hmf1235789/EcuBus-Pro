@@ -3,19 +3,21 @@
         <el-tabs v-model="activeName" style="width: 600px;">
             <el-tab-pane label="General" name="general">
                 <div style="height: 270px;width: 570px;overflow-y: auto;">
-                    <el-form ref="ruleFormRef" :model="data" label-width="100px" :rules="rules" size="small"
+                    <el-form ref="ruleFormRef" :model="formData" label-width="100px" :rules="rules" size="small"
                         :disabled="globalStart" hide-required-asterisk>
                         <el-form-item label="Node Name" prop="name">
-                            <el-input v-model="data.name" placeholder="Name" />
+                            <el-input v-model="formData.name" placeholder="Name" />
                         </el-form-item>
-                        <el-form-item label="Attach Tester" prop="attachTester">
-                            <el-select v-model="data.attachTester" placeholder="Tester">
-                                <el-option v-for="item in testers" :key="item.id" :label="item.name" :value="item.id">
+                     
+                        <el-form-item label="Net Node" prop="workNode" >
+                            <el-select v-model="formData.workNode" placeholder="Node Name" clearable>
+                                <el-option v-for="item in nodesName" :key="item.value" :label="item.label"
+                                    :value="item.value">
                                 </el-option>
                             </el-select>
                         </el-form-item>
                         <el-form-item label="Node Script File" prop="script">
-                            <el-input v-model="data.script" clearable>
+                            <el-input v-model="formData.script" clearable>
 
                             </el-input>
                             <div class="lr">
@@ -79,7 +81,7 @@
 
                         </el-form-item>
                         <el-form-item label="Node Active" prop="disabled">
-                            <el-switch v-model="data.disabled" disabled active-text="Disabled"
+                            <el-switch v-model="formData.disabled" disabled active-text="Disabled"
                                 inactive-text="Enabled" />
                         </el-form-item>
 
@@ -93,36 +95,19 @@
                     style="text-align: center;padding-top:10px;padding-bottom: 10px;width:570px;height:250px; overflow: auto;">
 
                     <el-transfer class="canit" style="text-align: left; display: inline-block;"
-                        v-model="dataBase.nodes[editIndex].channel" :data="allDeviceLabel"
-                        :titles="['Valid', 'Assigned ']" @leftCheckChange="handleLeftCheckChange" />
+                        v-model="formData.channel" :data="allDeviceLabel"
+                        :titles="['Valid', 'Assigned ']"  />
                 </div>
             </el-tab-pane>
-            <el-tab-pane label="Database" name="Database" v-if="data.type == 'lin'">
-                <div style="height: 270px;width: 570px;overflow-y: auto;">
-                    <el-form :model="data" label-width="100px" size="small" :disabled="globalStart || dbName == undefined">
-                        <el-form-item label="Database" prop="database">
-
-                            <el-select v-model="dbName" placeholder="No Database" disabled>
-                                <el-option v-for="item in db" :key="item.value" :label="`Lin.${item.label}`"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                        <el-form-item label="Net Node" prop="workNode" v-if="dbName">
-                            <el-select v-model="data.workNode" placeholder="Node Name" clearable>
-                                <el-option v-for="item in nodesName" :key="item.value" :label="item.label"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                        <el-alert v-else title="Choose database in connected device" type="info" :closable="false" />
-                    </el-form>
-                </div>
-            </el-tab-pane>
+          
         </el-tabs>
 
-
-
+        <!-- 添加底部按钮区域 -->
+        <div style="float:right;margin-right: 30px;">
+            
+            <el-button size="small" @click="handleCancel" >Cancel</el-button>
+            <el-button size="small" type="primary" @click="handleConfirm" :disabled="globalStart">OK</el-button>
+        </div>
     </div>
 </template>
 <script lang="ts" setup>
@@ -137,21 +122,21 @@ import dangerIcon from '@iconify/icons-material-symbols/dangerous-outline-rounde
 import newIcon from '@iconify/icons-material-symbols/new-window'
 import { Icon } from '@iconify/vue'
 import { useProjectStore } from '@r/stores/project';
-import { ElMessageBox, FormRules, TransferKey } from 'element-plus';
+import { ElMessageBox, FormInstance, FormRules, TransferKey } from 'element-plus';
 import { cloneDeep } from 'lodash';
 import { TesterInfo } from 'nodeCan/tester';
+import { udsCeil } from '../../udsView';
 
 const activeName = ref('general')
 const props = defineProps<{
     editIndex: string
-    type: string
-
+    ceil:udsCeil
 }>()
 const globalStart = toRef(window, 'globalStart')
 const editIndex = toRef(props, 'editIndex')
 const dataBase = useDataStore()
 const buildStatus = ref<string | undefined>()
-const data = toRef(dataBase.nodes, editIndex.value)
+const formData = ref(cloneDeep(dataBase.nodes[editIndex.value]))
 const nameCheck = (rule: any, value: any, callback: any) => {
     if (value) {
         for (const key of Object.keys(dataBase.nodes)) {
@@ -182,23 +167,11 @@ const rules: FormRules = {
         },
     ],
 }
-const testers = computed(
-    () => {
-        const testerList: TesterInfo[] = []
-        for (const key of Object.keys(dataBase.tester)) {
-            if (props.type == dataBase.tester[key].type) {
-                testerList.push(dataBase.tester[key])
-            }
-        }
-        return testerList
-    }
 
-
-)
 const buildLoading = ref(false)
 function editScript(action: 'open' | 'edit' | 'build' | 'refresh') {
     if (action == 'edit' || action == 'build') {
-        if (data.value.script) {
+        if (formData.value.script) {
 
             if (project.projectInfo.path) {
                 if (action == 'edit') {
@@ -213,7 +186,7 @@ function editScript(action: 'open' | 'edit' | 'build' | 'refresh') {
                 } else {
                     buildStatus.value = ''
                     buildLoading.value = true
-                    window.electron.ipcRenderer.invoke('ipc-build-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.getData()), data.value.script)
+                    window.electron.ipcRenderer.invoke('ipc-build-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.getData()), formData.value.script)
                         .then((val) => {
                             if (val.length > 0) {
 
@@ -276,9 +249,9 @@ async function openTs() {
     const file = r.filePaths[0]
     if (file) {
         if (project.projectInfo.path)
-            data.value.script = window.path.relative(project.projectInfo.path, file)
+            formData.value.script = window.path.relative(project.projectInfo.path, file)
         else
-            data.value.script = file
+            formData.value.script = file
     }
     return file
 
@@ -286,42 +259,42 @@ async function openTs() {
 const project = useProjectStore()
 
 function refreshBuildStatus() {
-    if (data.value.script) {
-        window.electron.ipcRenderer.invoke('ipc-get-build-status', project.projectInfo.path, project.projectInfo.name, data.value.script).then((val) => {
+    if (formData.value.script) {
+        window.electron.ipcRenderer.invoke('ipc-get-build-status', project.projectInfo.path, project.projectInfo.name, formData.value.script).then((val) => {
             buildStatus.value = val
         })
     }
 }
 
 
-const db = computed(() => {
-    const list: {
-        label: string,
-        value: string
-    }[] = []
-    if (props.type == 'lin') {
-        for (const key of Object.keys(dataBase.database.lin)) {
+// const db = computed(() => {
+//     const list: {
+//         label: string,
+//         value: string
+//     }[] = []
+//     if (props.type == 'lin') {
+//         for (const key of Object.keys(dataBase.database.lin)) {
 
-            list.push({ label: dataBase.database.lin[key].name, value: key })
+//             list.push({ label: dataBase.database.lin[key].name, value: key })
 
-        }
-    }
-    return list
-})
+//         }
+//     }
+//     return list
+// })
 
-const dbName = ref('')
-const getUsedDb = () => {
-    const device = data.value.channel[0]
-    if (device && dataBase.devices[device] && dataBase.devices[device].type == 'lin' && dataBase.devices[device].linDevice && dataBase.devices[device].linDevice.database) {
-        dbName.value = dataBase.devices[device].linDevice.database
-    } else {
-        dbName.value = ''
-        data.value.workNode = ''
-    }
-}
-watchEffect(() => {
-    getUsedDb()
-})
+// const dbName = ref('')
+// const getUsedDb = () => {
+//     const device = data.value.channel[0]
+//     if (device && dataBase.devices[device] && dataBase.devices[device].type == 'lin' && dataBase.devices[device].linDevice && dataBase.devices[device].linDevice.database) {
+//         dbName.value = dataBase.devices[device].linDevice.database
+//     } else {
+//         dbName.value = ''
+//         data.value.workNode = ''
+//     }
+// }
+// watchEffect(() => {
+//     getUsedDb()
+// })
 
 
 const nodesName = computed(() => {
@@ -329,30 +302,37 @@ const nodesName = computed(() => {
         label: string,
         value: string
     }[] = []
-    if (dbName.value && props.type == 'lin' && data.value.type == 'lin') {
+ 
+    for(const deviceId of formData.value.channel){
+       
+        const device=dataBase.devices[deviceId]
+        if(device.type=='lin'&&device.linDevice){
+            const d=device.linDevice
+            if(d.database){
+                const db = dataBase.database.lin[d.database]
 
-        const device = data.value.channel[0]
+                if (d.mode == 'MASTER') {
+                    list.push({
+                        label: `${db.name}:${db.node.master.nodeName}`,
+                        value: `${db.name}:${db.node.master.nodeName}`
+                    })
 
-        const db = dataBase.database.lin[dbName.value]
-
-        if (dataBase.devices[device].linDevice?.mode == 'MASTER') {
-            list.push({
-                label: `${db.node.master.nodeName} (Master)`,
-                value: db.node.master.nodeName
-            })
-
-        } 
-        for (const n of db.node.salveNode) {
-            list.push({
-                label: `${n} (Slave)`,
-                value: n
-            })
+                } 
+                for (const n of db.node.salveNode) {
+                    list.push({
+                        label: `${db.name}:${n}`,
+                        value: `${db.name}:${n}`
+                    })
+                }
+            }
         }
 
 
     }
     return list
 })
+
+
 
 interface Option {
     key: string
@@ -362,7 +342,7 @@ interface Option {
 const allDeviceLabel = computed(() => {
     const dd: Option[] = []
     for (const d of Object.keys(allDevices.value)) {
-        const deviceDisabled = (data.value.channel.length >= maxDeviceNum.value) && (data.value.channel.indexOf(d) == -1)
+        const deviceDisabled = false
         dd.push({ key: d, label: allDevices.value[d].name, disabled: globalStart.value || (deviceDisabled) })
     }
     return dd
@@ -386,25 +366,48 @@ const allDevices = computed(() => {
 })
 
 
+const ruleFormRef = ref<FormInstance>()
+watch(()=>formData.value.channel,()=>{
+    nextTick(()=>{
+        let found=false
+        for(const node of nodesName.value){
+            if(node.value==formData.value.workNode){
+                found=true
+                break
+            }
+        }
+        if(!found){
+            formData.value.workNode=''
+        }
+    })    
+},{deep:true})
+// 取消修改
+const handleCancel = () => {
+    ElMessageBox.close()
+}
 
+// 确认修改
+const handleConfirm = async () => {
+    if (!ruleFormRef.value) return
+    
+    await ruleFormRef.value.validate((valid, fields) => {
+        if (valid) {
+            // 验证通过，更新数据
+            dataBase.nodes[editIndex.value]=cloneDeep(formData.value)
+          
+            props.ceil.changeName(dataBase.nodes[editIndex.value].name)
+            // const t=props.ceil.getNodeBottomName()
+            props.ceil.changeNameBottom(dataBase.nodes[editIndex.value].workNode||'')
+          
+          
+        
+            ElMessageBox.close()
+        }
+    })
+}
 
+// 监听data变化，更新formData
 
-const maxDeviceNum = computed(() => {
-    if (props.type == 'lin') {
-        return 1
-    }
-    return Infinity
-})
-// const start = toRef(props, 'start')
-// const h = toRef(props, 'height')
-
-
-
-
-
-
-
-// const fh = computed(() => Math.ceil(h.value * 2 / 3) + 'px')
 
 onMounted(() => {
     refreshBuildStatus()

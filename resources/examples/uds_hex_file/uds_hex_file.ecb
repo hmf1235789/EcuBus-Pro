@@ -383,8 +383,8 @@
       },
       "f304259b-dc7d-460b-9729-4eee2d1156de_services": {
         "pos": {
-          "x": 33,
-          "y": 105,
+          "x": 202,
+          "y": 74,
           "w": 1658,
           "h": 404
         },
@@ -400,8 +400,8 @@
       },
       "f304259b-dc7d-460b-9729-4eee2d1156de_sequence": {
         "pos": {
-          "x": 678,
-          "y": 368,
+          "x": 670,
+          "y": 335,
           "w": 1590,
           "h": 400
         },
@@ -417,8 +417,8 @@
       },
       "trace": {
         "pos": {
-          "x": 398,
-          "y": 51,
+          "x": 686,
+          "y": 281,
           "w": 1619,
           "h": 566
         },
@@ -427,22 +427,10 @@
         "id": "trace",
         "options": {}
       },
-      "network": {
-        "pos": {
-          "x": 311,
-          "y": 105,
-          "w": 600,
-          "h": 400
-        },
-        "title": "network",
-        "label": "Network",
-        "id": "network",
-        "options": {}
-      },
       "tester": {
         "pos": {
-          "x": 331,
-          "y": 125,
+          "x": 1181,
+          "y": 119,
           "w": 906,
           "h": 400
         },
@@ -450,7 +438,7 @@
         "label": "UDS Tester",
         "id": "tester",
         "options": {},
-        "hide": true
+        "hide": false
       }
     },
     "example": {

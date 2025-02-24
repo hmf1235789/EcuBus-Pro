@@ -192,67 +192,8 @@ function addChild(parent: Tree) {
     parent.children.push(i)
   }
   //node
-  const n: Tree = {
-    type: 'node',
-    label: 'Node',
-    canAdd: true,
-    children: [],
-    icon: nodeIcon,
-    id: 'node'
-  }
-  if (parent.type == 'can') {
-    for (const key of Object.keys(dataBase.nodes)) {
-      const item = dataBase.nodes[key]
-      if (item.type == 'can') {
-        const cc: Tree = {
-          type: 'node',
-          label: item.name,
-          canAdd: false,
-          children: [],
-          icon: nodeIcon,
-          contextMenu: true,
-          id: key
-        }
-        n.children.push(cc)
-      }
 
-    }
-  } else if (parent.type == 'eth') {
-    for (const key of Object.keys(dataBase.nodes)) {
-      const item = dataBase.nodes[key]
-      if (item.type == 'eth') {
-        const cc: Tree = {
-          type: 'node',
-          label: item.name,
-          canAdd: false,
-          children: [],
-          icon: nodeIcon,
-          contextMenu: true,
-          id: key
-        }
-        n.children.push(cc)
-      }
 
-    }
-  } else if (parent.type == 'lin') {
-    for (const key of Object.keys(dataBase.nodes)) {
-      const item = dataBase.nodes[key]
-      if (item.type == 'lin') {
-        const cc: Tree = {
-          type: 'node',
-          label: item.name,
-          canAdd: false,
-          children: [],
-          icon: nodeIcon,
-          contextMenu: true,
-          id: key
-        }
-        n.children.push(cc)
-      }
-
-    }
-  }
-  parent.children.push(n)
 
 }
 const tData = computed(() => {
@@ -280,10 +221,38 @@ const tData = computed(() => {
     children: [],
     id: 'eth'
   }
+  const node: Tree = {
+    type: 'node',
+    label: 'Node',
+    canAdd: true,
+    icon: nodeIcon,
+    children: [],
+    id: 'node'
+  }
+
+  for (const key of Object.keys(dataBase.nodes)) {
+    const item = dataBase.nodes[key]
+
+    const cc: Tree = {
+      type: 'node',
+      label: item.name,
+      canAdd: false,
+      children: [],
+      icon: nodeIcon,
+      contextMenu: true,
+      id: key
+    }
+    node.children.push(cc)
+
+
+  }
+
+
   addChild(can)
   addChild(lin)
   addChild(eth)
-  return [can, lin, eth]
+  // addChild(node)
+  return [can, lin, eth, node]
 
 })
 
@@ -314,18 +283,18 @@ const loading = ref(true)
 onMounted(() => {
   loading.value = true
   window.jQuery('#networkShift').resizable({
-        handles:'e',
-        containment: '#networkMain',
-        // resize from all edges and corners
-        resize: (e, ui) => {
+    handles: 'e',
+    containment: '#networkMain',
+    // resize from all edges and corners
+    resize: (e, ui) => {
 
-            leftWidth.value = ui.size.width
-           
-        },
-        maxWidth:400,
-        minWidth:200,
-    })
-  
+      leftWidth.value = ui.size.width
+
+    },
+    maxWidth: 400,
+    minWidth: 200,
+  })
+
   paper = new joint.dia.Paper({
     el: document.getElementById('networkGraph'),
     model: udsView.graph,
@@ -428,7 +397,7 @@ onMounted(() => {
             initDone.value = true
             loading.value = false
           })
-         
+
         }
         q()
       })
@@ -644,7 +613,7 @@ function addNode(type: string, parent?: Tree) {
   }
   else if (type == 'node') {
     const id = v4()
-    if (parent?.type == 'can') {
+    {
       const devices: string[] = []
       // for (const key of Object.keys(dataBase.devices)) {
       //   const item = dataBase.devices[key]
@@ -654,7 +623,7 @@ function addNode(type: string, parent?: Tree) {
       // }
       dataBase.nodes[id] = {
         name: `Node ${Object.keys(dataBase.nodes).length + 1}`,
-        type: 'can',
+
         id: id,
         channel: devices, // Add an empty array for devices,
 
@@ -665,47 +634,6 @@ function addNode(type: string, parent?: Tree) {
         udsView.addLink(id, key)
       }
 
-    } else if (parent?.type == 'eth') {
-      const devices: string[] = []
-      for (const key of Object.keys(dataBase.devices)) {
-        const item = dataBase.devices[key]
-        if (item.type == 'eth' && item.ethDevice) {
-          devices.push(key)
-        }
-      }
-      dataBase.nodes[id] = {
-        name: `Node ${Object.keys(dataBase.nodes).length + 1}`,
-        type: 'eth',
-        id: id,
-        channel: devices, // Add an empty array for devices,
-
-      }
-      udsView.addNode(id, dataBase.nodes[id])
-      // add link
-      for (const key of devices) {
-        udsView.addLink(id, key)
-      }
-
-    } else if (parent?.type == 'lin') {
-      const devices: string[] = []
-      // for (const key of Object.keys(dataBase.devices)) {
-      //   const item = dataBase.devices[key]
-      //   if (item.type == 'lin' && item.linDevice) {
-      //     devices.push(key)
-      //   }
-      // }
-      dataBase.nodes[id] = {
-        name: `Node ${Object.keys(dataBase.nodes).length + 1}`,
-        type: 'lin',
-        id: id,
-        channel: devices, // Add an empty array for devices,
-
-      }
-      udsView.addNode(id, dataBase.nodes[id])
-      // add link
-      for (const key of devices) {
-        udsView.addLink(id, key)
-      }
     }
   }
   //fit

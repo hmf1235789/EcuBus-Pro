@@ -342,7 +342,8 @@ declare class Service {
     
     private params;
     private isRequest;
-    constructor(service: ServiceItem, isRequest: boolean);
+    testerName: string;
+    constructor(testerName: string, service: ServiceItem, isRequest: boolean);
     valueOf(): string;
     /**
      * Sync service params to tester sequence, after change, the sequence params will be updated.
@@ -746,14 +747,14 @@ declare class Service {
  * @category UDS
  */
 declare class DiagJob extends Service {
-    constructor(service: ServiceItem);
+    constructor(testerName: string, service: ServiceItem);
     from(jobName: keyof Jobs): DiagJob;
 }
 /**
  * @category UDS
  */
 declare class DiagResponse extends Service {
-    constructor(service: ServiceItem);
+    constructor(testerName: string, service: ServiceItem);
     /**
      * @param {string} serviceName
      *
@@ -822,7 +823,7 @@ declare class DiagResponse extends Service {
  * @category UDS
  */
 declare class DiagRequest extends Service {
-    constructor(service: ServiceItem);
+    constructor(testerName: string, service: ServiceItem);
     /**
      * @param {string} serviceName
      *
