@@ -726,11 +726,11 @@ function buildSubTree(infos: TestEvent[]) {
                 }
 
                 const nonCommentChildren = currentTest!.children.filter((c: any) => c.comment == null);
-                if (nonCommentChildren.length > 0) {
+                // if (nonCommentChildren.length > 0) {
 
-                } else {
+                // } else {
 
-                }
+                // }
                 break;
             }
         }
@@ -791,10 +791,10 @@ async function handleRefresh(data: TestTree) {
                 appendTo: '#wintest'
             })
         }
-    } catch (error) {
-        throw error
-    } finally {
         refreshLoading.value[data.id] = false
+    } catch (error) {
+        refreshLoading.value[data.id] = false
+        throw error
     }
 }
 
