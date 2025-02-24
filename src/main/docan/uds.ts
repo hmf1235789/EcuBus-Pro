@@ -549,7 +549,7 @@ export class UDSTesterMain {
                 const cs = cloneDeep(s)
                 // log.recv(s,rxData.ts, rxData.data)
                 applyBuffer(cs, rxData.data, false)
-                await tester.pool?.triggerRecv(tester.tester.id, cs, tester.lastActiveTs)
+                await tester.pool?.triggerRecv(tester.tester.name, cs, tester.lastActiveTs)
 
                 const rxBuffer = getRxPdu(s)
 
@@ -1097,7 +1097,8 @@ export async function refreshProject(projectPath: string, projectName: string, d
 
 export async function compileTsc(projectPath: string, projectName: string, data: DataSet, entry: string, esbuildPath: string, libPath: string, vendor = 'YT') {
 
-  await createProject(projectPath, projectName, data)
+  await createProject(projectPath, projectName, data, vendor)
+  await refreshProject(projectPath, projectName, data, vendor)
   if (entry) {
     let script = entry
     if (path.isAbsolute(script) === false) {

@@ -129,7 +129,7 @@ export class NodeClass {
                           if (item) {
                             try {
                               applyBuffer(item, data.data, false)
-                              this.pool?.triggerRecv(tester.id, item, data.ts).catch(e => {
+                              this.pool?.triggerRecv(tester.name, item, data.ts).catch(e => {
 
                                 this.log?.scriptMsg(e.toString(), data.ts, 'error');
                               })
@@ -185,7 +185,7 @@ export class NodeClass {
                           if (item) {
                             try {
                               applyBuffer(item, data.data, false)
-                              this.pool?.triggerRecv(tester.id, item, data.ts).catch(e => {
+                              this.pool?.triggerRecv(tester.name, item, data.ts).catch(e => {
 
                                 this.log?.scriptMsg(e.toString(), data.ts, 'error');
                               })
@@ -244,7 +244,7 @@ export class NodeClass {
                           if (item) {
                             try {
                               applyBuffer(item, data.data, false)
-                              this.pool?.triggerRecv(tester.id, item, data.ts).catch(e => {
+                              this.pool?.triggerRecv(tester.name, item, data.ts).catch(e => {
 
                                 this.log?.scriptMsg(e.toString(), data.ts, 'error');
                               })

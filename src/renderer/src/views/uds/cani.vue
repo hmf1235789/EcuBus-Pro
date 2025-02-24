@@ -212,7 +212,7 @@
                 <span class="key-text">{{ pressedKey }}</span>
             </div>
         </Transition>
-        <el-dialog v-model="selectFrameVisible" title="Select Frame from Database" :append-to="`#win${editIndex}_ia`"
+        <el-dialog v-if="selectFrameVisible" v-model="selectFrameVisible" title="Select Frame from Database" :append-to="`#win${editIndex}_ia`"
             width="600" align-center>
             <Signal :height="h * 2 / 3" :width="480" protocol-filter="can" selectable-level="frame"
                 :speical-db="speicalDb" @add-frame="handleFrameSelect" />

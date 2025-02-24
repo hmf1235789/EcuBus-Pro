@@ -1,5 +1,5 @@
 <template>
-    <el-container class="homeCtr">
+    <el-container class="homeCtr" v-loading="loading">
         <!-- <el-button link type="primary" class="returnButton"> <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 2048 2048"><rect width="2048" height="2048" fill="none"/><path fill="currentColor" d="M960 0Q827 0 705 34t-230 96t-194 150t-150 195t-97 229T0 960q0 133 34 255t96 230t150 194t195 150t229 97t256 34q133 0 255-34t230-96t194-150t150-195t97-229t34-256q0-133-34-255t-96-230t-150-194t-195-150t-229-97T960 0m0 1792q-115 0-221-30t-198-84t-169-130t-130-168t-84-199t-30-221q0-115 30-221t84-198t130-169t168-130t199-84t221-30q115 0 221 30t198 84t169 130t130 168t84 199t30 221q0 115-30 221t-84 198t-130 169t-168 130t-199 84t-221 30m233-896H512v128h681l-278 274l90 92l434-430l-434-430l-90 92z"/></svg></el-button> -->
         <el-tabs tab-position="left" v-model="activeMenu" class="main" @tab-change="mainTabChange" lazy>
             <el-tab-pane name="return" v-if="project.open">
@@ -416,14 +416,17 @@ const versions = ref([
     }
 
 ])
-
+const loading = ref(false)
 const router = useRouter()
 function mainTabChange(tab: string) {
     if (tab == 'open') {
         nextTick(() => {
             activeMenu.value = lastActiveMenu
         })
-        project.openProject()
+        loading.value = true
+        project.openProject().finally(() => {
+            loading.value = false
+        })
     } else if (tab == 'return') {
         nextTick(() => {
             activeMenu.value = lastActiveMenu
