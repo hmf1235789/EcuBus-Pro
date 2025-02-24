@@ -944,22 +944,22 @@ declare class UtilClass {
      */
     OffKey(key: string, fc: (key: string) => void | Promise<void>): void;
     /**
-   * Subscribe to an event once, invoking the registered function when the event is emitted.
-   * @param eventName
-   * Service name, formatted as \<tester name\>.\<service name\>.\<send|recv\>
-   *
-   * @param listener
-   * Function to be called when the event is emitted
-   *
-   * @example
-   *
-   * ```ts
-   * Util.OnOnce('Can.testService.send', async (req) => {
-   *    // The req is a `DiagRequest`
-   *    console.log(req.getServiceName(), ': send once');
-   * });
-   * ```
-   */
+     * Subscribe to an event once, invoking the registered function when the event is emitted.
+     * @param eventName
+     * Service name, formatted as \<tester name\>.\<service name\>.\<send|recv\>
+     *
+     * @param listener
+     * Function to be called when the event is emitted
+     *
+     * @example
+     *
+     * ```ts
+     * Util.OnOnce('Can.testService.send', async (req) => {
+     *    // The req is a `DiagRequest`
+     *    console.log(req.getServiceName(), ': send once');
+     * });
+     * ```
+     */
     OnOnce<Name extends keyof EventMap>(eventName: Name, listener: (eventData: EventMap[Name]) => void | Promise<void>): void;
     /**
      * Subscribe to an event, invoking the registered function when the event is emitted.
