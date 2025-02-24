@@ -70,7 +70,10 @@
         "id": "8e639030-23ea-45f1-a906-82c4bb4fb192",
         "name": "Test Config 01",
         "script": "test.ts",
-        "reportPath": "./report"
+        "reportPath": "./report",
+        "channel": [
+          "SIMULATE_0"
+        ]
       }
     }
   },
@@ -117,8 +120,8 @@
       },
       "test": {
         "pos": {
-          "x": 961.5,
-          "y": 26,
+          "x": 769.5,
+          "y": 32,
           "w": 600,
           "h": 400
         },

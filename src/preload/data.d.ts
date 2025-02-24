@@ -66,7 +66,7 @@ export type TestConfig = {
   id: string
   name: string
   script: string
-  attachTester?: string
+  channel: string[]
   reportPath?: string
 }
 export interface DataSet {

@@ -188,7 +188,7 @@
         <el-form
           ref="ruleFormRef"
           :model="model"
-          label-width="100px"
+          label-width="120px"
           size="small"
           :rules="rules"
           hide-required-asterisk
@@ -217,6 +217,17 @@
               </div>
             </div>
           </el-form-item>
+          <el-form-item label="Connect Devices" prop="devices">
+            <el-select v-model="model.channel" multiple placeholder="Select" style="width: 100%">
+              <el-option
+                v-for="item in devices"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+
           <el-divider content-position="left"> Report </el-divider>
           <el-form-item label="Report Path" prop="reportPath">
             <el-input v-model="model.reportPath" clearable>
@@ -334,7 +345,8 @@ const model = ref<TestConfig>({
   id: v4(),
   name: 'Test Config',
   script: '',
-  reportPath: ''
+  reportPath: '',
+  channel: []
 })
 
 function handleRun(data: TestTree) {
@@ -404,6 +416,31 @@ function buildTree() {
   tData.value = [t]
 }
 
+const devices = computed(() => {
+  const list: {
+    label: string
+    value: string
+  }[] = []
+  for (const item of Object.values(dataBase.devices)) {
+    if (item.type == 'can') {
+      list.push({
+        label: item.canDevice?.name || '',
+        value: item.canDevice?.name || ''
+      })
+    } else if (item.type == 'lin') {
+      list.push({
+        label: item.linDevice?.name || '',
+        value: item.linDevice?.name || ''
+      })
+    } else if (item.type == 'eth') {
+      list.push({
+        label: item.ethDevice?.name || '',
+        value: item.ethDevice?.name || ''
+      })
+    }
+  }
+  return list
+})
 function generateUniqueName(baseName: string): string {
   let index = 0
   let name = `${baseName} ${index}`
@@ -423,7 +460,8 @@ function addNewConfig() {
     id: v4(),
     name: defaultName,
     script: '',
-    reportPath: ''
+    reportPath: '',
+    channel: []
   }
 
   dataBase.tests[newConfig.id] = newConfig

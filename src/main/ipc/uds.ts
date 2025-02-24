@@ -119,7 +119,7 @@ ipcMain.handle('ipc-get-test-info', async (event, ...arg) => {
   return testInfo
 })
 
-const testMap = new Map<string, UdsTester>()
+const testMap = new Map<string, NodeClass>()
 ipcMain.handle('ipc-run-test', async (event, ...arg) => {
   const projectPath = arg[0] as string
   const projectName = arg[1] as string
@@ -127,38 +127,44 @@ ipcMain.handle('ipc-run-test', async (event, ...arg) => {
   const testers = arg[3] as Record<string, TesterInfo>
   const last = testMap.get(test.id)
   if (last) {
-    last.stop()
+    last.close()
     testMap.delete(test.id)
   }
-  const log = new UdsLOG(test.name)
-  const jsPath = getJsPath(test.script, projectPath)
-  const worker = new UdsTester(
-    {
-      PROJECT_ROOT: projectPath,
-      PROJECT_NAME: projectName,
-      MODE: 'test',
-      NAME: test.name
-    },
-    jsPath,
-    log,
+  const nodeItem: NodeItem = {
+    id: test.id,
+    name: test.name,
+    channel: test.channel,
+    script: test.script
+  }
+  const node = new NodeClass(
+    nodeItem,
+    canBaseMap,
+    linBaseMap,
+    doips,
+    ethBaseMap,
+    projectPath,
+    projectName,
     testers,
-    { id: test.id }
+    {
+      id: test.id
+    }
   )
-  await worker.start(projectPath)
-  testMap.set(test.id, worker)
+
+  await node.start()
+  testMap.set(test.id, node)
   try {
-    await worker.getTestInfo()
+    await node.getTestInfo()
   } catch (err: any) {
     null
   }
-  worker.stop()
+  node.close()
 })
 
 ipcMain.handle('ipc-stop-test', async (event, ...arg) => {
   const testId = arg[0] as string
   const worker = testMap.get(testId)
   if (worker) {
-    worker.stop()
+    worker.close()
     testMap.delete(testId)
   }
 })
@@ -234,7 +240,7 @@ async function globalStart(
 ) {
   let activeKey = ''
   testMap.forEach((value) => {
-    value.stop()
+    value.close()
   })
   testMap.clear()
   try {
