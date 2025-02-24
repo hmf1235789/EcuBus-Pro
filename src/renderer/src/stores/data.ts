@@ -17,7 +17,8 @@ export const useDataStore = defineStore('useDataStore', {
       lin: {},
       can: {}
     },
-    graphs: {}
+    graphs:{},
+    tests:{}
   }),
   actions: {
     globalRun(type: 'start' | 'stop') {
@@ -55,13 +56,14 @@ export const useDataStore = defineStore('useDataStore', {
     },
     getData() {
       return {
-        devices: this.devices,
-        ia: this.ia,
-        tester: this.tester,
-        subFunction: this.subFunction,
-        nodes: this.nodes,
-        database: this.database,
-        graphs: this.graphs
+        devices:this.devices,
+        ia:this.ia,
+        tester:this.tester,
+        subFunction:this.subFunction,
+        nodes:this.nodes,
+        database:this.database,
+        graphs:this.graphs,
+        tests:this.tests
       }
     }
   }

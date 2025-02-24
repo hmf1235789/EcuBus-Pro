@@ -62,15 +62,23 @@ export type GraphNode<T> = {
   type: 'signal' | 'variable' | 'frame'
   bindValue: T
 }
+export type TestConfig={
+    id:string,
+    name:string,
+    script:string,
+    attachTester?:string
+    reportPath?:string
+}
 export interface DataSet {
-  devices: Record<string, UdsDevice>
-  tester: Record<string, TesterInfo>
-  subFunction: Record<string, { name: string; subFunction: string }[]>
-  nodes: Record<string, NodeItem>
-  ia: Record<string, Inter>
-  database: {
-    lin: Record<string, LDF>
-    can: Record<string, DBC>
-  }
-  graphs: Record<string, GraphNode>
+    devices: Record<string, UdsDevice>
+    tester: Record<string, TesterInfo>
+    subFunction: Record<string, { name: string; subFunction: string }[]>
+    nodes: Record<string, NodeItem>
+    ia: Record<string, Inter>
+    database:{
+        lin:Record<string,LDF>
+        can:Record<string,DBC>
+    },
+    graphs: Record<string, GraphNode>
+    tests:Record<string,TestConfig>
 }

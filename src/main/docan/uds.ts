@@ -102,6 +102,7 @@ import { LIN_TP, LIN_TP_SOCKET } from '../dolin/lintp'
 import { LinMode } from '../share/lin'
 import { LDF } from 'src/renderer/src/database/ldfParse'
 import { DataSet, NodeItem } from 'src/preload/data'
+import { getJsPath } from '../util'
 const NRCMsg: Record<number, string> = {
   0x10: 'General Reject',
   0x11: 'Service Not Supported',
@@ -123,8 +124,8 @@ const NRCMsg: Record<number, string> = {
   0x72: 'General Programming Failure',
   0x73: 'Wrong Block Sequence Counter',
   0x78: 'Request Correctly Received-Response Pending',
-  0x7e: 'Subfunction Not Supported In Active Session',
-  0x7f: 'Service Not Supported In Active Session',
+  0x7E: 'Subfunction Not Supported In Active Session',
+  0x7F: 'Service Not Supported In Active Session',
   0x81: 'Rpm Too High',
   0x82: 'Rpm Too Low',
   0x83: 'Engine Is Running',
@@ -134,16 +135,17 @@ const NRCMsg: Record<number, string> = {
   0x87: 'Temperature Too Low',
   0x88: 'Vehicle Speed Too High',
   0x89: 'Vehicle Speed Too Low',
-  0x8a: 'Throttle/Pedal Position Too High',
-  0x8b: 'Throttle/Pedal Position Too Low',
-  0x8c: 'Transmission Range Not In Neutral',
-  0x8d: 'Transmission Range Not In Gear',
-  0x8f: 'Brake Switch(es) Not Closed',
+  0x8A: 'Throttle/Pedal Position Too High',
+  0x8B: 'Throttle/Pedal Position Too Low',
+  0x8C: 'Transmission Range Not In Neutral',
+  0x8D: 'Transmission Range Not In Gear',
+  0x8F: 'Brake Switch(es) Not Closed',
   0x90: 'Shifter Lever Not In Park',
   0x91: 'Torque Converter Clutch Locked',
   0x92: 'Voltage Too High',
-  0x93: 'Voltage Too Low'
+  0x93: 'Voltage Too Low',
 }
+
 
 const exec = util.promisify(execCb)
 // const spawn = util.promisify(spwn)
@@ -212,11 +214,7 @@ export class UDSTesterMain {
   runningDoip?: DOIP
   runningLinBase?: LinBase
   services: Record<string, ServiceItem> = {}
-  constructor(
-    project: ProjectConfig,
-    tester: TesterInfo,
-    private device: UdsDevice
-  ) {
+  constructor(project: ProjectConfig, tester: TesterInfo, private device: UdsDevice) {
     this.project = project
     this.tester = cloneDeep(tester)
     for (const s of Object.values(this.tester.allServiceList)) {
@@ -229,6 +227,7 @@ export class UDSTesterMain {
   pool?: UdsTester
 
   cancel() {
+
     this.ac.abort()
   }
   private async delay(ms: number): Promise<void> {
@@ -264,6 +263,7 @@ export class UDSTesterMain {
     if (targetDevice) {
       const log = new UdsLOG(`${this.tester.name} Seq#${seqIndex}`)
       if (this.tester.script) {
+
         let scriptPath
         if (path.isAbsolute(this.tester.script) === false) {
           scriptPath = path.join(this.project.projectPath, this.tester.script)
@@ -274,23 +274,16 @@ export class UDSTesterMain {
           throw new Error('script file should be a typescript file')
         }
 
-        const outDir = path.join(this.project.projectPath, '.ScriptBuild')
 
-        //change ts to outdir/*js
-        const scriptNameNoExt = path.basename(scriptPath, '.ts')
-        const jsPath = path.join(outDir, scriptNameNoExt + '.js')
+     
+        const jsPath = getJsPath(scriptPath,this.project.projectPath)
 
-        this.pool = new UdsTester(
-          {
-            PROJECT_ROOT: this.project.projectPath,
-            PROJECT_NAME: this.project.projectName,
-            MODE: 'sequence',
-            NAME: this.tester.name
-          },
-          jsPath,
-          log,
-          { [this.tester.id]: this.tester }
-        )
+        this.pool = new UdsTester({
+          PROJECT_ROOT: this.project.projectPath,
+          PROJECT_NAME: this.project.projectName,
+          MODE: 'sequence',
+          NAME: this.tester.name,
+        }, jsPath, log, {[this.tester.id]:this.tester})
         this.pool?.updateTs(0)
         try {
           await this.pool.start(this.project.projectPath)
@@ -306,6 +299,7 @@ export class UDSTesterMain {
       }
 
       if (targetDevice.type == 'can' && targetDevice.canDevice) {
+
         try {
           if (this.runningCanBase) {
             await this.runCanSequenceWithBase(this.runningCanBase, seqIndex, log, cycleCount)
@@ -323,6 +317,7 @@ export class UDSTesterMain {
           }
         }
       } else if (targetDevice.type == 'eth' && targetDevice.ethDevice) {
+
         try {
           if (this.runningDoip) {
             await this.runEthSequenceWithBase(this.runningDoip, seqIndex, log, cycleCount)
@@ -340,6 +335,7 @@ export class UDSTesterMain {
           }
         }
       } else if (targetDevice.type == 'lin' && targetDevice.linDevice) {
+
         try {
           if (this.runningLinBase) {
             await this.runLinSequenceWithBase(this.runningLinBase, seqIndex, log, cycleCount)
@@ -362,85 +358,58 @@ export class UDSTesterMain {
       throw new Error('target device not found')
     }
   }
-  private async runCanSequenceWithBase(
-    base: CanBase,
-    seqIndex: number,
-    log: UdsLOG,
-    cycleCount: number
-  ) {
+  private async runCanSequenceWithBase(base: CanBase, seqIndex: number, log: UdsLOG, cycleCount: number) {
     const tp = new CAN_TP(base)
-    await this.runCanTp(
-      {
-        createSocket: async (addr: UdsAddress) => {
-          if (addr.canAddr == undefined) {
-            throw new Error('address not found')
-          }
-          return new CAN_TP_SOCKET(tp, addr.canAddr)
-        },
-        close: (base: boolean) => {
-          tp.close(base)
+    await this.runCanTp({
+      createSocket: async (addr: UdsAddress) => {
+        if (addr.canAddr == undefined) {
+          throw new Error('address not found')
         }
+        return new CAN_TP_SOCKET(tp, addr.canAddr)
       },
-      seqIndex,
-      log,
-      cycleCount
-    ).finally(() => {
+      close: (base: boolean) => {
+
+        tp.close(base)
+
+      }
+    }, seqIndex, log, cycleCount).finally(() => {
       tp.close(this.closeBase)
     })
   }
-  private async runEthSequenceWithBase(
-    base: DOIP,
-    seqIndex: number,
-    log: UdsLOG,
-    cycleCount: number
-  ) {
-    await this.runCanTp(
-      {
-        createSocket: async (addr: UdsAddress) => {
-          if (addr.ethAddr == undefined) {
-            throw new Error('address not found')
-          }
-          if (this.ac.signal.aborted) {
-            throw new Error('aborted')
-          }
-          return await DOIP_SOCKET.create(base, addr.ethAddr, 'client')
-        },
-        close: (base: boolean) => {
-          null
-        }
-      },
-      seqIndex,
-      log,
-      cycleCount
-    )
-  }
-  private async runLinSequenceWithBase(
-    base: LinBase,
-    seqIndex: number,
-    log: UdsLOG,
-    cycleCount: number
-  ) {
-    const tp = new LIN_TP(base)
-    await this.runCanTp(
-      {
-        createSocket: async (addr: UdsAddress) => {
-          if (addr.linAddr == undefined) {
-            throw new Error('address not found')
-          }
-          if (this.ac.signal.aborted) {
-            throw new Error('aborted')
-          }
+  private async runEthSequenceWithBase(base: DOIP, seqIndex: number, log: UdsLOG, cycleCount: number) {
 
-          return new LIN_TP_SOCKET(tp, addr.linAddr, LinMode.MASTER)
-        },
-        close: (base: boolean) => {
-          tp.close(base)
+    await this.runCanTp({
+      createSocket: async (addr: UdsAddress) => {
+        if (addr.ethAddr == undefined) {
+          throw new Error('address not found')
         }
+        if (this.ac.signal.aborted) {
+          throw new Error('aborted')
+        }
+        return await DOIP_SOCKET.create(base, addr.ethAddr, 'client')
       },
-      seqIndex,
-      log,
-      cycleCount
-    )
+      close: (base: boolean) => {
+        null
+      }
+    }, seqIndex, log, cycleCount)
+  }
+  private async runLinSequenceWithBase(base: LinBase, seqIndex: number, log: UdsLOG, cycleCount: number) {
+    const tp = new LIN_TP(base)
+    await this.runCanTp({
+      createSocket: async (addr: UdsAddress) => {
+        if (addr.linAddr == undefined) {
+          throw new Error('address not found')
+        }
+        if (this.ac.signal.aborted) {
+          throw new Error('aborted')
+        }
+
+        return new LIN_TP_SOCKET(tp, addr.linAddr, LinMode.MASTER)
+      },
+      close: (base: boolean) => {
+        tp.close(base)
+      }
+    }, seqIndex, log, cycleCount)
   }
   // private async runCanSequence(device: CanBaseInfo, seqIndex: number, log: UdsLOG, cycleCount: number) {
   //   if (device.vendor == 'peak') {
@@ -490,19 +459,16 @@ export class UDSTesterMain {
     obj['ProName'] = this.project.projectName
     return obj
   }
-  private async runCanTp(
-    canTp: {
-      createSocket: (addr: UdsAddress) => Promise<{
-        write: (data: Buffer) => Promise<number>
-        read: (timeout: number) => Promise<{ ts: number; data: Buffer }>
-        close: () => void
-      }>
-      close: (base: boolean) => void
-    },
-    seqIndex: number,
-    log: UdsLOG,
-    cycleCount: number
-  ) {
+  private async runCanTp(canTp: {
+    createSocket: (addr: UdsAddress) => Promise<{
+      write: (data: Buffer) => Promise<number>
+      read: (timeout: number) => Promise<{ ts: number, data: Buffer }>
+      close: () => void
+    }>
+    close: (base: boolean) => void
+
+  }, seqIndex: number, log: UdsLOG, cycleCount: number) {
+
     const values = this.buildObj()
     const targetSeq = this.tester.seqList[seqIndex]
     for (let i = 0; i < cycleCount; i++) {
@@ -528,6 +494,7 @@ export class UDSTesterMain {
           canTp.close(this.closeBase)
         }
         if (service.enable && addrItem && targetService) {
+
           const serviceRun = async function (tester: UDSTesterMain, s: ServiceItem) {
             if (tester.ac.signal.aborted) {
               throw new Error('aborted')
@@ -546,6 +513,7 @@ export class UDSTesterMain {
 
             // log.sent(s, sentTs)
             await tester.pool?.triggerSend(tester.tester.name, s, tester.lastActiveTs)
+
 
             const hasSub = serviceDetail[s.serviceId].hasSubFunction
             if (hasSub) {
@@ -570,7 +538,7 @@ export class UDSTesterMain {
                   throw new Error('aborted')
                 }
                 rxData = await socket.read(tester.tester.udsTime.pTime).catch((e) => {
-                  tester.lastActiveTs += getTsUs() - curUs
+                  tester.lastActiveTs += (getTsUs() - curUs)
                   throw e
                 })
 
@@ -583,15 +551,14 @@ export class UDSTesterMain {
 
                 const rxBuffer = getRxPdu(s)
 
+
                 if (rxData.data.length == 0) {
                   throw new Error('rxBuffer length is 0')
                 }
                 if (rxData.data[0] == 0x7f) {
                   if (rxData.data.length >= 3) {
                     if (rxData.data[1] != Number(s.serviceId)) {
-                      throw new Error(
-                        `negative response with wrong service id, expect ${s.serviceId}, got ${rxData.data[1]}`
-                      )
+                      throw new Error(`negative response with wrong service id, expect ${s.serviceId}, got ${rxData.data[1]}`)
                     }
                     if (rxData.data[2] == 0x78) {
                       timeout = tester.tester.udsTime.pExtTime
@@ -604,17 +571,12 @@ export class UDSTesterMain {
                       throw new Error(`negative response: NRC:${rxData.data[2].toString(16)}`)
                     }
                   } else {
-                    throw new Error(
-                      `negative response, received length ${rxData.data.length} is invalid`
-                    )
+                    throw new Error(`negative response, received length ${rxData.data.length} is invalid`)
                   }
                 }
                 //compare
                 const minLen = Math.min(rxBuffer.length, rxData.data.length)
-                const ret = Buffer.compare(
-                  rxBuffer.subarray(0, minLen),
-                  rxData.data.subarray(0, minLen)
-                )
+                const ret = Buffer.compare(rxBuffer.subarray(0, minLen), rxData.data.subarray(0, minLen))
 
                 if (ret != 0) {
                   if (service.checkResp) {
@@ -628,39 +590,24 @@ export class UDSTesterMain {
                 socket.close()
                 break
               } catch (e: any) {
+
+
                 service.retryNum--
                 if (service.retryNum < 0) {
                   if (service.failBehavior == 'stop') {
                     socket.close()
                     throw e
                   } else {
-                    log.warning(
-                      tester.tester.id,
-                      s,
-                      targetSeq,
-                      seqIndex,
-                      serviceIndex,
-                      tester.lastActiveTs,
-                      rxData?.data,
-                      `Failed and continue: ${e.message}`
-                    )
+                    log.warning(tester.tester.id, s, targetSeq, seqIndex, serviceIndex, tester.lastActiveTs, rxData?.data, `Failed and continue: ${e.message}`)
                     socket.close()
                     return true
                   }
                 } else {
-                  log.warning(
-                    tester.tester.id,
-                    s,
-                    targetSeq,
-                    seqIndex,
-                    serviceIndex,
-                    tester.lastActiveTs,
-                    rxData?.data,
-                    `Failed and retry #${service.retryNum}: ${e.message}`
-                  )
+                  log.warning(tester.tester.id, s, targetSeq, seqIndex, serviceIndex, tester.lastActiveTs, rxData?.data, `Failed and retry #${service.retryNum}: ${e.message}`)
                   socket.close()
                   return false
                 }
+
               }
 
               // eslint-disable-next-line no-constant-condition
@@ -691,13 +638,14 @@ export class UDSTesterMain {
 
               if (services) {
                 let percent = 0
-                const step = 100 / services.length
+                const step = (100 / services.length)
                 for (const ser of services) {
                   await baseRun(tester, ser)
 
                   percent += step
                   log.udsIndex(tester.tester.id, serviceIndex, ser.name, 'progress', percent)
                 }
+
               }
               log.udsIndex(tester.tester.id, serviceIndex, s.name, 'finished')
             } else {
@@ -708,8 +656,10 @@ export class UDSTesterMain {
             if (s.serviceId === 'Job') {
               await jobRun(tester, s)
             } else {
+
               // eslint-disable-next-line no-constant-condition
               while (true) {
+
                 const r = await serviceRun(tester, s)
 
                 if (r) {
@@ -717,23 +667,24 @@ export class UDSTesterMain {
                 }
                 await tester.delay(service.delay)
               }
+
+
             }
             await tester.delay(service.delay)
           }
           log.udsIndex(this.tester.id, serviceIndex, targetService.name, 'start')
           await baseRun(this, targetService)
           log.udsIndex(this.tester.id, serviceIndex, targetService.name, 'finished')
+         
+         
         }
       }
     }
   }
 }
 
-export function findService(
-  tester: TesterInfo,
-  data: Buffer,
-  isReq: boolean
-): ServiceItem | undefined {
+
+export function findService(tester: TesterInfo, data: Buffer, isReq: boolean): ServiceItem | undefined {
   let sid = data[0]
   let isNeg = false
   if (!isReq) {
@@ -770,6 +721,8 @@ export function findService(
       for (const item of tester.allServiceList[serviceId]) {
         const b = isReq ? getTxPdu(item) : getRxPdu(item)
 
+
+
         if (Buffer.compare(data.subarray(0, matchLen + 1), b.subarray(0, matchLen + 1)) == 0) {
           return item
         }
@@ -777,21 +730,20 @@ export function findService(
     }
   }
   if (SupportServiceId.includes(serviceId)) {
+
     if (isReq) {
       return {
         id: v4(),
         name: serviceId,
         serviceId: serviceId,
-        params: [
-          {
-            id: v4(),
-            name: 'param0',
-            type: 'ARRAY',
-            value: data,
-            phyValue: data,
-            bitLen: data.length * 8
-          }
-        ],
+        params: [{
+          id: v4(),
+          name: 'param0',
+          type: 'ARRAY',
+          value: data,
+          phyValue: data,
+          bitLen: data.length * 8
+        }],
         respParams: []
       }
     } else {
@@ -800,20 +752,20 @@ export function findService(
         name: serviceId,
         serviceId: serviceId,
         params: [],
-        respParams: [
-          {
-            id: v4(),
-            name: 'param0',
-            type: 'ARRAY',
-            value: data,
-            phyValue: data,
-            bitLen: data.length * 8
-          }
-        ]
+        respParams: [{
+          id: v4(),
+          name: 'param0',
+          type: 'ARRAY',
+          value: data,
+          phyValue: data,
+          bitLen: data.length * 8
+        }]
       }
+
     }
   }
   return undefined
+
 }
 
 const preDefineTypes: Record<string, string> = {
@@ -870,7 +822,7 @@ const preDefineTypes: Record<string, string> = {
   'node_modules/@types/node/stream/consumers.d.ts': streamSubStr1,
   'node_modules/@types/node/stream/promises.d.ts': streamSubStr2,
   'node_modules/@types/node/stream/web.d.ts': streamSubStr3,
-  'node_modules/@types/node/timers/promises.d.ts': timerSubStr
+  'node_modules/@types/node/timers/promises.d.ts': timerSubStr,
 }
 
 // export function getAllTypes(tester: TesterInfo, vendor = 'YT') {
@@ -895,12 +847,12 @@ const preDefineTypes: Record<string, string> = {
 //   return allTypes
 // }
 
+
 export async function getBuildStatus(projectPath: string, projectName: string, script: string) {
   if (path.isAbsolute(script) === false) {
     script = path.join(projectPath, script)
   }
-  const outputDir = path.join(projectPath, '.ScriptBuild')
-  const outFile = path.join(outputDir, path.basename(script, '.ts') + '.js')
+  const outFile = getJsPath(script, projectPath)
   if (fs.existsSync(outFile) === false) {
     //never build
     return 'info'
@@ -911,7 +863,7 @@ export async function getBuildStatus(projectPath: string, projectName: string, s
     //need rebuild
     return 'warning'
   }
-  //compare time
+  //compare time 
   //no need rebuild
   return 'success'
 }
@@ -927,13 +879,13 @@ export async function deleteNode(projectPath: string, projectName: string, node:
       if (path.isAbsolute(node.script) === false) {
         const index = (tsconfig.files as string[]).indexOf(node.script)
         if (index != -1) {
-          ;(tsconfig.files as string[]).splice(index, 1)
+          (tsconfig.files as string[]).splice(index, 1)
         }
       } else {
-        const relativePath = path.relative(projectPath, node.script)
+        const relativePath = path.relative(projectPath, node.script);
         const index = (tsconfig.files as string[]).indexOf(relativePath)
         if (index != -1) {
-          ;(tsconfig.files as string[]).splice(index, 1)
+          (tsconfig.files as string[]).splice(index, 1)
         }
       }
     }
@@ -951,25 +903,20 @@ export async function deleteTester(projectPath: string, projectName: string, nod
       if (path.isAbsolute(node.script) === false) {
         const index = (tsconfig.files as string[]).indexOf(node.script)
         if (index != -1) {
-          ;(tsconfig.files as string[]).splice(index, 1)
+          (tsconfig.files as string[]).splice(index, 1)
         }
       } else {
-        const relativePath = path.relative(projectPath, node.script)
+        const relativePath = path.relative(projectPath, node.script);
         const index = (tsconfig.files as string[]).indexOf(relativePath)
         if (index != -1) {
-          ;(tsconfig.files as string[]).splice(index, 1)
+          (tsconfig.files as string[]).splice(index, 1)
         }
       }
     }
     await fsP.writeFile(tsconfigFile, JSON.stringify(tsconfig, null, 4))
   }
 }
-export async function createProject(
-  projectPath: string,
-  projectName: string,
-  data: DataSet,
-  vendor = 'YT'
-) {
+export async function createProject(projectPath: string, projectName: string, data: DataSet, vendor = 'YT') {
   //create node_modules
   const nodeModulesPath = path.join(projectPath, 'node_modules')
   if (!fs.existsSync(nodeModulesPath)) {
@@ -1016,7 +963,7 @@ export async function createProject(
     }
     //preDefineTypes
     for (const [p, c] of Object.entries(preDefineTypes)) {
-      await fsP.writeFile(path.join(projectPath, p), c, 'utf-8')
+      await fsP.writeFile(path.join(projectPath, p), c, 'utf-8',)
     }
   }
   //create vendor
@@ -1025,9 +972,7 @@ export async function createProject(
     await fsP.mkdir(vendorPath)
   }
   // await fsP.mkdir(vendorPath)
-  await fsP.writeFile(
-    path.join(vendorPath, 'index.d.ts'),
-    `
+  await fsP.writeFile(path.join(vendorPath, 'index.d.ts'), `
     export as namespace ${vendor};
 import { UtilClass} from './uds'
 declare global {
@@ -1037,8 +982,7 @@ export * from './uds'
 export * from './crc'
 export * from './cryptoExt'
 export * from './utli'
-    `
-  )
+    `)
   await fsP.writeFile(path.join(vendorPath, 'uds.d.ts'), updateUdsDts(data))
   await fsP.writeFile(path.join(vendorPath, 'crc.d.ts'), crcStr)
   await fsP.writeFile(path.join(vendorPath, 'cryptoExt.d.ts'), cryptoExtStr)
@@ -1046,43 +990,58 @@ export * from './utli'
   //create tsconfig.json
   const tsconfigFile = path.join(projectPath, 'tsconfig.json')
   if (!fs.existsSync(tsconfigFile)) {
-    ;(tsconfig as any).files = []
+    (tsconfig as any).files = []
     for (const tester of Object.values(data.tester)) {
       if (tester.script) {
         if (path.isAbsolute(tester.script) === false) {
-          ;((tsconfig as any).files as string[]).push(tester.script)
+          ((tsconfig as any).files as string[]).push(tester.script)
         } else {
-          const relativePath = path.relative(projectPath, tester.script)
-          ;((tsconfig as any).files as string[]).push(relativePath)
+          const relativePath = path.relative(projectPath, tester.script);
+          ((tsconfig as any).files as string[]).push(relativePath)
         }
+
       }
     }
     for (const node of Object.values(data.nodes)) {
       if (node.script) {
         if (path.isAbsolute(node.script) === false) {
-          ;((tsconfig as any).files as string[]).push(node.script)
+          ((tsconfig as any).files as string[]).push(node.script)
         } else {
-          const relativePath = path.relative(projectPath, node.script)
-          ;((tsconfig as any).files as string[]).push(relativePath)
+          const relativePath = path.relative(projectPath, node.script);
+          ((tsconfig as any).files as string[]).push(relativePath)
+        }
+      }
+    }
+    for(const test of Object.values(data.tests)){
+      if(test.script){
+        if(path.isAbsolute(test.script)===false){
+          ((tsconfig as any).files as string[]).push(test.script)
+        }else{
+          const relativePath = path.relative(projectPath, test.script);
+          ((tsconfig as any).files as string[]).push(relativePath)
         }
       }
     }
     await fsP.writeFile(tsconfigFile, JSON.stringify(tsconfig, null, 4))
   } else {
+
     const contnet = await fsP.readFile(tsconfigFile, 'utf-8')
     const tsconfig = json5.parse(contnet)
     tsconfig.files = tsconfig.files || []
     for (const tester of Object.values(data.tester)) {
       if (tester.script) {
+
         if (path.isAbsolute(tester.script) === false) {
           if ((tsconfig.files as string[]).indexOf(tester.script) == -1) {
-            ;(tsconfig.files as string[]).push(tester.script)
+
+            (tsconfig.files as string[]).push(tester.script)
           }
         } else {
-          const relativePath = path.relative(projectPath, tester.script)
+          const relativePath = path.relative(projectPath, tester.script);
           if ((tsconfig.files as string[]).indexOf(relativePath) == -1) {
-            ;(tsconfig.files as string[]).push(relativePath)
+            (tsconfig.files as string[]).push(relativePath)
           }
+
         }
       }
     }
@@ -1090,12 +1049,28 @@ export * from './utli'
       if (node.script) {
         if (path.isAbsolute(node.script) === false) {
           if ((tsconfig.files as string[]).indexOf(node.script) == -1) {
-            ;(tsconfig.files as string[]).push(node.script)
+
+            (tsconfig.files as string[]).push(node.script)
           }
         } else {
-          const relativePath = path.relative(projectPath, node.script)
+          const relativePath = path.relative(projectPath, node.script);
           if ((tsconfig.files as string[]).indexOf(relativePath) == -1) {
-            ;(tsconfig.files as string[]).push(relativePath)
+            (tsconfig.files as string[]).push(relativePath)
+          }
+
+        }
+      }
+    }
+    for(const test of Object.values(data.tests)){
+      if(test.script){
+        if(path.isAbsolute(test.script)===false){
+          if ((tsconfig.files as string[]).indexOf(test.script) == -1) {
+            (tsconfig.files as string[]).push(test.script)
+          }
+        } else {
+          const relativePath = path.relative(projectPath, test.script);
+          if ((tsconfig.files as string[]).indexOf(relativePath) == -1) {
+            (tsconfig.files as string[]).push(relativePath)
           }
         }
       }
@@ -1104,32 +1079,24 @@ export * from './utli'
   }
   //code-workspace
   if (!fs.existsSync(path.join(projectPath, projectName + '.code-workspace'))) {
-    await fsP.writeFile(
-      path.join(projectPath, projectName + '.code-workspace'),
-      JSON.stringify(
+    await fsP.writeFile(path.join(projectPath, projectName + '.code-workspace'), JSON.stringify({
+      folders: [
         {
-          folders: [
-            {
-              path: '.'
-            }
-          ],
-          extensions: {
-            recommendations: ['ms-vscode.vscode-typescript-next']
-          }
-        },
-        null,
-        4
-      )
-    )
+          path: '.'
+        }
+      ],
+      "extensions": {
+        "recommendations": [
+          "ms-vscode.vscode-typescript-next"
+        ]
+      }
+    }, null, 4))
   }
+
+
 }
 
-export async function refreshProject(
-  projectPath: string,
-  projectName: string,
-  data: DataSet,
-  vendor = 'YT'
-) {
+export async function refreshProject(projectPath: string, projectName: string, data: DataSet, vendor = 'YT') {
   //create node_modules
   const nodeModulesPath = path.join(projectPath, 'node_modules')
   if (!fs.existsSync(nodeModulesPath)) {
@@ -1149,43 +1116,31 @@ export async function refreshProject(
   await fsP.writeFile(path.join(vendorPath, 'uds.d.ts'), updateUdsDts(data))
 }
 
-export async function compileTsc(
-  projectPath: string,
-  projectName: string,
-  data: DataSet,
-  entry: string,
-  esbuildPath: string,
-  libPath: string,
-  vendor = 'YT'
-) {
-  await createProject(projectPath, projectName, data, vendor)
-  await refreshProject(projectPath, projectName, data, vendor)
+export async function compileTsc(projectPath: string, projectName: string, data: DataSet, entry: string, esbuildPath: string, libPath: string, isTest: boolean) {
+
+  await createProject(projectPath, projectName, data, 'ECB')
+  await refreshProject(projectPath, projectName, data, 'ECB')
   if (entry) {
     let script = entry
     if (path.isAbsolute(script) === false) {
       script = path.join(projectPath, script)
     }
     if (fs.existsSync(script) === false) {
-      return [
-        {
-          code: -1,
-          message: 'script file not exist',
-          file: entry,
-          start: 0,
-          line: 0
-        }
-      ]
+      return [{
+        code: -1, message: 'script file not exist', file: entry, start: 0, line: 0
+      }]
     }
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const tt = require('ts-morph')
     const project = new tt.Project({
-      tsConfigFilePath: path.join(projectPath, 'tsconfig.json')
-    })
+      tsConfigFilePath: path.join(projectPath, 'tsconfig.json'),
+    });
     // await project.emit()
     //get errors
     const diagnostics = project.getPreEmitDiagnostics()
     const errors = []
     for (const item of diagnostics) {
+
       let relativePath = ''
       const file = item.getSourceFile()?.getFilePath()
       if (file) {
@@ -1199,13 +1154,17 @@ export async function compileTsc(
         msgStr = msg.getMessageText()
       }
 
-      errors.push({
-        code: item.getCode(),
-        message: msgStr,
-        file: relativePath,
-        start: item.getStart(),
-        line: item.getLineNumber()
-      })
+
+      errors.push(
+        {
+          code: item.getCode(),
+          message: msgStr,
+          file: relativePath,
+          start: item.getStart(),
+          line: item.getLineNumber()
+        }
+      )
+
     }
     if (errors.length > 0) {
       return errors
@@ -1215,36 +1174,47 @@ export async function compileTsc(
 
     const outputDir = path.join(projectPath, '.ScriptBuild')
 
+
     try {
-      await compileTscEntry(script, outputDir, esbuildPath, libPath, vendor)
+
+      await compileTscEntry(script, outputDir, esbuildPath, libPath, isTest)
     } catch (e: any) {
       return [{ code: -1, message: e.message, file: entry, start: 0, line: 0 }]
     }
   }
   return []
+
 }
+
 
 async function compileTscEntry(
   entry: string,
   outputDir: string,
   esbuildPath: string,
   libPath: string,
-  vendor = 'YT'
+  isTest: boolean,
+
 ) {
-  //delete last build
+  //delete last build 
   const latBuildFile = path.join(outputDir, path.basename(entry).replace('.ts', '.js'))
   await fsP.rm(latBuildFile, { force: true, recursive: true })
-  const v = await exec(esbuildPath, [
-    entry,
+  const cmaArray = [entry,
     '--sourcemap',
     '--bundle',
     '--platform=node',
     '--format=cjs',
-    `--alias:${vendor}=${libPath}`,
+    `--alias:ECB=${libPath}`,
     `--alias:@serialport/bindings-cpp=${libPath}/bindings-cpp`,
     `--outdir=${outputDir}`,
-    `--inject:${path.join(libPath, 'uds.js')}`
-  ])
+    `--inject:${path.join(libPath, 'uds.js')}`,
+  ]
+  if (isTest) {
+    cmaArray.push(`--footer:js=const { test: ____ecubus_pro_test___} = require('node:test');____ecubus_pro_test___('____ecubus_pro_test___',()=>{})`)
+  }
+  const v = await exec(
+    esbuildPath,
+    cmaArray,
+  )
   if (v.stderr) {
     if (!v.stderr.includes('Done')) {
       throw new Error(v.stderr)
@@ -1266,46 +1236,48 @@ async function compileTscEntry(
     }
   }
 
+
+
   //modify the output file time equal to the input file
   const stats = await fsP.stat(entry)
   await fsP.utimes(latBuildFile, stats.atime, stats.mtime)
   return
 }
-async function generateFileTree(
-  projectPath: string,
-  dirPath: string
-): Promise<{ content: string; path: string }[]> {
-  const stats = await fsP.stat(dirPath)
+async function generateFileTree(projectPath: string, dirPath: string): Promise<{ content: string, path: string }[]> {
+  const stats = await fsP.stat(dirPath);
   if (!stats.isDirectory()) {
     return []
   }
 
-  const list: { content: string; path: string }[] = []
-  const entries = await fsP.readdir(dirPath)
+  const list: { content: string, path: string }[] = [];
+  const entries = await fsP.readdir(dirPath);
 
   for (const entry of entries) {
-    const fullPath = path.join(dirPath, entry)
-    const entryStats = await fsP.stat(fullPath)
+    const fullPath = path.join(dirPath, entry);
+    const entryStats = await fsP.stat(fullPath);
 
     if (entryStats.isDirectory()) {
       //exclude node_modules
 
       const v = await generateFileTree(projectPath, fullPath)
       list.push(...v)
+
     } else if (entryStats.isFile() && entry.endsWith('.d.ts')) {
       //path start from node_modules
-      const relativePath = path.relative(projectPath, fullPath).replace(/\\/g, '/')
-      list.push({ content: await fsP.readFile(fullPath, 'utf-8'), path: relativePath })
+      const relativePath = path.relative(projectPath, fullPath).replace(/\\/g, '/');
+      list.push({ content: await fsP.readFile(fullPath, 'utf-8'), path: relativePath });
     }
+
   }
 
-  return list
+  return list;
 }
+
 
 export async function compilePackage(projectPath: string) {
   const packagePath = path.join(projectPath, 'package.json')
   const nodeModulesPath = path.join(projectPath, 'node_modules')
-  const list: { content: string; path: string }[] = []
+  const list: { content: string, path: string }[] = []
   if (fs.existsSync(packagePath) && fs.existsSync(nodeModulesPath)) {
     const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf-8'))
     const dependencies = packageJson.dependencies

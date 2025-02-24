@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="demo-tabs" :class="{ tablePin: pined }">
-      <el-tabs v-model="activeMenu" type="border-card">
+    <div class="demo-tabs" :class="{ 'tablePin': pined }">
+      <el-tabs type="border-card" v-model="activeMenu">
         <!-- <el-tab-pane name="_home">
           <template #label>
             <img :src="logo" style="width: 35px;padding-left:5px;padding-right:5px; -webkit-app-region: drag" />
@@ -11,48 +11,38 @@
         <el-tab-pane name="home">
           <template #label>
             <span class="lr">
-              <Icon :icon="homeIcon" style="font-size: 16px" />
+              <Icon :icon="homeIcon" style="font-size: 16px; " />
               <span>Home</span>
             </span>
           </template>
-          <div style="display: flex; gap: 5px; padding: 15px">
-            <div
-              class="grid mingird"
-              :class="{
-                girdenable: !globalStart,
-                girddisable: globalStart
-              }"
-              style="color: var(--el-color-success)"
-              @click="dataBase.globalRun('start')"
-            >
-              <Icon :icon="lightIcon" style="font-size: 32px" />
+          <div style="display:flex;gap:5px;padding:15px;">
+            <div class="grid mingird" @click="dataBase.globalRun('start')" :class="{
+              girdenable: !globalStart,
+              girddisable: globalStart
+            }" style="color:var(--el-color-success)">
+              <Icon :icon="lightIcon" style="font-size: 32px;" />
               <span>Start</span>
             </div>
-            <div
-              class="grid mingird"
-              :class="{
-                girdenable: globalStart,
-                girddisable: !globalStart
-              }"
-              style="color: var(--el-color-danger)"
-              @click="dataBase.globalRun('stop')"
-            >
-              <Icon :icon="stopIcon" style="font-size: 32px" />
+            <div class="grid mingird" @click="dataBase.globalRun('stop')" :class="{
+              girdenable: globalStart,
+              girddisable: !globalStart
+            }" style="color:var(--el-color-danger)">
+              <Icon :icon="stopIcon" style="font-size: 32px;" />
               <span>Stop</span>
             </div>
-            <el-divider direction="vertical" style="height: 54px" />
+            <el-divider direction="vertical" style="height: 54px;" />
             <div class="grid girdenable" @click="handleSelect(['trace'])">
-              <Icon :icon="logIcon" style="font-size: 24px" />
+              <Icon :icon="logIcon" style="font-size: 24px; " />
               <span>Trace</span>
             </div>
-            <el-divider direction="vertical" style="height: 54px" />
+            <el-divider direction="vertical" style="height: 54px;" />
             <div class="grid girdenable" @click="handleSelect(['graph'])">
-              <Icon :icon="graphIcon" style="font-size: 24px" />
+              <Icon :icon="graphIcon" style="font-size: 24px; " />
               <span>Graph</span>
             </div>
-            <el-divider direction="vertical" style="height: 54px" />
+            <el-divider direction="vertical" style="height: 54px;" />
             <div class="grid girdenable" @click="handleSelect(['message'])">
-              <Icon :icon="msgIcon" style="font-size: 24px" />
+              <Icon :icon="msgIcon" style="font-size: 24px; " />
               <span>Message</span>
             </div>
           </div>
@@ -60,21 +50,22 @@
         <el-tab-pane name="hardware">
           <template #label>
             <span class="lr">
-              <Icon :icon="hardware" style="font-size: 16px" />
+              <Icon :icon="hardware" style="font-size: 16px; " />
               <span>Hardware</span>
             </span>
           </template>
-          <div style="display: flex; gap: 5px; padding: 15px">
+          <div style="display:flex;gap:5px;padding:15px">
+
             <div class="grid girdenable" @click="handleSelect(['hardware'])">
-              <Icon :icon="deviceIcon" style="font-size: 24px" />
+              <Icon :icon="deviceIcon" style="font-size: 24px; " />
               <span>Devices</span>
             </div>
             <div class="grid girdenable" @click="handleSelect(['network'])">
-              <Icon :icon="networkNode" style="font-size: 24px" />
+              <Icon :icon="networkNode" style="font-size: 24px; " />
               <span>Network</span>
             </div>
             <div class="grid girdenable">
-              <Icon :icon="interIcon" style="font-size: 24px" />
+              <Icon :icon="interIcon" style="font-size: 24px; " />
               <el-dropdown @command="openIA">
                 <span class="lr">
                   Interact
@@ -84,32 +75,33 @@
                 </span>
                 <template #dropdown>
                   <el-dropdown-menu size="small">
-                    <el-dropdown-item v-for="(item, key) in dataBase.ia" :key="key" :command="key"
-                      >{{ item.name }}
+                    <el-dropdown-item v-for="item, key in dataBase.ia" :command="key" :key="key">{{ item.name }}
                     </el-dropdown-item>
-                    <el-dropdown-item v-if="Object.keys(dataBase.ia).length == 0" disabled
-                      >No Interaction</el-dropdown-item
-                    >
+                    <el-dropdown-item disabled v-if="Object.keys(dataBase.ia).length == 0">No
+                      Interaction</el-dropdown-item>
+
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
+
             </div>
+
           </div>
         </el-tab-pane>
         <el-tab-pane name="diag">
           <template #label>
             <span class="lr">
-              <Icon :icon="diagIcon" style="font-size: 16px" />
+              <Icon :icon="diagIcon" style="font-size: 16px; " />
               <span>Diagnostics</span>
             </span>
           </template>
-          <div style="display: flex; gap: 5px; padding: 15px">
+          <div style="display:flex;gap:5px;padding:15px">
             <div class="grid girdenable" @click="handleSelect(['tester'])">
-              <Icon :icon="textFields" style="font-size: 24px" />
+              <Icon :icon="textFields" style="font-size: 24px; " />
               <span>UDS Tester</span>
             </div>
             <div class="grid girdenable">
-              <Icon :icon="diagServiceIcon" style="font-size: 24px" />
+              <Icon :icon="diagServiceIcon" style="font-size: 24px; " />
               <el-dropdown @command="openService">
                 <span class="lr">
                   Services
@@ -119,21 +111,18 @@
                 </span>
                 <template #dropdown>
                   <el-dropdown-menu size="small">
-                    <el-dropdown-item
-                      v-for="(item, key) in dataBase.tester"
-                      :key="key"
-                      :command="key"
-                      >{{ item.name }}
+                    <el-dropdown-item v-for="item, key in dataBase.tester" :command="key" :key="key">{{ item.name }}
                     </el-dropdown-item>
-                    <el-dropdown-item v-if="Object.keys(dataBase.tester).length == 0" disabled
-                      >No Tester</el-dropdown-item
-                    >
+                    <el-dropdown-item disabled v-if="Object.keys(dataBase.tester).length == 0">No
+                      Tester</el-dropdown-item>
+
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
+
             </div>
             <div class="grid girdenable">
-              <Icon :icon="stepIcon" style="font-size: 24px" />
+              <Icon :icon="stepIcon" style="font-size: 24px; " />
               <el-dropdown @command="openSequence">
                 <span class="lr">
                   Sequence
@@ -143,19 +132,54 @@
                 </span>
                 <template #dropdown>
                   <el-dropdown-menu size="small">
-                    <el-dropdown-item
-                      v-for="(item, key) in dataBase.tester"
-                      :key="key"
-                      :command="key"
-                      >{{ item.name }}
+                    <el-dropdown-item v-for="item, key in dataBase.tester" :command="key" :key="key">{{ item.name }}
                     </el-dropdown-item>
-                    <el-dropdown-item v-if="Object.keys(dataBase.tester).length == 0" disabled
-                      >No Tester</el-dropdown-item
-                    >
+                    <el-dropdown-item disabled v-if="Object.keys(dataBase.tester).length == 0">No
+                      Tester</el-dropdown-item>
+
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
+
             </div>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane name="test">
+          <template #label>
+            <span class="lr">
+              <Icon :icon="testConfig" style="font-size: 16px; " />
+              <span>Test</span>
+            </span>
+          </template>
+          <div style="display:flex;gap:5px;padding:15px">
+            <div class="grid girdenable" @click="handleSelect(['test'])">
+              <Icon :icon="testConfig" style="font-size: 18px;height: 24px; " />
+              <span>Test Setup</span>
+            </div>
+            <!-- <div class="grid girdenable">
+              <Icon :icon="testConfigIcon" style="font-size: 18px;height: 24px; " />
+              <el-dropdown @command="openDatabase">
+                <span class="lr">
+                  Test Config
+                  <el-icon class="el-icon--right">
+                    <arrow-down />
+                  </el-icon>
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu size="small">
+                  
+                    <el-dropdown-item divider v-for="item, index in dataBase.tests" :command="item.id" :key="item.id"
+                     >
+                      <Icon :icon="testConfigIcon" style="margin-right: 5px;" />{{ item.name }}
+
+                    </el-dropdown-item>
+                    <el-dropdown-item :icon="testConfigIcon" v-if="Object.keys(dataBase.tests).length == 0" disabled>No Test Config</el-dropdown-item>
+
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div> -->
+
           </div>
         </el-tab-pane>
         <!-- <el-tab-pane label="">
@@ -176,13 +200,13 @@
         <el-tab-pane name="other">
           <template #label>
             <span class="lr">
-              <Icon :icon="userIcon" style="font-size: 16px" />
+              <Icon :icon="userIcon" style="font-size: 16px; " />
               <span>Others</span>
             </span>
           </template>
-          <div style="display: flex; gap: 5px; padding: 15px">
+          <div style="display:flex;gap:5px;padding:15px">
             <div class="grid girdenable">
-              <Icon :icon="dataBaseIcon" style="font-size: 24px" />
+              <Icon :icon="dataBaseIcon" style="font-size: 24px; " />
               <el-dropdown @command="openDatabase">
                 <span class="lr">
                   Database
@@ -194,18 +218,16 @@
                   <el-dropdown-menu size="small">
                     <!-- <el-dropdown-item v-for="item, key in dataBase.database" :command="key" :key="key">{{ item.name }}
                       </el-dropdown-item> -->
-                    <el-dropdown-item icon="Plus" command="addLin">Add Lin (LDF) </el-dropdown-item>
-                    <el-dropdown-item icon="Plus" command="addCan">Add CAN (DBC) </el-dropdown-item>
-                    <el-dropdown-item
-                      v-for="(item, index) in dataBaseList"
-                      :key="item.url"
-                      divider
-                      :command="item.url"
-                      :disabled="item.disabled"
-                      :divided="index == 0"
-                    >
-                      <Icon :icon="dataBaseIcon" style="margin-right: 5px" />{{ item.url }}
+                    <el-dropdown-item icon="Plus" command="addLin">Add Lin (LDF)
                     </el-dropdown-item>
+                    <el-dropdown-item icon="Plus" command="addCan">Add CAN (DBC)
+                    </el-dropdown-item>
+                    <el-dropdown-item divider v-for="item, index in dataBaseList" :command="item.url" :key="item.url"
+                      :disabled="item.disabled" :divided="index == 0">
+                      <Icon :icon="dataBaseIcon" style="margin-right: 5px;" />{{ item.url }}
+
+                    </el-dropdown-item>
+
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
@@ -215,51 +237,31 @@
               <span>Edit Script</span>
             </div> -->
             <div class="grid girdenable" @click="openApi()">
-              <Icon :icon="apiIcon" style="font-size: 24px" />
+
+              <Icon :icon="apiIcon" style="font-size: 24px; " />
               <span>Script Api</span>
             </div>
+
           </div>
+
         </el-tab-pane>
       </el-tabs>
-      <el-button
-        v-if="activeMenu"
-        style="position: absolute; top: 135px; right: 5px"
-        type="info"
-        link
-        @click="pined = !pined"
-      >
-        <svg
-          v-if="!pined"
-          xmlns="http://www.w3.org/2000/svg"
-          width="1em"
-          height="1em"
-          viewBox="0 0 24 24"
-        >
-          <path
-            fill="none"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="1.5"
-            d="m3 21l5-5m5.259 2.871c-3.744-.85-7.28-4.386-8.13-8.13c-.135-.592-.202-.888-.007-1.369c.194-.48.433-.63.909-.927c1.076-.672 2.242-.886 3.451-.78c1.697.151 2.546.226 2.97.005c.423-.22.71-.736 1.286-1.767l.728-1.307c.48-.86.72-1.291 1.285-1.494s.905-.08 1.585.166a5.63 5.63 0 0 1 3.396 3.396c.246.68.369 1.02.166 1.585c-.203.564-.633.804-1.494 1.285l-1.337.745c-1.03.574-1.544.862-1.765 1.289c-.22.428-.14 1.258.02 2.918c.118 1.22-.085 2.394-.766 3.484c-.298.476-.447.714-.928.909c-.48.194-.777.127-1.37-.008"
-          />
+      <el-button style="position:absolute;top:135px;right:5px" v-if="activeMenu" type="info" link
+        @click="pined = !pined">
+        <svg xmlns="http://www.w3.org/2000/svg" v-if="!pined" width="1em" height="1em" viewBox="0 0 24 24">
+          <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="m3 21l5-5m5.259 2.871c-3.744-.85-7.28-4.386-8.13-8.13c-.135-.592-.202-.888-.007-1.369c.194-.48.433-.63.909-.927c1.076-.672 2.242-.886 3.451-.78c1.697.151 2.546.226 2.97.005c.423-.22.71-.736 1.286-1.767l.728-1.307c.48-.86.72-1.291 1.285-1.494s.905-.08 1.585.166a5.63 5.63 0 0 1 3.396 3.396c.246.68.369 1.02.166 1.585c-.203.564-.633.804-1.494 1.285l-1.337.745c-1.03.574-1.544.862-1.765 1.289c-.22.428-.14 1.258.02 2.918c.118 1.22-.085 2.394-.766 3.484c-.298.476-.447.714-.928.909c-.48.194-.777.127-1.37-.008" />
         </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
-          <path
-            fill="none"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="1.5"
+        <svg xmlns="http://www.w3.org/2000/svg" v-else width="1em" height="1em" viewBox="0 0 24 24">
+          <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
             d="M7.5 8c-.541.128-1 .142-1.507.459c-.92.575-1.142 1.258-.905 2.302c.852 3.753 4.398 7.299 8.15 8.15c1.045.238 1.728.017 2.304-.903c.3-.48.33-1 .458-1.508m-4-8.7a1.3 1.3 0 0 0 .43-.118c.97-.505 1.5-2.148 2.02-3.082c.481-.863.722-1.294 1.288-1.498s.907-.08 1.588.166a5.64 5.64 0 0 1 3.406 3.406c.246.681.37 1.022.166 1.588s-.635.807-1.498 1.288c-.94.524-2.605 1.06-3.11 2.04a1.2 1.2 0 0 0-.113.41M3 21l5-5M3 3l18 18"
-            color="currentColor"
-          />
+            color="currentColor" />
         </svg>
         <!-- <Icon :class="{
           xpin: pined
         }" :icon="pinIcon" /> -->
       </el-button>
-      <div v-if="maxWinId" style="width: 75px; position: absolute; top: 50px; right: 2px">
+      <div style="width: 75px;position:absolute;top:50px;right:2px" v-if="maxWinId">
         <span class="menu-right" @click="layoutMaster.minWin(maxWinId)">
           <Icon :icon="checkIndeterminateSmall" />
         </span>
@@ -273,19 +275,18 @@
         </span>
       </div>
     </div>
-    <div v-if="!maxWinId && hideLayout.length > 0" class="windows">
+    <div class="windows" v-if="!maxWinId && hideLayout.length > 0">
       <div v-for="item in hideLayout" :key="item.id" class="littleWin">
-        <Icon
-          v-if="layoutMaster.validLayout[item.title].icon"
-          :icon="layoutMaster.validLayout[item.title].icon || ''"
-          style="margin-right: 5px; font-size: 14px"
-        />
-        <el-text style="width: 60px" truncated>
-          {{ firstByteUpper(item.title)
-          }}<span v-if="item.options.name != undefined"
-            >-{{ `${item.options.name ? item.options.name : 'Untitled'}` }}</span
-          >
+        <Icon v-if="layoutMaster.validLayout[item.title].icon" :icon="layoutMaster.validLayout[item.title].icon || ''"
+          style="margin-right: 5px; font-size: 14px" />
+        <el-text style="width: 60px;" truncated>
+          {{
+            firstByteUpper(item.title)
+          }}<span v-if="item.options.name != undefined">-{{ `${item.options.name ? item.options.name :
+            'Untitled'}`
+            }}</span>
         </el-text>
+
 
         <span class="menu-right" @click="layoutMaster.showWin(item.id)">
           <Icon :icon="resizeIcon" />
@@ -294,74 +295,59 @@
         <span class="menu-right" @click="layoutMaster.removeWin(item.id)">
           <Icon :icon="closeIcon" />
         </span>
+
+
       </div>
     </div>
     <div class="content">
-      <div v-if="layoutMaster.left1.value" class="left1"></div>
-      <div v-if="layoutMaster.left2.value" class="left2"></div>
-      <div v-if="layoutMaster.left.value" class="left"></div>
-      <div v-if="layoutMaster.right.value" class="right"></div>
-      <div v-if="layoutMaster.right1.value" class="right1"></div>
-      <div v-if="layoutMaster.right2.value" class="right2"></div>
-      <div
-        v-for="item in project.project.wins"
-        :key="item.id"
-        style="position: absolute; padding: 1px"
-      >
-        <div
-          v-show="!item.hide"
-          v-if="layoutMaster.getLayoutType(item.id) == undefined"
-          :id="`win${item.id}`"
-          class="uds-window"
-          :style="{
+
+      <div class="left1" v-if="layoutMaster.left1.value"></div>
+      <div class="left2" v-if="layoutMaster.left2.value"></div>
+      <div class="left" v-if="layoutMaster.left.value"></div>
+      <div class="right" v-if="layoutMaster.right.value"></div>
+      <div class="right1" v-if="layoutMaster.right1.value"></div>
+      <div class="right2" v-if="layoutMaster.right2.value"></div>
+      <div v-for="item in project.project.wins" :key="item.id" style="position: absolute; padding: 1px">
+
+        <div v-show="!item.hide" v-if="layoutMaster.getLayoutType(item.id) == undefined" :id="`win${item.id}`"
+          class="uds-window" :style="{
             transform: 'translate(0px, 0px)',
             top: `${item.pos.y}px`,
             left: `${item.pos.x}px`,
             width: `${item.pos.w}px`,
-            height: `${item.pos.h}px`
-          }"
-        >
-          <div
-            class="titleBar"
-            :style="{
-              width: `${item.pos.w - 2}px`,
-              height: '25px',
-              borderRadius: '3px 3px 0px 0px',
-              backgroundColor:
-                layoutMaster.activeWin.value == item.id
-                  ? 'var(--el-color-primary-light-5)'
-                  : 'var(--el-color-info-light-7)',
-              borderTop: 'solid 1px var(--el-color-info-light-5)',
-              borderRight: 'solid 1px var(--el-color-info-light-5)',
-              borderLeft: 'solid 1px var(--el-color-info-light-5)'
-            }"
-            @dblclick="layoutMaster.maxWin(item.id)"
-          >
-            <div
-              class="uds-draggable"
-              :style="{
-                height: '19px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginTop: '3px',
-                width: `${item.pos.w - 2}px`
-              }"
-            >
+            height: `${item.pos.h}px`,
+          }">
+          <div class="titleBar" :style="{
+            width: `${item.pos.w - 2}px`,
+            height: '25px',
+            borderRadius: '3px 3px 0px 0px',
+            backgroundColor:
+              layoutMaster.activeWin.value == item.id
+                ? 'var(--el-color-primary-light-5)'
+                : 'var(--el-color-info-light-7)',
+            borderTop: 'solid 1px var(--el-color-info-light-5)',
+            borderRight: 'solid 1px var(--el-color-info-light-5)',
+            borderLeft: 'solid 1px var(--el-color-info-light-5)'
+          }" @dblclick="layoutMaster.maxWin(item.id)">
+            <div class="uds-draggable" :style="{
+              height: '19px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginTop: '3px',
+              width: `${item.pos.w - 2}px`
+            }">
               <span class="title" :style="{ width: `${item.pos.w - 85}px` }">
-                <Icon
-                  v-if="layoutMaster.validLayout[item.title].icon"
-                  :icon="layoutMaster.validLayout[item.title].icon || ''"
-                  style="margin-right: 5px; font-size: 14px"
-                />
-                <span style="display: inline-flex; align-items: center"
-                  >{{ item.label
-                  }}<span v-if="item.options.name != undefined"
-                    >-{{ `${item.options.name ? item.options.name : 'Untitled'}` }}</span
-                  >
-                  <span v-if="modify[item.id]" style="margin-left: 2px; font-weight: bolder"
-                    >*</span
-                  >
+                <Icon v-if="layoutMaster.validLayout[item.title].icon"
+                  :icon="layoutMaster.validLayout[item.title].icon || ''" style="margin-right: 5px; font-size: 14px" />
+                <span style="display: inline-flex; align-items: center;">{{
+                  item.label
+                }}<span v-if="item.options.name != undefined">-{{ `${item.options.name ? item.options.name :
+                    'Untitled'}`
+                    }}</span>
+                  <span v-if="modify[item.id]" style="margin-left: 2px;font-weight: bolder">*</span>
+
                 </span>
+
               </span>
               <div style="width: 75px" class="uds-no-drag">
                 <span class="menu-right" @click="layoutMaster.minWin(item.id)">
@@ -379,118 +365,91 @@
             </div>
           </div>
           <!-- <KeepAlive> -->
-          <div
-            class="uds-no-drag window"
-            style="overflow: auto"
-            :style="{
-              height: item.pos.h - 28 + 'px',
-              backgroundColor: 'white'
-            }"
-          >
-            <component
-              :is="layoutMaster.validLayout[item.title].component"
-              :id="item.id"
-              :ref="
-                (r) => {
-                  layoutMaster.winRef[item.id] = r
-                }
-              "
-              :width="item.pos.w - 6"
-              :height="item.pos.h - 30"
-              v-bind="layoutMaster.data.project.wins[item.id].options.params"
-            />
+          <div class="uds-no-drag window" style="overflow: auto" :style="{
+
+            height: item.pos.h - 28 + 'px',
+            backgroundColor: 'white'
+          }">
+            <component :ref="(r) => {
+              layoutMaster.winRef[item.id] = r
+            }
+              " :is="layoutMaster.validLayout[item.title].component" :width="item.pos.w - 6" :height="item.pos.h - 30"
+              :id="item.id" v-bind="layoutMaster.data.project.wins[item.id].options.params" />
           </div>
           <!-- </KeepAlive> -->
         </div>
 
+
         <!-- <span class="remove" @click="removeItem(item.i)">x</span> -->
       </div>
+
     </div>
     <div class="footer">
       <div v-for="item in project.project.wins" :key="item.id">
         <div v-if="item.layoutType == 'bottom'" :id="`win${item.id}`">
-          <div
-            class="titleBar"
-            :style="{
-              width: `${contentW}px`,
-              height: '25px',
-              borderRadius: '3px 3px 0px 0px',
-              backgroundColor: 'var(--el-color-primary-light-9)',
-              borderTop: 'solid 1px var(--el-color-primary-light-7)',
-              borderRight: 'solid 1px var(--el-color-primary-light-9)',
-              borderLeft: 'solid 1px var(--el-color-primary-light-9)'
-            }"
-          >
-            <div
-              :style="{
-                height: '19px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginTop: '3px',
-                width: `${contentW}px`
-              }"
-            >
+          <div class="titleBar" :style="{
+            width: `${contentW}px`,
+            height: '25px',
+            borderRadius: '3px 3px 0px 0px',
+            backgroundColor:
+
+              'var(--el-color-primary-light-9)'
+            ,
+            borderTop: 'solid 1px var(--el-color-primary-light-7)',
+            borderRight: 'solid 1px var(--el-color-primary-light-9)',
+            borderLeft: 'solid 1px var(--el-color-primary-light-9)'
+          }">
+            <div :style="{
+              height: '19px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginTop: '3px',
+              width: `${contentW}px`
+            }">
               <span class="title" :style="{ width: `${contentW - 85}px` }">
-                <Icon
-                  v-if="layoutMaster.validLayout[item.title].icon"
-                  :icon="layoutMaster.validLayout[item.title].icon || ''"
-                  style="margin-right: 5px; font-size: 14px"
-                />
-                <span style="display: inline-flex; align-items: center"
-                  >{{ firstByteUpper(item.title)
-                  }}<span v-if="item.options.name != undefined"
-                    >-{{ `${item.options.name ? item.options.name : 'Untitled'}` }}</span
-                  >
-                  <span v-if="modify[item.id]" style="margin-left: 2px; font-weight: bolder"
-                    >*</span
-                  >
+                <Icon v-if="layoutMaster.validLayout[item.title].icon"
+                  :icon="layoutMaster.validLayout[item.title].icon || ''" style="margin-right: 5px; font-size: 14px" />
+                <span style="display: inline-flex; align-items: center;">{{
+                  firstByteUpper(item.title)
+                }}<span v-if="item.options.name != undefined">-{{ `${item.options.name ? item.options.name :
+                    'Untitled'}`
+                    }}</span>
+                  <span v-if="modify[item.id]" style="margin-left: 2px;font-weight: bolder">*</span>
+
                 </span>
+
               </span>
               <div style="width: 25px" class="uds-no-drag">
+
                 <span class="menu-right" @click="layoutMaster.removeWin(item.id)">
                   <Icon :icon="closeIcon" />
                 </span>
               </div>
             </div>
           </div>
-          <div
-            style="overflow: auto"
-            :style="{
-              height: item.pos.h - 26 + 'px',
-              backgroundColor: 'white'
-            }"
-          >
-            <component
-              :is="layoutMaster.validLayout[item.title].component"
-              :id="item.id"
-              :ref="
-                (r) => {
-                  layoutMaster.winRef[item.id] = r
-                }
-              "
-              :width="contentW"
-              :height="item.pos.h - 30"
-              v-bind="layoutMaster.data.project.wins[item.id].options.params"
-            />
+          <div style="overflow: auto" :style="{
+
+            height: item.pos.h - 26 + 'px',
+            backgroundColor: 'white'
+          }">
+            <component :ref="(r) => {
+              layoutMaster.winRef[item.id] = r
+            }
+              " :is="layoutMaster.validLayout[item.title].component" :width="contentW" :height="item.pos.h - 30"
+              :id="item.id" v-bind="layoutMaster.data.project.wins[item.id].options.params" />
           </div>
+
+
         </div>
+
+
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {
-  computed,
-  nextTick,
-  onMounted,
-  onUnmounted,
-  provide,
-  ref,
-  toRef,
-  watch,
-  watchEffect
-} from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, provide, ref, toRef, watch, watchEffect } from 'vue'
 import type { Component, Ref } from 'vue'
 import { useWindowSize } from '@vueuse/core'
 import settingsIcon from '@iconify/icons-material-symbols/settings'
@@ -529,28 +488,32 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Layout } from './layout'
 import { useProjectStore } from '@r/stores/project'
 import ldfParse from '@r/database/ldfParse'
+import testConfig from '@iconify/icons-grommet-icons/test'
+import testConfigIcon from '@iconify/icons-grommet-icons/test-desktop'
 
 const activeMenu = ref('')
 const pined = ref(true)
 const { width, height } = useWindowSize()
 const graph = new joint.dia.Graph()
-const dataBase = useDataStore()
-const project = useProjectStore()
+const dataBase = useDataStore();
+const project = useProjectStore();
 const layoutMaster = new Layout()
 const udsView = new UDSView(graph, layoutMaster)
 const globalStart = toRef(window, 'globalStart')
 
 provide('udsView', udsView)
 
+
 function firstByteUpper(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
+
 
 function openService(testerIndex: string) {
   layoutMaster.addWin('testerService', `${testerIndex}_services`, {
     name: dataBase.tester[testerIndex].name,
     params: {
-      'edit-index': testerIndex
+      'edit-index': testerIndex,
     }
   })
 }
@@ -560,14 +523,14 @@ function openIA(testerIndex: string) {
     layoutMaster.addWin('cani', `${testerIndex}_ia`, {
       name: dataBase.ia[testerIndex].name,
       params: {
-        'edit-index': testerIndex
+        'edit-index': testerIndex,
       }
     })
   } else if (item.type == 'lin') {
     layoutMaster.addWin('lini', `${testerIndex}_ia`, {
       name: dataBase.ia[testerIndex].name,
       params: {
-        'edit-index': testerIndex
+        'edit-index': testerIndex,
       }
     })
   }
@@ -576,16 +539,18 @@ function openSequence(testerIndex: string) {
   layoutMaster.addWin('testerSequence', `${testerIndex}_sequence`, {
     name: dataBase.tester[testerIndex].name,
     params: {
-      'edit-index': testerIndex
+      'edit-index': testerIndex,
     }
   })
 }
 //watch width and height change
 
+
 const dataBaseList = computed(() => {
-  const list: { url: string; disabled: boolean }[] = []
+  const list: { url: string, disabled: boolean }[] = []
   if (dataBase.database) {
     for (const key in dataBase.database) {
+
       for (const key1 of Object.values(dataBase.database[key])) {
         const item = key1 as any
         list.push({
@@ -611,38 +576,49 @@ async function openDatabase(testerIndex: string) {
   //   }
   // })
   const fileExtMap = {
-    lin: 'ldf',
-    can: 'dbc'
+    'lin': 'ldf',
+    'can': 'dbc'
   }
   if (testerIndex.startsWith('add')) {
     const type = testerIndex.split('add')[1].toLocaleLowerCase()
     const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
-      title: 'Open Database File',
-      properties: ['openFile '],
-      filters: [{ name: `Database File`, extensions: [fileExtMap[type]] }]
+      title: 'Open Database File', properties: ['openFile '], filters: [
+        { name: `Database File`, extensions: [fileExtMap[type]] },
+      ]
+
     })
     const file = r.filePaths[0]
     if (file == undefined) {
       return
     }
 
+
     if (type == 'lin') {
+
       const id = v4()
       layoutMaster.addWin('ldf', `${id}`, {
+
         params: {
           'edit-index': id,
-          ldfFile: file
+          'ldfFile': file,
         }
       })
+
+
     } else if (type == 'can') {
       const id = v4()
       layoutMaster.addWin('dbc', `${id}`, {
         params: {
           'edit-index': id,
-          dbcFile: file
+          'dbcFile': file,
         }
       })
     }
+
+
+
+
+
   } else if (testerIndex.startsWith('LIN.')) {
     const name = testerIndex.split('.')[1]
     //findDb
@@ -651,13 +627,15 @@ async function openDatabase(testerIndex: string) {
         layoutMaster.addWin('ldf', key, {
           name: dataBase.database.lin[key].name,
           params: {
-            'edit-index': key
+            'edit-index': key,
+
           }
         })
         break
       }
     }
-  } else if (testerIndex.startsWith('CAN.')) {
+  }
+  else if (testerIndex.startsWith('CAN.')) {
     const name = testerIndex.split('.')[1]
     //for can
     for (const key of Object.keys(dataBase.database.can)) {
@@ -665,12 +643,14 @@ async function openDatabase(testerIndex: string) {
         layoutMaster.addWin('dbc', key, {
           name: dataBase.database.can[key].name,
           params: {
-            'edit-index': key
+            'edit-index': key,
+
           }
         })
       }
     }
   }
+
 }
 const maxWinId = toRef(layoutMaster, 'maxWinId')
 const modify = computed(() => layoutMaster.modify.value)
@@ -694,23 +674,25 @@ onMounted(() => {
         timer = setTimeout(() => {
           activeMenu.value = ''
         }, 500)
+
       }
+
     })
     tabs.addEventListener('mouseenter', () => {
       clearTimeout(timer)
     })
+
   }
   layoutMaster.restoreWin()
 })
+
 
 const handleSelect = (keyPath: string[]) => {
   layoutMaster.addWin(keyPath[0], keyPath[1] ? keyPath[1] : keyPath[0])
 }
 
 const hideLayout = computed(() => {
-  return Object.values(project.project.wins).filter(
-    (item) => item.hide && item.layoutType == undefined
-  )
+  return Object.values(project.project.wins).filter((item) => item.hide && item.layoutType == undefined)
 })
 
 const heightOffset = computed(() => {
@@ -720,6 +702,7 @@ const heightOffset = computed(() => {
     return 45 + 114 - 83
   }
 })
+
 
 // const contentH = computed(
 //   () => Math.floor((height.value - heightOffset.value) / rowHeight.value) * rowHeight.value
@@ -735,7 +718,9 @@ const bottomH = computed(() => {
   }
   return h
 })
-const contentH = computed(() => height.value - heightOffset.value - bottomH.value)
+const contentH = computed(
+  () => (height.value - heightOffset.value - bottomH.value)
+)
 const contentW = computed(() => width.value)
 // const contentLeft = computed(() => Math.floor((width.value - contentW.value) / 2))
 layoutMaster.setWinSize(contentH.value, contentW.value)
@@ -776,6 +761,7 @@ watch([contentH, contentW], (val) => {
   border-left: none !important;
   border-right: none !important;
   // border-bottom: solid 1px var(--el-color-info-light-5);
+
 }
 
 .tablePin .el-tabs__content {
@@ -802,7 +788,9 @@ watch([contentH, contentW], (val) => {
 
     .el-sub-menu__title {
       border-bottom: 2px solid #fff !important;
+
     }
+
   }
 
   .el-sub-menu.is-active .el-sub-menu__title {
@@ -879,7 +867,7 @@ watch([contentH, contentW], (val) => {
   overflow-y: hidden;
   overflow-x: hidden;
   position: relative;
-  background-color: #fafafa;
+  background-color: #FAFAFA;
 }
 
 .lr {
@@ -916,6 +904,7 @@ watch([contentH, contentW], (val) => {
 
   /* 使子元素从右到左排列 */
   /* overflow-x: auto; */
+
 }
 
 .littleWin {
@@ -936,7 +925,7 @@ watch([contentH, contentW], (val) => {
   align-items: center;
   flex-direction: column;
   justify-content: center;
-  width: 80px;
+  width: 90px;
   height: 46px;
   padding: 4px;
   color: var(--el-color-info-dark-2);
@@ -950,6 +939,7 @@ watch([contentH, contentW], (val) => {
   font-size: 32px;
 }
 
+
 .grid span {
   /* margin-top: 5px; */
   font-size: 14px;
@@ -959,11 +949,13 @@ watch([contentH, contentW], (val) => {
   cursor: pointer;
   background-color: var(--el-color-primary-light-9);
   border-radius: 4px;
+
 }
 
 .girddisable {
   color: var(--el-color-info-dark-2) !important;
 }
+
 
 .left1 {
   position: absolute;
