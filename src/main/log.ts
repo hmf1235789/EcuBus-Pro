@@ -9,7 +9,6 @@ import { PayloadType } from './doip'
 import { LinMsg } from './share/lin'
 import { TestEvent } from 'node:test/reporters'
 
-
 const isDev = process.env.NODE_ENV !== 'production'
 
 type LogFunc = () => Transport
@@ -243,11 +242,11 @@ export class UdsLOG {
   close() {
     this.log.close()
   }
-  testInfo(id:string|undefined,event:TestEvent){
+  testInfo(id: string | undefined, event: TestEvent) {
     this.log.info({
-      method:'testInfo',
+      method: 'testInfo',
       id,
-      data:event
+      data: event
     })
   }
 }

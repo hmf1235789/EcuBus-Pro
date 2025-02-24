@@ -102,10 +102,8 @@ function createWindow(): void {
     height: 600,
     x: undefined,
     y: undefined
-  }) as Electron.Rectangle;
-  const isMaximized = store.get('windowMaximized', false);
-
-
+  }) as Electron.Rectangle
+  const isMaximized = store.get('windowMaximized', false)
 
   function getBounds() {
     const bounds = mainWindow.getBounds()
@@ -131,9 +129,15 @@ function createWindow(): void {
     }
   })
   const logQ = new LogQueue(mainWindow)
-  createLogs([() => new ElectronLog(logQ, mainWindow, {
-    level: 'debug'
-  })], [])
+  createLogs(
+    [
+      () =>
+        new ElectronLog(logQ, mainWindow, {
+          level: 'debug'
+        })
+    ],
+    []
+  )
   ipcMain.on('minimize', () => {
     mainWindow?.minimize()
   })
@@ -141,12 +145,12 @@ function createWindow(): void {
   ipcMain.on('maximize', () => {
     if (mainWindow.isMaximized()) {
       mainWindow.unmaximize()
-      store.set('windowMaximized', false);
+      store.set('windowMaximized', false)
     } else {
       // Save current bounds before maximizing
-      store.set('windowBounds', getBounds());
+      store.set('windowBounds', getBounds())
       mainWindow.maximize()
-      store.set('windowMaximized', true);
+      store.set('windowMaximized', true)
     }
   })
 
@@ -154,16 +158,16 @@ function createWindow(): void {
     globalStop()
     // Only save bounds if window is not maximized
     if (!mainWindow.isMaximized()) {
-      store.set('windowBounds', getBounds());
+      store.set('windowBounds', getBounds())
     }
-    store.set('windowMaximized', mainWindow.isMaximized());
+    store.set('windowMaximized', mainWindow.isMaximized())
     mainWindow.close()
   })
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
     // Restore maximized state
     if (isMaximized) {
-      mainWindow.maximize();
+      mainWindow.maximize()
     }
     if (isDev) {
       mainWindow.webContents.openDevTools()

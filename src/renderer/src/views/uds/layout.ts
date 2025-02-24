@@ -20,8 +20,8 @@ import log from 'electron-log'
 import graphIcon from '@iconify/icons-ep/histogram'
 import testIcon from '@iconify/icons-grommet-icons/test'
 
-type WinsType = ProjectState["project"]['wins'];
-type WinValueType = WinsType[keyof WinsType];
+type WinsType = ProjectState['project']['wins']
+type WinValueType = WinsType[keyof WinsType]
 export interface LayoutItem {
   i: string
   x: number

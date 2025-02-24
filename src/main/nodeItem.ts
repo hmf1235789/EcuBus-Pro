@@ -368,14 +368,17 @@ export class NodeClass {
       throw new Error(`device ${frame.device} not found`)
     }
   }
-  async sendDiag(pool: UdsTester, data: {
-    device?: string
-    address?: string
-    service: ServiceItem
-    isReq: boolean
-    testerName: string
-  }): Promise<number> {
-    const tester = Object.values(this.testers).find(t => t.name == data.testerName)
+  async sendDiag(
+    pool: UdsTester,
+    data: {
+      device?: string
+      address?: string
+      service: ServiceItem
+      isReq: boolean
+      testerName: string
+    }
+  ): Promise<number> {
+    const tester = Object.values(this.testers).find((t) => t.name == data.testerName)
     if (!tester) {
       throw new Error(`tester ${data.testerName} not found`)
     }

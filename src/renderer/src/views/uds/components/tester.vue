@@ -1,47 +1,79 @@
 <template>
-  <div class="main" v-loading="loading">
-      <div class="left">
-          <el-scrollbar :height="h + 'px'">
-              <el-tree ref="treeRef" node-key="id" default-expand-all :data="tData" highlight-current
-                  :expand-on-click-node="false" @node-click="nodeClick">
-                  <template #default="{ node, data }">
-                      <div class="tree-node">
-                          <span :class="{
-                              isTop: node.level === 1,
+  <div v-loading="loading" class="main">
+    <div class="left">
+      <el-scrollbar :height="h + 'px'">
+        <el-tree
+          ref="treeRef"
+          node-key="id"
+          default-expand-all
+          :data="tData"
+          highlight-current
+          :expand-on-click-node="false"
+          @node-click="nodeClick"
+        >
+          <template #default="{ node, data }">
+            <div class="tree-node">
+              <span
+                :class="{
+                  isTop: node.level === 1,
 
-                              treeLabel: true
-                          }">{{ node.label }}
-                          </span>
-                          <el-button type="primary" v-if="data.append" link @click.stop="addNewDevice(data)"
-                              :disabled="data.disabled || globalStart">
-                              <Icon :icon="circlePlusFilled" />
-                          </el-button>
+                  treeLabel: true
+                }"
+                >{{ node.label }}
+              </span>
+              <el-button
+                v-if="data.append"
+                type="primary"
+                link
+                :disabled="data.disabled || globalStart"
+                @click.stop="addNewDevice(data)"
+              >
+                <Icon :icon="circlePlusFilled" />
+              </el-button>
 
-                          <el-button type="danger" v-else-if="node.parent?.data.append" link
-                              @click.stop="removeDevice(data.id)" :disabled="data.disabled || globalStart">
-                              <Icon :icon="removeIcon" />
-                          </el-button>
-
-
-                      </div>
-                  </template>
-              </el-tree>
-          </el-scrollbar>
+              <el-button
+                v-else-if="node.parent?.data.append"
+                type="danger"
+                link
+                :disabled="data.disabled || globalStart"
+                @click.stop="removeDevice(data.id)"
+              >
+                <Icon :icon="removeIcon" />
+              </el-button>
+            </div>
+          </template>
+        </el-tree>
+      </el-scrollbar>
+    </div>
+    <div :id="`${winKey}Shift`" class="shift" />
+    <div class="right">
+      <div v-if="activeTree">
+        <testerCanVue
+          v-if="activeTree.type"
+          :index="activeTree.id"
+          :type="activeTree.type"
+          :height="h"
+          @change="nodeChange"
+        >
+        </testerCanVue>
       </div>
-      <div class="shift" :id="`${winKey}Shift`" />
-      <div class="right">
-          <div v-if="activeTree">
-              <testerCanVue :index="activeTree.id" v-if="activeTree.type" :type="activeTree.type" :height="h"
-                  @change="nodeChange">
-              </testerCanVue>
-          </div>
-      </div>
-
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { Ref, computed, inject, nextTick, onMounted, onUnmounted, provide, ref, toRef, watch } from 'vue'
+import {
+  Ref,
+  computed,
+  inject,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  provide,
+  ref,
+  toRef,
+  watch
+} from 'vue'
 import { Icon } from '@iconify/vue'
 import { type FormRules, type FormInstance, ElMessageBox, ElMessage } from 'element-plus'
 import circlePlusFilled from '@iconify/icons-ep/circle-plus-filled'
@@ -78,97 +110,103 @@ const rightHeight = computed(() => {
 
 function nodeClick(data: tree, node: any) {
   if (activeTree.value?.id == data.id) {
-      return
+    return
   }
   activeTree.value = undefined
   nextTick(() => {
-      if (node.parent?.data.append == true) {
-          activeTree.value = data
-
-
-      }
+    if (node.parent?.data.append == true) {
+      activeTree.value = data
+    }
   })
 }
 function removeDevice(id: string) {
   ElMessageBox.confirm('Are you sure to delete this tester?', 'Warning', {
-      confirmButtonText: 'OK',
-      cancelButtonText: 'Cancel',
-      type: 'warning',
-      buttonSize: 'small',
-      appendTo: `#win${winKey}`
-  }).then(() => {
-      window.electron.ipcRenderer.invoke('ipc-delete-tester', project.projectInfo.path, project.projectInfo.name, cloneDeep(globalData.tester[id])).finally(() => {
+    confirmButtonText: 'OK',
+    cancelButtonText: 'Cancel',
+    type: 'warning',
+    buttonSize: 'small',
+    appendTo: `#win${winKey}`
+  })
+    .then(() => {
+      window.electron.ipcRenderer
+        .invoke(
+          'ipc-delete-tester',
+          project.projectInfo.path,
+          project.projectInfo.name,
+          cloneDeep(globalData.tester[id])
+        )
+        .finally(() => {
           delete globalData.tester[id]
           treeRef.value?.remove(id)
           activeTree.value = undefined
           //close relative window
           layout.removeWin(`${id}_services`, true)
           layout.removeWin(`${id}_sequence`, true)
-      })
-
-
-
-  }).catch(() => {
+        })
+    })
+    .catch(() => {
       null
-  })
-
+    })
 }
 function generateUniqueName(type: HardwareType): string {
-  let index = 0;
-  let name = `Tester_${type}_${index}`;
-  
+  let index = 0
+  let name = `Tester_${type}_${index}`
+
   // 检查是否存在同名配置
-  while (Object.values(globalData.tester).some(tester => tester.name === name)) {
-      index++;
-      name = `Tester_${type}_${index}`;
+  while (Object.values(globalData.tester).some((tester) => tester.name === name)) {
+    index++
+    name = `Tester_${type}_${index}`
   }
-  
-  return name;
+
+  return name
 }
 function addNewDevice(node: tree) {
   activeTree.value = undefined
   const id = v4()
-  
+
   // 使用新的生成唯一名称的函数
   const name = generateUniqueName(node.type)
-  
-  treeRef.value?.append({ 
-      label: name, 
-      append: false, 
-      id: id, 
-      type: node.type 
-  }, node.id)
-  
-  globalData.tester[id] = {
+
+  treeRef.value?.append(
+    {
+      label: name,
+      append: false,
       id: id,
-      name: name,
-      type: node.type,
-      script: "",
-      targetDeviceId: "",
-      seqList: [],
-      address: [],
-      udsTime: {
-          pTime: 2000,
-          pExtTime: 5000,
-          s3Time: 5000,
-          testerPresentEnable: false
-      },
-      allServiceList: {}
+      type: node.type
+    },
+    node.id
+  )
+
+  globalData.tester[id] = {
+    id: id,
+    name: name,
+    type: node.type,
+    script: '',
+    targetDeviceId: '',
+    seqList: [],
+    address: [],
+    udsTime: {
+      pTime: 2000,
+      pExtTime: 5000,
+      s3Time: 5000,
+      testerPresentEnable: false
+    },
+    allServiceList: {}
   }
-  
+
   nextTick(() => {
-      activeTree.value = treeRef.value?.getNode(id).data
-      treeRef.value.setCurrentKey(id)
+    activeTree.value = treeRef.value?.getNode(id).data
+    treeRef.value.setCurrentKey(id)
   })
 }
 function nodeChange(id: string, name: string) {
   //change tree stuff
   const node = treeRef.value?.getNode(id)
   if (node) {
-      node.data.label = name
-      layout.changeWinName(`${id}_services`, name)
-      layout.changeWinName(`${id}_sequence`, name)
-  } 
+    node.data.label = name
+    layout.changeWinName(`${id}_services`, name)
+    layout.changeWinName(`${id}_sequence`, name)
+  }
 }
 
 interface tree {
@@ -185,63 +223,61 @@ const globalStart = toRef(window, 'globalStart')
 function buildTree() {
   const t: tree[] = []
   const can: tree = {
-      label: 'CAN Interface',
-      type: 'can',
-      append: true,
-      id: 'CAN',
-      children: []
+    label: 'CAN Interface',
+    type: 'can',
+    append: true,
+    id: 'CAN',
+    children: []
   }
   for (const key in globalData.tester) {
-      if (globalData.tester[key].type == 'can') {
-          can.children?.push({
-              label: globalData.tester[key].name,
-              type: 'can',
-              append: false,
-              id: key
-          })
-      }
+    if (globalData.tester[key].type == 'can') {
+      can.children?.push({
+        label: globalData.tester[key].name,
+        type: 'can',
+        append: false,
+        id: key
+      })
+    }
   }
   t.push(can)
   const lin: tree = {
-      label: 'LIN Interface',
-      type: 'lin',
-      append: true,
-      id: 'LIN',
-      children: [],
-      disabled: false
+    label: 'LIN Interface',
+    type: 'lin',
+    append: true,
+    id: 'LIN',
+    children: [],
+    disabled: false
   }
-  for(const key in globalData.tester){
-      if(globalData.tester[key].type == 'lin'){
-          lin.children?.push({
-              label: globalData.tester[key].name,
-              type: 'lin',
-              append: false,
-              id: key
-          })
-      }
+  for (const key in globalData.tester) {
+    if (globalData.tester[key].type == 'lin') {
+      lin.children?.push({
+        label: globalData.tester[key].name,
+        type: 'lin',
+        append: false,
+        id: key
+      })
+    }
   }
   t.push(lin)
   const eth: tree = {
-      label: 'ETH Interface',
-      type: 'eth',
-      append: true,
-      id: 'ETH',
-      children: [],
-      disabled: false
+    label: 'ETH Interface',
+    type: 'eth',
+    append: true,
+    id: 'ETH',
+    children: [],
+    disabled: false
   }
   for (const key in globalData.tester) {
-      if (globalData.tester[key].type == 'eth') {
-          eth.children?.push({
-              label: globalData.tester[key].name,
-              type: 'eth',
-              append: false,
-              id: key
-          })
-      }
+    if (globalData.tester[key].type == 'eth') {
+      eth.children?.push({
+        label: globalData.tester[key].name,
+        type: 'eth',
+        append: false,
+        id: key
+      })
+    }
   }
   t.push(eth)
-
-
 
   tData.value = t
 }
@@ -249,21 +285,17 @@ function buildTree() {
 const layout = inject('layout') as Layout
 onMounted(() => {
   window.jQuery(`#${winKey}Shift`).resizable({
-      handles:'e',
-      // resize from all edges and corners
-      resize: (e, ui) => {
-
-          leftWidth.value = ui.size.width
-         
-      },
-      maxWidth:400,
-      minWidth:150,
+    handles: 'e',
+    // resize from all edges and corners
+    resize: (e, ui) => {
+      leftWidth.value = ui.size.width
+    },
+    maxWidth: 400,
+    minWidth: 150
   })
-  
-
 
   nextTick(() => {
-      buildTree()
+    buildTree()
   })
 })
 </script>
@@ -298,7 +330,6 @@ onMounted(() => {
 .isTop {
   font-weight: bold;
 }
-
 
 .left {
   position: absolute;

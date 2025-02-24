@@ -1,7 +1,6 @@
 import EventEmitter from 'events'
 import { cloneDeep } from 'lodash'
 
-
 export interface CanBitrate {
   freq: number
   timeSeg1: number
@@ -9,78 +8,75 @@ export interface CanBitrate {
   sjw: number
   preScaler: number
   clock?: string
-  zlgSpec?:string
+  zlgSpec?: string
 }
 
-
-export type CanVendor='peak'|'simulate'|'zlg'|'kvaser'|'toomoss'
+export type CanVendor = 'peak' | 'simulate' | 'zlg' | 'kvaser' | 'toomoss'
 export interface CanBaseInfo {
   id: string
   handle: any
   name: string
   vendor: CanVendor
   canfd: boolean
-  bitrate:CanBitrate
+  bitrate: CanBitrate
   bitratefd?: CanBitrate
-  database?:string
+  database?: string
 }
-
 
 /**
  * Represents a CAN (Controller Area Network) message.
- * 
+ *
  * @category CAN
  */
 export interface CanMessage {
   /**
    * The name of the CAN message.
    */
-  name?:string
+  name?: string
   /**
    * The device associated with the CAN message.
    */
-  device?: string;
+  device?: string
 
   /**
    * The direction of the CAN message, either 'IN' for incoming or 'OUT' for outgoing.
    */
-  dir: 'IN' | 'OUT';
+  dir: 'IN' | 'OUT'
 
   /**
    * The data payload of the CAN message.
    */
-  data: Buffer;
+  data: Buffer
 
   /**
    * The timestamp of when the CAN message was sent/recv.
    */
-  ts?: number;
+  ts?: number
 
   /**
    * The identifier of the CAN message.
    */
-  id: number;
+  id: number
 
   /**
    * The type of the CAN message.
    */
-  msgType: CanMsgType;
+  msgType: CanMsgType
 
   /**
    * Indicates whether the CAN message is simulated.
    * This property is optional.
    */
-  isSimulate?: boolean;
+  isSimulate?: boolean
   /**
    * The database name of the CAN message.
    */
-  database?:string
- 
+  database?: string
 }
 
 /**
  * Enumeration representing different CAN (Controller Area Network) ID types.
- * 
+ *
  * @category CAN
  * @enum {string}
  * @readonly
@@ -92,7 +88,7 @@ export enum CAN_ID_TYPE {
 
 /**
  * Enumeration representing different CAN (Controller Area Network) address types.
- * 
+ *
  * @category CAN
  * @enum {string}
  * @readonly
@@ -104,7 +100,7 @@ export enum CAN_ADDR_TYPE {
 
 /**
  * Enumeration representing different CAN (Controller Area Network) address formats.
- * 
+ *
  * @category CAN
  * @enum {string}
  * @readonly
@@ -126,27 +122,27 @@ export interface CanMsgType {
   /**
    * The type of CAN ID.
    */
-  idType: CAN_ID_TYPE;
+  idType: CAN_ID_TYPE
 
   /**
    * Indicates if Bit Rate Switching (BRS) is enabled.
    */
-  brs: boolean;
+  brs: boolean
 
   /**
    * Indicates if CAN FD (Flexible Data-rate) is used.
    */
-  canfd: boolean;
+  canfd: boolean
 
   /**
    * Indicates if the message is a remote frame.
    */
-  remote: boolean;
+  remote: boolean
 
   /**
    * Optional unique identifier for the message.
    */
-  uuid?: string;
+  uuid?: string
 }
 
 export enum CAN_ERROR_ID {
@@ -155,92 +151,87 @@ export enum CAN_ERROR_ID {
   CAN_BUS_BUSY,
   CAN_BUS_CLOSED,
   CAN_INTERNAL_ERROR,
-  CAN_PARAM_ERROR,
+  CAN_PARAM_ERROR
 }
 
-const canErrorMap:Record<CAN_ERROR_ID,string>={
-  [CAN_ERROR_ID.CAN_BUS_ERROR]:'bus error',
-  [CAN_ERROR_ID.CAN_READ_TIMEOUT]:'read timeout',
-  [CAN_ERROR_ID.CAN_BUS_BUSY]:'bus busy',
-  [CAN_ERROR_ID.CAN_INTERNAL_ERROR]:'dll lib internal error',
-  [CAN_ERROR_ID.CAN_BUS_CLOSED]:'bus closed',
-  [CAN_ERROR_ID.CAN_PARAM_ERROR]:'param error'
-
-}
- 
-export function getTsUs(){
-  const hrtime=process.hrtime()
-  const seconds = hrtime[0];
-  const nanoseconds = hrtime[1];  
-  return seconds*1000000+Math.floor(nanoseconds/1000)
+const canErrorMap: Record<CAN_ERROR_ID, string> = {
+  [CAN_ERROR_ID.CAN_BUS_ERROR]: 'bus error',
+  [CAN_ERROR_ID.CAN_READ_TIMEOUT]: 'read timeout',
+  [CAN_ERROR_ID.CAN_BUS_BUSY]: 'bus busy',
+  [CAN_ERROR_ID.CAN_INTERNAL_ERROR]: 'dll lib internal error',
+  [CAN_ERROR_ID.CAN_BUS_CLOSED]: 'bus closed',
+  [CAN_ERROR_ID.CAN_PARAM_ERROR]: 'param error'
 }
 
+export function getTsUs() {
+  const hrtime = process.hrtime()
+  const seconds = hrtime[0]
+  const nanoseconds = hrtime[1]
+  return seconds * 1000000 + Math.floor(nanoseconds / 1000)
+}
 
-export interface CanInterAction{
-  trigger:{
-    type:'manual'|'periodic'
-    period?:number
-    onKey?:string
+export interface CanInterAction {
+  trigger: {
+    type: 'manual' | 'periodic'
+    period?: number
+    onKey?: string
   }
-  name:string
-  database?:string
-  id:string
-  channel:string
-  type:'canfd'|'can'|'ecan'|'ecanfd'
-  dlc:number
-  brs?:boolean
-  remote?:boolean
-  data:string[]
-} 
-export function formatError(error: Error) {
-  console.log('x',error)
-    // Get error stack
-    const stack = error.stack || '';
-    
-    // Get first stack line (usually contains error location)
-    const locationLine = stack.split('\n')[1] || '';
-    
-    // Extract file location info
-    const locationMatch = locationLine.match(/webpack:\\ecubuspro\\(.*):(\d+):(\d+)\)$/);
-    
-    let location = '';
-    if (locationMatch) {
-        const [, file, line, column] = locationMatch;
-        //
-        // Convert webpack path to GitHub URL，#L${line}C${column}-L${line}C${column}
-        location = `https://github.com/ecubus/EcuBus-Pro/blob/master/${file}#L${line}C${column}`;
-    }else{
-      // at listener (D:\code\ecubus-pro\resources\examples\test_simple\node.ts:5:11)
-        const newMatch=locationLine.match(/\((.*):(\d+):(\d+)\)/)
-        if(newMatch){
-          const [, file, line, column] = newMatch;
-          location = `file://${file}:${line}:${column}`;
-        }else{
-          location = locationLine
-        }
-
-    }
-    
-    // Return simplified error message
-    return `Error: ${error.message}, Pos: ${location}`;
+  name: string
+  database?: string
+  id: string
+  channel: string
+  type: 'canfd' | 'can' | 'ecan' | 'ecanfd'
+  dlc: number
+  brs?: boolean
+  remote?: boolean
+  data: string[]
 }
+export function formatError(error: Error) {
+  console.log('x', error)
+  // Get error stack
+  const stack = error.stack || ''
 
+  // Get first stack line (usually contains error location)
+  const locationLine = stack.split('\n')[1] || ''
+
+  // Extract file location info
+  const locationMatch = locationLine.match(/webpack:\\ecubuspro\\(.*):(\d+):(\d+)\)$/)
+
+  let location = ''
+  if (locationMatch) {
+    const [, file, line, column] = locationMatch
+    //
+    // Convert webpack path to GitHub URL，#L${line}C${column}-L${line}C${column}
+    location = `https://github.com/ecubus/EcuBus-Pro/blob/master/${file}#L${line}C${column}`
+  } else {
+    // at listener (D:\code\ecubus-pro\resources\examples\test_simple\node.ts:5:11)
+    const newMatch = locationLine.match(/\((.*):(\d+):(\d+)\)/)
+    if (newMatch) {
+      const [, file, line, column] = newMatch
+      location = `file://${file}:${line}:${column}`
+    } else {
+      location = locationLine
+    }
+  }
+
+  // Return simplified error message
+  return `Error: ${error.message}, Pos: ${location}`
+}
 
 export class CanError extends Error {
-  errorId:CAN_ERROR_ID
-  msgType:CanMsgType
-  data?:Buffer
-  constructor(errorId:CAN_ERROR_ID,msgType:CanMsgType,data?:Buffer,extMsg?:string) {
-      super(canErrorMap[errorId]+(extMsg?`,${extMsg}`:'')) ;
-      this.errorId = errorId;
-      this.msgType=msgType
-      this.data=data
+  errorId: CAN_ERROR_ID
+  msgType: CanMsgType
+  data?: Buffer
+  constructor(errorId: CAN_ERROR_ID, msgType: CanMsgType, data?: Buffer, extMsg?: string) {
+    super(canErrorMap[errorId] + (extMsg ? `,${extMsg}` : ''))
+    this.errorId = errorId
+    this.msgType = msgType
+    this.data = data
   }
 }
 
-
-export interface CanAddr extends CanMsgType{
-  name:string
+export interface CanAddr extends CanMsgType {
+  name: string
   addrFormat: CAN_ADDR_FORMAT
   addrType: CAN_ADDR_TYPE
   desc?: string
@@ -258,7 +249,7 @@ export interface CanAddr extends CanMsgType{
   stMin: number
   bs: number
   maxWTF: number
-  uuid?:string
+  uuid?: string
   dlc: number
   padding: boolean
   paddingValue: string
@@ -282,7 +273,7 @@ export interface CanEventMap {
       brs: boolean
       remote: boolean
     }
-  ],
+  ]
   sendBase: [
     info: {
       data: Buffer
@@ -293,7 +284,7 @@ export interface CanEventMap {
       brs: boolean
       remote: boolean
     }
-  ],
+  ]
   recvTp: [
     info: {
       data: Buffer
@@ -304,7 +295,7 @@ export interface CanEventMap {
       brs: boolean
       remote: boolean
     }
-  ],
+  ]
   recvBase: [
     info: {
       data: Buffer
@@ -315,7 +306,7 @@ export interface CanEventMap {
       brs: boolean
       remote: boolean
     }
-  ],
+  ]
   errorTp: [
     info: {
       dir: 'send' | 'recv'
@@ -331,10 +322,9 @@ export interface CanEventMap {
   ]
 }
 
-
-export abstract class CanBase{
-  abstract info:CanBaseInfo
-  abstract close():void
+export abstract class CanBase {
+  abstract info: CanBaseInfo
+  abstract close(): void
   abstract readBase(
     id: number,
     msgType: CanMsgType,
@@ -344,119 +334,123 @@ export abstract class CanBase{
     id: number,
     msgType: CanMsgType,
     data: Buffer,
-    extra?:{database?:string,name?:string}
+    extra?: { database?: string; name?: string }
   ): Promise<number>
-  abstract getReadBaseId(id:number,msgType:CanMsgType):string
-  abstract setOption(cmd:string,val:any):void
-  
+  abstract getReadBaseId(id: number, msgType: CanMsgType): string
+  abstract setOption(cmd: string, val: any): void
+
   abstract event: EventEmitter
-  static getValidDevices():CanDevice[] {
+  static getValidDevices(): CanDevice[] {
     throw new Error('Method not implemented.')
   }
-  static getLibVersion():string {
+  static getLibVersion(): string {
     throw new Error('Method not implemented.')
   }
-  static getDefaultBitrate(canfd:boolean):CanBitrate[] {
+  static getDefaultBitrate(canfd: boolean): CanBitrate[] {
     return []
   }
-  attachCanMessage(cb:(msg:CanMessage)=>void){
-    this.event.on('can-frame',cb)
+  attachCanMessage(cb: (msg: CanMessage) => void) {
+    this.event.on('can-frame', cb)
   }
-  detachCanMessage(cb:(msg:CanMessage)=>void){
-    this.event.off('can-frame',cb)
+  detachCanMessage(cb: (msg: CanMessage) => void) {
+    this.event.off('can-frame', cb)
   }
 }
 
 export class CAN_SOCKET {
   inst: CanBase
   msgType: CanMsgType
-  closed=false
-  id:number
-  recvId:string
-  tsOffset:number|null=null
-  recvBuffer:({data:Buffer,ts:number}|CanError)[]=[]
-  recvTimer:NodeJS.Timeout|null=null
-  cb:any
-  pendingRecv: {resolve: (value: { data: Buffer, ts: number }) => void, reject: (reason: CanError) => void}|null=null
-  constructor(inst:CanBase,id:number,msgType:CanMsgType,private extra?:{database?:string,name?:string}){
-    this.inst=inst
-    this.msgType=msgType
-    this.id=id
-    this.recvId = this.inst.getReadBaseId(id,msgType)
-    this.cb=this.recvHandle.bind(this)
-    this.inst.event.on(this.recvId,this.cb)
-      
+  closed = false
+  id: number
+  recvId: string
+  tsOffset: number | null = null
+  recvBuffer: ({ data: Buffer; ts: number } | CanError)[] = []
+  recvTimer: NodeJS.Timeout | null = null
+  cb: any
+  pendingRecv: {
+    resolve: (value: { data: Buffer; ts: number }) => void
+    reject: (reason: CanError) => void
+  } | null = null
+  constructor(
+    inst: CanBase,
+    id: number,
+    msgType: CanMsgType,
+    private extra?: { database?: string; name?: string }
+  ) {
+    this.inst = inst
+    this.msgType = msgType
+    this.id = id
+    this.recvId = this.inst.getReadBaseId(id, msgType)
+    this.cb = this.recvHandle.bind(this)
+    this.inst.event.on(this.recvId, this.cb)
   }
-  getSystemTs(){
-    const hrTime = process.hrtime();
-    return hrTime[0] * 1000000 + Math.floor(hrTime[1] / 1000);
+  getSystemTs() {
+    const hrTime = process.hrtime()
+    return hrTime[0] * 1000000 + Math.floor(hrTime[1] / 1000)
   }
-  recvHandle(val:{data:Buffer,ts:number}|CanError){
-      // if(!(val instanceof CanError)){
-      //   const ts=val.ts
-      //   const systemTs=this.getSystemTs()
-      //   if(this.tsOffset==null){
-      //     this.tsOffset=systemTs-ts
-      //   }else{
-      //     //average
-      //     this.tsOffset=Math.floor((this.tsOffset+(systemTs-ts))/2)
-      //   }
-      // }
-      if(this.pendingRecv){
-          if(this.recvTimer){
-              clearTimeout(this.recvTimer)
-              this.recvTimer=null
-          }
-          if(val instanceof CanError){
-              this.pendingRecv.reject(val)
-          }else{
-              this.pendingRecv.resolve(val)
-          }
-          this.pendingRecv=null
-      }else{
-          this.recvBuffer.push(val)
+  recvHandle(val: { data: Buffer; ts: number } | CanError) {
+    // if(!(val instanceof CanError)){
+    //   const ts=val.ts
+    //   const systemTs=this.getSystemTs()
+    //   if(this.tsOffset==null){
+    //     this.tsOffset=systemTs-ts
+    //   }else{
+    //     //average
+    //     this.tsOffset=Math.floor((this.tsOffset+(systemTs-ts))/2)
+    //   }
+    // }
+    if (this.pendingRecv) {
+      if (this.recvTimer) {
+        clearTimeout(this.recvTimer)
+        this.recvTimer = null
       }
-    
-  }
-  error(id:CAN_ERROR_ID){
-    return new CanError(id,this.msgType)
-  }
-  async read(timeout:number):Promise<{data:Buffer,ts:number}>{
-    return new Promise((resolve,reject)=>{
-      if(this.closed){
-          reject(this.error(CAN_ERROR_ID.CAN_BUS_CLOSED))
-          return
+      if (val instanceof CanError) {
+        this.pendingRecv.reject(val)
+      } else {
+        this.pendingRecv.resolve(val)
       }
-      const val=this.recvBuffer.shift()
-      if(val){
-        if(val instanceof CanError){
+      this.pendingRecv = null
+    } else {
+      this.recvBuffer.push(val)
+    }
+  }
+  error(id: CAN_ERROR_ID) {
+    return new CanError(id, this.msgType)
+  }
+  async read(timeout: number): Promise<{ data: Buffer; ts: number }> {
+    return new Promise((resolve, reject) => {
+      if (this.closed) {
+        reject(this.error(CAN_ERROR_ID.CAN_BUS_CLOSED))
+        return
+      }
+      const val = this.recvBuffer.shift()
+      if (val) {
+        if (val instanceof CanError) {
           reject(val)
-        }else{
+        } else {
           resolve(val)
         }
-      }else{
-          
-        this.pendingRecv={resolve,reject}
-        this.recvTimer=setTimeout(()=>{
-  
-          if(this.pendingRecv){
+      } else {
+        this.pendingRecv = { resolve, reject }
+        this.recvTimer = setTimeout(() => {
+          if (this.pendingRecv) {
             reject(this.error(CAN_ERROR_ID.CAN_READ_TIMEOUT))
-            this.pendingRecv=null
+            this.pendingRecv = null
           }
-        },timeout)
+        }, timeout)
       }
     })
   }
-  async write(data:Buffer):Promise<number>{
-      if(this.closed){
-          throw this.error(CAN_ERROR_ID.CAN_BUS_CLOSED)
+  async write(data: Buffer): Promise<number> {
+    if (this.closed) {
+      throw this.error(CAN_ERROR_ID.CAN_BUS_CLOSED)
+    }
+    if (this.msgType.canfd) {
+      if (this.inst.info.canfd == false) {
+        throw this.error(CAN_ERROR_ID.CAN_PARAM_ERROR)
       }
-      if(this.msgType.canfd){
-        if(this.inst.info.canfd==false){
-          throw this.error(CAN_ERROR_ID.CAN_PARAM_ERROR)
-        }
-      }
-    const ts=await this.inst.writeBase(this.id,this.msgType,data,this.extra)
+    }
+    const ts = await this.inst.writeBase(this.id, this.msgType, data, this.extra)
     // const systemTs=this.getSystemTs()
     // if(this.tsOffset==null){
     //   this.tsOffset=systemTs-ts
@@ -466,17 +460,17 @@ export class CAN_SOCKET {
     // }
     return ts
   }
-  close(){
-      if(this.pendingRecv){
-          this.pendingRecv.reject(this.error(CAN_ERROR_ID.CAN_BUS_CLOSED))
-          this.pendingRecv=null
-      }
-      this.inst.event.off(this.recvId,this.cb)
-      this.closed=true
+  close() {
+    if (this.pendingRecv) {
+      this.pendingRecv.reject(this.error(CAN_ERROR_ID.CAN_BUS_CLOSED))
+      this.pendingRecv = null
+    }
+    this.inst.event.off(this.recvId, this.cb)
+    this.closed = true
   }
 }
 
-export function getLenByDlc(dlc: number, canFd:boolean) {
+export function getLenByDlc(dlc: number, canFd: boolean) {
   const map: Record<number, number> = {
     0: 8,
     1: 8,
@@ -519,7 +513,7 @@ export function getLenByDlc(dlc: number, canFd:boolean) {
     return map[dlc] || 0
   }
 }
-export function getDlcByLen(len: number, canFd:boolean) {
+export function getDlcByLen(len: number, canFd: boolean) {
   const map: Record<number, number> = {
     0: 0,
     1: 1,
@@ -529,7 +523,7 @@ export function getDlcByLen(len: number, canFd:boolean) {
     5: 5,
     6: 6,
     7: 7,
-    8: 8,
+    8: 8
   }
   const mapFd: Record<number, number> = {
     0: 0,
@@ -549,11 +543,10 @@ export function getDlcByLen(len: number, canFd:boolean) {
     48: 14,
     64: 15
   }
-  
-  if(canFd){
+
+  if (canFd) {
     return mapFd[len] || 0
-  }else{
-   
+  } else {
     return map[len] || 0
   }
 }
@@ -569,7 +562,7 @@ export function addrToId(addr: CanAddr): number {
   return id
 }
 export function addrToStr(addr: CanAddr): string {
-  const jsonString = JSON.stringify(addr, Object.keys(addr).sort());
+  const jsonString = JSON.stringify(addr, Object.keys(addr).sort())
   return jsonString
 }
 
