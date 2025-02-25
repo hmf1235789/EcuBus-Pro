@@ -48,18 +48,7 @@
     },
     "tester": {},
     "subFunction": {},
-    "nodes": {
-      "b6e943fd-f8f4-44b0-aa6b-f5d4fd7a3018": {
-        "name": "Node 1",
-        "type": "can",
-        "id": "b6e943fd-f8f4-44b0-aa6b-f5d4fd7a3018",
-        "channel": [
-          "b283da7b-1165-4e62-a609-b0eac40cb8a8"
-        ],
-        "workNode": "",
-        "script": "node.ts"
-      }
-    },
+    "nodes": {},
     "database": {
       "lin": {},
       "can": {}
@@ -72,7 +61,7 @@
         "script": "test.ts",
         "reportPath": "./report",
         "channel": [
-          "SIMULATE_0"
+          "b283da7b-1165-4e62-a609-b0eac40cb8a8"
         ]
       }
     }
@@ -106,22 +95,10 @@
         "id": "hardware",
         "options": {}
       },
-      "network": {
-        "pos": {
-          "x": 55,
-          "y": 30.5,
-          "w": 600,
-          "h": 400
-        },
-        "title": "network",
-        "label": "Network",
-        "id": "network",
-        "options": {}
-      },
       "test": {
         "pos": {
-          "x": 769.5,
-          "y": 32,
+          "x": 1234.5,
+          "y": 55,
           "w": 600,
           "h": 400
         },
@@ -149,8 +126,8 @@
       },
       "trace": {
         "pos": {
-          "x": 686.5,
-          "y": 163,
+          "x": 789.5,
+          "y": 290,
           "w": 700,
           "h": 400
         },

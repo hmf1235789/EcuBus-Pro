@@ -425,17 +425,17 @@ const devices = computed(() => {
     if (item.type == 'can') {
       list.push({
         label: item.canDevice?.name || '',
-        value: item.canDevice?.name || ''
+        value: item.canDevice?.id || ''
       })
     } else if (item.type == 'lin') {
       list.push({
         label: item.linDevice?.name || '',
-        value: item.linDevice?.name || ''
+        value: item.linDevice?.id || ''
       })
     } else if (item.type == 'eth') {
       list.push({
         label: item.ethDevice?.name || '',
-        value: item.ethDevice?.name || ''
+        value: item.ethDevice?.id || ''
       })
     }
   }
