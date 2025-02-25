@@ -77,6 +77,9 @@ export class NodeClass {
       const jsPath = path.join(outDir, scriptNameNoExt + '.js')
       if (fs.existsSync(jsPath)) {
         this.log = new UdsLOG(`${nodeItem.name} ${path.basename(nodeItem.script)}`)
+        if (testOptions) {
+          this.log.addMethodPrefix('test-')
+        }
         this.pool = new UdsTester(
           {
             PROJECT_ROOT: this.projectPath,

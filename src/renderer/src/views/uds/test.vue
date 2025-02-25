@@ -171,7 +171,13 @@
       </div>
       <div id="testerServiceShift" class="shift" />
       <div class="right" :style="{ left: leftWidth + 5 + 'px' }">
-        <trace-component ref="traceRef" :height="h" :show-filter="false" :default-check-list="[]" />
+        <trace-component
+          ref="traceRef"
+          :height="h - 2"
+          :capture-test="true"
+          prefix="test-"
+          :capture-system="false"
+        />
       </div>
     </div>
 
@@ -295,7 +301,7 @@ import todoIcon from '@iconify/icons-material-symbols/assignment-late-outline'
 import exportIcon from '@iconify/icons-material-symbols/export-notes-outline'
 import logo from './logo.html?raw'
 import errorParse from '@r/util/ipcError'
-import TraceComponent from './components/trace.vue'
+import TraceComponent from './log.vue'
 
 const loading = ref(false)
 const traceRef = ref()

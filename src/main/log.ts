@@ -135,6 +135,7 @@ export function clearFormat() {
 
 export class UdsLOG {
   log: Logger
+  methodPrefix: string = ''
   startTime = Date.now()
   constructor(name: string) {
     const et = externalTransport.map((t) => t())
@@ -145,7 +146,7 @@ export class UdsLOG {
   }
   sent(testerid: string, service: ServiceItem, ts: number, recvData?: Buffer, msg?: string) {
     this.log.info({
-      method: 'udsSent',
+      method: this.methodPrefix + 'udsSent',
       id: testerid,
       data: {
         service,
@@ -157,7 +158,7 @@ export class UdsLOG {
   }
   recv(testerid: string, service: ServiceItem, ts: number, recvData?: Buffer, msg?: string) {
     this.log.info({
-      method: 'udsRecv',
+      method: this.methodPrefix + 'udsRecv',
       id: testerid,
       data: {
         service,
@@ -178,7 +179,7 @@ export class UdsLOG {
     msg?: string
   ) {
     this.log.warn({
-      method: 'udsWarning',
+      method: this.methodPrefix + 'udsWarning',
       id: testerid,
       data: {
         service,
@@ -191,9 +192,12 @@ export class UdsLOG {
       }
     })
   }
+  addMethodPrefix(prefix: string) {
+    this.methodPrefix = prefix
+  }
   scriptMsg(msg: string, ts: number, level: 'info' | 'warn' | 'error' = 'info') {
     this.log[level]({
-      method: 'udsScript',
+      method: this.methodPrefix + 'udsScript',
       data: {
         msg,
         ts
@@ -202,7 +206,7 @@ export class UdsLOG {
   }
   systemMsg(msg: string, ts: number, level: 'info' | 'warn' | 'error' = 'info') {
     this.log[level]({
-      method: 'udsSystem',
+      method: this.methodPrefix + 'udsSystem',
       data: {
         msg,
         ts
@@ -211,7 +215,7 @@ export class UdsLOG {
   }
   error(testerid: string, msg: string, ts: number, recvData?: Buffer) {
     this.log.error({
-      method: 'udsError',
+      method: this.methodPrefix + 'udsError',
       id: testerid,
       data: {
         msg,
@@ -229,7 +233,7 @@ export class UdsLOG {
   ) {
     const l = action == 'start' ? 'debug' : 'info'
     this.log[l]({
-      method: 'udsIndex',
+      method: this.methodPrefix + 'udsIndex',
       id: testerid,
       data: {
         serviceName,

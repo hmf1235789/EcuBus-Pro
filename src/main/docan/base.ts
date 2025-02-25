@@ -7,7 +7,7 @@ import {
   CanError,
   CanMessage,
   CanMsgType
-} from 'nodeCan/can'
+} from '../share/can'
 import { CanLOG } from '../log'
 
 export abstract class CanBase {
