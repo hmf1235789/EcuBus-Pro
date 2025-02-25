@@ -33,7 +33,8 @@
         "action": [
           {
             "trigger": {
-              "type": "periodic"
+              "type": "manual",
+              "onKey": "a"
             },
             "name": "",
             "id": "1",
@@ -42,6 +43,19 @@
             "dlc": 8,
             "data": [],
             "_X_ROW_KEY": "row_24"
+          },
+          {
+            "trigger": {
+              "type": "manual",
+              "onKey": "b"
+            },
+            "name": "",
+            "id": "1",
+            "channel": "b283da7b-1165-4e62-a609-b0eac40cb8a8",
+            "type": "can",
+            "dlc": 8,
+            "data": [],
+            "_X_ROW_KEY": "row_41"
           }
         ]
       }
