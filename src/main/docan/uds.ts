@@ -12,7 +12,8 @@ import {
   getUdsDeviceName,
   applyBuffer
 } from '../share/uds'
-import { CanAddr, CanBase, getTsUs } from '../share/can'
+import { CanAddr, getTsUs } from '../share/can'
+import { CanBase } from './base'
 // #v-ifdef IGNORE_NODE!='1'
 import { PEAK_TP } from './peak'
 import { KVASER_CAN } from './kvaser'

@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs'
-import { CanAddr, CanBase, CanMessage, swapAddr } from './share/can'
+import { CanAddr, CanMessage, swapAddr } from './share/can'
 import { TesterInfo } from './share/tester'
 import UdsTester from './workerClient'
 import { CAN_TP, TpError as CanTpError } from './docan/cantp'
@@ -17,6 +17,7 @@ import { LIN_TP, TpError as LinTpError } from './dolin/lintp'
 import { LinMode, LinMsg } from './share/lin'
 import { updateSignalVal } from './dolin'
 import { DOIP, DoipError } from './doip'
+import { CanBase } from './docan/base'
 export class NodeClass {
   private pool?: UdsTester
   private cantp: CAN_TP[] = []

@@ -1,6 +1,5 @@
 import {
   CanAddr,
-  CanBase,
   CAN_ID_TYPE,
   CanMsgType,
   CAN_ERROR_ID,
@@ -15,6 +14,7 @@ import { addrToId, CanError } from '../../share/can'
 import { CanLOG } from '../../log'
 import KV from './../build/Release/kvaser.node'
 import { v4 } from 'uuid'
+import { CanBase } from '../base'
 
 function buf2str(buf: Buffer) {
   const nullCharIndex = buf.indexOf(0) // 0 是 '\0' 的 ASCII 码

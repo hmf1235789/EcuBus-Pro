@@ -99,8 +99,8 @@
       },
       "hardware": {
         "pos": {
-          "x": 329,
-          "y": 158.5,
+          "x": -304,
+          "y": 8,
           "w": 600,
           "h": 400
         },
@@ -109,22 +109,10 @@
         "id": "hardware",
         "options": {}
       },
-      "test": {
-        "pos": {
-          "x": 1234.5,
-          "y": 55,
-          "w": 600,
-          "h": 400
-        },
-        "title": "test",
-        "label": "Test",
-        "id": "test",
-        "options": {}
-      },
       "1e1f0b3f-a46b-45e9-848f-ed899671cd5e_ia": {
         "pos": {
-          "x": 503.5,
-          "y": 52,
+          "x": 296,
+          "y": 8,
           "w": 700,
           "h": 400
         },
@@ -148,6 +136,18 @@
         "title": "trace",
         "label": "Trace",
         "id": "trace",
+        "options": {}
+      },
+      "test": {
+        "pos": {
+          "x": 996,
+          "y": 7.5,
+          "w": 759,
+          "h": 400
+        },
+        "title": "test",
+        "label": "Test",
+        "id": "test",
         "options": {}
       }
     }

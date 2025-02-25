@@ -12,14 +12,8 @@ import {
   refreshProject,
   UDSTesterMain
 } from '../docan/uds'
-import {
-  CAN_ID_TYPE,
-  CAN_SOCKET,
-  CanBase,
-  CanInterAction,
-  formatError,
-  swapAddr
-} from '../share/can'
+import { CAN_ID_TYPE, CanInterAction, formatError, swapAddr } from '../share/can'
+import { CAN_SOCKET, CanBase } from '../docan/base'
 import { CAN_TP, TpError } from '../docan/cantp'
 import { UdsAddress, UdsDevice } from '../share/uds'
 import { TesterInfo } from '../share/tester'

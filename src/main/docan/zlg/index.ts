@@ -1,6 +1,5 @@
 import {
   CanAddr,
-  CanBase,
   CAN_ID_TYPE,
   CanMsgType,
   CAN_ERROR_ID,
@@ -16,6 +15,7 @@ import { addrToId, CanError } from '../../share/can'
 import { CanLOG } from '../../log'
 import ZLG from './../build/Release/zlg.node'
 import { platform } from 'os'
+import { CanBase } from '../base'
 
 interface CANFrame {
   canId: number

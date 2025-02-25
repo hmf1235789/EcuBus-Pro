@@ -8,7 +8,6 @@ import {
   CAN_ADDR_TYPE,
   CAN_ERROR_ID,
   CAN_ID_TYPE,
-  CAN_SOCKET,
   CanAddr,
   getTsUs,
   swapAddr
