@@ -8,9 +8,11 @@ import {
   CanMessage,
   CanMsgType
 } from 'nodeCan/can'
+import { CanLOG } from '../log'
 
 export abstract class CanBase {
   abstract info: CanBaseInfo
+  abstract log: CanLOG
   abstract close(): void
   // abstract log: CanLOG
   abstract readBase(
