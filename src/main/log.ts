@@ -246,11 +246,12 @@ export class UdsLOG {
   close() {
     this.log.close()
   }
-  testInfo(id: string | undefined, event: TestEvent) {
+  testInfo(id: string | undefined, event: TestEvent, msg?: string) {
     this.log.info({
       method: 'testInfo',
       id,
-      data: event
+      data: event,
+      msg
     })
   }
 }

@@ -13,6 +13,9 @@ import reportPath from '../../resources/lib/js/report.js?asset&asarUnpack'
 import { pathToFileURL } from 'node:url'
 import { TestEvent } from 'node:test/reporters'
 import fsP from 'node:fs/promises'
+import fs from 'node:fs'
+import { SourceMapConsumer } from 'source-map'
+
 type HandlerMap = {
   output: (pool: UdsTester, data: any) => Promise<number>
   sendDiag: (
@@ -56,6 +59,7 @@ export default class UdsTester {
   ts = 0
   private cb: any
   eventHandlerMap: Partial<EventHandlerMap> = {}
+  sourceMapConsumer: SourceMapConsumer | null = null
   constructor(
     private env: {
       PROJECT_ROOT: string
@@ -64,7 +68,7 @@ export default class UdsTester {
       NAME: string
       ONLY?: boolean
     },
-    jsFilePath: string,
+    private jsFilePath: string,
     log: UdsLOG,
     private testers?: Record<string, TesterInfo>,
     private testOptions?: {
@@ -201,7 +205,20 @@ export default class UdsTester {
     } else if (event == 'test' && this.env.MODE == 'test') {
       const testEvent = data as TestEvent
 
+      // Process source map for test failures to get correct TypeScript line numbers
+
       if (!this.testOptions?.testOnly) {
+        if (testEvent.type == 'test:fail') {
+          const pos = this.sourceMapConsumer?.originalPositionFor({
+            line: testEvent.data.line || 0,
+            column: testEvent.data.column || 0
+          })
+          console.log('pos', pos, testEvent.data.line, testEvent.data.column)
+          if (pos) {
+            console.log(pos)
+          }
+        }
+        // Add the missing third parameter (message) to fix the linter error
         this.log.testInfo(this.testOptions?.id, testEvent)
       }
       this.testEvents.push(testEvent)
@@ -318,6 +335,11 @@ export default class UdsTester {
     }
   }
   async start(projectPath: string) {
+    const mapFile = `${this.jsFilePath}.map`
+    if (this.testOptions && this.testOptions.testOnly == false && fs.existsSync(mapFile)) {
+      const content = await fsP.readFile(mapFile, 'utf-8')
+      this.sourceMapConsumer = await new SourceMapConsumer(content)
+    }
     await this.pool.exec('__start', [this.serviceMap])
     await this.workerEmit('__varFc', null)
   }
@@ -343,6 +365,9 @@ export default class UdsTester {
     })
   }
   stop() {
+    if (this.sourceMapConsumer) {
+      this.sourceMapConsumer.destroy()
+    }
     if (this.getInfoPromise) {
       this.getInfoPromise.reject(new Error('worker terminated'))
     }

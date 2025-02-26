@@ -267,12 +267,12 @@ function testLog(
     if ((item.message.data?.data as any).name == '____ecubus_pro_test___') {
       continue
     }
-    if (item.message.data.type == 'test:start') {
+    if (item.message.data.type == 'test:dequeue') {
       logData.push({
         time: new Date().toLocaleTimeString(),
         label: item.message.data.data.name,
         level: 'info',
-        message: `Test ${item.message.data.data.name} started`,
+        message: `Test ${item.message.data.data.name} starting...`,
         id: cnt++
       })
     } else if (item.message.data.type == 'test:pass') {
@@ -284,6 +284,7 @@ function testLog(
         id: cnt++
       })
     } else if (item.message.data.type == 'test:fail') {
+      console.log('item', item.message.data.data)
       logData.push({
         time: new Date().toLocaleTimeString(),
         label: item.message.data.data.name,
@@ -291,6 +292,8 @@ function testLog(
         message: `Test ${item.message.data.data.name} failed, ${item.message.data.data.details.duration_ms}ms, ${item.message.data.data.details.error.message}`,
         id: cnt++
       })
+    } else if (item.message.data.type == 'test:diagnostic') {
+      console.log('diag', item.message.data.data)
     }
   }
   xGrid.value.insertAt(logData, -1).then((v: any) => {

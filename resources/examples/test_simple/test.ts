@@ -15,6 +15,9 @@ const TestWaitForMessage = async (id: number | true, timeout: number = 1000) => 
     // Register one-time handler for the specified CAN message ID
     Util.OnCanOnce(id, (msg) => {
       clearTimeout(timer)
+      console.log(
+        `ID: ${msg.id}, DLC: ${msg.data.length}, Data: ${msg.data.toString('hex').toUpperCase()}`
+      )
       resolve(msg)
     })
   })
@@ -53,6 +56,7 @@ describe('Test Suite', () => {
   // Test case that waits for any CAN message and verifies its ID is 0x2
   test('Test 2', async () => {
     const msg = await TestWaitForMessage(true, 3000)
+    throw new Error('test')
     assert(msg.id == 0x2)
   })
 

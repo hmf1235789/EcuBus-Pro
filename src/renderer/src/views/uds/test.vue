@@ -686,7 +686,7 @@ function testLog(
   }[]
 ) {
   for (const item of data) {
-    if (item.message.data.type == 'test:start') {
+    if (item.message.data.type == 'test:dequeue') {
       const key =
         item.message.data.data.name +
         ':' +

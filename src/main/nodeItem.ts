@@ -93,6 +93,10 @@ export class NodeClass {
           this.testers,
           this.testOptions
         )
+        if (this.testOptions) {
+          this.startTs = getTsUs()
+          this.log?.systemMsg(`Test Config ${this.nodeItem.name} starting...`, getTsUs(), 'info')
+        }
         this.pool.registerHandler('output', this.sendFrame.bind(this))
         this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
         this.pool.registerHandler('setSignal', this.setSignal.bind(this))
@@ -640,10 +644,6 @@ export class NodeClass {
   async start() {
     this.pool?.updateTs(0)
     await this.pool?.start(this.projectPath)
-    if (this.testOptions) {
-      this.startTs = getTsUs()
-      this.log?.systemMsg(`Test Config ${this.nodeItem.name} starting...`, getTsUs(), 'info')
-    }
   }
   cb(frame: CanMessage | LinMsg) {
     if ('msgType' in frame) {

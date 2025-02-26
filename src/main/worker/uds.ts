@@ -1346,7 +1346,8 @@ export async function* reporter(source: TestEventGenerator) {
       event.type === 'test:start' ||
       event.type === 'test:pass' ||
       event.type === 'test:fail' ||
-      event.type === 'test:diagnostic'
+      event.type === 'test:diagnostic' ||
+      event.type === 'test:dequeue'
     ) {
       workerpool.workerEmit({
         event: 'test',
