@@ -12,9 +12,6 @@ import { LinMsg } from './share/lin'
 import reportPath from '../../resources/lib/js/report.js?asset&asarUnpack'
 import { pathToFileURL } from 'node:url'
 import { TestEvent } from 'node:test/reporters'
-import fsP from 'node:fs/promises'
-import fs from 'node:fs'
-import { SourceMapConsumer } from 'source-map'
 
 type HandlerMap = {
   output: (pool: UdsTester, data: any) => Promise<number>
@@ -48,18 +45,28 @@ type EventHandlerMap = {
   [K in keyof HandlerMap]: HandlerMap[K]
 }
 
+export interface TestData {
+  event: boolean
+  eventData: TestEvent
+  data: {
+    label: string
+    message: {
+      method: string
+    }
+  }
+}
+
 export default class UdsTester {
   pool: Pool
   worker: any
   selfStop = false
   log: UdsLOG
-  testEvents: TestEvent[] = []
+  testEvents: (TestEvent | string)[] = []
   getInfoPromise?: { resolve: (v: any[]) => void; reject: (e: any) => void }
   serviceMap: Record<string, ServiceItem> = {}
   ts = 0
   private cb: any
   eventHandlerMap: Partial<EventHandlerMap> = {}
-  sourceMapConsumer: SourceMapConsumer | null = null
   constructor(
     private env: {
       PROJECT_ROOT: string
@@ -142,12 +149,15 @@ export default class UdsTester {
     globalThis.keyEvent.on('keydown', this.cb)
   }
   async getTestInfo() {
-    return new Promise<TestEvent[]>((resolve, reject) => {
+    return new Promise<(TestEvent | string)[]>((resolve, reject) => {
       if (this.env.MODE != 'test') {
         reject(new Error('not in test mode'))
         return
       }
       for (const testEvent of this.testEvents) {
+        if (typeof testEvent == 'string') {
+          continue
+        }
         if (testEvent.type == 'test:pass' && testEvent.data.name == '____ecubus_pro_test___') {
           resolve(this.testEvents)
           return
@@ -155,6 +165,9 @@ export default class UdsTester {
       }
       this.getInfoPromise = { resolve, reject }
     })
+  }
+  addTestEvent(testEvent: TestEvent | string) {
+    this.testEvents.push(testEvent)
   }
   updateTs(ts: number) {
     this.ts = ts
@@ -208,16 +221,6 @@ export default class UdsTester {
       // Process source map for test failures to get correct TypeScript line numbers
 
       if (!this.testOptions?.testOnly) {
-        if (testEvent.type == 'test:fail') {
-          const pos = this.sourceMapConsumer?.originalPositionFor({
-            line: testEvent.data.line || 0,
-            column: testEvent.data.column || 0
-          })
-          console.log('pos', pos, testEvent.data.line, testEvent.data.column)
-          if (pos) {
-            console.log(pos)
-          }
-        }
         // Add the missing third parameter (message) to fix the linter error
         this.log.testInfo(this.testOptions?.id, testEvent)
       }
@@ -335,11 +338,6 @@ export default class UdsTester {
     }
   }
   async start(projectPath: string) {
-    const mapFile = `${this.jsFilePath}.map`
-    if (this.testOptions && this.testOptions.testOnly == false && fs.existsSync(mapFile)) {
-      const content = await fsP.readFile(mapFile, 'utf-8')
-      this.sourceMapConsumer = await new SourceMapConsumer(content)
-    }
     await this.pool.exec('__start', [this.serviceMap])
     await this.workerEmit('__varFc', null)
   }
@@ -365,9 +363,6 @@ export default class UdsTester {
     })
   }
   stop() {
-    if (this.sourceMapConsumer) {
-      this.sourceMapConsumer.destroy()
-    }
     if (this.getInfoPromise) {
       this.getInfoPromise.reject(new Error('worker terminated'))
     }

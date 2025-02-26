@@ -18,6 +18,29 @@ import { LinMode, LinMsg } from './share/lin'
 import { updateSignalVal } from './dolin'
 import { DOIP, DoipError } from './doip'
 import { CanBase } from './docan/base'
+import Transport from 'winston-transport'
+
+class TestTransport extends Transport {
+  constructor(
+    private cb: (info: any) => void,
+    opts?: Transport.TransportStreamOptions
+  ) {
+    super(opts)
+    //
+    // Consume any custom options here. e.g.:
+    // - Connection information for databases
+    // - Authentication information for APIs (e.g. loggly, papertrail,
+    //   logentries, etc.).
+    //
+  }
+
+  log(info: any, callback: () => void) {
+    this.cb(info)
+
+    // Perform the writing to the remote service
+    callback()
+  }
+}
 export class NodeClass {
   private pool?: UdsTester
   private cantp: CAN_TP[] = []
@@ -26,6 +49,7 @@ export class NodeClass {
   private canBaseId: string[] = []
   private ethBaseId: string[] = []
   private startTs = 0
+
   freeEvent: {
     doip: DOIP
     id: string
@@ -80,6 +104,20 @@ export class NodeClass {
         this.log = new UdsLOG(`${nodeItem.name} ${path.basename(nodeItem.script)}`)
         if (this.testOptions) {
           this.log.addMethodPrefix('test-')
+
+          const testTransport = new TestTransport((info: any) => {
+            console.log('info', info)
+            const method = info.message.method
+            if (
+              method == 'test-udsSystem' ||
+              method == 'test-udsScript' ||
+              method == 'test-udsWarning'
+            ) {
+              this.pool?.addTestEvent(info.message.data.msg)
+            }
+            // this.pool?.addTestEvent(info)
+          })
+          this.log.addTransport(testTransport)
         }
         this.pool = new UdsTester(
           {
@@ -640,6 +678,7 @@ export class NodeClass {
       tp.close(false)
     })
     this.pool?.stop()
+    this.log?.close()
   }
   async start() {
     this.pool?.updateTs(0)

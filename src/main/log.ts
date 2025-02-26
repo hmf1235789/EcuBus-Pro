@@ -144,6 +144,12 @@ export class UdsLOG {
       format: format.combine(format.json(), format.label({ label: name }), ...externalFormat)
     })
   }
+  addTransport(t: Transport) {
+    this.log.add(t)
+  }
+  removeTransport(t: Transport) {
+    this.log.remove(t)
+  }
   sent(testerid: string, service: ServiceItem, ts: number, recvData?: Buffer, msg?: string) {
     this.log.info({
       method: this.methodPrefix + 'udsSent',
