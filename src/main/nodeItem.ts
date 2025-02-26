@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs'
-import { CanAddr, CanMessage, swapAddr } from './share/can'
+import { CanAddr, CanMessage, getTsUs, swapAddr } from './share/can'
 import { TesterInfo } from './share/tester'
 import UdsTester from './workerClient'
 import { CAN_TP, TpError as CanTpError } from './docan/cantp'
@@ -25,6 +25,7 @@ export class NodeClass {
   private linBaseId: string[] = []
   private canBaseId: string[] = []
   private ethBaseId: string[] = []
+  private startTs = 0
   freeEvent: {
     doip: DOIP
     id: string
@@ -40,7 +41,7 @@ export class NodeClass {
     private projectPath: string,
     private projectName: string,
     private testers: Record<string, TesterInfo>,
-    testOptions?:
+    private testOptions?:
       | {
           testOnly?: boolean
           id?: string
@@ -77,20 +78,20 @@ export class NodeClass {
       const jsPath = path.join(outDir, scriptNameNoExt + '.js')
       if (fs.existsSync(jsPath)) {
         this.log = new UdsLOG(`${nodeItem.name} ${path.basename(nodeItem.script)}`)
-        if (testOptions) {
+        if (this.testOptions) {
           this.log.addMethodPrefix('test-')
         }
         this.pool = new UdsTester(
           {
             PROJECT_ROOT: this.projectPath,
             PROJECT_NAME: this.projectName,
-            MODE: testOptions ? 'test' : 'node',
+            MODE: this.testOptions ? 'test' : 'node',
             NAME: nodeItem.name
           },
           jsPath,
           this.log,
           this.testers,
-          testOptions
+          this.testOptions
         )
         this.pool.registerHandler('output', this.sendFrame.bind(this))
         this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
@@ -262,8 +263,16 @@ export class NodeClass {
       }
     }
   }
-  getTestInfo() {
-    return this.pool?.getTestInfo()
+  async getTestInfo() {
+    const info = await this.pool?.getTestInfo()
+    if (this.testOptions) {
+      this.log?.systemMsg(
+        `Test Config ${this.nodeItem.name} finished, total time: ${((getTsUs() - this.startTs) / 1000).toFixed(2)}s`,
+        getTsUs(),
+        'info'
+      )
+    }
+    return info
   }
   setSignal(
     pool: UdsTester,
@@ -631,6 +640,10 @@ export class NodeClass {
   async start() {
     this.pool?.updateTs(0)
     await this.pool?.start(this.projectPath)
+    if (this.testOptions) {
+      this.startTs = getTsUs()
+      this.log?.systemMsg(`Test Config ${this.nodeItem.name} starting...`, getTsUs(), 'info')
+    }
   }
   cb(frame: CanMessage | LinMsg) {
     if ('msgType' in frame) {

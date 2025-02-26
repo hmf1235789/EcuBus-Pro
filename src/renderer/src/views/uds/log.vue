@@ -310,26 +310,25 @@ onMounted(() => {
         xGrid.value.scrollToRow(v.row)
       })
     })
-
-    window.logBus.on(props.prefix + 'udsSystem', udsLog)
   }
-  window.logBus.on(props.prefix + 'udsScript', udsLog)
-  window.logBus.on(props.prefix + 'udsWarning', udsLog)
   if (props.captureTest) {
     window.logBus.on('testInfo', testLog)
   }
+  window.logBus.on(props.prefix + 'udsSystem', udsLog)
+  window.logBus.on(props.prefix + 'udsScript', udsLog)
+  window.logBus.on(props.prefix + 'udsWarning', udsLog)
 })
 
 onUnmounted(() => {
   if (props.captureSystem) {
     mainLog()
-    window.logBus.detach(props.prefix + 'udsSystem', udsLog)
   }
-  window.logBus.detach(props.prefix + 'udsScript', udsLog)
-  window.logBus.detach(props.prefix + 'udsWarning', udsLog)
   if (props.captureTest) {
     window.logBus.detach('testInfo', testLog)
   }
+  window.logBus.detach(props.prefix + 'udsSystem', udsLog)
+  window.logBus.detach(props.prefix + 'udsScript', udsLog)
+  window.logBus.detach(props.prefix + 'udsWarning', udsLog)
 })
 </script>
 

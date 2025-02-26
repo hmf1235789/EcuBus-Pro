@@ -362,6 +362,7 @@ function handleRun(data: TestTree) {
     .then(() => {
       runtime.testStates.isRunning[data.id] = true
       runtime.testStates.activeTest = data
+      traceRef.value.clearLog()
       window.electron.ipcRenderer
         .invoke(
           'ipc-run-test',
@@ -932,7 +933,7 @@ async function handleRefresh(data: TestTree) {
         val.script
       )
       if (v != 'success') {
-        await window.electron.ipcRenderer.invoke(
+        const r = await window.electron.ipcRenderer.invoke(
           'ipc-build-project',
           project.projectInfo.path,
           project.projectInfo.name,
@@ -940,6 +941,9 @@ async function handleRefresh(data: TestTree) {
           val.script,
           true
         )
+        if (r.length > 0) {
+          throw new Error(r.map((item) => item.message).join('\n'))
+        }
       }
 
       const testInfo: TestEvent[] = await window.electron.ipcRenderer.invoke(
