@@ -43,7 +43,7 @@ EcuBus-Pro is an open-source alternative to commercial automotive diagnostic too
 - 📈 **Data Visualization**: Real-time signal graphing and analysis - [Details](./docs/um/graph/graph.md)
 - ⌨️ **Command Line**: Full-featured CLI for automation and integration - [Details](./docs/um/cli.md)
 
-[Read the Docs to Learn More.](https://app.whyengineer.com/docs/um/concept.md)
+[Read the Docs to Learn More.](https://app.whyengineer.com)
 
 ## Visual Tour
 
