@@ -153,7 +153,15 @@ ipcMain.handle('ipc-run-test', async (event, ...arg) => {
   }
   node.close()
 })
-
+ipcMain.handle('ipc-get-test-report', async (event, ...arg) => {
+  const testId = arg[0] as string
+  const reportPath = arg[1] as string
+  const node = testMap.get(testId)
+  if (node) {
+    return await node.generateHtml(reportPath)
+  }
+  return ''
+})
 ipcMain.handle('ipc-stop-test', async (event, ...arg) => {
   const testId = arg[0] as string
   const worker = testMap.get(testId)

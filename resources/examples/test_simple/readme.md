@@ -1,3 +1,10 @@
+# Test Simple
+
+About test framework, see UM [Test](../../../docs/um/test/test.md)
+- Interface: `CAN`
+- Vendor Device: `Simulate`
+- Test Script: test.ts
+```typescript
 import { describe, test, assert, CanMessage } from 'ECB'
 
 /**
@@ -25,6 +32,8 @@ const TestWaitForMessage = async (id: number | true, timeout: number = 1000) => 
 
 // Main test suite
 describe('Test Suite', () => {
+
+
   test('Wait for a specific CAN message with ID 0x1', async () => {
     await TestWaitForMessage(0x1, 3000)
     assert(true)
@@ -49,3 +58,19 @@ describe('Test Suite 2', () => {
     assert(false)
   })
 })
+```
+- CAN-IA
+  - ID (1), press a to send
+  - ID (2), press  to send
+![alt text](image.png)
+
+## Example Success
+need press a in `Wait for a specific CAN message with ID 0x1`
+and press b in `Wait for any CAN message, and verify its ID is 0x2`
+![alt text](ok.gif)
+![alt text](image-1.png)
+
+## Example Fail
+don't press any key, will timeout in `Wait can frame`
+![alt text](fail.gif)
+![alt text](image-2.png)

@@ -189,11 +189,16 @@ export default withMermaid({
           { text: 'CAN', link: '/docs/um/can/can.md' },
           { text: 'LIN', link: '/docs/um/lin/lin.md' },
           { text: 'Graph', link: '/docs/um/graph/graph.md' },
-          { text: 'CLI', link: '/docs/um/cli' },
+          { text: 'CLI', link: '/docs/um/cli.md' },
           {
             text: 'Script',
             link: '/docs/um/script',
             items: [{ text: 'Use External Package', link: '/docs/um/scriptSerialPort' }]
+          },
+          {
+            text: 'Test',
+            link: '/docs/um/test/test.md',
+            
           },
           {
             text: 'Database',
@@ -240,6 +245,11 @@ export default withMermaid({
               { text: 'Secure Access dll', link: '/examples/secure_access_dll/readme' }
             ],
             collapsed: true
+          },
+          {
+            text: 'Test',
+            items: [{ text: 'Test Simple', link: '/examples/test_simple/readme' }],
+            collapsed: true
           }
         ]
       },
@@ -258,7 +268,7 @@ export default withMermaid({
               }
             ]
           },
-          { text: 'Test', link: '/docs/dev/test' },
+          { text: 'Comp Test', link: '/docs/dev/test' },
           { text: 'Addon', link: '/docs/dev/addon' },
 
           { text: 'Releases Note', link: '/docs/dev/releases_note' }

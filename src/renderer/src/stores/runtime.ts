@@ -5,7 +5,7 @@ export type TestTree = {
   label: string
   canAdd: boolean
   id: string
-  type: 'test' | 'config'
+  type: 'test' | 'config' | 'root'
   children: TestTree[]
 
   time?: string

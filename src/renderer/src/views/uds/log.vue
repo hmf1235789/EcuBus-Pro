@@ -70,7 +70,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted, computed, toRef, watch } from 'vue'
 import { CAN_ID_TYPE, CanMsgType, getDlcByLen } from 'nodeCan/can'
-import { VxeGridProps } from 'vxe-table'
+import { VxeGridProps, VxeGridPropTypes } from 'vxe-table'
 import { VxeGrid } from 'vxe-table'
 import { Icon } from '@iconify/vue'
 import circlePlusFilled from '@iconify/icons-material-symbols/scan-delete-outline'
@@ -102,11 +102,13 @@ const props = withDefaults(
     prefix?: string
     captureTest?: boolean
     captureSystem?: boolean
+    fields?: string[]
   }>(),
   {
     prefix: '',
     captureTest: false,
-    captureSystem: true
+    captureSystem: true,
+    fields: () => ['time', 'source', 'message']
   }
 )
 
@@ -142,6 +144,21 @@ function convertMessageToHtml(message: string) {
 }
 
 const gridOptions = computed(() => {
+  const columes: VxeGridPropTypes.Columns<LogData> = []
+  for (const field of props.fields) {
+    if (field == 'time') {
+      columes.push({ field: 'time', title: 'Time', width: 120 })
+    } else if (field == 'source') {
+      columes.push({ field: 'label', title: 'Source', width: 200 })
+    } else if (field == 'message') {
+      columes.push({
+        field: 'message',
+        title: 'Message',
+        minWidth: 200,
+        slots: { default: 'message_content' } // Add custom slot for message
+      })
+    }
+  }
   const v: VxeGridProps<LogData> = {
     border: false,
     size: 'mini',
@@ -174,15 +191,7 @@ const gridOptions = computed(() => {
         editRender: {},
         slots: { default: 'default_type' }
       },
-      { field: 'time', title: 'Time', width: 120 },
-      { field: 'label', title: 'Source', width: 200 },
-      {
-        field: 'message',
-        title: 'Message',
-
-        minWidth: 200,
-        slots: { default: 'message_content' } // Add custom slot for message
-      }
+      ...columes
     ],
     rowClassName: ({ row }) => {
       return row.level
@@ -284,16 +293,17 @@ function testLog(
         id: cnt++
       })
     } else if (item.message.data.type == 'test:fail') {
-      console.log('item', item.message.data.data)
+      let file = item.message.data.data.file
+      if (file) {
+        file = window.path.relative(project.projectInfo.path, file)
+      }
       logData.push({
         time: new Date().toLocaleTimeString(),
         label: item.message.data.data.name,
         level: 'error',
-        message: `Test ${item.message.data.data.name} failed, ${item.message.data.data.details.duration_ms}ms, ${item.message.data.data.details.error.message}`,
+        message: `Test ${item.message.data.data.name} failed, ${item.message.data.data.details.duration_ms}ms, file: ${file}:${item.message.data.data.line}, details: ${item.message.data.data.details.error.message}`,
         id: cnt++
       })
-    } else if (item.message.data.type == 'test:diagnostic') {
-      console.log('diag', item.message.data.data)
     }
   }
   xGrid.value.insertAt(logData, -1).then((v: any) => {

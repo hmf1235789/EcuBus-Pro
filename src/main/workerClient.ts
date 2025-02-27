@@ -61,7 +61,7 @@ export default class UdsTester {
   worker: any
   selfStop = false
   log: UdsLOG
-  testEvents: (TestEvent | string)[] = []
+  testEvents: TestEvent[] = []
   getInfoPromise?: { resolve: (v: any[]) => void; reject: (e: any) => void }
   serviceMap: Record<string, ServiceItem> = {}
   ts = 0
@@ -155,9 +155,6 @@ export default class UdsTester {
         return
       }
       for (const testEvent of this.testEvents) {
-        if (typeof testEvent == 'string') {
-          continue
-        }
         if (testEvent.type == 'test:pass' && testEvent.data.name == '____ecubus_pro_test___') {
           resolve(this.testEvents)
           return
@@ -165,9 +162,6 @@ export default class UdsTester {
       }
       this.getInfoPromise = { resolve, reject }
     })
-  }
-  addTestEvent(testEvent: TestEvent | string) {
-    this.testEvents.push(testEvent)
   }
   updateTs(ts: number) {
     this.ts = ts

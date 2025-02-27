@@ -50,7 +50,7 @@
               "onKey": "b"
             },
             "name": "",
-            "id": "1",
+            "id": "2",
             "channel": "b283da7b-1165-4e62-a609-b0eac40cb8a8",
             "type": "can",
             "dlc": 8,
@@ -97,22 +97,10 @@
         "id": "message",
         "layoutType": "bottom"
       },
-      "hardware": {
-        "pos": {
-          "x": -317,
-          "y": 0,
-          "w": 600,
-          "h": 400
-        },
-        "title": "hardware",
-        "label": "Devices",
-        "id": "hardware",
-        "options": {}
-      },
       "1e1f0b3f-a46b-45e9-848f-ed899671cd5e_ia": {
         "pos": {
-          "x": 283,
-          "y": 8,
+          "x": 170,
+          "y": 400,
           "w": 700,
           "h": 400
         },
@@ -128,8 +116,8 @@
       },
       "trace": {
         "pos": {
-          "x": 657.5,
-          "y": 63,
+          "x": 170,
+          "y": 0,
           "w": 700,
           "h": 400
         },
@@ -140,16 +128,19 @@
       },
       "test": {
         "pos": {
-          "x": 1021,
-          "y": 208.5,
-          "w": 759,
-          "h": 400
+          "x": 586,
+          "y": 203.5,
+          "w": 1274,
+          "h": 487
         },
         "title": "test",
         "label": "Test",
         "id": "test",
         "options": {}
       }
+    },
+    "example": {
+      "catalog": "TEST"
     }
   }
 }
