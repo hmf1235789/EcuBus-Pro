@@ -57,8 +57,8 @@
               <Icon :icon="isPaused ? playIcon : pauseIcon" />
             </el-button>
           </el-tooltip>
-          <el-divider direction="vertical" />
-          <el-dropdown>
+          <el-divider v-if="showFilter" direction="vertical" />
+          <el-dropdown v-if="showFilter">
             <span class="el-dropdown-link">
               <Icon :icon="filterIcon" />
             </span>
@@ -98,7 +98,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted, computed, toRef, watch, watchEffect } from 'vue'
+import { ref, onMounted, onUnmounted, computed, toRef, watch, watchEffect, PropType } from 'vue'
 
 import { CAN_ID_TYPE, CanMessage, CanMsgType, getDlcByLen } from 'nodeCan/can'
 import { VxeGridProps } from 'vxe-table'
@@ -142,7 +142,7 @@ interface LogData {
 const database = useDataStore()
 const xGrid = ref()
 // const logData = ref<LogData[]>([])
-const checkList = ref<string[]>(['canBase', 'ipBase', 'linBase', 'uds'])
+
 interface CanBaseLog {
   method: 'canBase'
   data: CanMessage
@@ -416,14 +416,23 @@ function logDisplay(vals: LogItem[]) {
   insertData1(logData)
 }
 
-const props = defineProps<{
-  height: number
-  // start: boolean
-}>()
-
-defineExpose({
-  clearLog
+const props = defineProps({
+  height: {
+    type: Number,
+    required: true
+  },
+  showFilter: {
+    type: Boolean,
+    default: true
+  },
+  defaultCheckList: {
+    type: Array as PropType<string[]>,
+    default: () => ['canBase', 'ipBase', 'linBase', 'uds']
+  }
 })
+
+// Initialize checkList with the prop value
+const checkList = ref(props.defaultCheckList)
 
 function filterChange(method: 'uds' | 'canBase' | 'ipBase' | 'linBase', val: boolean) {
   const i = LogFilter.value.find((v) => v.v == method)
@@ -537,10 +546,20 @@ function saveAll() {
 const isPaused = ref(false)
 // const autoScroll = ref(true)
 function scrollHandle(x) {
-  if (x.type == 'body' && !isPaused.value) {
+  if (x.type == 'body' && !isPaused.value && x.direction != 'left' && x.direction != 'right') {
     isPaused.value = true
   }
 }
+
+function getData() {
+  return xGrid.value.getTableData()
+}
+
+defineExpose({
+  clearLog,
+  insertData: insertData1,
+  getData
+})
 
 function togglePause() {
   isPaused.value = !isPaused.value
@@ -574,10 +593,6 @@ const LogFilter = ref<
     value: ['ipBase', 'ipError']
   }
 ])
-
-// function toggleAutoScroll() {
-//    autoScroll.value = !autoScroll.value
-// }
 
 onMounted(() => {
   for (const item of checkList.value) {

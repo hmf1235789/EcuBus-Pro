@@ -27,35 +27,23 @@ EcuBus-Pro is an open-source alternative to commercial automotive diagnostic too
 
 - 🆓 Open-source and free to use
 - 🚀 Modern, intuitive user interface
-- 💻 Cross-platform support (Windows, Linux)
-- 🔌 Extensive hardware compatibility (PEAK, Kvaser, ZLG, and more)
-- 📝 Powerful TypeScript-based scripting engine
-- ⌨️ Full-featured command-line interface
+- 💻 Cross-platform support (Windows, Linux) - [Install](./docs/about/install.md)
+- 🔌 Multi-hardware support
+  - 🔧 **PEAK**: CAN, CAN-FD, LIN
+  - 🔧 **KVASER**: CAN, CAN-FD
+  - 🔧 **ZLG**: CAN, CAN-FD
+  - 🔧 **Toomoss**: CAN, CAN-FD
+- 🛠️ Comprehensive diagnostic capabilities
+  - 🔄 **Diagnostic Protocols**: CAN/CAN-FD, DoIP, LIN
+- 📝 **Scripting**: Advanced TypeScript-based automation - [Details](./docs/um/script.md)
+- 🧪 **Test**: HIL Test Framework - [Details](./docs/um/test/test.md)
+- 📊 **Database Support**: LIN LDF (edit & export), CAN DBC (view) - [Details](./docs/um/database.md)
+- 📈 **Data Visualization**: Real-time signal graphing and analysis - [Details](./docs/um/graph/graph.md)
+- ⌨️ **Command Line**: Full-featured CLI for automation and integration - [Details](./docs/um/cli.md)
 
-### Core Features
+For detailed information, please refer to our [User Manual](https://app.whyengineer.com/docs/um/concept.md).
 
-For detailed information, please refer to our [User Manual](./docs/um/concept.md).
-
-#### Hardware Support
-
-| Manufacturer | Supported Protocols |
-| ------------ | ------------------- |
-| PEAK         | CAN, CAN-FD, LIN    |
-| KVASER       | CAN, CAN-FD         |
-| ZLG          | CAN, CAN-FD         |
-| Toomoss      | CAN, CAN-FD         |
-
-#### Software Capabilities
-
-| Feature              | Description                                                                 |
-| -------------------- | --------------------------------------------------------------------------- |
-| Platform Support     | Windows (installer, portable), Linux (deb package)                          |
-| Diagnostic Protocols | CAN/CAN-FD, DoIP, LIN                                                       |
-| Scripting            | Advanced TypeScript-based automation - [Documentation](./docs/um/script.md) |
-| Database Support     | LIN LDF (edit & export), CAN DBC (view) - [Details](./docs/um/database.md)  |
-| Data Visualization   | Real-time signal graphing and analysis                                      |
-
-### Feature Highlights
+## Feature Highlights
 
 #### CAN Communication
 

@@ -7,11 +7,11 @@ import {
   CAN_ADDR_FORMAT,
   CAN_ADDR_TYPE,
   CAN_ID_TYPE,
-  CAN_SOCKET,
   CanAddr,
   swapAddr
 } from '../../src/main/share/can'
 import { CAN_TP, CAN_TP_SOCKET, CanTp, TP_ERROR_ID, TpError } from '../../src/main/docan/cantp'
+import { CAN_SOCKET } from 'src/main/docan/base'
 
 function createIncrementArray(length: number, start = 0) {
   const array: number[] = []

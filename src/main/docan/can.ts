@@ -6,7 +6,8 @@ import { ZLG_CAN } from './zlg'
 import { KVASER_CAN } from './kvaser'
 import { SIMULATE_CAN } from './simulate'
 import { TOOMOSS_CAN } from './toomoss'
-import { CanBase, CanBaseInfo } from '../share/can'
+import { CanBaseInfo } from '../share/can'
+import { CanBase } from './base'
 
 const libPath = path.dirname(dllLib)
 PEAK_TP.loadDllPath(libPath)

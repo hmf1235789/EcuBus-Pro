@@ -9,7 +9,6 @@ import {
   calcCanIdMixed,
   addrToId,
   swapAddr,
-  CanBase,
   CanMsgType,
   CAN_ERROR_ID,
   CanError,
@@ -23,7 +22,7 @@ import { queue, QueueObject } from 'async'
 import { v4 } from 'uuid'
 import { TpError, CanTp, TP_ERROR_ID } from '../cantp'
 import { CanLOG } from '../../log'
-
+import { CanBase } from '../base'
 const allDevice: Record<string, number> = {
   PCAN_NONEBUS: peak.PCAN_NONEBUS,
   //   PCAN_ISABUS1: peak.PCAN_ISABUS1,

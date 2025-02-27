@@ -1,6 +1,5 @@
 import {
   CanAddr,
-  CanBase,
   CAN_ID_TYPE,
   CanMsgType,
   CAN_ERROR_ID,
@@ -15,6 +14,7 @@ import { cloneDeep, set } from 'lodash'
 import { addrToId, CanError } from '../../share/can'
 import { TpError, CanTp } from '../cantp'
 import { CanLOG } from '../../log'
+import { CanBase } from '../base'
 const vBusCount = 8
 
 const vBusCountEvent: Record<number, EventEmitter> = {}

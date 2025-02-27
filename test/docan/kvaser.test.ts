@@ -7,7 +7,6 @@ import {
   CAN_ADDR_FORMAT,
   CAN_ADDR_TYPE,
   CAN_ID_TYPE,
-  CAN_SOCKET,
   CanAddr,
   swapAddr
 } from '../../src/main/share/can'

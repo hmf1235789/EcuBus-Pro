@@ -5,16 +5,15 @@ import {
   CAN_ADDR_FORMAT,
   CAN_ERROR_ID,
   CanAddr,
-  CanBase,
   CanError,
   swapAddr,
-  CAN_SOCKET,
   getLenByDlc,
   getDlcByLen,
   CAN_ADDR_TYPE,
   CanMessage
 } from '../share/can'
 import { queue, QueueObject } from 'async'
+import { CAN_SOCKET, CanBase } from './base'
 export interface CanTp {
   close: () => void
   writeTp(addr: CanAddr, data: Buffer): Promise<number>

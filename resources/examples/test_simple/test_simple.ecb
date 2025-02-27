@@ -1,0 +1,146 @@
+{
+  "data": {
+    "devices": {
+      "b283da7b-1165-4e62-a609-b0eac40cb8a8": {
+        "type": "can",
+        "canDevice": {
+          "id": "b283da7b-1165-4e62-a609-b0eac40cb8a8",
+          "name": "SIMULATE_0",
+          "handle": 0,
+          "vendor": "simulate",
+          "canfd": false,
+          "database": "",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_16"
+          }
+        }
+      }
+    },
+    "ia": {
+      "1e1f0b3f-a46b-45e9-848f-ed899671cd5e": {
+        "name": "Can IA",
+        "type": "can",
+        "id": "1e1f0b3f-a46b-45e9-848f-ed899671cd5e",
+        "devices": [
+          "b283da7b-1165-4e62-a609-b0eac40cb8a8"
+        ],
+        "action": [
+          {
+            "trigger": {
+              "type": "manual",
+              "onKey": "a"
+            },
+            "name": "",
+            "id": "1",
+            "channel": "b283da7b-1165-4e62-a609-b0eac40cb8a8",
+            "type": "can",
+            "dlc": 8,
+            "data": [],
+            "_X_ROW_KEY": "row_24"
+          },
+          {
+            "trigger": {
+              "type": "manual",
+              "onKey": "b"
+            },
+            "name": "",
+            "id": "2",
+            "channel": "b283da7b-1165-4e62-a609-b0eac40cb8a8",
+            "type": "can",
+            "dlc": 8,
+            "data": [],
+            "_X_ROW_KEY": "row_41"
+          }
+        ]
+      }
+    },
+    "tester": {},
+    "subFunction": {},
+    "nodes": {},
+    "database": {
+      "lin": {},
+      "can": {}
+    },
+    "graphs": {},
+    "tests": {
+      "8e639030-23ea-45f1-a906-82c4bb4fb192": {
+        "id": "8e639030-23ea-45f1-a906-82c4bb4fb192",
+        "name": "Test Config 01",
+        "script": "test.ts",
+        "reportPath": "./report",
+        "channel": [
+          "b283da7b-1165-4e62-a609-b0eac40cb8a8"
+        ]
+      }
+    }
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 219,
+          "w": 2562,
+          "h": 356
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      },
+      "1e1f0b3f-a46b-45e9-848f-ed899671cd5e_ia": {
+        "pos": {
+          "x": 170,
+          "y": 400,
+          "w": 700,
+          "h": 400
+        },
+        "title": "cani",
+        "label": "IA",
+        "id": "1e1f0b3f-a46b-45e9-848f-ed899671cd5e_ia",
+        "options": {
+          "params": {
+            "edit-index": "1e1f0b3f-a46b-45e9-848f-ed899671cd5e"
+          },
+          "name": "Can IA"
+        }
+      },
+      "trace": {
+        "pos": {
+          "x": 170,
+          "y": 0,
+          "w": 700,
+          "h": 400
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {}
+      },
+      "test": {
+        "pos": {
+          "x": 586,
+          "y": 203.5,
+          "w": 1274,
+          "h": 487
+        },
+        "title": "test",
+        "label": "Test",
+        "id": "test",
+        "options": {}
+      }
+    },
+    "example": {
+      "catalog": "TEST"
+    }
+  }
+}
