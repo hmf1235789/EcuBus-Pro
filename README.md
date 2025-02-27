@@ -72,6 +72,9 @@ Built on Node.js, our scripting engine enables:
 Streamline your workflow with powerful CLI support:
 ![base1](./docs/about/seq.png)
 
+### Test Framework Report
+![base1](./docs//um//test/image-1.png)
+
 ## Support & Sponsorship
 
 Consider [becoming a sponsor](./docs/about/sponsor) to support ongoing development. Sponsors receive prominent logo placement with website links. 🙏
