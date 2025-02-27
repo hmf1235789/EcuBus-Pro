@@ -155,11 +155,6 @@
     "yaml": "^2.6.0"
   },
   "overrides": {
-    "electron-vite": {
-      "esbuild": "^0.25.0"
-    },
-    "vitepress-plugin-mermaid": {
-      "esbuild": "^0.25.0"
-    }
+    "esbuild": "^0.25.0"
   }
 }
