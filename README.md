@@ -23,6 +23,8 @@
 
 ## Overview
 
+![main](./docs/about/main.png)
+
 EcuBus-Pro is an open-source alternative to commercial automotive diagnostic tools like `CAN-OE`. It provides a comprehensive solution for ECU development and testing with:
 
 - 🆓 Open-source and free to use
@@ -41,39 +43,13 @@ EcuBus-Pro is an open-source alternative to commercial automotive diagnostic too
 - 📈 **Data Visualization**: Real-time signal graphing and analysis - [Details](./docs/um/graph/graph.md)
 - ⌨️ **Command Line**: Full-featured CLI for automation and integration - [Details](./docs/um/cli.md)
 
-For detailed information, please refer to our [User Manual](https://app.whyengineer.com/docs/um/concept.md).
+[Read the Docs to Learn More.](https://app.whyengineer.com/docs/um/concept.md)
 
-## Feature Highlights
+## Visual Tour
 
-#### CAN Communication
+Take a visual journey through EcuBus-Pro's powerful features:
 
-![base1](./docs/about/base1.gif)
-
-#### UDS Diagnostics
-
-![base1](./docs/about/uds.gif)
-
-#### Signal Analysis
-
-![base1](./docs/about/graph.gif)
-
-### Scripting Engine
-
-Built on Node.js, our scripting engine enables:
-
-- Full access to Node.js ecosystem
-- Comprehensive EcuBus-Pro API integration
-- Advanced test automation capabilities
-
-![base1](./docs/um/script1.gif)
-
-### Command Line Interface
-
-Streamline your workflow with powerful CLI support:
-![base1](./docs/about/seq.png)
-
-### Test Framework Report
-![base1](./docs//um//test/image-1.png)
+[Browse Screenshots](./docs/about/screenshots.md) to see EcuBus-Pro in action and discover how it can streamline your ECU development workflow.
 
 ## Support & Sponsorship
 

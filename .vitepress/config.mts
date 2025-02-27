@@ -176,6 +176,7 @@ export default withMermaid({
         text: 'About',
         items: [
           { text: 'Introduce', link: '/' },
+          { text: 'Visual Tour', link: '/docs/about/screenshots' },
           { text: 'Install', link: '/docs/about/install' },
 
           { text: 'Sponsor ❤️', link: '/docs/about/sponsor' },
