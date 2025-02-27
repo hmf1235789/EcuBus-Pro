@@ -29,12 +29,12 @@ EcuBus-Pro is an open-source alternative to commercial automotive diagnostic too
 - 🚀 Modern, intuitive user interface
 - 💻 Cross-platform support (Windows, Linux) - [Install](./docs/about/install.md)
 - 🔌 Multi-hardware support
-  - 🔧 **PEAK**: CAN, CAN-FD, LIN
-  - 🔧 **KVASER**: CAN, CAN-FD
-  - 🔧 **ZLG**: CAN, CAN-FD
-  - 🔧 **Toomoss**: CAN, CAN-FD
+  - **PEAK**: CAN, CAN-FD, LIN
+  - **KVASER**: CAN, CAN-FD
+  - **ZLG**: CAN, CAN-FD
+  - **Toomoss**: CAN, CAN-FD
 - 🛠️ Comprehensive diagnostic capabilities
-  - 🔄 **Diagnostic Protocols**: CAN/CAN-FD, DoIP, LIN
+  - **Diagnostic Protocols**: CAN/CAN-FD, DoIP, LIN
 - 📝 **Scripting**: Advanced TypeScript-based automation - [Details](./docs/um/script.md)
 - 🧪 **Test**: HIL Test Framework - [Details](./docs/um/test/test.md)
 - 📊 **Database Support**: LIN LDF (edit & export), CAN DBC (view) - [Details](./docs/um/database.md)

@@ -34,8 +34,39 @@ export type { LinMsg }
 export type { CanMsgType } from '../share/can'
 import { dot } from 'node:test/reporters'
 import assert from 'node:assert'
+/**
+ * @category TEST
+ */
 export { assert }
-export { test, beforeEach, afterEach, before, after } from 'node:test'
+
+/**
+ * @category TEST
+ */
+export { test } from 'node:test'
+
+/**
+ * @category TEST
+ */
+export { beforeEach } from 'node:test'
+
+/**
+ * @category TEST
+ */
+export { afterEach } from 'node:test'
+
+/**
+ * @category TEST
+ */
+export { before } from 'node:test'
+
+/**
+ * @category TEST
+ */
+export { after } from 'node:test'
+
+/**
+ * @category TEST
+ */
 import { describe } from 'node:test'
 
 const selfDescribe = process.env.ONLY ? describe.only : describe
