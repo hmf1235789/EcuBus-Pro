@@ -133,20 +133,23 @@ export default class UdsTester {
         () => {}
       )
     }
+
     d.worker.stdout.on('data', (data: any) => {
       if (!this.selfStop) {
         const str = data.toString().trim()
         this.log.scriptMsg(str, this.ts)
       }
     })
+
     d.worker.stderr.on('data', (data: any) => {
       if (!this.selfStop) {
         const str = data.toString().trim()
         this.log.systemMsg(str, this.ts, 'error')
       }
     })
+
     this.cb = this.keyHandle.bind(this)
-    globalThis.keyEvent.on('keydown', this.cb)
+    globalThis.keyEvent?.on('keydown', this.cb)
   }
   async getTestInfo() {
     return new Promise<(TestEvent | string)[]>((resolve, reject) => {
@@ -364,6 +367,6 @@ export default class UdsTester {
     this.selfStop = true
     this.pool?.terminate(true).catch(null)
     this.worker?.worker?.terminate()
-    globalThis.keyEvent.off('keydown', this.cb)
+    globalThis.keyEvent?.off('keydown', this.cb)
   }
 }

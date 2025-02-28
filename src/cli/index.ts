@@ -17,10 +17,31 @@ import { ServiceItem } from 'src/main/share/uds';
 import vm from 'vm'
 import pnpmScript from '../../resources/bin/pnpm/pnpm.cjs?asset&asarUnpack'
 import glob from 'glob';
+import testMain from './test';
+import { TestEvent } from 'node:test/reporters';
 
 declare global {
     var sysLog: Logger
     var scriptLog: Logger
+}
+
+// 创建一个自定义的 Transport 来过滤掉不需要的日志
+class FilteredConsoleTransport extends Transport {
+  constructor(options: any) {
+    super(options);
+  }
+
+  log(info: any, callback: () => void) {
+    const m=info[Symbol.for('message')]
+    if(m){
+        console.log(m)
+    }
+    
+    
+    
+    // 对于其他日志，正常处理
+    callback()
+  }
 }
 
 async function parseProject(projectPath: string): Promise<{
@@ -53,13 +74,13 @@ async function parseProject(projectPath: string): Promise<{
 
 const myFormat = format.printf(({ level, message, label, timestamp }) => {
     const map:Record<string,any>={
-        'info':colors.green,
+        'info':colors.blue,
         'warn':colors.yellow,
         'error':colors.red,
         'debug':colors.gray
     }
     let msg=message as any
-    const fn=map[level]||colors.white
+    let fn=map[level]||colors.white
    
     if (typeof msg === 'object') {
       
@@ -88,11 +109,45 @@ const hexId = data.id.toString(16);
             }
 
         }else if(msg.method=='canError'||msg.method=='udsError'){
+            fn=colors.red
+            const data=msg.data as {ts: number, msg?: string}
+            msg=`${data.msg||'error'}`
+        }else if(msg.method=='testInfo'){
+            const testEvent=msg.data as TestEvent
+            if((testEvent.data as any).name=='____ecubus_pro_test___'){
+                // 使用特殊标记来跳过这条日志
+                return null;
+            }
+            if(testEvent.type == 'test:dequeue') {
+                msg = `Test ${testEvent.data.name} starting...`
+            } else if(testEvent.type == 'test:pass') {
+                if(testEvent.data.skip){
+                    fn=colors.yellow
+                    msg = `Test ${testEvent.data.name} skipped, ${testEvent.data.details.duration_ms}ms`
+                }else{
+                    fn=colors.green
+                    msg = `Test ${testEvent.data.name} passed, ${testEvent.data.details.duration_ms}ms`
+                }
+            } else if(testEvent.type == 'test:fail') {
+                fn=colors.red
+                let file = testEvent.data.file
+                if(file) {
+                    file = path.relative(process.cwd(), file)
+                }
+                msg = `Test ${testEvent.data.name} failed, ${testEvent.data.details.duration_ms}ms, file: ${file}:${testEvent.data.line}, details: ${testEvent.data.details.error.message}`
+            } else {
+               // 使用特殊标记来跳过这条日志
+               return null;
+            }
+        }else if(msg.method.endsWith('udsSystem')){
+            const data=msg.data as {ts: number, msg?: string}
+            msg=`${data.msg||'error'}`
+        }else if(msg.method.endsWith('udsError')){
             const data=msg.data as {ts: number, msg?: string}
             msg=`${data.msg||'error'}`
         }
         else{
-            console.log(msg)
+            console.log('raw',msg)
         }
 
     }else if(typeof msg === 'string'){
@@ -114,7 +169,10 @@ function createLog(level:string, file?:string){
     const f=[]
     // const cliFormat = format.cli();
     const timestamp = format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' });
-    t.push(()=>new transports.Console({level}))
+    
+    // 使用自定义的过滤 transport 替代标准控制台 transport
+    t.push(()=>new FilteredConsoleTransport({level}))
+    
     f.push(timestamp)
     f.push(myFormat)
 
@@ -149,7 +207,28 @@ npm.argument('<command>', 'pnpm command')
 // npm.option('-i, --install <package>', 'Prints the location of the globally installed executables.')
 // npm.action(async (command)=>{
 //     console.log('run npm command',command)
-    
+
+
+const test = program.command('test').description('run test config')
+test.argument('<project>', 'EcuBus-Pro project path')
+test.argument('<name>', 'test config name')
+test.option('-r, --report <report>', 'report file name')
+addLoggingOption(test)
+test.action(async (project, name, options) => {
+    createLog(options.logLevel, options.logFile)
+    try {
+        const { data, projectPath, projectName } = await parseProject(project)
+      
+        await testMain(projectPath, projectName, data, name, options.report)
+    } catch (e: any) {
+        console.trace(e)
+        sysLog.error(e.message||'failed to run test config')
+        exit(1)
+    }
+})
+
+
+
     
 // })
 if(process.argv[1]=='pnpm'||process.argv[2]=='pnpm'){
@@ -206,8 +285,6 @@ if(process.argv[1]=='pnpm'||process.argv[2]=='pnpm'){
     program.parse();
 }
 // console.log(process.argv)
-
-
 
 
 

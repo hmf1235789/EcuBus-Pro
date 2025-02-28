@@ -549,7 +549,7 @@ export class NodeClass {
       `
     return html
   }
-  async generateHtml(reportPath?: string) {
+  async generateHtml(reportPath?: string, returnHtml = false) {
     const root: TestTree = {
       label: this.nodeItem.name,
       type: 'config',
@@ -670,6 +670,9 @@ export class NodeClass {
     }
     root.children = roots
     const html = await this._generateHtml(root)
+    if (returnHtml) {
+      return html
+    }
     let fpath = path.join(this.projectPath, `${this.nodeItem.name}.html`)
     if (reportPath) {
       fpath = path.join(reportPath, `${this.nodeItem.name}.html`)
