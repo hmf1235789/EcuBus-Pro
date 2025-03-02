@@ -136,6 +136,9 @@ const myFormat = format.printf(({ level, message, label, timestamp }) => {
           file = path.relative(process.cwd(), file)
         }
         msg = `Test ${testEvent.data.name} failed, ${testEvent.data.details.duration_ms}ms, file: ${file}:${testEvent.data.line}, details: ${testEvent.data.details.error.message}`
+      } else if (testEvent.type == 'test:diagnostic') {
+        msg = testEvent.data.message
+        fn = colors.yellow
       } else {
         // 使用特殊标记来跳过这条日志
         return null

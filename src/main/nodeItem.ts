@@ -625,6 +625,18 @@ export class NodeClass {
                 // }
                 break
               }
+              case 'test:diagnostic': {
+                if (currentSuite) {
+                  currentSuite.children.push({
+                    type: 'log',
+                    label: 'Test Diagnostic',
+                    msg: event.data.message,
+                    nesting: event.data.nesting + 2,
+
+                    children: []
+                  })
+                }
+              }
             }
         } else {
           const val: TestTree = {

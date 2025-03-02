@@ -75,5 +75,6 @@ export default async function main(
     const html = await node.generateHtml(reportPath, true)
     reportPath = path.join(process.cwd(), reportPath)
     await fsP.writeFile(reportPath, html)
+    sysLog.info(`test report saved to ${reportPath}`)
   }
 }

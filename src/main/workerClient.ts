@@ -137,14 +137,18 @@ export default class UdsTester {
     d.worker.stdout.on('data', (data: any) => {
       if (!this.selfStop) {
         const str = data.toString().trim()
-        this.log.scriptMsg(str, this.ts)
+        if (str) {
+          this.log.scriptMsg(str, this.ts)
+        }
       }
     })
 
     d.worker.stderr.on('data', (data: any) => {
       if (!this.selfStop) {
         const str = data.toString().trim()
-        this.log.systemMsg(str, this.ts, 'error')
+        if (str) {
+          this.log.systemMsg(str, this.ts, 'error')
+        }
       }
     })
 

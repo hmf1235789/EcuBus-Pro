@@ -304,6 +304,14 @@ function testLog(
         message: `Test ${item.message.data.data.name} failed, ${item.message.data.data.details.duration_ms}ms, file: ${file}:${item.message.data.data.line}, details: ${item.message.data.data.details.error.message}`,
         id: cnt++
       })
+    } else if (item.message.data.type == 'test:diagnostic') {
+      logData.push({
+        time: new Date().toLocaleTimeString(),
+        label: 'Test Diagnostic',
+        level: 'info',
+        message: item.message.data.data.message,
+        id: cnt++
+      })
     }
   }
   xGrid.value.insertAt(logData, -1).then((v: any) => {
