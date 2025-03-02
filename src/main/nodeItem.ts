@@ -549,7 +549,7 @@ export class NodeClass {
       `
     return html
   }
-  async generateHtml(reportPath?: string) {
+  async generateHtml(reportPath?: string, returnHtml = false) {
     const root: TestTree = {
       label: this.nodeItem.name,
       type: 'config',
@@ -625,6 +625,18 @@ export class NodeClass {
                 // }
                 break
               }
+              case 'test:diagnostic': {
+                if (currentSuite) {
+                  currentSuite.children.push({
+                    type: 'log',
+                    label: 'Test Diagnostic',
+                    msg: event.data.message,
+                    nesting: event.data.nesting + 2,
+
+                    children: []
+                  })
+                }
+              }
             }
         } else {
           const val: TestTree = {
@@ -670,6 +682,9 @@ export class NodeClass {
     }
     root.children = roots
     const html = await this._generateHtml(root)
+    if (returnHtml) {
+      return html
+    }
     let fpath = path.join(this.projectPath, `${this.nodeItem.name}.html`)
     if (reportPath) {
       fpath = path.join(reportPath, `${this.nodeItem.name}.html`)

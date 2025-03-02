@@ -1,6 +1,6 @@
 out
 dist
-cli
+/cli
 build
 tools
 pnpm-lock.yaml
