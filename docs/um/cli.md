@@ -46,3 +46,34 @@ ecb_cli pnpm install package_name
 #### Example:
 
 ![alt text](pnpm.gif)
+
+### Test command
+
+_run test by cli_
+
+```bash
+ecb_cli test -h
+```
+
+The test command allows you to run test configurations from your EcuBus-Pro project via the command line. This is useful for automated testing, continuous integration, and regression testing without launching the GUI.
+
+#### Syntax:
+
+```bash
+ecb_cli test <project> <name> [options]
+```
+
+#### Arguments:
+
+- `project`: Path to the EcuBus-Pro project file (.ecb)
+- `name`: Name of the test configuration to run
+
+#### Options:
+
+- `-r, --report <report>`: Specify the report file name (HTML format)
+- `-b, --build`: Force build before running the test
+- `--log-level <level>`: Set the log level (error, warning, info, debug). Default is "info"
+- `-h, --help`: Display help information
+
+#### Example:
+![alt text](test.gif)

@@ -1,8 +1,17 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.19
+Changes from v0.8.18 to v0.8.19:
+
+ 
+* [feat]:cli test ok
+---
+
 ## v0.8.18
 Changes from v0.8.17 to v0.8.18:
 
+ 
+* [feat]:test framework ok 
 * [feat]:test arch base ok 
 * [refactor]: Refactor network node logic 
 * [bug]:fix log sequence issue
