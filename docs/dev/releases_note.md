@@ -1,5 +1,13 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.20
+Changes from v0.8.19 to v0.8.20:
+
+ 
+* [feat]:add ZLG ZCAN_USBCANFD_100U support 
+* [bug]:fix white screen
+---
+
 ## v0.8.19
 Changes from v0.8.18 to v0.8.19:
 
