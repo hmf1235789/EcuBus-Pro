@@ -1,5 +1,13 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.21
+Changes from v0.8.20 to v0.8.21:
+
+ 
+* [bug]:fix udp socket close twice #80 
+* [bug]:fix eth handle is required #81
+---
+
 ## v0.8.20
 Changes from v0.8.19 to v0.8.20:
 
