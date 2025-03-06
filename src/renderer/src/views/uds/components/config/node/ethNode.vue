@@ -18,7 +18,7 @@
         {{ props.vendor.toLocaleUpperCase() }}
       </el-tag>
     </el-form-item>
-    <el-form-item label="Device" prop="handle" required>
+    <el-form-item label="Device" prop="device.handle" required>
       <el-select v-model="data.device.handle" :loading="deviceLoading" style="width: 300px">
         <el-option
           v-for="item in deviceList"
@@ -96,6 +96,7 @@ function getDevice(visible: boolean) {
     window.electron.ipcRenderer
       .invoke('ipc-get-eth-devices', props.vendor.toLocaleUpperCase())
       .then((res) => {
+        console.log(res)
         deviceList.value = res
       })
       .finally(() => {
