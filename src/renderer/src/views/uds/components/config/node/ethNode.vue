@@ -96,7 +96,6 @@ function getDevice(visible: boolean) {
     window.electron.ipcRenderer
       .invoke('ipc-get-eth-devices', props.vendor.toLocaleUpperCase())
       .then((res) => {
-        console.log(res)
         deviceList.value = res
       })
       .finally(() => {
