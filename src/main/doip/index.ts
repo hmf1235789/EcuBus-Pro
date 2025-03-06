@@ -179,7 +179,7 @@ export class DOIP {
   generalTimeout = 5 * 60 * 1000
   inverseVersion = 0xfd
   maxProcessSize = 4000
-  private udp4Server: dgram.Socket
+  private udp4Server?: dgram.Socket
   private server?: net.Server
   log: DoipLOG
   udsLog: UdsLOG
@@ -213,6 +213,7 @@ export class DOIP {
         'error'
       )
       this.udp4Server?.close()
+      this.udp4Server = undefined
     })
     udp4Server.bind(13400, this.eth.handle)
 
