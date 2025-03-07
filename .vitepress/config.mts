@@ -277,7 +277,8 @@ export default withMermaid({
               {
                 text: 'Learning Resources',
                 link: '/docs/dev/jslearn'
-              }
+              },
+              { text: 'Dev New Adapter', link: '/docs/dev/adapter' }
             ]
           },
           { text: 'Comp Test', link: '/docs/dev/test' },

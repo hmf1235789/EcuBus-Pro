@@ -13,5 +13,8 @@ More information about the `Electron` framework can be found [here](https://www.
 - `Electron-builder` - The build tool for packaging the application.
 - `ElementPlus` - The UI library for building the user interface.
 - `Vite-Test` - The test tool for the project.
+- `node-addon-api` - The API for building the native node modules.
+- `node-gyp` - The build tool for the native node modules.
+- `swig` - The template engine for the project.
 
 We use [Electron-Vite](https://electron-vite.org/) to combine these stack together, which is a template for building `Electron` applications with `Vite`.
