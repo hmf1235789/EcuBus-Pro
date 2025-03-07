@@ -89,7 +89,7 @@ const data = defineModel<LinAddr>({
 const nameCheck = (rule: any, value: any, callback: any) => {
   if (value) {
     for (let i = 0; i < addrs.value.length; i++) {
-      const hasName = addrs.value[i].ethAddr?.name
+      const hasName = addrs.value[i].linAddr?.name
       if (hasName == value && i != editIndex.value) {
         callback(new Error('The name already exists'))
       }
