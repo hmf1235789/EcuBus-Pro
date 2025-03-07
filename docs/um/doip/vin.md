@@ -7,6 +7,8 @@ we support 4 VIN request methods:
 3. Broadcast VIN Request (UDP4)
 4. Multicast VIN Request (UDP6)
 
+![alt text](image-5.png)
+
 ## Unicast VIN Request
 
 > [!NOTE]
@@ -32,7 +34,9 @@ without UDP request, connect directly to the tcp server, see [[#82](https://gith
 ![alt text](image-3.png)
 ![alt text](image-4.png)
 
+## Multicast VIN Request (UDP6)
 
+unsupported yet.
 
 
 
