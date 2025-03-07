@@ -132,7 +132,7 @@
         v-if="props.type == 'can'"
         v-model="activeTabName"
         tab-position="left"
-        style="height: 660px"
+        style="height: 100%"
         closable
         @tab-remove="removeTab"
       >
@@ -160,7 +160,7 @@
         v-else-if="props.type == 'eth'"
         v-model="activeTabName"
         tab-position="left"
-        style="height: 450px"
+        style="height: 100%"
         closable
         @tab-remove="removeTab"
       >
@@ -189,7 +189,7 @@
         v-else-if="props.type == 'lin'"
         v-model="activeTabName"
         tab-position="left"
-        style="height: 450px"
+        style="height: 100%"
         closable
         @tab-remove="removeTab"
       >

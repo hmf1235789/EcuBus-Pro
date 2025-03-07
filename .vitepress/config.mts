@@ -189,6 +189,17 @@ export default withMermaid({
         items: [
           { text: 'CAN', link: '/docs/um/can/can.md' },
           { text: 'LIN', link: '/docs/um/lin/lin.md' },
+          { text: 'Ethernet',items:[
+            {
+              text:'DoIP',
+              items:[
+                {
+                  text:'VIN Request Behavior',
+                  link:'/docs/um/doip/vin.md'
+                }
+              ]
+            }
+          ] },
           { text: 'Graph', link: '/docs/um/graph/graph.md' },
           { text: 'CLI', link: '/docs/um/cli.md' },
           {
