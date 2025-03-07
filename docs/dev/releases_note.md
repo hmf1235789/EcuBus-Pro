@@ -1,5 +1,12 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.22
+Changes from v0.8.21 to v0.8.22:
+
+ 
+* [feat]:add doip connect tcp directly #82
+---
+
 ## v0.8.21
 Changes from v0.8.20 to v0.8.21:
 
