@@ -168,6 +168,8 @@ export function updateUdsDts(data: DataSet) {
               let ty = 'number'
               if (item.type == 'ASCII' || item.type == 'UNICODE') {
                 ty = 'string'
+              } else if (item.type == 'FILE') {
+                ty = 'Buffer'
               }
               return `${item.name}:${ty}`
             })
@@ -668,7 +670,7 @@ export class UDSTesterMain {
           }
           const jobRun = async function (tester: UDSTesterMain, s: ServiceItem) {
             if (tester.pool) {
-              const params: (string | number)[] = []
+              const params: (string | number | Buffer)[] = []
               for (const p of s.params) {
                 if (p.type == 'ASCII' || p.type == 'UNICODE') {
                   let str = p.phyValue as string
@@ -680,6 +682,14 @@ export class UDSTesterMain {
                     str = JSON.stringify(str)
                   }
                   params.push(str)
+                } else if (p.type == 'FILE') {
+                  //read file content
+                  let filePath = p.phyValue as string
+                  if (!path.isAbsolute(filePath)) {
+                    filePath = path.join(tester.project.projectPath, filePath)
+                  }
+                  const fileContent = await fsP.readFile(filePath)
+                  params.push(fileContent)
                 } else {
                   params.push(Number(p.phyValue))
                 }

@@ -79,25 +79,39 @@
     <el-table-column prop="Value" label="Value" min-width="300" align="center">
       <template #default="{ row, $index }">
         <div v-if="editIndex == $index" class="editParam">
-          <el-select
-            v-if="infoParam && infoParam.enum"
-            v-model="editValue.editValue"
-            filterable
-            allow-create
-            style="padding-left: 15px; padding-right: 15px"
-          >
-            <el-option v-for="e in infoParam.enum" :key="e.value" :label="e.name" :value="e.value">
-              <span style="float: left">{{ e.name }}</span>
-              <span style="float: right; color: var(--el-text-color-secondary); font-size: 13px">
-                {{ e.value }}
-              </span>
-            </el-option>
-          </el-select>
-          <el-input
-            v-else
-            v-model="editValue.editValue"
-            style="padding-left: 15px; padding-right: 15px"
-          />
+          <template v-if="row.type == 'FILE'">
+            <el-input v-model="editValue.editValue" disabled placeholder="File Path">
+              <template #append>
+                <el-button :icon="Folder" @click="selectFile" />
+              </template>
+            </el-input>
+          </template>
+          <template v-else>
+            <el-select
+              v-if="infoParam && infoParam.enum"
+              v-model="editValue.editValue"
+              filterable
+              allow-create
+              style="padding-left: 15px; padding-right: 15px"
+            >
+              <el-option
+                v-for="e in infoParam.enum"
+                :key="e.value"
+                :label="e.name"
+                :value="e.value"
+              >
+                <span style="float: left">{{ e.name }}</span>
+                <span style="float: right; color: var(--el-text-color-secondary); font-size: 13px">
+                  {{ e.value }}
+                </span>
+              </el-option>
+            </el-select>
+            <el-input
+              v-else
+              v-model="editValue.editValue"
+              style="padding-left: 15px; padding-right: 15px"
+            />
+          </template>
           <el-tooltip
             v-if="paramError['value']"
             :content="paramError['value']"
@@ -115,7 +129,7 @@
         }}</span>
       </template>
     </el-table-column>
-    <el-table-column prop="desc" label="Description" align="center">
+    <el-table-column prop="desc" label="Description" align="center" min-width="200">
       <template #default="{ $index, row }">
         <el-input v-if="editIndex == $index" v-model="editValue.desc" />
         <span v-else>{{ row.desc }}</span>
@@ -136,6 +150,9 @@
                 <el-dropdown-item @click="addParam('FLOAT')"> FLOAT </el-dropdown-item>
                 <el-dropdown-item @click="addParam('DOUBLE')"> DOUBLE </el-dropdown-item>
                 <el-dropdown-item @click="addParam('UNICODE')"> UNICODE </el-dropdown-item>
+                <el-dropdown-item :disabled="!(props.serviceId == 'Job')" @click="addParam('FILE')">
+                  FILE
+                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -195,14 +212,17 @@ import { Param, param2len, param2str, paramSetVal, DataType, ServiceItem } from 
 import { watch, ref, nextTick, computed, toRef } from 'vue'
 import Sortable from 'sortablejs'
 import { cloneDeep } from 'lodash'
-import { serviceDetail } from 'nodeCan/service'
+import { serviceDetail, ServiceId } from 'nodeCan/service'
 import { useClipboard } from '@vueuse/core'
 import { ElMessage } from 'element-plus'
+import { Folder } from '@element-plus/icons-vue'
+import { useProjectStore } from '@r/stores/project'
+
 const paramError = ref<Record<string, string>>({})
 const { copy } = useClipboard()
 const props = defineProps<{
   id: string
-  serviceId: string
+  serviceId: ServiceId
   subFunction?: boolean
   disabled?: boolean
   sid: string
@@ -231,6 +251,25 @@ watch(
   }
 )
 
+const project = useProjectStore()
+async function selectFile() {
+  const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+    defaultPath: project.projectInfo.path,
+    title: 'Script File',
+    properties: ['openFile'],
+    filters: [
+      { name: 'typescript', extensions: ['ts'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  })
+  const file = r.filePaths[0]
+  if (file) {
+    if (project.projectInfo.path)
+      editValue.value.editValue = window.path.relative(project.projectInfo.path, file)
+    else editValue.value.editValue = file
+  }
+  return file
+}
 interface EditParam extends Param {
   editValue: string
 }
@@ -286,7 +325,7 @@ function saveParam(index: number, justValid: boolean) {
   }
 
   {
-    if (d.type == 'ASCII') {
+    if (d.type == 'ASCII' || d.type == 'FILE') {
       //auto change bitLen
       d.bitLen = d.editValue.length * 8
     }
@@ -332,6 +371,7 @@ function saveParam(index: number, justValid: boolean) {
       }
       break
     case 'ASCII':
+    case 'FILE':
     case 'UNICODE':
       {
         if (d.bitLen % 8 != 0) {
@@ -446,6 +486,19 @@ function addParam(type: DataType) {
         value: Buffer.from('1', 'ascii'),
         bitLen: 8,
         type: 'ASCII',
+        deletable: true,
+        editable: true
+      })
+      break
+    case 'FILE':
+      data.value.push({
+        id: v4(),
+        name: paramName,
+        desc: '',
+        phyValue: '',
+        value: Buffer.from(''),
+        bitLen: 8,
+        type: 'FILE',
         deletable: true,
         editable: true
       })

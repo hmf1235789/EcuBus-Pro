@@ -5,7 +5,7 @@ import { serviceDetail, ServiceId, SupportServiceId } from './service'
 import { EthBaseInfo, EthAddr, EntityAddr } from './doip'
 import { LinAddr, LinBaseInfo } from './lin'
 
-export type DataType = 'NUM' | 'ARRAY' | 'ASCII' | 'UNICODE' | 'FLOAT' | 'DOUBLE'
+export type DataType = 'NUM' | 'ARRAY' | 'ASCII' | 'UNICODE' | 'FLOAT' | 'DOUBLE' | 'FILE'
 export type HardwareType = 'can' | 'lin' | 'eth'
 //serviceDetail所有的key作为serviceId
 
@@ -216,6 +216,7 @@ export function paramSetVal(param: Param, str: string | number) {
         param.value = Buffer.from(s.map((item) => parseInt(item, 16)))
       }
       break
+    case 'FILE':
     case 'ASCII': {
       const byte = Math.floor(param.bitLen / 8)
       if (str.toString().length > byte) {
