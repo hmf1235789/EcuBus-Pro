@@ -173,7 +173,8 @@ export const SupportServiceId: ServiceId[] = [
   '0x36',
   '0x37',
   '0x38',
-  'Job'
+  'Job',
+  'Job1'
 ]
 /**
  * @category UDS
@@ -206,12 +207,15 @@ export type ServiceId =
   | '0x37'
   | '0x38'
   | 'Job'
+  | 'Job1'
+
 export const serviceDetail: Record<
   ServiceId,
   {
     name: string
     hasSubFunction: boolean
-
+    fixedParam?: boolean
+    desc?: string
     defaultParams: {
       param: Param
       enum?: { name: string; value: string }[]
@@ -2203,5 +2207,78 @@ export const serviceDetail: Record<
     hasSubFunction: false,
     defaultParams: [],
     defaultRespParams: []
+  },
+  Job1: {
+    name: 'RequestDownloadBin',
+    fixedParam: true,
+    hasSubFunction: false,
+    desc: `Combines services 0x34, 0x36(N), and 0x37 into one group. Only supports bin files with memory size matching file length`,
+    defaultParams: [
+      {
+        param: {
+          id: 'dataFormatIdentifier',
+          name: 'dataFormatIdentifier',
+          bitLen: 8,
+          deletable: false,
+          editable: true,
+          type: 'NUM',
+          value: Buffer.from([0x0]),
+          phyValue: '00'
+        }
+      },
+      {
+        param: {
+          id: 'addressAndLengthFormatIdentifier',
+          name: 'addressAndLengthFormatIdentifier',
+          bitLen: 8,
+          deletable: false,
+          editable: true,
+          type: 'NUM',
+          value: Buffer.from([0x0]),
+          phyValue: '00'
+        }
+      },
+      {
+        param: {
+          id: 'memoryAddress',
+          name: 'memoryAddress',
+          bitLen: 32,
+          deletable: false,
+          editable: true,
+          type: 'NUM',
+          value: Buffer.from([0x0, 0x0, 0x0, 0x0]),
+          phyValue: '00'
+        }
+      },
+      {
+        param: {
+          id: 'binFile',
+          name: 'binFile',
+          bitLen: 0,
+          deletable: false,
+          editable: true,
+          type: 'FILE',
+          value: Buffer.from([]),
+          phyValue: ''
+        }
+      }
+    ],
+    defaultRespParams: []
   }
+}
+
+export function checkServiceId(serviceId: ServiceId | undefined, need: ('job' | 'uds')[]) {
+  if (!serviceId) return false
+
+  if (need.includes('job')) {
+    if (!serviceId.startsWith('0x')) {
+      return true
+    }
+  }
+  if (need.includes('uds')) {
+    if (serviceId.startsWith('0x')) {
+      return true
+    }
+  }
+  return false
 }

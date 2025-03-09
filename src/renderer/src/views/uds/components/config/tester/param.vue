@@ -45,7 +45,7 @@
       </template>
     </el-table-column>
     <el-table-column
-      v-if="props.serviceId != 'Job'"
+      v-if="checkServiceId(props.serviceId, ['uds'])"
       prop="length"
       label="Length (bit)"
       width="165"
@@ -80,7 +80,7 @@
       <template #default="{ row, $index }">
         <div v-if="editIndex == $index" class="editParam">
           <template v-if="row.type == 'FILE'">
-            <el-input v-model="editValue.editValue" disabled placeholder="File Path">
+            <el-input v-model="editValue.editValue" disabled placeholder="File Path" clearable>
               <template #append>
                 <el-button :icon="Folder" @click="selectFile" />
               </template>
@@ -138,9 +138,17 @@
     <el-table-column fixed="right" label="Operations" width="180" align="center">
       <template #header>
         <div>
-          <el-dropdown>
+          <el-dropdown :disabled="props.disabled">
             <span>
-              <el-button size="small" type="primary" text icon="CirclePlusFilled"> Add </el-button>
+              <el-button
+                size="small"
+                type="primary"
+                text
+                icon="CirclePlusFilled"
+                :disabled="props.disabled"
+              >
+                Add
+              </el-button>
             </span>
             <template #dropdown>
               <el-dropdown-menu>
@@ -150,7 +158,10 @@
                 <el-dropdown-item @click="addParam('FLOAT')"> FLOAT </el-dropdown-item>
                 <el-dropdown-item @click="addParam('DOUBLE')"> DOUBLE </el-dropdown-item>
                 <el-dropdown-item @click="addParam('UNICODE')"> UNICODE </el-dropdown-item>
-                <el-dropdown-item :disabled="!(props.serviceId == 'Job')" @click="addParam('FILE')">
+                <el-dropdown-item
+                  v-if="!checkServiceId(props.serviceId, ['uds'])"
+                  @click="addParam('FILE')"
+                >
                   FILE
                 </el-dropdown-item>
               </el-dropdown-menu>
@@ -165,7 +176,7 @@
             type="warning"
             text
             icon="Edit"
-            :disabled="!row.editable || (props.disabled && !row.deletable)"
+            :disabled="!row.editable"
             @click="editParam(row, $index)"
           >
             Edit
@@ -212,7 +223,7 @@ import { Param, param2len, param2str, paramSetVal, DataType, ServiceItem } from 
 import { watch, ref, nextTick, computed, toRef } from 'vue'
 import Sortable from 'sortablejs'
 import { cloneDeep } from 'lodash'
-import { serviceDetail, ServiceId } from 'nodeCan/service'
+import { serviceDetail, ServiceId, checkServiceId } from 'nodeCan/service'
 import { useClipboard } from '@vueuse/core'
 import { ElMessage } from 'element-plus'
 import { Folder } from '@element-plus/icons-vue'

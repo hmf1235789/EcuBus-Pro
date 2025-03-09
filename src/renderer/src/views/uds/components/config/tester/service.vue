@@ -19,11 +19,14 @@
               <span
                 :class="{
                   isServiceTop: !(data.id == data.serviceId),
-                  isJob: data.id == 'Job' || node.parent?.data.id == 'Job',
+                  isJob:
+                    checkServiceId(data.id, ['job']) ||
+                    checkServiceId(node.parent?.data.id, ['job']),
+
                   treeLabel: true
                 }"
                 >{{ node.label }}
-                <span v-if="data.parent && data.serviceId != 'Job'"
+                <span v-if="data.parent && checkServiceId(data.serviceId, ['uds'])"
                   >({{ data.serviceId }})</span
                 ></span
               >
@@ -66,127 +69,84 @@
         <el-form-item label="Name" prop="name" required>
           <el-input v-model="model.name" style="width: 100%" @change="reqParamChange" />
         </el-form-item>
-        <!-- <el-form-item label="Sub Function" prop="subfunc" v-if="model.serviceId != 'Job'"
-          :disabled="!serviceDetail[model.serviceId].hasSubFunction">
-          <el-select v-model="model.subfunc"
-            :disabled="!serviceDetail[model.serviceId].hasSubFunction" @change="subFuncChange">
-            <el-option v-for="item in subfuncOptions" :key="item.name" :label="item.name" :value="item.subFunction">
-              <span style="float: left">{{ item.name }}</span>
-              <span style="
-                  display: flex;
-                  align-items: center;
-                  float: right;
-                  color: var(--el-text-color-secondary);
-                  font-size: 13px;
-                " :style="{
-                  'margin-right': item.deleted ? '0px' : '13px'
-                }">{{ item.subFunction }}
-                <Icon :icon="closeIcon" v-if="item.deleted" class="subClose" @click.stop="deleteSubFunc(item)" />
-              </span>
-            </el-option>
-            <template #footer>
-              <el-button v-if="!isAdding" text bg size="small" @click="onAddOption">
-                Add Sub Function
-              </el-button>
-              <template v-else>
-                <el-form :inline="true" :model="optionVal" :rules="subFuncRules" ref="subFuncRef">
-                  <el-form-item label="Name" prop="name">
-                    <el-input v-model="optionVal.name" />
-                  </el-form-item>
-                  <el-form-item label="SubFunc" prop="subFunction">
-                    <el-input v-model="optionVal.subFunction" />
-                  </el-form-item>
-                </el-form>
-                <el-button type="primary" size="small" @click="onConfirm"> confirm </el-button>
-                <el-button size="small" @click="clear"> cancel </el-button>
-              </template>
-            </template>
-          </el-select>
-         
-        </el-form-item> -->
-        <el-form-item v-if="model.serviceId == 'Job'" label="Job Description">
-          <el-input
-            v-model="model.desc"
-            style="width: 100%"
-            :rows="2"
-            type="textarea"
-            @change="reqParamChange"
-          />
-        </el-form-item>
-        <el-form-item v-if="model.serviceId != 'Job'" label-width="0">
-          <el-col :span="12">
-            <el-form-item label="AutoSync Func / ID" prop="serviceId" required>
-              <el-checkbox v-model="model.autoSubfunc" @change="reqParamChange" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="Suppress Response" prop="serviceId" required>
-              <el-checkbox
-                v-model="model.suppress"
-                :disabled="!serviceDetail[model.serviceId].hasSubFunction"
-                @change="suppressChange"
-              />
-            </el-form-item>
-          </el-col>
-        </el-form-item>
+        <template v-if="checkServiceId(model.serviceId, ['uds'])">
+          <el-form-item label-width="0">
+            <el-col :span="12">
+              <el-form-item label="AutoSync Func / ID" prop="serviceId" required>
+                <el-checkbox v-model="model.autoSubfunc" @change="reqParamChange" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="Suppress Response" prop="serviceId" required>
+                <el-checkbox
+                  v-model="model.suppress"
+                  :disabled="!serviceDetail[model.serviceId].hasSubFunction"
+                  @change="suppressChange"
+                />
+              </el-form-item>
+            </el-col>
+          </el-form-item>
 
-        <el-form-item v-if="model.serviceId != 'Job'" label="TX PDU">
-          <div style="white-space: nowrap; overflow-x: auto">
-            <span
-              v-for="(item, index) in reqArrayStr"
-              :key="index"
-              :style="{
-                backgroundColor:
-                  index % 2 == 0
-                    ? 'var(--el-color-info-light-9)'
-                    : 'var(--el-color-primary-light-9)'
-              }"
-              class="param"
-              >{{ item }}</span
-            >
-          </div>
-        </el-form-item>
-        <el-form-item v-if="model.serviceId != 'Job' && !model.suppress" label="RX PDU">
-          <div style="white-space: nowrap; overflow-x: auto">
-            <span
-              v-for="(item, index) in respArrayStr"
-              :key="index"
-              :style="{
-                backgroundColor:
-                  index % 2 == 0
-                    ? 'var(--el-color-info-light-9)'
-                    : 'var(--el-color-primary-light-9)'
-              }"
-              class="param"
-              >{{ item }}</span
-            >
-          </div>
-        </el-form-item>
-        <el-alert
-          v-if="model.serviceId == 'Job'"
-          title="The job requires these request parameters to serve as the function's input arguments."
-          style="margin-bottom: 5px"
-          effect="light"
-          type="info"
-          :closable="false"
-        />
-        <el-alert
-          v-if="model.serviceId == 'Job'"
-          title="ASCII Param Env Variable"
-          effect="light"
-          style="margin-bottom: 5px"
-          type="success"
-          :closable="false"
-        >
-          <template #default>
-            <ul style="margin: 0">
-              <li><strong>${ProPath}:</strong> project root path</li>
-              <li><strong>${ProName}:</strong> project name</li>
-              <li><strong>${%serviceName%.serviceId}:</strong> access serviceId by serviceName</li>
-              <li><strong>${address.idType}:</strong> get running address idType (CAN)</li>
-            </ul>
-          </template>
-        </el-alert>
+          <el-form-item label="TX PDU">
+            <div style="white-space: nowrap; overflow-x: auto">
+              <span
+                v-for="(item, index) in reqArrayStr"
+                :key="index"
+                :style="{
+                  backgroundColor:
+                    index % 2 == 0
+                      ? 'var(--el-color-info-light-9)'
+                      : 'var(--el-color-primary-light-9)'
+                }"
+                class="param"
+                >{{ item }}</span
+              >
+            </div>
+          </el-form-item>
+          <el-form-item v-if="!model.suppress" label="RX PDU">
+            <div style="white-space: nowrap; overflow-x: auto">
+              <span
+                v-for="(item, index) in respArrayStr"
+                :key="index"
+                :style="{
+                  backgroundColor:
+                    index % 2 == 0
+                      ? 'var(--el-color-info-light-9)'
+                      : 'var(--el-color-primary-light-9)'
+                }"
+                class="param"
+                >{{ item }}</span
+              >
+            </div>
+          </el-form-item>
+        </template>
+        <template v-else>
+          <el-form-item label="Description">
+            <el-input
+              v-model="model.desc"
+              style="width: 100%"
+              :rows="2"
+              type="textarea"
+              @change="reqParamChange"
+            />
+          </el-form-item>
+
+          <el-alert
+            title="Job requires these request parameters to serve as the function's input arguments."
+            style="margin-bottom: 5px"
+            effect="light"
+            type="info"
+            :closable="false"
+          />
+          <el-alert
+            v-if="serviceDetail[model.serviceId].desc"
+            :title="serviceDetail[model.serviceId].desc"
+            style="margin-bottom: 5px"
+            effect="light"
+            type="info"
+            :closable="false"
+          />
+        </template>
         <el-form-item label-width="0px" style="margin-bottom: 0px" prop="params">
           <div style="width: 100%">
             <el-tabs v-model="activeName" type="border-card">
@@ -196,6 +156,7 @@
                   ref="repParamRef"
                   v-model="model.params"
                   :parent-id="editIndex"
+                  :disabled="serviceDetail[model.serviceId].fixedParam"
                   :sid="model.id"
                   :service-id="model.serviceId"
                   :other-service="serviceList[model.serviceId]"
@@ -204,7 +165,7 @@
               </el-tab-pane>
               <el-tab-pane
                 v-if="
-                  model.serviceId != 'Job' &&
+                  checkServiceId(model.serviceId, ['uds']) &&
                   !(serviceDetail[model.serviceId].hasSubFunction && model.suppress)
                 "
                 label="Response"
@@ -225,20 +186,6 @@
             </el-tabs>
           </div>
         </el-form-item>
-        <!-- <el-form-item label-width="0">
-          <div style="text-align: left; width: 100%; margin-top:20px">
-            <div v-if="!isEdit" style="display: flex; align-items: center; justify-content: flex-start">
-              <el-button type="primary" @click="onSubmit" plain>
-                Add <span v-if="model.serviceId != 'Job'" style="margin-left: 5px"> Service</span><span v-else
-                  style="margin-left: 5px"> Job</span></el-button>
-            </div>
-            <div v-else style="display: flex; align-items: center; justify-content: flex-start">
-              <el-button type="warning" @click="onSubmit" plain>
-                Save <span v-if="model.serviceId != 'Job'" style="margin-left: 5px">Service</span><span v-else
-                  style="margin-left: 5px">Job</span></el-button>
-            </div>
-          </div>
-        </el-form-item> -->
       </el-form>
       <div v-else class="tips">
         <!-- <div class="button" @click="importOdx">
@@ -309,7 +256,7 @@ import { type FormRules, type FormInstance, ElMessageBox, ElMessage } from 'elem
 import circlePlusFilled from '@iconify/icons-ep/circle-plus-filled'
 import removeIcon from '@iconify/icons-ep/remove'
 import loadIcon from '@iconify/icons-material-symbols/upload'
-import { ServiceId, serviceDetail } from 'nodeCan/service'
+import { ServiceId, checkServiceId, serviceDetail } from 'nodeCan/service'
 import { useDataStore } from '@r/stores/data'
 import { Layout } from '@r/views/uds/layout'
 
@@ -358,6 +305,7 @@ function nodeClick(data: any) {
     activeService.value = ''
   }
 }
+
 function removeService(serviceId: ServiceId, id: string) {
   // if(activeService.value&&dataModify.value&&id!=model.value.id){
   //   treeRef.value.setCurrentKey(model.value.id)
@@ -420,7 +368,7 @@ function addNewService(name: string, id: ServiceId) {
       deletedCnt++
     }
   })
-  if (deletedCnt == 0 && serviceList.value[id]?.length && id != 'Job') {
+  if (deletedCnt == 0 && serviceList.value[id]?.length && checkServiceId(id, ['uds'])) {
     ElMessageBox({
       message: 'This service may only be created once.',
       type: 'warning',
@@ -448,25 +396,26 @@ function addNewService(name: string, id: ServiceId) {
   }
   const targetService = serviceList.value[id]
   let q = ''
-  if (id == 'Job') {
+  if (!checkServiceId(id, ['uds'])) {
     q = ''
   } else {
     q = Number(id).toString()
-    if (serviceDetail[id].defaultParams) {
-      for (const p of serviceDetail[id].defaultParams) {
-        const s = cloneDeep(p.param)
-        s.id = v4()
-        model.value.params.push(s)
-      }
-    }
-    if (serviceDetail[id].defaultRespParams) {
-      for (const p of serviceDetail[id].defaultRespParams) {
-        const s = cloneDeep(p.param)
-        s.id = v4()
-        model.value.respParams.push(s)
-      }
+  }
+  if (serviceDetail[id].defaultParams) {
+    for (const p of serviceDetail[id].defaultParams) {
+      const s = cloneDeep(p.param)
+      s.id = v4()
+      model.value.params.push(s)
     }
   }
+  if (serviceDetail[id].defaultRespParams) {
+    for (const p of serviceDetail[id].defaultRespParams) {
+      const s = cloneDeep(p.param)
+      s.id = v4()
+      model.value.respParams.push(s)
+    }
+  }
+
   for (const [index, p] of model.value.params.entries()) {
     if (p.deletable == false) {
       // 将当前值转换为十六进制数值

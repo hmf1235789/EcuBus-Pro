@@ -21,7 +21,7 @@ export type { ServiceId }
 import workerpool, { worker } from 'workerpool'
 import { cloneDeep } from 'lodash'
 import { v4 } from 'uuid'
-import { ServiceId, SupportServiceId } from '../share/service'
+import { checkServiceId, ServiceId, SupportServiceId } from '../share/service'
 import { CanMessage } from '../share/can'
 import SecureAccessDll from './secureAccess'
 import { EntityAddr, VinInfo } from '../share/doip'
@@ -672,7 +672,7 @@ export class DiagJob extends Service {
   from(jobName: keyof Jobs) {
     const testerName = jobName.split('.')[0]
     const service = serviceMap.get(jobName)
-    if (service && service.serviceId == 'Job') {
+    if (service && checkServiceId(service.serviceId, ['job'])) {
       return new DiagJob(testerName, service)
     } else {
       throw new Error(`job ${jobName} not found`)
@@ -706,7 +706,7 @@ export class DiagResponse extends Service {
   static from(serviceName: ServiceName) {
     const testerName = serviceName.split('.')[0]
     const service = serviceMap.get(serviceName)
-    if (service && service.serviceId != 'Job') {
+    if (service && checkServiceId(service.serviceId, ['uds'])) {
       return new DiagResponse(testerName, service)
     } else {
       throw new Error(`service ${serviceName} not found`)

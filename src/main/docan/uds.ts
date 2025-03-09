@@ -91,7 +91,7 @@ import { TesterInfo } from '../share/tester'
 import { CAN_TP, CAN_TP_SOCKET, CanTp, TpError } from './cantp'
 
 import { SIMULATE_CAN } from './simulate'
-import { ServiceId, SupportServiceId, serviceDetail } from '../share/service'
+import { ServiceId, SupportServiceId, checkServiceId, serviceDetail } from '../share/service'
 import { UdsLOG } from '../log'
 import tsconfig from './ts.json'
 import json5 from 'json5'
@@ -163,7 +163,7 @@ export function updateUdsDts(data: DataSet) {
       for (const item of items) {
         {
           nameString.push(`${tester.name}.${item.name}`)
-          if (item.serviceId == 'Job') {
+          if (checkServiceId(item.serviceId, ['job'])) {
             const param = item.params.map((item) => {
               let ty = 'number'
               if (item.type == 'ASCII' || item.type == 'UNICODE') {
@@ -477,14 +477,14 @@ export class UDSTesterMain {
   private buildObj() {
     const obj: Record<string, any> = {}
 
-    for (const seq of this.tester.seqList) {
-      for (const service of seq.services) {
-        const targetService = this.services[service.serviceId]
-        if (targetService && targetService.serviceId === 'Job') {
-          obj[`${seq.name}:${targetService.name}`] = targetService
-        }
-      }
-    }
+    // for (const seq of this.tester.seqList) {
+    //   for (const service of seq.services) {
+    //     const targetService = this.services[service.serviceId]
+    //     if (targetService && targetService.serviceId === 'Job') {
+    //       obj[`${seq.name}:${targetService.name}`] = targetService
+    //     }
+    //   }
+    // }
 
     obj['ProPath'] = this.project.projectPath
     obj['ProName'] = this.project.projectName
@@ -688,6 +688,9 @@ export class UDSTesterMain {
                   if (!path.isAbsolute(filePath)) {
                     filePath = path.join(tester.project.projectPath, filePath)
                   }
+                  if (!fs.existsSync(filePath)) {
+                    throw new Error(`file parameter ${p.name} file not found`)
+                  }
                   const fileContent = await fsP.readFile(filePath)
                   params.push(fileContent)
                 } else {
@@ -713,7 +716,7 @@ export class UDSTesterMain {
             }
           }
           const baseRun = async function (tester: UDSTesterMain, s: ServiceItem) {
-            if (s.serviceId === 'Job') {
+            if (checkServiceId(s.serviceId, ['job'])) {
               await jobRun(tester, s)
             } else {
               // eslint-disable-next-line no-constant-condition
