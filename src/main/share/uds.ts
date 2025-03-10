@@ -71,26 +71,23 @@ export type ServiceId =
   | '0x37'
   | '0x38'
   | 'Job'
-  | 'Job1'
 
-export type ServiceDetial = Record<
-  ServiceId,
-  {
-    name: string
-    hasSubFunction: boolean
-    fixedParam?: boolean
-    desc?: string
-    buildInScript?: string
-    defaultParams: {
-      param: Param
-      enum?: { name: string; value: string }[]
-    }[]
-    defaultRespParams: {
-      param: Param
-      enum?: { name: string; value: string }[]
-    }[]
-  }
->
+export type ServiceDetailItem = {
+  name: string
+  hasSubFunction: boolean
+  fixedParam?: boolean
+  desc?: string
+  buildInScript?: string
+  defaultParams: {
+    param: Param
+    enum?: { name: string; value: string }[]
+  }[]
+  defaultRespParams: {
+    param: Param
+    enum?: { name: string; value: string }[]
+  }[]
+}
+export type ServiceDetial = Record<ServiceId, ServiceDetailItem>
 export function splitStr2(str: string) {
   const result: string[] = []
   for (let i = 0; i < str.length; i += 2) {

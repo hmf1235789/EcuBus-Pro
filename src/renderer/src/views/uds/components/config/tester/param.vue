@@ -269,10 +269,7 @@ async function selectFile() {
     defaultPath: project.projectInfo.path,
     title: 'Script File',
     properties: ['openFile'],
-    filters: [
-      { name: 'typescript', extensions: ['ts'] },
-      { name: 'All Files', extensions: ['*'] }
-    ]
+    filters: [{ name: 'All Files', extensions: ['*'] }]
   })
   const file = r.filePaths[0]
   if (file) {

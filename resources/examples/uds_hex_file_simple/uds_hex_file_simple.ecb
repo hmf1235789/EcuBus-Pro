@@ -40,7 +40,7 @@
                 "retryNum": 0,
                 "addressIndex": 0,
                 "failBehavior": "stop",
-                "serviceId": "3e5401d9-7406-4d7b-b5a7-b7b24e1ea710",
+                "serviceId": "88b26388-ea29-44be-9e51-cb2590e5a541",
                 "delay": 0,
                 "_X_ROW_KEY": "row_82"
               }
@@ -312,49 +312,50 @@
               "autoSubfunc": true
             }
           ],
-          "Job1": [
+          "RequestDownloadBin": [
             {
-              "id": "3e5401d9-7406-4d7b-b5a7-b7b24e1ea710",
+              "id": "88b26388-ea29-44be-9e51-cb2590e5a541",
               "name": "RequestDownloadBin0",
-              "serviceId": "Job1",
+              "serviceId": "RequestDownloadBin",
               "params": [
                 {
-                  "id": "01e58162-f697-41dd-b5a8-bf0e5892e846",
+                  "id": "274c964c-67aa-41a9-8e6f-559b972b8189",
                   "name": "dataFormatIdentifier",
                   "bitLen": 8,
                   "deletable": false,
                   "editable": true,
                   "type": "NUM",
+                  "phyValue": "00",
                   "value": {
                     "type": "Buffer",
                     "data": [
                       0
                     ]
-                  },
-                  "phyValue": 0
+                  }
                 },
                 {
-                  "id": "8edb3fbb-e09f-491c-ba04-43503b2d666d",
+                  "id": "fd679aee-6681-4807-92a3-f2c8a532d7ea",
                   "name": "addressAndLengthFormatIdentifier",
                   "bitLen": 8,
                   "deletable": false,
                   "editable": true,
                   "type": "NUM",
+                  "phyValue": "0x44",
                   "value": {
                     "type": "Buffer",
                     "data": [
                       68
                     ]
-                  },
-                  "phyValue": 68
+                  }
                 },
                 {
-                  "id": "24bdbb2e-b1d3-457f-939b-e52ec634fb8c",
+                  "id": "e7a73620-d435-48ee-a44a-bd256c7cde7f",
                   "name": "memoryAddress",
                   "bitLen": 32,
                   "deletable": false,
                   "editable": true,
                   "type": "NUM",
+                  "phyValue": "00",
                   "value": {
                     "type": "Buffer",
                     "data": [
@@ -363,16 +364,16 @@
                       0,
                       0
                     ]
-                  },
-                  "phyValue": "00"
+                  }
                 },
                 {
-                  "id": "bf69b5cd-6047-42e3-be3f-84298a2290f8",
+                  "id": "a22e0cf9-0e1a-4cb9-891c-53be3fd4c2b1",
                   "name": "binFile",
                   "bitLen": 48,
                   "deletable": false,
                   "editable": true,
                   "type": "FILE",
+                  "phyValue": "ecu.ts",
                   "value": {
                     "type": "Buffer",
                     "data": [
@@ -383,8 +384,7 @@
                       116,
                       115
                     ]
-                  },
-                  "phyValue": "ecu.ts"
+                  }
                 }
               ],
               "respParams": [],
@@ -435,8 +435,8 @@
       },
       "f304259b-dc7d-460b-9729-4eee2d1156de_services": {
         "pos": {
-          "x": 336,
-          "y": 39,
+          "x": 44,
+          "y": 22,
           "w": 1626,
           "h": 537
         },
@@ -452,8 +452,8 @@
       },
       "f304259b-dc7d-460b-9729-4eee2d1156de_sequence": {
         "pos": {
-          "x": 77,
-          "y": 78.00003051757812,
+          "x": 219,
+          "y": 63,
           "w": 984,
           "h": 400
         },

@@ -406,13 +406,16 @@ function addNewService(name: string, id: ServiceId) {
     for (const p of serviceDetail[id].defaultParams) {
       const s = cloneDeep(p.param)
       s.id = v4()
+      s.value = Buffer.from(p.param.value || Buffer.alloc(Math.ceil(p.param.bitLen / 8)))
       model.value.params.push(s)
+      JSON.stringify(s)
     }
   }
   if (serviceDetail[id].defaultRespParams) {
     for (const p of serviceDetail[id].defaultRespParams) {
       const s = cloneDeep(p.param)
       s.id = v4()
+      s.value = Buffer.from(p.param.value || Buffer.alloc(Math.ceil(p.param.bitLen / 8)))
       model.value.respParams.push(s)
     }
   }

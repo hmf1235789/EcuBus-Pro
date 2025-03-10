@@ -89,7 +89,7 @@ import { execFile as execCb } from 'child_process'
 import util from 'util'
 import { TesterInfo } from '../share/tester'
 import { CAN_TP, CAN_TP_SOCKET, CanTp, TpError } from './cantp'
-import buildInScript from './../../../resources/buildInScript/.gitkeep?asset&asarUnpack'
+
 import { SIMULATE_CAN } from './simulate'
 import { SupportServiceId, serviceDetail } from '../uds/service'
 import { ServiceId, checkServiceId } from '../share/uds'
@@ -105,8 +105,6 @@ import { LinMode } from '../share/lin'
 import { LDF } from 'src/renderer/src/database/ldfParse'
 import { DataSet, NodeItem } from 'src/preload/data'
 import { getJsPath } from '../util'
-
-const buildInScriptPath = path.dirname(buildInScript)
 
 const NRCMsg: Record<number, string> = {
   0x10: 'General Reject',
@@ -720,7 +718,6 @@ export class UDSTesterMain {
               if (typeof e == 'string' && e.includes('Unknown method')) {
                 const buildScript = serviceDetail[s.serviceId].buildInScript
                 if (buildScript) {
-                  const scriptPath = path.join(buildInScriptPath, buildScript)
                   let tmpPool: UdsTester | undefined
                   try {
                     tmpPool = new UdsTester(
@@ -730,7 +727,7 @@ export class UDSTesterMain {
                         MODE: 'sequence',
                         NAME: tester.tester.name
                       },
-                      scriptPath,
+                      buildScript,
                       log,
                       { [tester.tester.id]: tester.tester }
                     )

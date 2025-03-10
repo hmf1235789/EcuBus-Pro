@@ -1,5 +1,8 @@
-import { Param, ServiceId } from '../share/uds'
-
+import path from 'path'
+import { Param, ServiceDetailItem, ServiceDetial, ServiceId } from '../share/uds'
+import buildInScript from './../../../resources/buildInScript/.gitkeep?asset&asarUnpack'
+import { globSync } from 'glob'
+import fs from 'fs'
 export const SupportServiceId: ServiceId[] = [
   '0x10',
   '0x11',
@@ -29,28 +32,12 @@ export const SupportServiceId: ServiceId[] = [
   '0x38',
   'Job'
 ]
+
 /**
  * @category UDS
  */
 
-export const serviceDetail: Record<
-  ServiceId,
-  {
-    name: string
-    hasSubFunction: boolean
-    fixedParam?: boolean
-    desc?: string
-    buildInScript?: string
-    defaultParams: {
-      param: Param
-      enum?: { name: string; value: string }[]
-    }[]
-    defaultRespParams: {
-      param: Param
-      enum?: { name: string; value: string }[]
-    }[]
-  }
-> = {
+export const serviceDetail: ServiceDetial = {
   '0x10': {
     name: 'DiagnosticSessionControl',
     hasSubFunction: true,
@@ -2032,63 +2019,28 @@ export const serviceDetail: Record<
     hasSubFunction: false,
     defaultParams: [],
     defaultRespParams: []
-  },
-  Job1: {
-    name: 'RequestDownloadBin',
-    fixedParam: true,
-    buildInScript: 'RequestDownloadBin.js',
-    hasSubFunction: false,
-    desc: `Combines services 0x34, 0x36(N), and 0x37 into one group. Only supports bin files with memory size matching file length`,
-    defaultParams: [
-      {
-        param: {
-          id: 'dataFormatIdentifier',
-          name: 'dataFormatIdentifier',
-          bitLen: 8,
-          deletable: false,
-          editable: true,
-          type: 'NUM',
-          value: Buffer.from([0x0]),
-          phyValue: '00'
-        }
-      },
-      {
-        param: {
-          id: 'addressAndLengthFormatIdentifier',
-          name: 'addressAndLengthFormatIdentifier',
-          bitLen: 8,
-          deletable: false,
-          editable: true,
-          type: 'NUM',
-          value: Buffer.from([0x44]),
-          phyValue: '0x44'
-        }
-      },
-      {
-        param: {
-          id: 'memoryAddress',
-          name: 'memoryAddress',
-          bitLen: 32,
-          deletable: false,
-          editable: true,
-          type: 'NUM',
-          value: Buffer.from([0x0, 0x0, 0x0, 0x0]),
-          phyValue: '00'
-        }
-      },
-      {
-        param: {
-          id: 'binFile',
-          name: 'binFile',
-          bitLen: 0,
-          deletable: false,
-          editable: true,
-          type: 'FILE',
-          value: Buffer.from([]),
-          phyValue: ''
-        }
-      }
-    ],
-    defaultRespParams: []
+  }
+}
+
+const buildInScriptPath = path.dirname(buildInScript)
+
+//buildInScriptPath/*/plugin.json
+
+const pluginFiles = globSync('*/plugin.json', {
+  cwd: buildInScriptPath
+})
+
+for (let pluginFile of pluginFiles) {
+  try {
+    pluginFile = path.join(buildInScriptPath, pluginFile)
+    const plugin = JSON.parse(fs.readFileSync(pluginFile, 'utf8'))
+    const item = plugin.service as ServiceDetailItem
+    if (item.buildInScript) {
+      const dir = path.dirname(pluginFile)
+      item.buildInScript = path.join(dir, item.buildInScript)
+      serviceDetail[item.name as ServiceId] = item
+    }
+  } catch (error) {
+    null
   }
 }
