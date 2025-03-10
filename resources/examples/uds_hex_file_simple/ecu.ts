@@ -1,4 +1,4 @@
-import { DiagResponse } from 'ECB'
+import { DiagResponse, describe } from 'ECB'
 
 Util.Init(() => {})
 

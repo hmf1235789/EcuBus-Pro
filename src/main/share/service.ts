@@ -216,6 +216,7 @@ export const serviceDetail: Record<
     hasSubFunction: boolean
     fixedParam?: boolean
     desc?: string
+    buildInScript?: string
     defaultParams: {
       param: Param
       enum?: { name: string; value: string }[]
@@ -2211,6 +2212,7 @@ export const serviceDetail: Record<
   Job1: {
     name: 'RequestDownloadBin',
     fixedParam: true,
+    buildInScript: 'RequestDownloadBin.js',
     hasSubFunction: false,
     desc: `Combines services 0x34, 0x36(N), and 0x37 into one group. Only supports bin files with memory size matching file length`,
     defaultParams: [
@@ -2234,8 +2236,8 @@ export const serviceDetail: Record<
           deletable: false,
           editable: true,
           type: 'NUM',
-          value: Buffer.from([0x0]),
-          phyValue: '00'
+          value: Buffer.from([0x44]),
+          phyValue: '0x44'
         }
       },
       {

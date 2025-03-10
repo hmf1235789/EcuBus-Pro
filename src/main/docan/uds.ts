@@ -89,7 +89,7 @@ import { execFile as execCb } from 'child_process'
 import util from 'util'
 import { TesterInfo } from '../share/tester'
 import { CAN_TP, CAN_TP_SOCKET, CanTp, TpError } from './cantp'
-
+import buildInScript from './../../../resources/buildInScript/.gitkeep?asset&asarUnpack'
 import { SIMULATE_CAN } from './simulate'
 import { ServiceId, SupportServiceId, checkServiceId, serviceDetail } from '../share/service'
 import { UdsLOG } from '../log'
@@ -104,6 +104,9 @@ import { LinMode } from '../share/lin'
 import { LDF } from 'src/renderer/src/database/ldfParse'
 import { DataSet, NodeItem } from 'src/preload/data'
 import { getJsPath } from '../util'
+
+const buildInScriptPath = path.dirname(buildInScript)
+
 const NRCMsg: Record<number, string> = {
   0x10: 'General Reject',
   0x11: 'Service Not Supported',
@@ -231,9 +234,17 @@ export class UDSTesterMain {
   }
   ac: AbortController = new AbortController()
   pool?: UdsTester
+  switchPool?: UdsTester
+  log?: UdsLOG
 
   cancel() {
     this.ac.abort()
+  }
+  close() {
+    this.log?.close()
+    this.cancel()
+    this.pool?.stop()
+    this.switchPool?.stop()
   }
   private async delay(ms: number): Promise<void> {
     return new Promise((resolve) => {
@@ -247,7 +258,7 @@ export class UDSTesterMain {
     if (this.pool) {
       return await this.pool.exec(this.tester.name, method, params)
     } else {
-      return []
+      throw 'Unknown method or pool not found'
     }
   }
   setCanBase(base?: CanBase) {
@@ -266,7 +277,7 @@ export class UDSTesterMain {
     this.ac = new AbortController()
     const targetDevice = this.device
     if (targetDevice) {
-      const log = new UdsLOG(`${this.tester.name} Seq#${seqIndex}`)
+      this.log = new UdsLOG(`${this.tester.name} Seq#${seqIndex}`)
       if (this.tester.script) {
         let scriptPath
         if (path.isAbsolute(this.tester.script) === false) {
@@ -288,15 +299,16 @@ export class UDSTesterMain {
             NAME: this.tester.name
           },
           jsPath,
-          log,
+          this.log,
           { [this.tester.id]: this.tester }
         )
         this.pool?.updateTs(0)
         try {
-          await this.pool.start(this.project.projectPath)
+          await this.pool.start(this.project.projectPath, this.tester.name)
         } catch (e: any) {
-          log.error(this.tester.id, e.message, 0)
-          log.close()
+          this.log?.error(this.tester.id, e.message, 0)
+          this.log?.close()
+          this.pool?.stop()
           throw e
         }
       }
@@ -308,7 +320,7 @@ export class UDSTesterMain {
       if (targetDevice.type == 'can' && targetDevice.canDevice) {
         try {
           if (this.runningCanBase) {
-            await this.runCanSequenceWithBase(this.runningCanBase, seqIndex, log, cycleCount)
+            await this.runCanSequenceWithBase(this.runningCanBase, seqIndex, this.log, cycleCount)
           } else {
             // await this.runCanSequence(targetDevice.canDevice, seqIndex, log, cycleCount)
             throw new Error('can base not found')
@@ -317,15 +329,15 @@ export class UDSTesterMain {
           if (this.ac.signal.aborted) {
             null
           } else {
-            log.error(this.tester.id, e.message, this.lastActiveTs)
-            log.close()
+            this.log.error(this.tester.id, e.message, this.lastActiveTs)
+
             throw e
           }
         }
       } else if (targetDevice.type == 'eth' && targetDevice.ethDevice) {
         try {
           if (this.runningDoip) {
-            await this.runEthSequenceWithBase(this.runningDoip, seqIndex, log, cycleCount)
+            await this.runEthSequenceWithBase(this.runningDoip, seqIndex, this.log, cycleCount)
           } else {
             // await this.runCanSequence(targetDevice.canDevice, seqIndex, log, cycleCount)
             throw new Error('eth base not found')
@@ -334,15 +346,15 @@ export class UDSTesterMain {
           if (this.ac.signal.aborted) {
             null
           } else {
-            log.error(this.tester.id, e.message, this.lastActiveTs)
-            log.close()
+            this.log.error(this.tester.id, e.message, this.lastActiveTs)
+
             throw e
           }
         }
       } else if (targetDevice.type == 'lin' && targetDevice.linDevice) {
         try {
           if (this.runningLinBase) {
-            await this.runLinSequenceWithBase(this.runningLinBase, seqIndex, log, cycleCount)
+            await this.runLinSequenceWithBase(this.runningLinBase, seqIndex, this.log, cycleCount)
           } else {
             // await this.runCanSequence(targetDevice.canDevice, seqIndex, log, cycleCount)
             throw new Error('lin base not found')
@@ -351,13 +363,12 @@ export class UDSTesterMain {
           if (this.ac.signal.aborted) {
             null
           } else {
-            log.error(this.tester.id, e.message, this.lastActiveTs)
-            log.close()
+            this.log.error(this.tester.id, e.message, this.lastActiveTs)
+
             throw e
           }
         }
       }
-      log.close()
     } else {
       throw new Error('target device not found')
     }
@@ -369,7 +380,7 @@ export class UDSTesterMain {
     cycleCount: number
   ) {
     const tp = new CAN_TP(base)
-    await this.runCanTp(
+    await this.runTp(
       {
         createSocket: async (addr: UdsAddress) => {
           if (addr.canAddr == undefined) {
@@ -394,7 +405,7 @@ export class UDSTesterMain {
     log: UdsLOG,
     cycleCount: number
   ) {
-    await this.runCanTp(
+    await this.runTp(
       {
         createSocket: async (addr: UdsAddress) => {
           if (addr.ethAddr == undefined) {
@@ -421,7 +432,7 @@ export class UDSTesterMain {
     cycleCount: number
   ) {
     const tp = new LIN_TP(base)
-    await this.runCanTp(
+    await this.runTp(
       {
         createSocket: async (addr: UdsAddress) => {
           if (addr.linAddr == undefined) {
@@ -490,7 +501,7 @@ export class UDSTesterMain {
     obj['ProName'] = this.project.projectName
     return obj
   }
-  private async runCanTp(
+  private async runTp(
     canTp: {
       createSocket: (addr: UdsAddress) => Promise<{
         write: (data: Buffer) => Promise<number>
@@ -669,51 +680,100 @@ export class UDSTesterMain {
             return true
           }
           const jobRun = async function (tester: UDSTesterMain, s: ServiceItem) {
-            if (tester.pool) {
-              const params: (string | number | Buffer)[] = []
-              for (const p of s.params) {
-                if (p.type == 'ASCII' || p.type == 'UNICODE') {
-                  let str = p.phyValue as string
-                  str = str.replace(/\$\{(\w+)\}/g, (match, p1) => {
-                    // p1 是括号中匹配的内容，即'xx'。返回实际值或原始匹配（如果找不到）
-                    return get(values, p1) || match
-                  })
-                  if (typeof str == 'object') {
-                    str = JSON.stringify(str)
-                  }
-                  params.push(str)
-                } else if (p.type == 'FILE') {
-                  //read file content
-                  let filePath = p.phyValue as string
-                  if (!path.isAbsolute(filePath)) {
-                    filePath = path.join(tester.project.projectPath, filePath)
-                  }
-                  if (!fs.existsSync(filePath)) {
-                    throw new Error(`file parameter ${p.name} file not found`)
-                  }
-                  const fileContent = await fsP.readFile(filePath)
-                  params.push(fileContent)
-                } else {
-                  params.push(Number(p.phyValue))
+            const params: (string | number | Buffer)[] = []
+            for (const p of s.params) {
+              if (p.type == 'ASCII' || p.type == 'UNICODE') {
+                let str = p.phyValue as string
+                str = str.replace(/\$\{(\w+)\}/g, (match, p1) => {
+                  // p1 是括号中匹配的内容，即'xx'。返回实际值或原始匹配（如果找不到）
+                  return get(values, p1) || match
+                })
+                if (typeof str == 'object') {
+                  str = JSON.stringify(str)
                 }
-              }
-
-              const services = await tester.execJob(s.name, params)
-
-              if (services) {
-                let percent = 0
-                const step = 100 / services.length
-                for (const ser of services) {
-                  await baseRun(tester, ser)
-
-                  percent += step
-                  log.udsIndex(tester.tester.id, serviceIndex, ser.name, 'progress', percent)
+                params.push(str)
+              } else if (p.type == 'FILE') {
+                //read file content
+                let filePath = p.phyValue as string
+                if (!filePath) {
+                  throw new Error(`file parameter ${p.name} is empty`)
                 }
+                if (!path.isAbsolute(filePath)) {
+                  filePath = path.join(tester.project.projectPath, filePath)
+                }
+                if (!fs.existsSync(filePath)) {
+                  throw new Error(`file parameter ${p.name} file not found`)
+                }
+
+                const fileContent = await fsP.readFile(filePath)
+                params.push(fileContent)
+              } else {
+                params.push(Number(p.phyValue))
               }
-              log.udsIndex(tester.tester.id, serviceIndex, s.name, 'finished')
-            } else {
-              throw new Error('the pool has been terminated')
             }
+            let services: ServiceItem[] | undefined
+            // eslint-disable-next-line no-useless-catch
+            try {
+              services = await tester.execJob(s.name, params)
+            } catch (e: any) {
+              if (typeof e == 'string' && e.includes('Unknown method')) {
+                const buildScript = serviceDetail[s.serviceId].buildInScript
+                if (buildScript) {
+                  const scriptPath = path.join(buildInScriptPath, buildScript)
+                  let tmpPool: UdsTester | undefined
+                  try {
+                    tmpPool = new UdsTester(
+                      {
+                        PROJECT_ROOT: tester.project.projectPath,
+                        PROJECT_NAME: tester.project.projectName,
+                        MODE: 'sequence',
+                        NAME: tester.tester.name
+                      },
+                      scriptPath,
+                      log,
+                      { [tester.tester.id]: tester.tester }
+                    )
+                    tmpPool.updateTs(tester.lastActiveTs)
+
+                    await tmpPool.start(tester.project.projectPath, tester.tester.name)
+
+                    services = await tmpPool.exec(
+                      tester.tester.name,
+                      serviceDetail[s.serviceId].name,
+                      params
+                    )
+                    tester.switchPool = tester.pool
+                    tester.pool = tmpPool
+                  } catch (e: any) {
+                    tmpPool?.stop()
+                    throw e
+                  }
+                } else {
+                  throw new Error(
+                    `Unknown method "${s.name}", check: https://app.whyengineer.com/scriptApi/classes/UtilClass.html#register`
+                  )
+                }
+              } else {
+                throw e
+              }
+            }
+
+            if (services) {
+              let percent = 0
+              const step = 100 / services.length
+              for (const ser of services) {
+                await baseRun(tester, ser)
+
+                percent += step
+                log.udsIndex(tester.tester.id, serviceIndex, ser.name, 'progress', percent)
+              }
+            }
+            if (tester.switchPool) {
+              tester.pool?.stop()
+              tester.pool = tester.switchPool
+              tester.switchPool = undefined
+            }
+            log.udsIndex(tester.tester.id, serviceIndex, s.name, 'finished')
           }
           const baseRun = async function (tester: UDSTesterMain, s: ServiceItem) {
             if (checkServiceId(s.serviceId, ['job'])) {

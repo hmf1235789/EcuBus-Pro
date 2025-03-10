@@ -425,7 +425,7 @@ function saveParam(index: number, justValid: boolean) {
     paramError.value['value'] = e.message
     error = true
   }
-  if (otherService.value) {
+  if (otherService.value && checkServiceId(props.serviceId, ['uds'])) {
     for (const ss of otherService.value) {
       if (ss.id != props.sid) {
         const params = props.id == 'req' ? ss.params : ss.respParams

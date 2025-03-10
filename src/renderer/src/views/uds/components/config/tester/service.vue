@@ -416,42 +416,44 @@ function addNewService(name: string, id: ServiceId) {
     }
   }
 
-  for (const [index, p] of model.value.params.entries()) {
-    if (p.deletable == false) {
-      // 将当前值转换为十六进制数值
-      const currentValue = parseInt(p.value.toString('hex'), 16)
-      let maxValue = currentValue
+  if (checkServiceId(id, ['uds'])) {
+    for (const [index, p] of model.value.params.entries()) {
+      if (p.deletable == false) {
+        // 将当前值转换为十六进制数值
+        const currentValue = parseInt(p.value.toString('hex'), 16)
+        let maxValue = currentValue
 
-      // 查找所有目标服务中的最大值
-      for (const v of targetService) {
-        const b = Buffer.from(v.params[index].value)
-        const compareValue = parseInt(b.toString('hex'), 16)
+        // 查找所有目标服务中的最大值
+        for (const v of targetService) {
+          const b = Buffer.from(v.params[index].value)
+          const compareValue = parseInt(b.toString('hex'), 16)
 
-        if (compareValue >= maxValue) {
-          maxValue = compareValue
+          if (compareValue >= maxValue) {
+            maxValue = compareValue
+          }
         }
-      }
 
-      // 如果当前值不是唯一的，使用最大值+1
-      if (maxValue >= currentValue) {
-        // 将新值转回Buffer
-        const newValueHex = (maxValue + 1).toString(16).padStart(p.value.length * 2, '0')
-        p.value = Buffer.from(newValueHex, 'hex')
-        if (p.value.length * 8 > p.bitLen) {
-          activeService.value = ''
-          ElMessageBox({
-            message: 'The value is out of range',
-            type: 'warning',
-            title: 'Warning',
-            buttonSize: 'small',
-            appendTo: `#win${editIndex.value}_services`
-          })
-          return
+        // 如果当前值不是唯一的，使用最大值+1
+        if (maxValue >= currentValue) {
+          // 将新值转回Buffer
+          const newValueHex = (maxValue + 1).toString(16).padStart(p.value.length * 2, '0')
+          p.value = Buffer.from(newValueHex, 'hex')
+          if (p.value.length * 8 > p.bitLen) {
+            activeService.value = ''
+            ElMessageBox({
+              message: 'The value is out of range',
+              type: 'warning',
+              title: 'Warning',
+              buttonSize: 'small',
+              appendTo: `#win${editIndex.value}_services`
+            })
+            return
+          }
         }
+        paramSetValRaw(p, p.value)
+        reqParamChange()
+        break
       }
-      paramSetValRaw(p, p.value)
-      reqParamChange()
-      break
     }
   }
   if (targetService == undefined) {

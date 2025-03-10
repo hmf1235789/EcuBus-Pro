@@ -338,8 +338,8 @@ export default class UdsTester {
       throw formatError(e)
     }
   }
-  async start(projectPath: string) {
-    await this.pool.exec('__start', [this.serviceMap])
+  async start(projectPath: string, testerName?: string) {
+    await this.pool.exec('__start', [this.serviceMap, testerName])
     await this.workerEmit('__varFc', null)
   }
 
@@ -367,7 +367,6 @@ export default class UdsTester {
     if (this.getInfoPromise) {
       this.getInfoPromise.reject(new Error('worker terminated'))
     }
-    this.log.close()
     this.selfStop = true
     this.pool?.terminate(true).catch(null)
     this.worker?.worker?.terminate()
