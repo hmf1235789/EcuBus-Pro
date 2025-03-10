@@ -256,10 +256,11 @@ import { type FormRules, type FormInstance, ElMessageBox, ElMessage } from 'elem
 import circlePlusFilled from '@iconify/icons-ep/circle-plus-filled'
 import removeIcon from '@iconify/icons-ep/remove'
 import loadIcon from '@iconify/icons-material-symbols/upload'
-import { ServiceId, checkServiceId, serviceDetail } from 'nodeCan/service'
+import { ServiceId, checkServiceId } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
 import { Layout } from '@r/views/uds/layout'
 
+const serviceDetail = window.serviceDetail
 const dialogVisible = ref(false)
 const loading = ref(false)
 const activeService = ref('')

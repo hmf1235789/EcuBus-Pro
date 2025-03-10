@@ -21,7 +21,7 @@ export type { ServiceId }
 import workerpool, { worker } from 'workerpool'
 import { cloneDeep } from 'lodash'
 import { v4 } from 'uuid'
-import { checkServiceId, ServiceId, SupportServiceId } from '../share/service'
+import { checkServiceId, ServiceId } from './../share/uds'
 import { CanMessage } from '../share/can'
 import SecureAccessDll from './secureAccess'
 import { EntityAddr, VinInfo } from '../share/doip'

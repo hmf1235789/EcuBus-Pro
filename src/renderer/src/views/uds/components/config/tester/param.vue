@@ -223,12 +223,13 @@ import { Param, param2len, param2str, paramSetVal, DataType, ServiceItem } from 
 import { watch, ref, nextTick, computed, toRef } from 'vue'
 import Sortable from 'sortablejs'
 import { cloneDeep } from 'lodash'
-import { serviceDetail, ServiceId, checkServiceId } from 'nodeCan/service'
+import { ServiceId, checkServiceId } from 'nodeCan/uds'
 import { useClipboard } from '@vueuse/core'
 import { ElMessage } from 'element-plus'
 import { Folder } from '@element-plus/icons-vue'
 import { useProjectStore } from '@r/stores/project'
 
+const serviceDetail = window.serviceDetail
 const paramError = ref<Record<string, string>>({})
 const { copy } = useClipboard()
 const props = defineProps<{

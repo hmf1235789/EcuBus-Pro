@@ -20,6 +20,7 @@ import type { Ref } from 'vue'
 import path from 'path'
 import { Logger } from 'winston'
 import EventBus from './../renderer/src/event'
+import { ServiceDetial } from 'nodeCan/uds'
 
 declare global {
   interface Window {
@@ -32,6 +33,7 @@ declare global {
       set: (property: string, val: unknown) => void
       get: (key: string) => unknown
     }
+    serviceDetail: ServiceDetial
     globalStart: Ref<boolean>
     startTime: number
     path: typeof path

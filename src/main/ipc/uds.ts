@@ -37,9 +37,14 @@ import { getMessageData } from 'src/renderer/src/database/dbc/calc'
 import { NodeClass } from '../nodeItem'
 import { getJsPath } from '../util'
 import UdsTester from '../workerClient'
+import { serviceDetail } from '../uds/service'
 
 const libPath = path.dirname(dllLib)
 log.info('dll lib path:', libPath)
+
+ipcMain.on('ipc-service-detail', (event, arg) => {
+  event.returnValue = serviceDetail
+})
 
 ipcMain.on('ipc-open-script-api', (event, arg) => {
   shell.openPath(path.join(path.dirname(scriptIndex), 'scriptApi', 'index.html'))

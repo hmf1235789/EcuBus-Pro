@@ -300,7 +300,6 @@ import { type FormRules, type FormInstance, ElMessageBox, ElMessage } from 'elem
 import circlePlusFilled from '@iconify/icons-ep/circle-plus-filled'
 import removeIcon from '@iconify/icons-ep/remove'
 import loadIcon from '@iconify/icons-material-symbols/upload'
-import { ServiceId, serviceDetail } from 'nodeCan/service'
 import { useDataStore } from '@r/stores/data'
 import { Layout } from '@r/views/uds/layout'
 import { TestConfig } from 'src/preload/data'
