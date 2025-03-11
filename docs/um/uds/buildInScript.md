@@ -44,7 +44,7 @@ Here's how to create your own script:
 ### Script Structure
 
 1. **Directory Setup**
-   - Create a new directory under `${App Install Path}/resources/resources/app.asar.unpacked/resources/buildInScript/`
+   - Create a new directory under `${App Install Path}/resources/app.asar.unpacked/resources/buildInScript/`
    - Name it according to your script's function (e.g., `MyCustomScript`)
 
 2. **Required Files**
