@@ -263,6 +263,7 @@ export default withMermaid({
             text: 'UDS',
             items: [
               { text: 'UDS Hex File', link: '/examples/uds_hex_file/readme' },
+              { text: 'UDS Binary File', link: '/examples/uds_bin_file/readme' },
               { text: 'Secure Access dll', link: '/examples/secure_access_dll/readme' }
             ],
             collapsed: true
