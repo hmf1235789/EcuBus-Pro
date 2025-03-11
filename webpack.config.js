@@ -55,6 +55,7 @@ class MyCustomPlugin {
         //reaplace
         content=content.replace("import { ServiceItem } from '../share/uds';",'')
         content=content.replace("service: ServiceItem;","")
+        content=content.replace('declare const selfDescribe: typeof describe.only;','declare const selfDescribe: typeof describe;')
         content=content.replace("constructor(service: ServiceItem, isRequest: boolean, data?: Buffer);","")
         content=content.replace('declare const serviceList: readonly ["{{{serviceName}}}"];',
 `declare const serviceList: readonly [
@@ -129,7 +130,10 @@ class MyCustomPlugin {
 
       });
     }
-  }
+}
+
+
+
 module.exports = {
     entry: {
         uds:path.resolve(__dirname,'src/main/worker') + '/uds.ts',

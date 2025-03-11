@@ -37,9 +37,14 @@ import { getMessageData } from 'src/renderer/src/database/dbc/calc'
 import { NodeClass } from '../nodeItem'
 import { getJsPath } from '../util'
 import UdsTester from '../workerClient'
+import { serviceDetail } from '../uds/service'
 
 const libPath = path.dirname(dllLib)
 log.info('dll lib path:', libPath)
+
+ipcMain.on('ipc-service-detail', (event, arg) => {
+  event.returnValue = serviceDetail
+})
 
 ipcMain.on('ipc-open-script-api', (event, arg) => {
   shell.openPath(path.join(path.dirname(scriptIndex), 'scriptApi', 'index.html'))
@@ -538,8 +543,9 @@ ipcMain.handle('ipc-run-sequence', async (event, ...arg) => {
   const device = arg[3] as UdsDevice
   const seqIndex = arg[4] as number
   const cycle = arg[5] as number
+  let uds: UDSTesterMain | undefined
   try {
-    const uds = new UDSTesterMain(
+    uds = new UDSTesterMain(
       {
         projectPath,
         projectName
@@ -584,6 +590,8 @@ ipcMain.handle('ipc-run-sequence', async (event, ...arg) => {
       }
     }
   } catch (err: any) {
+    uds?.close()
+    udsTesterMap.delete(tester.id)
     sysLog.error(`Sequence ${tester.name} ` + err.toString())
 
     throw err

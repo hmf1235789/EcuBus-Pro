@@ -1,5 +1,4 @@
-import { HardwareType, Sequence, ServiceItem, UdsAddress, UdsInfo } from './uds'
-import { ServiceId } from './service'
+import { HardwareType, Sequence, ServiceItem, UdsAddress, UdsInfo, ServiceId } from './uds'
 import { EntityAddr } from './doip'
 
 export interface TesterInfo {

@@ -1,11 +1,10 @@
 // import { Param, param2raw, ServiceItem } from '../views/Uds/service'
 import { v4 } from 'uuid'
 import { CAN_ADDR_FORMAT, CAN_ID_TYPE, CanAddr, CanBaseInfo } from './can'
-import { serviceDetail, ServiceId, SupportServiceId } from './service'
 import { EthBaseInfo, EthAddr, EntityAddr } from './doip'
 import { LinAddr, LinBaseInfo } from './lin'
 
-export type DataType = 'NUM' | 'ARRAY' | 'ASCII' | 'UNICODE' | 'FLOAT' | 'DOUBLE'
+export type DataType = 'NUM' | 'ARRAY' | 'ASCII' | 'UNICODE' | 'FLOAT' | 'DOUBLE' | 'FILE'
 export type HardwareType = 'can' | 'lin' | 'eth'
 //serviceDetail所有的key作为serviceId
 
@@ -41,12 +40,76 @@ export interface Param {
   deletable?: boolean
   editable?: boolean
 }
+/**
+ * @category UDS
+ */
+export type ServiceId =
+  | '0x10'
+  | '0x11'
+  | '0x27'
+  | '0x28'
+  | '0x29'
+  | '0x3E'
+  | '0x83'
+  | '0x84'
+  | '0x85'
+  | '0x22'
+  | '0x23'
+  | '0x24'
+  | '0x2A'
+  | '0x2C'
+  | '0x2E'
+  | '0x3D'
+  | '0x14'
+  | '0x87'
+  | '0x19'
+  | '0x2F'
+  | '0x31'
+  | '0x34'
+  | '0x35'
+  | '0x36'
+  | '0x37'
+  | '0x38'
+  | 'Job'
+
+export type ServiceDetailItem = {
+  name: string
+  hasSubFunction: boolean
+  fixedParam?: boolean
+  desc?: string
+  buildInScript?: string
+  defaultParams: {
+    param: Param
+    enum?: { name: string; value: string }[]
+  }[]
+  defaultRespParams: {
+    param: Param
+    enum?: { name: string; value: string }[]
+  }[]
+}
+export type ServiceDetial = Record<ServiceId, ServiceDetailItem>
 export function splitStr2(str: string) {
   const result: string[] = []
   for (let i = 0; i < str.length; i += 2) {
     result.push(str.substring(i, i + 2))
   }
   return result.join(' ')
+}
+
+export function checkServiceId(serviceId: ServiceId | undefined, need: ('job' | 'uds')[]) {
+  if (!serviceId) return false
+
+  if (need.includes('job')) {
+    if (!serviceId.startsWith('0x')) {
+      return true
+    }
+  }
+  if (need.includes('uds')) {
+    if (serviceId.startsWith('0x')) {
+      return true
+    }
+  }
+  return false
 }
 
 export function param2str(param: Param): string {
@@ -216,6 +279,7 @@ export function paramSetVal(param: Param, str: string | number) {
         param.value = Buffer.from(s.map((item) => parseInt(item, 16)))
       }
       break
+    case 'FILE':
     case 'ASCII': {
       const byte = Math.floor(param.bitLen / 8)
       if (str.toString().length > byte) {

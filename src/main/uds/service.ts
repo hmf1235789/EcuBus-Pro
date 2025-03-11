@@ -1,151 +1,8 @@
-import { Param } from './uds'
-
-export const allServiceList: {
-  name: string
-  children: {
-    name: string
-    serviceId: ServiceId
-  }[]
-}[] = [
-  {
-    name: 'Diagnostic and Communication Management',
-    children: [
-      {
-        name: 'DiagnosticSessionControl',
-        serviceId: '0x10'
-      },
-      {
-        name: 'ECUReset',
-        serviceId: '0x11'
-      },
-      {
-        name: 'SecurityAccess',
-        serviceId: '0x27'
-      },
-      {
-        name: 'CommunicationControl',
-        serviceId: '0x28'
-      },
-      {
-        name: 'Authentication',
-        serviceId: '0x29'
-      },
-      {
-        name: 'TesterPresent',
-        serviceId: '0x3E'
-      },
-      {
-        name: 'AccessTimingParameter',
-        serviceId: '0x83'
-      },
-      {
-        name: 'SecuredDataTransmission',
-        serviceId: '0x84'
-      },
-      {
-        name: 'ControlDTCSetting',
-        serviceId: '0x85'
-      },
-      // {
-      //   name: "ResponseOnEvent",
-      //   serviceId: "0x86",
-      // },
-      {
-        name: 'LinkControl',
-        serviceId: '0x87'
-      }
-    ]
-  },
-  {
-    name: 'Data Transmission',
-    children: [
-      {
-        name: 'ReadDataByIdentifier',
-        serviceId: '0x22'
-      },
-      {
-        name: 'ReadMemoryByAddress',
-        serviceId: '0x23'
-      },
-      {
-        name: 'ReadScalingDataByIdentifier',
-        serviceId: '0x24'
-      },
-      {
-        name: 'ReadDataByPeriodicIdentifier',
-        serviceId: '0x2A'
-      },
-      {
-        name: 'DynamicallyDefineDataIdentifier',
-        serviceId: '0x2C'
-      },
-      {
-        name: 'WriteDataByIdentifier',
-        serviceId: '0x2E'
-      },
-      {
-        name: 'WriteMemoryByAddress',
-        serviceId: '0x3D'
-      }
-    ]
-  },
-  {
-    name: 'Stored Data Transmission',
-    children: [
-      {
-        name: 'ClearDiagnosticInformation',
-        serviceId: '0x14'
-      },
-      {
-        name: 'ReadDTCInformation',
-        serviceId: '0x19'
-      }
-    ]
-  },
-  {
-    name: 'InputOutput Control ',
-    children: [
-      {
-        name: 'InputOutputControlByIdentifier',
-        serviceId: '0x2F'
-      }
-    ]
-  },
-  {
-    name: 'Routine ',
-    children: [
-      {
-        name: 'RoutineControl',
-        serviceId: '0x31'
-      }
-    ]
-  },
-  {
-    name: 'Upload Download',
-    children: [
-      {
-        name: 'RequestDownload',
-        serviceId: '0x34'
-      },
-      {
-        name: 'RequestUpload',
-        serviceId: '0x35'
-      },
-      {
-        name: 'TransferData',
-        serviceId: '0x36'
-      },
-      {
-        name: 'RequestTransferExit',
-        serviceId: '0x37'
-      },
-      {
-        name: 'RequestFileTransfer',
-        serviceId: '0x38'
-      }
-    ]
-  }
-]
+import path from 'path'
+import { Param, ServiceDetailItem, ServiceDetial, ServiceId } from '../share/uds'
+import buildInScript from './../../../resources/buildInScript/.gitkeep?asset&asarUnpack'
+import { globSync } from 'glob'
+import fs from 'fs'
 export const SupportServiceId: ServiceId[] = [
   '0x10',
   '0x11',
@@ -175,53 +32,12 @@ export const SupportServiceId: ServiceId[] = [
   '0x38',
   'Job'
 ]
+
 /**
  * @category UDS
  */
-export type ServiceId =
-  | '0x10'
-  | '0x11'
-  | '0x27'
-  | '0x28'
-  | '0x29'
-  | '0x3E'
-  | '0x83'
-  | '0x84'
-  | '0x85'
-  | '0x87'
-  | '0x22'
-  | '0x23'
-  | '0x24'
-  | '0x2A'
-  | '0x2C'
-  | '0x2E'
-  | '0x3D'
-  | '0x14'
-  | '0x19'
-  | '0x2F'
-  | '0x31'
-  | '0x34'
-  | '0x35'
-  | '0x36'
-  | '0x37'
-  | '0x38'
-  | 'Job'
-export const serviceDetail: Record<
-  ServiceId,
-  {
-    name: string
-    hasSubFunction: boolean
 
-    defaultParams: {
-      param: Param
-      enum?: { name: string; value: string }[]
-    }[]
-    defaultRespParams: {
-      param: Param
-      enum?: { name: string; value: string }[]
-    }[]
-  }
-> = {
+export const serviceDetail: ServiceDetial = {
   '0x10': {
     name: 'DiagnosticSessionControl',
     hasSubFunction: true,
@@ -2203,5 +2019,28 @@ export const serviceDetail: Record<
     hasSubFunction: false,
     defaultParams: [],
     defaultRespParams: []
+  }
+}
+
+const buildInScriptPath = path.dirname(buildInScript)
+
+//buildInScriptPath/*/plugin.json
+
+const pluginFiles = globSync('*/plugin.json', {
+  cwd: buildInScriptPath
+})
+
+for (let pluginFile of pluginFiles) {
+  try {
+    pluginFile = path.join(buildInScriptPath, pluginFile)
+    const plugin = JSON.parse(fs.readFileSync(pluginFile, 'utf8'))
+    const item = plugin.service as ServiceDetailItem
+    if (item.buildInScript) {
+      const dir = path.dirname(pluginFile)
+      item.buildInScript = path.join(dir, item.buildInScript)
+      serviceDetail[item.name as ServiceId] = item
+    }
+  } catch (error) {
+    null
   }
 }

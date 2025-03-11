@@ -21,7 +21,7 @@ export type { ServiceId }
 import workerpool, { worker } from 'workerpool'
 import { cloneDeep } from 'lodash'
 import { v4 } from 'uuid'
-import { ServiceId, SupportServiceId } from '../share/service'
+import { checkServiceId, ServiceId } from './../share/uds'
 import { CanMessage } from '../share/can'
 import SecureAccessDll from './secureAccess'
 import { EntityAddr, VinInfo } from '../share/doip'
@@ -217,6 +217,18 @@ class Service {
     listener: (data: ServiceEvent[T]) => void | Promise<void>
   ) {
     Util.On(`${this.getServiceName()}.${event}` as any, listener)
+  }
+  /**
+   * Subscribe to an event, only once.
+   *
+   * @param event - The event type.
+   * @param listener - The function to subscribe.
+   */
+  Once<T extends keyof ServiceEvent>(
+    event: T,
+    listener: (data: ServiceEvent[T]) => void | Promise<void>
+  ) {
+    Util.OnOnce(`${this.getServiceName()}.${event}` as any, listener)
   }
   /**
    * Unsubscribe from an event.
@@ -672,7 +684,7 @@ export class DiagJob extends Service {
   from(jobName: keyof Jobs) {
     const testerName = jobName.split('.')[0]
     const service = serviceMap.get(jobName)
-    if (service && service.serviceId == 'Job') {
+    if (service && checkServiceId(service.serviceId, ['job'])) {
       return new DiagJob(testerName, service)
     } else {
       throw new Error(`job ${jobName} not found`)
@@ -706,7 +718,7 @@ export class DiagResponse extends Service {
   static from(serviceName: ServiceName) {
     const testerName = serviceName.split('.')[0]
     const service = serviceMap.get(serviceName)
-    if (service && service.serviceId != 'Job') {
+    if (service && checkServiceId(service.serviceId, ['uds'])) {
       return new DiagResponse(testerName, service)
     } else {
       throw new Error(`service ${serviceName} not found`)
@@ -819,6 +831,7 @@ export class UtilClass {
   private isMain = workerpool.isMainThread
   private event = new Emittery<EventMap>()
   private funcMap = new Map<Function, any>()
+  private testerName?: string
   /**
    * Register a handler function for a job.
    * @param jobs 
@@ -845,7 +858,7 @@ export class UtilClass {
           const v = await (func as any)(...args)
           if (Array.isArray(v)) {
             //each item must be DiagRequest
-            if (v.every((item) => item instanceof DiagRequest)) {
+            if (v.every((item) => item instanceof DiagRequest || item instanceof DiagJob)) {
               return v.map((item) => item.service)
             } else {
               throw new Error('return value must be array of DiagRequest')
@@ -882,6 +895,13 @@ export class UtilClass {
     } else {
       this.event.on(`can.${id}` as any, fc)
     }
+  }
+  /**
+   * Get the tester name, valid in Tester script
+   * @returns {string}
+   */
+  getTesterName() {
+    return this.testerName
   }
   /**
    * Registers an event listener for CAN messages that will be invoked once.
@@ -1114,8 +1134,9 @@ export class UtilClass {
       this.event.off(eventName, func)
     }
   }
-  private start(val: Record<string, ServiceItem>) {
+  private start(val: Record<string, ServiceItem>, testerName?: string) {
     // process.chdir(projectPath)
+    this.testerName = testerName
     for (const key of Object.keys(val)) {
       //convert all param.value to buffer
       const service = val[key]
