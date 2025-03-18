@@ -293,7 +293,7 @@ export default withMermaid({
           },
           { text: 'Comp Test', link: '/docs/dev/test' },
           { text: 'Addon', link: '/docs/dev/addon' },
-
+          { text: 'Feature Request Process', link: '/docs/dev/feature' },
           { text: 'Releases Note', link: '/docs/dev/releases_note' }
         ]
       }
