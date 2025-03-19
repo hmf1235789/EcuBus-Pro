@@ -38,19 +38,9 @@ const pendingBaseCmds = new Map<
 >()
 
 export class TOOMOSS_CAN extends CanBase {
-  // 添加静态设备管理Map
-  static deviceHandles = new Map<
-    number,
-    {
-      refCount: number // 引用计数
-      channels: Set<number> // 当前使用的通道
-    }
-  >()
-
   event: EventEmitter
   info: CanBaseInfo
   handle: number
-  channel: number = 0
   deviceIndex: number
   closed = false
   cnt = 0
@@ -139,7 +129,16 @@ export class TOOMOSS_CAN extends CanBase {
 
     let ret = 0
     // 检查设备是否已经打开
-    let deviceInfo = TOOMOSS_CAN.deviceHandles.get(this.handle)
+    if (global.toomossDeviceHandles == undefined) {
+      global.toomossDeviceHandles = new Map<
+        number,
+        {
+          refCount: number // 引用计数
+          channels: Set<number> // 当前使用的通道
+        }
+      >()
+    }
+    let deviceInfo = global.toomossDeviceHandles.get(this.handle)
     if (!deviceInfo) {
       // 首次打开设备
       ret = TOOMOSS.USB_OpenDevice(this.handle)
@@ -150,7 +149,7 @@ export class TOOMOSS_CAN extends CanBase {
         refCount: 1,
         channels: new Set([this.deviceIndex])
       }
-      TOOMOSS_CAN.deviceHandles.set(this.handle, deviceInfo)
+      global.toomossDeviceHandles.set(this.handle, deviceInfo)
     } else {
       // 设备已打开，检查通道是否已被使用
       if (deviceInfo.channels.has(this.deviceIndex)) {
@@ -358,7 +357,11 @@ export class TOOMOSS_CAN extends CanBase {
   }
 
   static override getLibVersion(): string {
-    return '1.8.6.0'
+    if (process.platform == 'win32') {
+      return '1.8.6.0'
+    } else {
+      return 'only support windows'
+    }
   }
 
   close(isReset = false, msg?: string) {
@@ -402,7 +405,7 @@ export class TOOMOSS_CAN extends CanBase {
     }
 
     // 更新设备引用计数
-    const deviceInfo = TOOMOSS_CAN.deviceHandles.get(this.handle)
+    const deviceInfo = global.toomossDeviceHandles?.get(this.handle)
     if (deviceInfo) {
       deviceInfo.channels.delete(this.deviceIndex)
       deviceInfo.refCount--
@@ -410,7 +413,7 @@ export class TOOMOSS_CAN extends CanBase {
       // 如果没有其他引用了，关闭设备
       if (deviceInfo.refCount <= 0) {
         TOOMOSS.USB_CloseDevice(this.handle)
-        TOOMOSS_CAN.deviceHandles.delete(this.handle)
+        global.toomossDeviceHandles?.delete(this.handle)
       }
     }
   }

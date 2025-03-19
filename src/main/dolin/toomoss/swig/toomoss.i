@@ -29,10 +29,9 @@
 %include <carrays.i>
 
 %array_class(LIN_EX_MSG, LIN_MSG_ARRAY);
-// %array_class(unsigned int, U32Array);
-// %array_class(BYTE, ByteArray);
-// %array_class(ZCAN_Receive_Data, ReceiveDataArray);
-// %array_class(ZCAN_ReceiveFD_Data, ReceiveFDDataArray);
+%array_class(int, I32Array);
+%array_class(unsigned int, U32Array);
+
 
 %ignore LIN_EX_SetBusState;
 %include <usb2lin_ex.h>

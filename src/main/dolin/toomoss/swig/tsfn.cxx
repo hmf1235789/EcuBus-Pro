@@ -153,22 +153,23 @@ void SendLinMsg(const Napi::CallbackInfo& info) {
             throw Napi::Error::New(env, "Context not found");
         }
         TsfnContext* context = it->second;
-        uint32_t index=info[4].As<Napi::Number>().Uint32Value();
+       
         
         // 创建消息
         TxMessage msg;
         msg.devHandle = info[0].As<Napi::Number>().Int32Value();
         msg.linIndex = info[1].As<Napi::Number>().Uint32Value();
-        msg.cnt = info[4].As<Napi::Number>().Uint32Value();
+        msg.cnt = info[2].As<Napi::Number>().Uint32Value();
 
-        auto msgObj = info[5].As<Napi::Object>();
+        auto msgObj = info[4].As<Napi::Object>();
       
         msg.linMsg.MsgType = msgObj.Get("MsgType").As<Napi::Number>().Uint32Value();
         msg.linMsg.CheckType = msgObj.Get("CheckType").As<Napi::Number>().Uint32Value();
         msg.linMsg.PID = msgObj.Get("PID").As<Napi::Number>().Uint32Value();
         msg.linMsg.Check = msgObj.Get("Check").As<Napi::Number>().Uint32Value();
         msg.linMsg.BreakBits = msgObj.Get("BreakBits").As<Napi::Number>().Uint32Value();
-          
+        msg.linMsg.Sync = 0x55;
+        
         auto dataBuffer = msgObj.Get("Data").As<Napi::Buffer<uint8_t>>();
         memcpy(msg.linMsg.Data, dataBuffer.Data(), dataBuffer.Length());
         msg.linMsg.DataLen = dataBuffer.Length();

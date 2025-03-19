@@ -1,148 +1,86 @@
 import {
-  CanAddr,
-  CAN_ID_TYPE,
-  CanMsgType,
-  CAN_ERROR_ID,
-  getLenByDlc,
-  CanBaseInfo,
-  CanDevice,
-  getTsUs,
-  CanMessage
-} from '../../share/can'
-import { EventEmitter } from 'events'
-import { cloneDeep } from 'lodash'
-import { addrToId, CanError } from '../../share/can'
-import { CanLOG } from '../../log'
-import TOOMOSS from './../build/Release/toomoss.node'
-import { platform } from 'os'
-import { CanBase } from '../base'
-
-interface CANFrame {
-  canId: number
-  msgType: CanMsgType
-  data: Buffer
-  ts: number
-}
+  getPID,
+  LIN_ERROR_ID,
+  LIN_SCH_TYPE,
+  LinBaseInfo,
+  LinChecksumType,
+  LinDevice,
+  LinDirection,
+  LinError,
+  LinMode,
+  LinMsg
+} from '../../share/lin'
+import LIN from '../build/Release/toomossLin.node'
+import { v4 } from 'uuid'
+import { queue, QueueObject } from 'async'
+import { LinLOG } from 'src/main/log'
+import EventEmitter from 'events'
+import LinBase, { LinWriteOpt, QueueItem } from '../base'
+import { getTsUs } from 'src/main/share/can'
+import { LDF } from 'src/renderer/src/database/ldfParse'
 
 let txCnt = 0
-const pendingBaseCmds = new Map<
-  number,
-  {
-    resolve: (value: number) => void
-    reject: (reason: CanError) => void
-    msgType: CanMsgType
-    id: number
-    data: Buffer
-    extra?: { database?: string; name?: string }
-  }
->()
-
-export class TOOMOSS_CAN extends CanBase {
+export class ToomossLin extends LinBase {
   // 添加静态设备管理Map
-  static deviceHandles = new Map<
-    number,
-    {
-      refCount: number // 引用计数
-      channels: Set<number> // 当前使用的通道
-    }
-  >()
 
-  event: EventEmitter
-  info: CanBaseInfo
+  queue = queue((task: QueueItem, cb) => {
+    if (task.discard) {
+      cb()
+    } else {
+      this._write(task.data).then(task.resolve).catch(task.reject).finally(cb)
+    }
+  }, 1)
+
+  private lastFrame: Map<number, LinMsg> = new Map()
+  event = new EventEmitter()
+  pendingPromise?: {
+    resolve: (msg: LinMsg) => void
+    reject: (error: LinError) => void
+    sendMsg: LinMsg
+  }
+  static loadDllPath(dllPath: string) {
+    if (process.platform == 'win32') {
+      LIN.LoadDll(dllPath)
+    }
+  }
+  static getLibVersion() {
+    if (process.platform == 'win32') {
+      return '1.8.6.0'
+    } else {
+      return 'only support windows'
+    }
+  }
+  startTs: number
+  offsetTs = 0
+  offsetInit = false
+  log: LinLOG
+  db?: LDF
+
   handle: number
   channel: number = 0
   deviceIndex: number
-  closed = false
-  cnt = 0
+  constructor(public info: LinBaseInfo) {
+    super(info)
 
-  id: string
-  log: CanLOG
-  canConfig: any
-  canfdConfig: any
-  startTime = getTsUs()
-  tsOffset: number | undefined
-
-  private readAbort = new AbortController()
-
-  rejectBaseMap = new Map<
-    number,
-    {
-      reject: (reason: CanError) => void
-      msgType: CanMsgType
-    }
-  >()
-
-  constructor(info: CanBaseInfo, enableRes = false) {
-    super()
-    this.id = info.id
-    this.info = info
-
-    const devices = TOOMOSS_CAN.getValidDevices()
-    const target = devices.find((item) => item.handle == info.handle)
-    if (!target) {
-      throw new Error('Invalid handle')
-    }
-
-    // 检查波特率配置
-    const CLOCK = 40_000_000 // 40MHz时钟
-
-    // 检查普通CAN波特率
-    if (info.bitrate.freq) {
-      const calcFreq = Math.floor(
-        CLOCK / (info.bitrate.preScaler * (1 + info.bitrate.timeSeg1 + info.bitrate.timeSeg2))
-      )
-      // 允许1%的误差
-      if (Math.abs(calcFreq - info.bitrate.freq) / info.bitrate.freq > 0.01) {
-        throw new Error(
-          `Invalid CAN bitrate config: expected ${info.bitrate.freq}, got ${calcFreq}. ` +
-            `preScaler=${info.bitrate.preScaler}, ` +
-            `timeSeg1=${info.bitrate.timeSeg1}, ` +
-            `timeSeg2=${info.bitrate.timeSeg2}`
-        )
-      }
-    }
-
-    // 检查CANFD波特率
-    if (info.canfd && info.bitratefd?.freq) {
-      // 检查仲裁域波特率
-      const calcNbtFreq = Math.floor(
-        CLOCK / (info.bitrate.preScaler * (1 + info.bitrate.timeSeg1 + info.bitrate.timeSeg2))
-      )
-      if (Math.abs(calcNbtFreq - info.bitrate.freq) / info.bitrate.freq > 0.01) {
-        throw new Error(
-          `Invalid CANFD NBT config: expected ${info.bitrate.freq}, got ${calcNbtFreq}. ` +
-            `preScaler=${info.bitrate.preScaler}, ` +
-            `timeSeg1=${info.bitrate.timeSeg1}, ` +
-            `timeSeg2=${info.bitrate.timeSeg2}`
-        )
-      }
-
-      // 检查数据域波特率
-      const calcDbtFreq = Math.floor(
-        CLOCK / (info.bitratefd.preScaler * (1 + info.bitratefd.timeSeg1 + info.bitratefd.timeSeg2))
-      )
-      if (Math.abs(calcDbtFreq - info.bitratefd.freq) / info.bitratefd.freq > 0.01) {
-        throw new Error(
-          `Invalid CANFD DBT config: expected ${info.bitratefd.freq}, got ${calcDbtFreq}. ` +
-            `preScaler=${info.bitratefd.preScaler}, ` +
-            `timeSeg1=${info.bitratefd.timeSeg1}, ` +
-            `timeSeg2=${info.bitratefd.timeSeg2}`
-        )
-      }
-    }
-
-    this.event = new EventEmitter()
-    this.log = new CanLOG('TOOMOSS', info.name, this.event)
-
-    this.handle = parseInt(info.handle.split(':')[0])
-    this.deviceIndex = parseInt(info.handle.split(':')[1])
-
+    this.log = new LinLOG('PEAK', info.name, this.event)
+    this.startTs = getTsUs()
+    this.handle = parseInt(info.device.handle.split(':')[0])
+    this.deviceIndex = parseInt(info.device.handle.split(':')[1])
     let ret = 0
-    // 检查设备是否已经打开
-    let deviceInfo = TOOMOSS_CAN.deviceHandles.get(this.handle)
+
+    if (global.toomossDeviceHandles == undefined) {
+      global.toomossDeviceHandles = new Map<
+        number,
+        {
+          refCount: number // 引用计数
+          channels: Set<number> // 当前使用的通道
+        }
+      >()
+    }
+    let deviceInfo = global.toomossDeviceHandles.get(this.handle)
     if (!deviceInfo) {
       // 首次打开设备
-      ret = TOOMOSS.USB_OpenDevice(this.handle)
+      ret = LIN.USB_OpenDevice(this.handle)
       if (ret != 1) {
         throw new Error('Open device failed')
       }
@@ -150,7 +88,7 @@ export class TOOMOSS_CAN extends CanBase {
         refCount: 1,
         channels: new Set([this.deviceIndex])
       }
-      TOOMOSS_CAN.deviceHandles.set(this.handle, deviceInfo)
+      global.toomossDeviceHandles.set(this.handle, deviceInfo)
     } else {
       // 设备已打开，检查通道是否已被使用
       if (deviceInfo.channels.has(this.deviceIndex)) {
@@ -159,185 +97,286 @@ export class TOOMOSS_CAN extends CanBase {
       deviceInfo.refCount++
       deviceInfo.channels.add(this.deviceIndex)
     }
-    TOOMOSS.DEV_ResetTimestamp(this.handle)
-    // 初始化CAN配置
-    if (info.canfd && info.bitratefd) {
-      // CANFD配置
+    LIN.DEV_ResetTimestamp(this.handle)
 
-      this.canfdConfig = new TOOMOSS.CANFD_INIT_CONFIG()
-      this.canfdConfig.Mode = 0 // 正常模式
-      this.canfdConfig.ISOCRCEnable = 1
-      this.canfdConfig.RetrySend = 0
-      this.canfdConfig.ResEnable = enableRes ? 1 : 0
-      // 仲裁域波特率配置
-      this.canfdConfig.NBT_BRP = info.bitrate.preScaler
-      this.canfdConfig.NBT_SEG1 = info.bitrate.timeSeg1
-      this.canfdConfig.NBT_SEG2 = info.bitrate.timeSeg2
-      this.canfdConfig.NBT_SJW = info.bitrate.sjw
-      // 数据域波特率配置
-      this.canfdConfig.DBT_BRP = info.bitratefd.preScaler
-      this.canfdConfig.DBT_SEG1 = info.bitratefd.timeSeg1
-      this.canfdConfig.DBT_SEG2 = info.bitratefd.timeSeg2
-      this.canfdConfig.DBT_SJW = info.bitratefd.sjw
-      this.canfdConfig.TDC = 0
-
-      ret = TOOMOSS.CANFD_Init(this.handle, this.deviceIndex, this.canfdConfig)
-      if (ret != 0) {
-        throw new Error('Init CANFD failed')
-      }
-      TOOMOSS.CANFD_ResetStartTime(this.handle, this.deviceIndex)
-
-      // 启动CANFD
-      ret = TOOMOSS.CANFD_StartGetMsg(this.handle, this.deviceIndex)
-      if (ret != 0) {
-        throw new Error('Start CANFD failed')
-      }
-    } else {
-      // 普通CAN配置
-      this.canConfig = new TOOMOSS.CAN_INIT_CONFIG()
-      this.canConfig.CAN_BRP = info.bitrate.preScaler
-      this.canConfig.CAN_SJW = info.bitrate.sjw
-      this.canConfig.CAN_BS1 = info.bitrate.timeSeg1
-      this.canConfig.CAN_BS2 = info.bitrate.timeSeg2
-      this.canConfig.CAN_Mode = enableRes ? 0x80 | 0 : 0 // 正常模式
-      this.canConfig.CAN_ABOM = 0 // 自动离线恢复
-      this.canConfig.CAN_NART = 1 // 自动重传
-      this.canConfig.CAN_RFLM = 0 // 接收FIFO锁定模式
-
-      this.canConfig.CAN_TXFP = 0 // 发送FIFO优先级
-
-      ret = TOOMOSS.CAN_Init(this.handle, this.deviceIndex, this.canConfig)
-      if (ret != 0) {
-        throw new Error('Init CAN failed')
-      }
-
-      // 启动CAN
-      ret = TOOMOSS.CAN_StartGetMsg(this.handle, this.deviceIndex)
-      if (ret != 0) {
-        throw new Error('Start CAN failed')
-      }
-      TOOMOSS.CAN_ResetStartTime(this.handle, this.deviceIndex)
+    if (info.database) {
+      this.db = global.database.lin[info.database]
     }
-
-    // 绑定回调函数到实例
-
-    // 初始化 TSFN
-    TOOMOSS.CreateTSFN(
+    for (let i = 0; i <= 0x3f; i++) {
+      const checksum = i == 0x3c || i == 0x3d ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED
+      this.setEntry(i, 8, LinDirection.RECV_AUTO_LEN, checksum, Buffer.alloc(8), 0)
+    }
+    ret = LIN.LIN_EX_Init(
       this.handle,
       this.deviceIndex,
-      this.info.canfd,
-      this.id,
-      this.callback.bind(this),
-      'error-' + this.id,
-      this.callbackError.bind(this),
-      'tx-' + this.id,
-      this.txCallback.bind(this)
+      info.baudRate,
+      info.mode == LinMode.MASTER ? 1 : 0
     )
-  }
-  txCallback(obj: any) {
-    const { id, timestamp, result } = obj
-
-    // 更新时间戳偏移
-    if (this.tsOffset == undefined) {
-      this.tsOffset = timestamp * 10 - (getTsUs() - this.startTime)
+    if (ret != 0) {
+      throw new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, undefined, 'init failed')
     }
-    const ts = timestamp * 10 - this.tsOffset
+    LIN.LIN_EX_CtrlPowerOut(this.handle, this.deviceIndex, 0)
+    LIN.CreateTSFN(
+      this.handle,
+      this.deviceIndex,
+      LinMode.MASTER ? true : false,
+      this.info.id,
+      this.callback.bind(this)
+    )
+    // this.getEntrys()
+    // this.wakeup()
+  }
+  setEntry(
+    frameId: number,
+    length: number,
+    dir: LinDirection,
+    checksumType: LinChecksumType,
+    initData: Buffer,
+    flag: number
+  ) {
+    // const entry = new LIN.TLINFrameEntry()
+    // entry.FrameId = frameId
+    // entry.Length = length
+    // entry.Direction = dir == LinDirection.SEND ? 1 : dir == LinDirection.RECV ? 2 : 3
+    // entry.ChecksumType = checksumType == LinChecksumType.CLASSIC ? 1 : 2
+    // entry.Flags = flag
+    // const ia = LIN.ByteArray.frompointer(entry.InitialData)
+    // for (let i = 0; i < length; i++) {
+    //   ia.setitem(i, initData[i])
+    // }
+    // const result = LIN.LIN_SetFrameEntry(this.client, this.info.device.handle, entry)
+    // if (result != 0) {
+    //   throw new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, undefined, err2Str(result))
+    // }
+  }
+  async callback(msg: {
+    id: number
+    result: number
+    linMsg: {
+      MsgType: number
+      CheckType: number
+      PID: number
+      Check: number
+      BreakBits: number
+      Data: Buffer
+    }
+  }) {
+    console.log(msg)
+    // if (ret == 0) {
+    //   let ts = recvMsg.TimeStamp
+    //   if (!this.offsetInit) {
+    //     this.offsetTs = ts - (getTsUs() - this.startTs)
+    //     this.offsetInit = true
+    //   }
+    //   ts -= this.offsetTs
 
-    // 从待发送队列中找到对应的消息
-    const cmdId = Number(id)
+    //   if (recvMsg.Type == 0) {
+    //     //mstStandard
+    //     const a = new LIN.ByteArray.frompointer(recvMsg.Data)
+    //     const data = Buffer.alloc(recvMsg.Length)
+    //     for (let i = 0; i < recvMsg.Length; i++) {
+    //       data[i] = a.getitem(i)
+    //     }
 
-    const pendingCmds = pendingBaseCmds.get(cmdId)
+    //     const msg: LinMsg = {
+    //       frameId: recvMsg.FrameId & 0x3f,
+    //       data: data,
+    //       direction:
+    //         recvMsg.Direction == 1
+    //           ? LinDirection.SEND
+    //           : recvMsg.Direction == 2
+    //             ? LinDirection.RECV
+    //             : LinDirection.RECV_AUTO_LEN,
+    //       checksumType:
+    //         recvMsg.ChecksumType == 1 ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED,
+    //       checksum: recvMsg.Checksum
+    //     }
 
-    if (pendingCmds) {
-      const message: CanMessage = {
-        device: this.info.name,
-        dir: 'OUT',
-        id: pendingCmds.id,
-        data: pendingCmds.data,
-        ts: ts,
-        msgType: pendingCmds.msgType,
-        database: pendingCmds.extra?.database,
-        name: pendingCmds.extra?.name
+    //     if (recvMsg.ErrorFlags == 0) {
+    //       this.lastFrame.set(msg.frameId, msg)
+    //     }
+    //     const error: string[] = []
+    //     const handle = () => {
+    //       if (recvMsg.ErrorFlags & 1) {
+    //         error.push('Error on Synchronization field')
+    //       }
+    //       if (recvMsg.ErrorFlags & 2) {
+    //         error.push('Wrong parity Bit 0')
+    //       }
+    //       if (recvMsg.ErrorFlags & 4) {
+    //         error.push('Wrong parity Bit 1')
+    //       }
+    //       if (recvMsg.ErrorFlags & 8) {
+    //         error.push('Slave not responding error')
+    //       }
+    //       if (recvMsg.ErrorFlags & 16) {
+    //         error.push('A timeout was reached')
+    //       }
+    //       if (recvMsg.ErrorFlags & 32) {
+    //         error.push('Wrong checksum')
+    //       }
+    //       if (recvMsg.ErrorFlags & 64) {
+    //         error.push('Bus shorted to ground')
+    //       }
+    //       if (recvMsg.ErrorFlags & 128) {
+    //         error.push('Bus shorted to Vbat')
+    //       }
+    //       if (recvMsg.ErrorFlags & 256) {
+    //         error.push('A slot time (delay) was too smallt')
+    //       }
+    //       if (recvMsg.ErrorFlags & 512) {
+    //         error.push(' Response was received from other station')
+    //       }
+    //     }
+    //     let isEvent = false
+    //     if (this.pendingPromise && this.pendingPromise.sendMsg.frameId == (msg.frameId & 0x3f)) {
+    //       this.pendingPromise.sendMsg.data = msg.data
+    //       this.pendingPromise.sendMsg.ts = ts
+    //       if (recvMsg.ErrorFlags != 0) {
+    //         handle()
+    //         this.log.error(ts, error.join(', '), this.pendingPromise.sendMsg)
+    //         this.pendingPromise.reject(
+    //           new LinError(
+    //             LIN_ERROR_ID.LIN_BUS_ERROR,
+    //             this.pendingPromise.sendMsg,
+    //             error.join(', ')
+    //           )
+    //         )
+    //       } else {
+    //         this.log.linBase(this.pendingPromise.sendMsg)
+    //         this.event.emit(`${msg.frameId}`, this.pendingPromise.sendMsg)
+    //         this.pendingPromise.resolve(this.pendingPromise.sendMsg)
+    //       }
+    //       this.pendingPromise = undefined
+    //     } else {
+    //       //slave
+    //       msg.ts = ts
+    //       if (this.db) {
+    //         // Find matching frame or event frame
+    //         let frameName: string | undefined
+
+    //         let publish: string | undefined
+
+    //         // Check regular frames
+    //         for (const fname in this.db.frames) {
+    //           if (this.db.frames[fname].id === msg.frameId) {
+    //             frameName = fname
+    //             publish = this.db.frames[fname].publishedBy
+    //             break
+    //           }
+    //         }
+
+    //         // Check event triggered frames
+    //         if (!frameName) {
+    //           for (const ename in this.db.eventTriggeredFrames) {
+    //             const eventFrame = this.db.eventTriggeredFrames[ename]
+    //             if (eventFrame.frameId === msg.frameId) {
+    //               frameName = ename
+    //               isEvent = true
+    //               break
+    //             }
+    //           }
+    //         }
+
+    //         // Enrich message with database info if frame found
+    //         if (frameName) {
+    //           msg.name = frameName
+    //           msg.workNode = publish
+    //           msg.isEvent = isEvent
+    //         }
+    //       }
+    //       if (recvMsg.ErrorFlags != 0) {
+    //         handle()
+    //         this.log.error(ts, error.join(', '), msg)
+    //       } else {
+    //         if (isEvent && this.db) {
+    //           const pid = msg.data[0] & 0x3f
+    //           for (const fname in this.db.frames) {
+    //             if (this.db.frames[fname].id === pid) {
+    //               msg.workNode = this.db.frames[fname].publishedBy
+    //               break
+    //             }
+    //           }
+    //         }
+    //         this.log.linBase(msg)
+    //         this.event.emit(`${msg.frameId}`, msg)
+    //       }
+    //     }
+    //   } else if (recvMsg.Type == 1) {
+    //     this.log.sendEvent('busSleep', ts)
+    //   } else if (recvMsg.Type == 2) {
+    //     this.log.sendEvent('busWakeUp', ts)
+    //   } else {
+    //     this.log.error(ts, 'internal error')
+    //   }
+    //   //让出时间片
+    //   await new Promise((resolve) => {
+    //     setImmediate(() => {
+    //       resolve(null)
+    //     })
+    //   })
+    //   await this.callback()
+    // }
+  }
+  close() {
+    LIN.FreeTSFN(this.info.id)
+    LIN.LIN_EX_Stop(this.handle, this.deviceIndex)
+    const deviceInfo = global.toomossDeviceHandles?.get(this.handle)
+    if (deviceInfo) {
+      deviceInfo.channels.delete(this.deviceIndex)
+      deviceInfo.refCount--
+
+      // 如果没有其他引用了，关闭设备
+      if (deviceInfo.refCount <= 0) {
+        LIN.USB_CloseDevice(this.handle)
+        global.toomossDeviceHandles?.delete(this.handle)
       }
-      this.log.canBase(message)
-      pendingCmds.resolve(ts)
-      pendingBaseCmds.delete(cmdId)
     }
   }
-  callback(msg: any) {
-    if (msg.id == 0xffffffff) {
-      return
-    }
+  async _write(m: LinMsg): Promise<number> {
+    return new Promise<number>((resolve, reject) => {
+      const cmdId = txCnt++
+      const msg: any = {}
+      msg.PID = getPID(m.frameId)
+      msg.BreakBits = 13
+      msg.CheckType = m.checksumType == LinChecksumType.CLASSIC ? 0 : 1
+      msg.Data = m.data
+      msg.Check = 0
 
-    const frame: CANFrame = {
-      canId: msg.ID & 0x1fffffff,
-      msgType: {
-        idType: msg.ID & 0x80000000 ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD,
-        remote: msg.ID & 0x40000000 ? true : false,
-        canfd: this.info.canfd,
-        brs: false
-      },
-      data: msg.Data,
-      ts: ((msg.TimeStampHigh << 32) | msg.TimeStamp) * 10
-    }
-
-    if (this.info.canfd) {
-      // CANFD消息处理
-      frame.msgType.brs = msg.Flags & 0x01 ? true : false
-      frame.msgType.canfd = msg.Flags & 0x04 ? true : false
-    } else {
-      // 普通CAN消息处理
-      frame.msgType.brs = false
-      frame.msgType.canfd = false
-
-      // 普通CAN最大8字节
-      if (frame.data.length > 8) {
-        frame.data = frame.data.subarray(0, 8)
+      if (this.info.mode == LinMode.MASTER) {
+        if (this.pendingPromise != undefined) {
+          reject(new LinError(LIN_ERROR_ID.LIN_BUS_BUSY, m))
+          return
+        }
+        if (m.direction == LinDirection.SEND) {
+          msg.MsgType = 1
+        } else {
+          msg.MsgType = 2
+        }
+        LIN.SendLinMsg(this.handle, this.deviceIndex, cmdId, this.info.id, msg)
+        this.pendingPromise = {
+          resolve: (msg) => resolve(msg.ts || 0),
+          reject,
+          sendMsg: m
+        }
+      } else {
+        reject(new LinError(LIN_ERROR_ID.LIN_INTERNAL_ERROR, undefined, 'not supported'))
       }
-    }
-
-    this._read(frame)
+    })
   }
 
-  callbackError(err: any) {
-    this.log.error(getTsUs() - this.startTime, 'bus error')
-    this.close(true)
+  read(frameId: number) {
+    return this.lastFrame.get(frameId)
+  }
+  wakeup() {
+    throw new LinError(LIN_ERROR_ID.LIN_INTERNAL_ERROR, undefined, 'not supported')
   }
 
-  setOption(cmd: string, val: any): void {
-    null
-  }
-  _read(frame: CANFrame) {
-    if (this.tsOffset == undefined) {
-      this.tsOffset = frame.ts - (getTsUs() - this.startTime)
-    }
-    const ts = frame.ts - this.tsOffset
-
-    const cmdId = this.getReadBaseId(frame.canId, frame.msgType)
-    const message: CanMessage = {
-      device: this.info.name,
-      dir: 'IN',
-      id: frame.canId,
-      data: frame.data,
-      ts: ts,
-      msgType: frame.msgType
-    }
-
-    this.log.canBase(message)
-    this.event.emit(cmdId, message)
-  }
-
-  static loadDllPath(dllPath: string) {
-    if (process.platform == 'win32') {
-      TOOMOSS.LoadDll(dllPath)
-    }
-  }
-
-  static override getValidDevices(): CanDevice[] {
-    const devices: CanDevice[] = []
-    if (process.platform == 'win32') {
-      const deviceHandle = new TOOMOSS.I32Array(10)
-      const ret = TOOMOSS.USB_ScanDevice(deviceHandle)
+  static getValidDevices(): LinDevice[] {
+    const devices: LinDevice[] = []
+    if (process.platform !== 'win32') {
+      const deviceHandle = new LIN.I32Array(10)
+      const ret = LIN.USB_ScanDevice(deviceHandle)
       if (ret > 0) {
         for (let i = 0; i < ret; i++) {
           const v = deviceHandle.getitem(i)
@@ -355,139 +394,5 @@ export class TOOMOSS_CAN extends CanBase {
       }
     }
     return devices
-  }
-
-  static override getLibVersion(): string {
-    return '1.8.6.0'
-  }
-
-  close(isReset = false, msg?: string) {
-    this.readAbort.abort()
-
-    for (const [key, value] of this.rejectBaseMap) {
-      value.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, value.msgType))
-    }
-
-    this.rejectBaseMap.clear()
-
-    for (const [key, val] of pendingBaseCmds) {
-      val.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, val.msgType))
-    }
-    pendingBaseCmds.clear()
-
-    if (isReset) {
-      if (this.info.canfd) {
-        TOOMOSS.CANFD_ClearMsg(this.handle, this.deviceIndex)
-        TOOMOSS.CANFD_Stop(this.handle, this.deviceIndex)
-        TOOMOSS.CANFD_Init(this.handle, this.deviceIndex, this.canfdConfig)
-        TOOMOSS.CANFD_StartGetMsg(this.handle, this.deviceIndex)
-      } else {
-        TOOMOSS.CAN_ClearMsg(this.handle, this.deviceIndex)
-        TOOMOSS.CAN_Stop(this.handle, this.deviceIndex)
-        TOOMOSS.CAN_Init(this.handle, this.deviceIndex, this.canConfig)
-        TOOMOSS.CAN_StartGetMsg(this.handle, this.deviceIndex)
-      }
-      return
-    } else {
-      this.closed = true
-      this.log.close()
-      TOOMOSS.FreeTSFN(this.id)
-      if (this.info.canfd) {
-        TOOMOSS.CANFD_ClearMsg(this.handle, this.deviceIndex)
-        TOOMOSS.CANFD_Stop(this.handle, this.deviceIndex)
-      } else {
-        TOOMOSS.CAN_ClearMsg(this.handle, this.deviceIndex)
-        TOOMOSS.CAN_Stop(this.handle, this.deviceIndex)
-      }
-    }
-
-    // 更新设备引用计数
-    const deviceInfo = TOOMOSS_CAN.deviceHandles.get(this.handle)
-    if (deviceInfo) {
-      deviceInfo.channels.delete(this.deviceIndex)
-      deviceInfo.refCount--
-
-      // 如果没有其他引用了，关闭设备
-      if (deviceInfo.refCount <= 0) {
-        TOOMOSS.USB_CloseDevice(this.handle)
-        TOOMOSS_CAN.deviceHandles.delete(this.handle)
-      }
-    }
-  }
-
-  writeBase(
-    id: number,
-    msgType: CanMsgType,
-    data: Buffer,
-    extra?: { database?: string; name?: string }
-  ): Promise<number> {
-    return new Promise((resolve, reject) => {
-      const cmdId = txCnt++
-
-      try {
-        pendingBaseCmds.set(cmdId, { resolve, reject, msgType, id, data, extra })
-        TOOMOSS.SendCANMsg(
-          this.handle,
-          this.deviceIndex,
-          this.info.canfd,
-          this.id,
-
-          cmdId,
-          {
-            ID:
-              id |
-              (msgType.idType == CAN_ID_TYPE.EXTENDED ? 0x80000000 : 0) |
-              (msgType.remote ? 0x40000000 : 0),
-            RemoteFlag: msgType.remote ? 1 : 0,
-            ExternFlag: msgType.idType == CAN_ID_TYPE.EXTENDED ? 1 : 0,
-            DataLen: data.length,
-            Data: data,
-            DLC: data.length,
-            Flags: (msgType.brs ? 0x01 : 0) | (msgType.canfd ? 0x04 : 0)
-          }
-        )
-      } catch (err: any) {
-        pendingBaseCmds.delete(cmdId)
-        reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data, err))
-      }
-    })
-  }
-
-  readBase(id: number, msgType: CanMsgType, timeout: number) {
-    return new Promise<{ data: Buffer; ts: number }>(
-      (
-        resolve: (value: { data: Buffer; ts: number }) => void,
-        reject: (reason: CanError) => void
-      ) => {
-        const cmdId = this.getReadBaseId(id, msgType)
-        const cnt = this.cnt++
-        this.rejectBaseMap.set(cnt, { reject, msgType })
-
-        this.readAbort.signal.addEventListener('abort', () => {
-          if (this.rejectBaseMap.has(cnt)) {
-            this.rejectBaseMap.delete(cnt)
-            reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, msgType))
-          }
-          this.event.off(cmdId, readCb)
-        })
-
-        const readCb = (val: any) => {
-          if (this.rejectBaseMap.has(cnt)) {
-            if (val instanceof CanError) {
-              reject(val)
-            } else {
-              resolve({ data: val.data, ts: val.ts })
-            }
-            this.rejectBaseMap.delete(cnt)
-          }
-        }
-
-        this.event.once(cmdId, readCb)
-      }
-    )
-  }
-
-  getReadBaseId(id: number, msgType: CanMsgType): string {
-    return `${id}-${msgType.canfd ? msgType.brs : false}-${msgType.remote}-${msgType.canfd}-${msgType.idType}`
   }
 }
