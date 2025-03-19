@@ -275,7 +275,7 @@ function addSubTree(vendor: CanVendor, node: tree) {
     type: 'lin',
     children: []
   }
-  if (vendor == 'peak') {
+  if (vendor == 'peak' || vendor == 'toomoss') {
     node.children?.push(linTree)
   }
   for (const [key, value] of Object.entries(devices.devices)) {

@@ -80,8 +80,6 @@
     </el-form-item>
 
     <el-divider />
-
-    <el-divider />
     <el-form-item label-width="0">
       <div style="text-align: left; width: 100%">
         <el-button v-if="editIndex == ''" type="primary" plain @click="onSubmit">
