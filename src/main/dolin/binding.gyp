@@ -53,43 +53,57 @@
                 ]
             ],
         },
-        # {
-        #     'target_name': 'delay',
-        #     'include_dirs': [
-        #         './delay',
-        #         "<!@(node -p \"require('node-addon-api').include\")"
-        #     ],
-        #     'configurations': {
+        {
+            'target_name': 'toomossLin',
+           
+            'configurations': {
 
-        #     },
-        #     'defines': [
-        #         '__EXCEPTIONS'
-        #     ],
-        #     'sources': [
-        #         './delay/delay.cpp'
-        #     ],
-        #     'conditions': [
-        #         ['OS=="win"', {
-        #             'cflags': [
+            },
+            'defines': [
+                '__EXCEPTIONS'
+            ],
+           
+            'conditions': [
+                ['OS=="win"', {
+                    'cflags': [
 
-        #             ],
-        #             'cflags_cc': [
+                    ],
+                    'cflags_cc': [
 
-        #             ],
-                  
-        #             'msvs_settings': {
-        #                 'VCCLCompilerTool': {
-        #                     'AdditionalOptions': [],
-        #                     'ExceptionHandling': 1
-        #                 }
-        #             },
-        #             'link_settings': {
-        #                 'libraries': []
-        #             }
-        #         }
+                    ],
+                     'include_dirs': [
+                        '<(module_root_dir)/../docan/toomoss/inc',
+                        "<!@(node -p \"require('node-addon-api').include\")"
+                    ],
+                     'sources': [
+                        './toomoss/swig/toomoss_wrap.cxx', './toomoss/swig/tsfn.cxx',
+                    ],
+                    'libraries': ['<(module_root_dir)/../docan/toomoss/lib/USB2XXX.lib'],
+                    'defines': ['DELAYLOAD_HOOK',],
+                    'msvs_settings': {
+                        'VCCLCompilerTool': {
+                            'AdditionalOptions': [ '/DELAYLOAD:USB2XXX.dll','/DELAYLOAD:libusb-1.0.dll' ],
+                            'ExceptionHandling':1
+                        }
+                    },
+                    'link_settings': {
+                        'libraries': [ '-DELAYLOAD:USB2XXX.dll','-DELAYLOAD:libusb-1.0.dll' ]
+                    }
+                },
+                'OS=="linux"', {
+                    'include_dirs': [
+                        "<!@(node -p \"require('node-addon-api').include\")"
+                    ],
+                    'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
+                    'cflags!': [ '-fno-exceptions' ],
+                    'cflags_cc!': [ '-fno-exceptions' ],
+                    'sources': [ './fake_linux.cxx' ],
+                    'cflags': [ '-fexceptions' ],
+                    'cflags_cc': [ '-fexceptions' ]
+                }
 
-        #         ]
-        #     ],
-        # }
+                ]
+            ],
+        },
     ]
 }

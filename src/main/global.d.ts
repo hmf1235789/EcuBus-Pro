@@ -11,4 +11,13 @@ declare global {
     lin: Record<string, LDF>
     can: Record<string, DBC>
   }
+  var toomossDeviceHandles:
+    | Map<
+        number,
+        {
+          refCount: number // 引用计数
+          channels: Set<number> // 当前使用的通道
+        }
+      >
+    | undefined
 }

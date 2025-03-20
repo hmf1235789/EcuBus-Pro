@@ -9,6 +9,7 @@ export interface LinDevice {
   id: string
   handle: any
   busy?: boolean
+  toomossVolt?: number
 }
 
 export interface LinBaseInfo {

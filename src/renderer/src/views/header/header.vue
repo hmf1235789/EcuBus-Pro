@@ -96,6 +96,7 @@ import lightIcon from '@iconify/icons-material-symbols/play-circle-outline-round
 import stopIcon from '@iconify/icons-material-symbols/stop-circle-outline'
 import { onKeyStroke, onKeyDown } from '@vueuse/core'
 import { useDataStore } from '@r/stores/data'
+import { ElLoading } from 'element-plus'
 
 const project = useProjectStore()
 const router = useRouter()
@@ -111,7 +112,15 @@ function winHandle(action: string) {
   } else if (action == 'max') {
     window.electron.ipcRenderer.send('maximize')
   } else if (action == 'close') {
-    window.electron.ipcRenderer.send('close')
+    if (window.globalStart.value) {
+      //TODO:add force close
+      ElLoading.service()
+      window.electron.ipcRenderer.invoke('ipc-global-stop').finally(() => {
+        window.electron.ipcRenderer.send('close')
+      })
+    } else {
+      window.electron.ipcRenderer.send('close')
+    }
   }
 }
 

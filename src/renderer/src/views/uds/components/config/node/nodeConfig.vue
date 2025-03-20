@@ -354,7 +354,7 @@ const nodesName = computed(() => {
 
   for (const deviceId of formData.value.channel) {
     const device = dataBase.devices[deviceId]
-    if (device.type == 'lin' && device.linDevice) {
+    if (device && device.type == 'lin' && device.linDevice) {
       const d = device.linDevice
       if (d.database) {
         const db = dataBase.database.lin[d.database]

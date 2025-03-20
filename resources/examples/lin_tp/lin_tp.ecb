@@ -1,17 +1,18 @@
 {
   "data": {
     "devices": {
-      "e4179991-1b87-4889-b365-25b1fd93d97e": {
+      "40ba0a35-c84e-4f5f-a403-54b17c5bea12": {
         "type": "lin",
         "linDevice": {
           "device": {
             "label": "",
-            "handle": 1,
-            "id": ""
+            "handle": "1417675180:0",
+            "id": "",
+            "toomossVolt": 2
           },
-          "name": "PEAK_0",
-          "id": "e4179991-1b87-4889-b365-25b1fd93d97e",
-          "vendor": "peak",
+          "name": "TOOMOSS_1",
+          "id": "40ba0a35-c84e-4f5f-a403-54b17c5bea12",
+          "vendor": "toomoss",
           "baudRate": 19200,
           "mode": "MASTER",
           "database": "655bf90d-b010-49b5-9cf8-a9787319b5b4"
@@ -24,7 +25,7 @@
         "type": "lin",
         "id": "25cec12a-572d-4221-b85e-2728628134f7",
         "devices": [
-          "e4179991-1b87-4889-b365-25b1fd93d97e"
+          "40ba0a35-c84e-4f5f-a403-54b17c5bea12"
         ],
         "action": []
       }
@@ -35,7 +36,7 @@
         "name": "Tester_lin_1",
         "type": "lin",
         "script": "",
-        "targetDeviceId": "e4179991-1b87-4889-b365-25b1fd93d97e",
+        "targetDeviceId": "40ba0a35-c84e-4f5f-a403-54b17c5bea12",
         "seqList": [
           {
             "name": "Seq0",
@@ -161,9 +162,9 @@
         "type": "lin",
         "id": "9505c05a-4fe5-42e1-a45d-b1cbc14854ba",
         "channel": [
-          "e4179991-1b87-4889-b365-25b1fd93d97e"
+          "40ba0a35-c84e-4f5f-a403-54b17c5bea12"
         ],
-        "workNode": "lin:Motor2",
+        "workNode": "lin:Motor1",
         "attachTester": "5459ce47-1751-4a82-94a0-9bd33ae289ab",
         "script": "node.ts"
       }
@@ -785,7 +786,8 @@
           "symbol": "circle"
         }
       }
-    }
+    },
+    "tests": {}
   },
   "project": {
     "wins": {
@@ -807,7 +809,7 @@
       },
       "network": {
         "pos": {
-          "x": 610,
+          "x": 607,
           "y": 29,
           "w": 600,
           "h": 400
@@ -820,9 +822,9 @@
       },
       "25cec12a-572d-4221-b85e-2728628134f7_ia": {
         "pos": {
-          "x": 400,
-          "y": 144,
-          "w": 700,
+          "x": 151,
+          "y": 223,
+          "w": 931,
           "h": 400
         },
         "title": "lini",
@@ -838,8 +840,8 @@
       },
       "5459ce47-1751-4a82-94a0-9bd33ae289ab_sequence": {
         "pos": {
-          "x": 180,
-          "y": 171,
+          "x": 1403,
+          "y": 273,
           "w": 700,
           "h": 400
         },
@@ -856,10 +858,10 @@
       },
       "trace": {
         "pos": {
-          "x": 900,
-          "y": 19,
-          "w": 700,
-          "h": 400
+          "x": 821,
+          "y": 27,
+          "w": 1174,
+          "h": 503
         },
         "title": "trace",
         "label": "Trace",
@@ -880,15 +882,29 @@
       },
       "tester": {
         "pos": {
-          "x": 200,
-          "y": 191,
+          "x": 842,
+          "y": 209,
           "w": 1095,
           "h": 400
         },
         "title": "tester",
         "label": "UDS Tester",
         "id": "tester",
-        "options": {}
+        "options": {},
+        "hide": true
+      },
+      "hardware": {
+        "pos": {
+          "x": 1135,
+          "y": 97,
+          "w": 600,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {},
+        "hide": false
       }
     },
     "example": {

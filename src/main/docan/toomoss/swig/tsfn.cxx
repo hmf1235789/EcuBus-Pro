@@ -234,6 +234,7 @@ void FreeTSFN(const Napi::CallbackInfo &info) {
 
     context->tsfn.Release();
     context->tserror.Release();
+    context->txtsfn.Release();
 
     delete context;
     tsfnContextMap.erase(it);

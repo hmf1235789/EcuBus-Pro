@@ -1,0 +1,78 @@
+/* COPY to index.ts */
+/* eslint-disable no-var */
+import { Command, program } from 'commander'
+import { version } from '../../package.json'
+import seqMain from './seq'
+import path from 'path'
+import fsP from 'fs/promises'
+import fs from 'fs'
+import { DataSet } from 'src/preload/data'
+import { Logger, transports } from 'winston'
+import { exit } from 'process'
+import { format } from 'winston'
+import { createLogs } from 'src/main/log'
+import Transport from 'winston-transport'
+import colors from 'colors'
+import { CanMessage } from 'src/main/share/can'
+import { ServiceItem } from 'src/main/share/uds'
+import vm from 'vm'
+import pnpmScript from '../../resources/bin/pnpm/pnpm.cjs?asset&asarUnpack'
+import glob from 'glob'
+import testMain from './test'
+import { TestEvent } from 'node:test/reporters'
+import { ToomossLin } from 'src/main/dolin/toomoss'
+import { LinChecksumType, LinDirection, LinMode } from 'src/main/share/lin'
+import 'src/main/dolin'
+
+
+
+const client= new ToomossLin({
+  device: {
+    handle: '1417675180:0',
+    label: 'lin1',
+    id: 'lin1'
+  },
+  id: 'lin1',
+  vendor: 'toomoss',
+  name: 'lin1',
+  baudRate: 19200,
+  mode: LinMode.MASTER
+})
+
+
+
+
+async   function test(){
+  // await client.write({
+  //     frameId: 0x0,
+  //     data: Buffer.from([0x01, 0x22, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]),
+  //     direction: LinDirection.SEND,
+  //     checksumType: LinChecksumType.CLASSIC
+  //   })
+  for(let i = 0; i < 10; i++){
+    await client.write({
+      frameId: 0x3,
+      data: Buffer.from([0x01, 0x22, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]),
+      direction: LinDirection.SEND,
+      checksumType: LinChecksumType.CLASSIC
+    })
+  }
+  await client.write({
+    frameId: 0x4,
+    data: Buffer.from([0x01, 0x11, 0x03, 0x04]),
+    direction: LinDirection.RECV,
+    checksumType: LinChecksumType.CLASSIC
+  })
+  // return new Promise((resolve, reject) => {
+  //   setTimeout(() => {
+  //     resolve(null)
+  //   }, 5000)
+  // })
+}
+
+test().catch((e)=>{
+  console.log(e)
+}).finally(()=>{
+  client.close()
+  exit(0)
+})
