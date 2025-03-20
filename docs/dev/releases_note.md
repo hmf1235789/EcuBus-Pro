@@ -1,5 +1,13 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.24
+Changes from v0.8.23 to v0.8.24:
+
+ 
+* [feat]:add toomoss lin 
+* [dep]:update axios
+---
+
 ## v0.8.23
 Changes from v0.8.22 to v0.8.23:
 
