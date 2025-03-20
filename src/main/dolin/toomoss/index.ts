@@ -120,7 +120,7 @@ export class ToomossLin extends LinBase {
     if (ret != 0) {
       throw new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, undefined, 'init failed')
     }
-    LIN.LIN_EX_CtrlPowerOut(this.handle, this.deviceIndex, 2)
+    LIN.LIN_EX_CtrlPowerOut(this.handle, this.deviceIndex, this.info.device.toomossVolt || 0)
     LIN.CreateTSFN(
       this.handle,
       this.deviceIndex,

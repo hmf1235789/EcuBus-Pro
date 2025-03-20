@@ -39,7 +39,22 @@
         </template>
       </el-select>
     </el-form-item>
-
+    <el-form-item
+      v-if="props.vendor == 'toomoss'"
+      label="Volatge Control"
+      prop="device.toomossVolt"
+    >
+      <el-select
+        v-model="data.device.toomossVolt"
+        :loading="deviceLoading"
+        placeholder="Input 12V"
+        style="width: 300px"
+      >
+        <el-option label="Output 12V" :value="2" />
+        <el-option label="Output 5V" :value="1" />
+        <el-option label="Input 12V" :value="0" />
+      </el-select>
+    </el-form-item>
     <el-divider content-position="left"> Lin Parameters </el-divider>
     <el-form-item label-width="0">
       <el-col :span="12">
