@@ -5,8 +5,13 @@ LIN is a cost-effective and deterministic communication protocol designed for co
 > [!IMPORTANT]
 > All features described below require importing a LIN Description File (LDF). For more information about LDF, see the [database documentation](./../ldf).
 
-> [!NOTE]
-> Only support PEAK
+## Device Support
+- PEAK
+- TOOMOSS
+  - Support 12v voltage output
+  - Support 5v voltage output
+  - Support 12v voltage input
+  
 
 ## Schedule Table Management
 
