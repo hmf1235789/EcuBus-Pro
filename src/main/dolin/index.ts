@@ -24,9 +24,11 @@ import { LIN_TP, TpError } from './lintp'
 import { findService } from '../docan/uds'
 import { NodeItem } from 'src/preload/data'
 import { getJsPath } from '../util'
+import { ToomossLin } from './toomoss'
 
 const libPath = path.dirname(dllLib)
 PeakLin.loadDllPath(libPath)
+ToomossLin.loadDllPath(libPath)
 
 export function openLinDevice(device: LinBaseInfo) {
   let linBase: LinBase | undefined
@@ -34,6 +36,8 @@ export function openLinDevice(device: LinBaseInfo) {
   // #v-ifdef IGNORE_NODE!='1'
   if (device.vendor == 'peak') {
     linBase = new PeakLin(device)
+  } else if (device.vendor == 'toomoss') {
+    linBase = new ToomossLin(device)
   }
 
   return linBase
@@ -44,6 +48,8 @@ export function getLinVersion(vendor: string) {
   vendor = vendor.toUpperCase()
   if (vendor === 'PEAK') {
     return PeakLin.getLibVersion()
+  } else if (vendor === 'TOOMOSS') {
+    return ToomossLin.getLibVersion()
   }
   // #v-endif
   else {
@@ -56,6 +62,8 @@ export function getLinDevices(vendor: string) {
   // #v-ifdef IGNORE_NODE!='1'
   if (vendor === 'PEAK') {
     return PeakLin.getValidDevices()
+  } else if (vendor === 'TOOMOSS') {
+    return ToomossLin.getValidDevices()
   }
   // #v-endif
   else {

@@ -69,6 +69,7 @@ auto txCallback = [](Napi::Env env, Napi::Function jsCallback, TxResult* result)
     linMsgObj.Set("PID", Napi::Number::New(env, result->linMsg.PID));
     linMsgObj.Set("Check", Napi::Number::New(env, result->linMsg.Check));
     linMsgObj.Set("BreakBits", Napi::Number::New(env, result->linMsg.BreakBits));
+    linMsgObj.Set("Timestamp", Napi::Number::New(env, result->linMsg.Timestamp));
     
     linMsgObj.Set("Data", Napi::Buffer<uint8_t>::Copy(env, result->linMsg.Data, result->linMsg.DataLen));
   
@@ -142,7 +143,7 @@ void SendLinMsg(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
 
     try {
-        if (info.Length() < 6) {
+        if (info.Length() != 5) {
             throw Napi::Error::New(env, "Wrong number of arguments");
         }
 
@@ -157,6 +158,7 @@ void SendLinMsg(const Napi::CallbackInfo& info) {
         
         // 创建消息
         TxMessage msg;
+        memset(&msg.linMsg, 0, sizeof(LIN_EX_MSG));
         msg.devHandle = info[0].As<Napi::Number>().Int32Value();
         msg.linIndex = info[1].As<Napi::Number>().Uint32Value();
         msg.cnt = info[2].As<Napi::Number>().Uint32Value();
@@ -167,8 +169,9 @@ void SendLinMsg(const Napi::CallbackInfo& info) {
         msg.linMsg.CheckType = msgObj.Get("CheckType").As<Napi::Number>().Uint32Value();
         msg.linMsg.PID = msgObj.Get("PID").As<Napi::Number>().Uint32Value();
         msg.linMsg.Check = msgObj.Get("Check").As<Napi::Number>().Uint32Value();
-        msg.linMsg.BreakBits = msgObj.Get("BreakBits").As<Napi::Number>().Uint32Value();
+        msg.linMsg.BreakBits = 13;
         msg.linMsg.Sync = 0x55;
+        msg.linMsg.Timestamp = 0;
         
         auto dataBuffer = msgObj.Get("Data").As<Napi::Buffer<uint8_t>>();
         memcpy(msg.linMsg.Data, dataBuffer.Data(), dataBuffer.Length());
@@ -190,14 +193,14 @@ void SendLinMsg(const Napi::CallbackInfo& info) {
 // 修改发送线程入口函数
 void txThreadEntry(TsfnContext *context) {
     TxMessage msg;
-    PLIN_EX_MSG linOutMsg[50];
+    PLIN_EX_MSG linOutMsg[512];
     while (!context->closed) {
+       
         if(context->isMaster) {
             // 使用带超时的等待，每100ms检查一次closed标志
             if (context->txQueue.wait_dequeue_timed(msg, std::chrono::milliseconds(100))) {
                 TxResult* result = new TxResult();
                 int ret = LIN_EX_MasterSync(context->DevHandle, context->linIndex, &msg.linMsg, (LIN_EX_MSG *)linOutMsg, 1);
-                
                 result->result = ret;
                 result->id = msg.cnt;
                 if(ret > 0) {
@@ -214,9 +217,11 @@ void txThreadEntry(TsfnContext *context) {
             }
         }else{
             int ret = LIN_EX_SlaveGetData(context->DevHandle, context->linIndex, (LIN_EX_MSG *)linOutMsg);
+           
             if(ret > 0) {
                 for(int i = 0; i < ret; i++) {
                     TxResult* result = new TxResult();
+                    result->result = ret;
                     memcpy(&result->linMsg, &linOutMsg[i], sizeof(LIN_EX_MSG));
                     context->txtsfn.NonBlockingCall(result, txCallback);
                     if(context->closed) {
@@ -224,6 +229,8 @@ void txThreadEntry(TsfnContext *context) {
                     }
                 }
             }
+            //delay 10ms
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }
 }
