@@ -1,108 +1,87 @@
 <template>
   <div>
-    <VxeGrid
-      ref="xGrid"
-      v-bind="gridOptions"
-      class="sequenceTable"
-      :height="tableHeight"
-      @menu-click="menuClick"
-      @scroll="scrollHandle"
+    <div
+      style="
+        justify-content: flex-start;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        margin-left: 5px;
+      "
     >
-      <template #default_type="{ row }">
-        <Icon
-          v-if="row.method == 'canBase' || row.method == 'ipBase'"
-          :icon="email"
-          style="font-size: 14px"
-        />
-        <Icon
-          v-else-if="
-            row.method == 'udsSent' || row.method == 'udsRecv' || row.method == 'udsNegRecv'
-          "
-          :icon="emailFill"
-          style="font-size: 14px"
-        />
-        <Icon v-else-if="row.method == 'udsSystem'" :icon="systemIcon" style="font-size: 14px" />
-        <Icon v-else :icon="errorIcon" style="font-size: 14px" />
-      </template>
-      <template #toolbar>
-        <div
-          style="
-            justify-content: flex-start;
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            margin-left: 5px;
-          "
-        >
-          <el-button-group>
-            <el-tooltip effect="light" content="Clear Log" placement="bottom">
-              <el-button type="danger" link @click="clearLog">
-                <Icon :icon="circlePlusFilled" />
-              </el-button>
-            </el-tooltip>
+      <el-button-group>
+        <el-tooltip effect="light" content="Clear Log" placement="bottom">
+          <el-button type="danger" link @click="clearLog">
+            <Icon :icon="circlePlusFilled" />
+          </el-button>
+        </el-tooltip>
 
-            <!-- <el-tooltip effect="light" :content="autoScroll ? 'Disable Auto-Scroll' : 'Enable Auto-Scroll'" placement="bottom" >
+        <!-- <el-tooltip effect="light" :content="autoScroll ? 'Disable Auto-Scroll' : 'Enable Auto-Scroll'" placement="bottom" >
                      <el-button :type="autoScroll ? 'success' : 'warning'" link @click="toggleAutoScroll">
                         <Icon :icon="autoScroll ? scrollIcon2 : scrollIcon1" />
                      </el-button>
                   </el-tooltip> -->
-          </el-button-group>
-          <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom">
-            <el-button
-              :type="isPaused ? 'success' : 'warning'"
-              link
-              :class="{ 'pause-active': isPaused }"
-              @click="togglePause"
-            >
-              <Icon :icon="isPaused ? playIcon : pauseIcon" />
-            </el-button>
-          </el-tooltip>
-          <el-divider v-if="showFilter" direction="vertical" />
-          <el-dropdown v-if="showFilter">
-            <span class="el-dropdown-link">
-              <Icon :icon="filterIcon" />
-            </span>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-checkbox-group
-                  v-model="checkList"
-                  size="small"
-                  style="width: 200px; margin: 10px"
-                >
-                  <el-checkbox
-                    v-for="item of LogFilter"
-                    :key="item.v"
-                    :label="item.label"
-                    :value="item.v"
-                    @change="filterChange(item.v, $event)"
-                  />
-                </el-checkbox-group>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-          <el-divider direction="vertical" />
-          <el-dropdown size="small">
-            <el-button type="info" link @click="saveAll">
-              <Icon :icon="saveIcon" />
-            </el-button>
+      </el-button-group>
+      <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom">
+        <el-button
+          :type="isPaused ? 'success' : 'warning'"
+          link
+          :class="{ 'pause-active': isPaused }"
+          @click="togglePause"
+        >
+          <Icon :icon="isPaused ? playIcon : pauseIcon" />
+        </el-button>
+      </el-tooltip>
+      <el-divider v-if="showFilter" direction="vertical" />
+      <el-dropdown v-if="showFilter">
+        <span class="el-dropdown-link">
+          <Icon :icon="filterIcon" />
+        </span>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-checkbox-group v-model="checkList" size="small" style="width: 200px; margin: 10px">
+              <el-checkbox
+                v-for="item of LogFilter"
+                :key="item.v"
+                :label="item.label"
+                :value="item.v"
+                @change="filterChange(item.v, $event)"
+              />
+            </el-checkbox-group>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+      <el-divider direction="vertical" />
+      <el-dropdown size="small">
+        <el-button type="info" link @click="saveAll">
+          <Icon :icon="saveIcon" />
+        </el-button>
 
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item>Save as raw</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </div>
-      </template>
-    </VxeGrid>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item>Save as raw</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+    </div>
+    <div :id="`traceTable-${props.editIndex}`" class="realLog"></div>
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted, computed, toRef, watch, watchEffect, PropType } from 'vue'
+import {
+  ref,
+  onMounted,
+  onUnmounted,
+  computed,
+  toRef,
+  watch,
+  watchEffect,
+  PropType,
+  nextTick,
+  handleError
+} from 'vue'
 
 import { CAN_ID_TYPE, CanMessage, CanMsgType, getDlcByLen } from 'nodeCan/can'
-import { VxeGridProps } from 'vxe-table'
-import { VxeGrid } from 'vxe-table'
 import { Icon } from '@iconify/vue'
 import circlePlusFilled from '@iconify/icons-material-symbols/scan-delete-outline'
 import email from '@iconify/icons-material-symbols/mark-email-unread-outline-rounded'
@@ -122,9 +101,12 @@ import scrollIcon2 from '@iconify/icons-material-symbols/autopause'
 
 import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
-import { LinChecksumType, LinDirection, LinMsg } from 'nodeCan/lin'
-
+import { LinDirection, LinMsg } from 'nodeCan/lin'
+import EVirtTable from 'e-virt-table'
+let allLogData: LogData[] = []
+let logIndex = 0
 interface LogData {
+  index: string
   dir?: 'Tx' | 'Rx' | '--'
   data: string
   ts: string
@@ -191,9 +173,11 @@ watch(window.globalStart, (val) => {
     isPaused.value = false
   }
 })
+
 function clearLog() {
-  // logData.value = []
-  xGrid.value?.remove()
+  allLogData = []
+  logIndex = 0
+  grid.loadData([])
 }
 function data2str(data: Uint8Array) {
   return data.reduce((acc, val) => acc + val.toString(16).padStart(2, '0') + ' ', '')
@@ -216,18 +200,21 @@ function CanMsgType2Str(msgType: CanMsgType) {
   }
   return str
 }
-function insertData1(data: LogData[]) {
-  xGrid.value.insertAt(data, -1).then((v: any) => {
-    xGrid.value.scrollToRow(v.row)
 
-    const { fullData } = xGrid.value.getTableData()
-    const limit = 1000
-    if (fullData.length > limit) {
-      xGrid.value.remove(fullData.slice(0, fullData.length - limit + 10))
-    }
-  })
+const maxLogCount = 10000
+function insertData2(data: LogData[]) {
+  // grid.loadData(data)
+  allLogData.push(...data)
+  if (allLogData.length > maxLogCount) {
+    const excessRows = allLogData.length - maxLogCount
+    allLogData.splice(0, excessRows)
+  }
+  grid.loadData(allLogData)
+  // grid.scrollYTo(allLogData.length*28+100)
+  // nextTick(() => {
+  //   grid.scrollToRowIndex(logIndex - 1)
+  // })
 }
-
 function logDisplay(vals: LogItem[]) {
   // Don't process logs when paused
   if (isPaused.value) return
@@ -246,6 +233,7 @@ function logDisplay(vals: LogItem[]) {
       //    }
       // }
       insertData({
+        index: String(logIndex++),
         method: val.message.method,
         dir: val.message.data.dir == 'OUT' ? 'Tx' : 'Rx',
         data: data2str(val.message.data.data),
@@ -260,6 +248,7 @@ function logDisplay(vals: LogItem[]) {
       })
     } else if (val.message.method == 'ipBase') {
       insertData({
+        index: String(logIndex++),
         method: val.message.method,
         dir: val.message.data.dir == 'OUT' ? 'Tx' : 'Rx',
         data: data2str(val.message.data.data),
@@ -274,6 +263,7 @@ function logDisplay(vals: LogItem[]) {
       })
     } else if (val.message.method == 'linBase') {
       insertData({
+        index: String(logIndex++),
         method: val.message.method,
         dir: val.message.data.direction == LinDirection.SEND ? 'Tx' : 'Rx',
         data: data2str(val.message.data.data),
@@ -293,6 +283,7 @@ function logDisplay(vals: LogItem[]) {
       }
 
       insertData({
+        index: String(logIndex++),
         method: val.message.method,
         dir: '--',
         name: testerName,
@@ -318,6 +309,7 @@ function logDisplay(vals: LogItem[]) {
         msgType = 'UDS Negative Resp' + (val.message.data.msg || '')
       }
       insertData({
+        index: String(logIndex++),
         method: method,
         dir: '--',
         name: testerName,
@@ -333,6 +325,7 @@ function logDisplay(vals: LogItem[]) {
       //find last udsSent or udsPreSend
 
       insertData({
+        index: String(logIndex++),
         method: val.message.method,
         name: '',
         data: val.message.data.msg,
@@ -350,6 +343,7 @@ function logDisplay(vals: LogItem[]) {
           method = 'linWarning'
         }
         insertData({
+          index: String(logIndex++),
           method: method,
           name: val.message.data.data.name,
           data: val.message.data.msg,
@@ -364,6 +358,7 @@ function logDisplay(vals: LogItem[]) {
         })
       } else {
         insertData({
+          index: String(logIndex++),
           method: val.message.method,
           name: '',
           data: val.message.data.msg,
@@ -377,6 +372,7 @@ function logDisplay(vals: LogItem[]) {
       }
     } else if (val.message.method == 'linEvent') {
       insertData({
+        index: String(logIndex++),
         method: val.message.method,
         name: '',
         data: val.message.data.msg,
@@ -389,6 +385,7 @@ function logDisplay(vals: LogItem[]) {
       })
     } else if (val.message.method == 'udsScript') {
       insertData({
+        index: String(logIndex++),
         method: val.message.method,
         name: '',
         data: val.message.data.msg,
@@ -401,6 +398,7 @@ function logDisplay(vals: LogItem[]) {
       })
     } else if (val.message.method == 'udsSystem') {
       insertData({
+        index: String(logIndex++),
         method: val.message.method,
         name: '',
         data: val.message.data.msg,
@@ -413,10 +411,18 @@ function logDisplay(vals: LogItem[]) {
       })
     }
   }
-  insertData1(logData)
+  insertData2(logData)
 }
 
 const props = defineProps({
+  editIndex: {
+    type: String,
+    default: ''
+  },
+  width: {
+    type: Number,
+    required: true
+  },
   height: {
     type: Number,
     required: true
@@ -446,110 +452,18 @@ function filterChange(method: 'uds' | 'canBase' | 'ipBase' | 'linBase', val: boo
   }
 }
 
-const tableHeight = toRef(props, 'height')
-
-const gridOptions = computed(() => {
-  const v: VxeGridProps<LogData> = {
-    border: true,
-    size: 'mini',
-
-    columnConfig: {
-      resizable: true
-    },
-    showOverflow: true,
-    scrollY: {
-      enabled: true,
-      gt: 0,
-      mode: 'wheel'
-    },
-    rowConfig: {
-      isCurrent: true,
-      height: 30
-    },
-    toolbarConfig: {
-      slots: {
-        tools: 'toolbar'
-      }
-    },
-    align: 'center',
-    columns: [
-      {
-        field: 'type',
-        title: '',
-        width: 36,
-        resizable: false,
-        editRender: {},
-        slots: { default: 'default_type' }
-      },
-      { field: 'ts', title: 'Time', width: 100 },
-      { field: 'name', title: 'Name', width: 200 },
-      { field: 'data', title: 'Data', minWidth: 300 },
-      { field: 'dir', title: 'Dir', width: 50 },
-      // { field: 'seqIndex', title: 'Num', width: 50 },
-
-      { field: 'id', title: 'ID', width: 100 },
-
-      { field: 'dlc', title: 'DLC', width: 100 },
-      { field: 'len', title: 'Len', width: 100 },
-      { field: 'msgType', title: 'Type', width: 100 },
-      { field: 'channel', title: 'Channel', width: 100 },
-      { field: 'device', title: 'Device', width: 200 }
-    ],
-    rowClassName: ({ row }) => {
-      return row.method
-    },
-    menuConfig: {
-      body: {
-        options: [
-          [
-            { code: 'copyRaw', name: 'Copy data as raw', visible: true, disabled: false },
-            { code: 'copyArray', name: 'Copy data as array', visible: true, disabled: false },
-            { code: 'copyRow', name: 'Copy row (json)', visible: true, disabled: false }
-          ]
-        ]
-      }
-    }
-  }
-
-  return v
+const tableHeight = computed(() => {
+  return props.height - 20
+})
+const tableWidth = computed(() => {
+  return props.width
 })
 
-function menuClick(val: any) {
-  switch (val.menu.code) {
-    case 'copyRaw': {
-      const data = val.row.data
-      navigator.clipboard.writeText(data)
-
-      break
-    }
-    case 'copyArray': {
-      const data1 = val.row.data
-        .split(' ')
-        .map((v: any) => `0x${v}`)
-        .join(',')
-      navigator.clipboard.writeText(data1)
-
-      break
-    }
-    case 'copyRow': {
-      const data2 = JSON.stringify(val.row, null, 2)
-      navigator.clipboard.writeText(data2)
-
-      break
-    }
-  }
-}
-
 function saveAll() {
-  xGrid.value.exportData()
+  // xGrid.value.exportData()
 }
 const isPaused = ref(false)
 // const autoScroll = ref(true)
-function scrollHandle(x) {
-  if (x.type == 'body' && !isPaused.value && x.direction != 'left' && x.direction != 'right') {
-    isPaused.value = true
-  }
-}
 
 function getData() {
   return xGrid.value.getTableData()
@@ -557,7 +471,7 @@ function getData() {
 
 defineExpose({
   clearLog,
-  insertData: insertData1,
+  insertData: insertData2,
   getData
 })
 
@@ -594,6 +508,7 @@ const LogFilter = ref<
   }
 ])
 
+let grid: EVirtTable
 onMounted(() => {
   for (const item of checkList.value) {
     const v = LogFilter.value.find((v) => v.v == item)
@@ -603,6 +518,51 @@ onMounted(() => {
       }
     }
   }
+  const target = document.getElementById(`traceTable-${props.editIndex}`)
+
+  grid = new EVirtTable(target as any, {
+    data: [],
+    columns: [
+      { key: 'ts', title: 'Time', width: 100 },
+      { key: 'name', title: 'Name', width: 200 },
+      { key: 'data', title: 'Data', width: 300 },
+      { key: 'dir', title: 'Dir', width: 50 },
+      { key: 'id', title: 'ID', width: 100 },
+      { key: 'dlc', title: 'DLC', width: 100 },
+      { key: 'len', title: 'Len', width: 100 },
+      { key: 'msgType', title: 'Type', width: 100 },
+      { key: 'channel', title: 'Channel', width: 100 },
+      { key: 'device', title: 'Device', width: 200 }
+    ],
+    config: {
+      WIDTH: tableWidth.value,
+      HEIGHT: tableHeight.value,
+      DISABLED: true,
+      HEADER_HEIGHT: 28,
+      CELL_HEIGHT: 28,
+      ENABLE_SELECTOR: false,
+      ENABLE_HISTORY: false,
+      ENABLE_COPY: false,
+      ENABLE_PASTER: false,
+      ENABLE_KEYBOARD: false,
+      ENABLE_RESIZE_ROW: false,
+      EMPTY_TEXT: 'No data',
+      ROW_KEY: 'index'
+    }
+  })
+
+  grid.on('onScrollY', (v) => {
+    console.log(v)
+    // if (!isPaused.value) {
+    //   isPaused.value = true
+    // }
+  })
+})
+watch([tableWidth, tableHeight], () => {
+  grid.loadConfig({
+    WIDTH: tableWidth.value,
+    HEIGHT: tableHeight.value
+  })
 })
 
 onUnmounted(() => {
@@ -611,6 +571,9 @@ onUnmounted(() => {
       window.logBus.detach(val, logDisplay)
     }
   })
+  // cTable.close()
+  // stage.destroy()
+  grid.destroy()
 })
 </script>
 
@@ -622,6 +585,7 @@ onUnmounted(() => {
 .linEvent {
   color: var(--el-color-success);
 }
+
 .ipBase {
   color: var(--el-color-primary-dark-2);
 }
@@ -637,12 +601,15 @@ onUnmounted(() => {
 .canError {
   color: var(--el-color-danger);
 }
+
 .linError {
   color: var(--el-color-danger);
 }
+
 .linWarning {
   color: var(--el-color-warning);
 }
+
 .ipError {
   color: var(--el-color-danger);
 }
@@ -654,9 +621,11 @@ onUnmounted(() => {
 .udsWarning {
   color: var(--el-color-warning);
 }
+
 .udsNegRecv {
   color: var(--el-color-warning);
 }
+
 .pause-active {
   box-shadow: inset 0 0 4px var(--el-color-info-light-5);
   border-radius: 4px;
