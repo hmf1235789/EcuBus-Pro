@@ -1,0 +1,151 @@
+/*---------GLOBAL DEFINITIONS-----------*/
+LIN_description_file;
+LIN_protocol_version             = "2.1";
+LIN_language_version             = "2.1";
+LIN_speed                        = 19.2 kbps;
+/* ----------NODE DEFINITIONS---------- */
+Nodes {
+   Master:
+      Masterboard,                                           /* Master node name */
+      1 ms,                                                  /* Time base */
+      0.1 ms;                                                /* Jitter */
+   Slaves:
+      NSUC1500_LIN_HV_LV_LED_DEMO_NODE;
+}
+/* ----------SIGNAL DEFINITIONS---------- */
+Signals {
+   /* Signal_name                : Size,                              Init,            Publisher, Subscriber(s) */
+   s_CtrlMode                    :  8,                                0x40,          Masterboard, NSUC1500_LIN_HV_LV_LED_DEMO_NODE;
+   s_ERR0                        :  8,                                0x00, NSUC1500_LIN_HV_LV_LED_DEMO_NODE, Masterboard;
+   s_ERR1                        :  8,                                0x00, NSUC1500_LIN_HV_LV_LED_DEMO_NODE, Masterboard;
+   s_VDD                         : 16,                                0x00, NSUC1500_LIN_HV_LV_LED_DEMO_NODE, Masterboard;
+   s_RED_PN                      : 16,                                0x00, NSUC1500_LIN_HV_LV_LED_DEMO_NODE, Masterboard;
+   s_GREEN_PN                    : 16,                                0x00, NSUC1500_LIN_HV_LV_LED_DEMO_NODE, Masterboard;
+   s_BLUE_PN                     : 16,                                0x00, NSUC1500_LIN_HV_LV_LED_DEMO_NODE, Masterboard;
+   s_HVTempSensor                : 16,                                0x00, NSUC1500_LIN_HV_LV_LED_DEMO_NODE, Masterboard;
+   s_Vcore                       : 16,                                0x00, NSUC1500_LIN_HV_LV_LED_DEMO_NODE, Masterboard;
+   s_Vsup                        : 16,                                0x00, NSUC1500_LIN_HV_LV_LED_DEMO_NODE, Masterboard;
+   s_LVTempSensor                : 16,                                0x00, NSUC1500_LIN_HV_LV_LED_DEMO_NODE, Masterboard;
+   s_LRE                         :  1,                                0x00, NSUC1500_LIN_HV_LV_LED_DEMO_NODE, Masterboard;
+   s_ClearErr                    :  1,                                0x00,          Masterboard, NSUC1500_LIN_HV_LV_LED_DEMO_NODE;
+   s_R                           :  8,                                0x00,          Masterboard, NSUC1500_LIN_HV_LV_LED_DEMO_NODE;
+   s_G                           :  8,                                0x00,          Masterboard, NSUC1500_LIN_HV_LV_LED_DEMO_NODE;
+   s_B                           :  8,                                0x00,          Masterboard, NSUC1500_LIN_HV_LV_LED_DEMO_NODE;
+   s_intensity                   :  8,                                0x00,          Masterboard, NSUC1500_LIN_HV_LV_LED_DEMO_NODE;
+   s_NAD                         :  8,                                0x7F,          Masterboard, NSUC1500_LIN_HV_LV_LED_DEMO_NODE;
+}
+/* ----------DIAGNOSTIC SIGNAL DEFINITIONS---------- */
+Diagnostic_signals {
+   /* MasterReq Reserved Signals */
+   MasterReqB0         :    8,   0;
+   MasterReqB1         :    8,   0;
+   MasterReqB2         :    8,   0;
+   MasterReqB3         :    8,   0;
+   MasterReqB4         :    8,   0;
+   MasterReqB5         :    8,   0;
+   MasterReqB6         :    8,   0;
+   MasterReqB7         :    8,   0;
+   /* SlaveResp Reserved Signals */
+   SlaveRespB0         :    8,   0;
+   SlaveRespB1         :    8,   0;
+   SlaveRespB2         :    8,   0;
+   SlaveRespB3         :    8,   0;
+   SlaveRespB4         :    8,   0;
+   SlaveRespB5         :    8,   0;
+   SlaveRespB6         :    8,   0;
+   SlaveRespB7         :    8,   0;
+}
+/* ----------UNCONDITIONAL FRAME DEFINITIONS---------- */
+Frames {
+   f_Read_1            : 0x01, NSUC1500_LIN_HV_LV_LED_DEMO_NODE,    8 {
+      s_ERR0              , 0;
+      s_ERR1              , 8;
+      s_Vsup              , 16;
+   }
+   f_Write_2           : 0x02, Masterboard         ,    8 {
+      s_ClearErr          , 0;
+   }
+   f_Write_3           : 0x14, Masterboard         ,    8 {
+      s_NAD               , 0;
+      s_CtrlMode          , 8;
+      s_R                 , 16;
+      s_G                 , 24;
+      s_B                 , 32;
+      s_intensity         , 40;
+   }
+   f_Read_4            : 0x04, NSUC1500_LIN_HV_LV_LED_DEMO_NODE,    8 {
+      s_HVTempSensor      , 0;
+      s_RED_PN            , 16;
+      s_GREEN_PN          , 32;
+      s_BLUE_PN           , 48;
+   }
+   f_Read_5            : 0x05, NSUC1500_LIN_HV_LV_LED_DEMO_NODE,    8 {
+      s_LRE               , 0;
+      s_VDD               , 8;
+      s_LVTempSensor      , 24;
+      s_Vcore             , 40;
+   }
+}
+/* ----------DIAGNOSTIC FRAME DEFINITIONS---------- */
+Diagnostic_frames {
+   MasterReq           : 0x3C {
+      MasterReqB0         , 0;
+      MasterReqB1         , 8;
+      MasterReqB2         , 16;
+      MasterReqB3         , 24;
+      MasterReqB4         , 32;
+      MasterReqB5         , 40;
+      MasterReqB6         , 48;
+      MasterReqB7         , 56;
+   }
+   SlaveResp           : 0x3D {
+      SlaveRespB0         , 0;
+      SlaveRespB1         , 8;
+      SlaveRespB2         , 16;
+      SlaveRespB3         , 24;
+      SlaveRespB4         , 32;
+      SlaveRespB5         , 40;
+      SlaveRespB6         , 48;
+      SlaveRespB7         , 56;
+   }
+}
+/* ----------NODE ATTRIBUTE DEFINITIONS---------- */
+Node_attributes {
+   NSUC1500_LIN_HV_LV_LED_DEMO_NODE {
+      LIN_protocol               = "2.2";                    /* Node protocol version */
+      configured_NAD             = 0x01;                     /* configured NAD of node */
+      initial_NAD                = 0x01;                     /* initial NAD of node */
+      product_id                 = 0x41, 0x2345, 0xAB;       /* Product id */
+      response_error             = s_LRE;                    /* Response error signal */
+      P2_min                     = 50 ms;                    /* P2_min */
+      ST_min                     = 0 ms;                     /* ST_min */
+      N_As_timeout               = 1000 ms;                  /* N_As_timeout */
+      N_Cr_timeout               = 1000 ms;                  /* N_As_timeout */
+      configurable_frames {
+         f_Read_1;
+         f_Write_2;
+         f_Write_3;
+         f_Read_4;
+         f_Read_5;
+      }
+   }
+}
+/* ----------SCHEDULE TABLE DEFINITIONS---------- */
+Schedule_tables {
+   st_all {
+      f_Read_1                                           delay 10 ms;
+      f_Write_2                                          delay 10 ms;
+      f_Write_3                                          delay 10 ms;
+      f_Read_4                                           delay 10 ms;
+      f_Read_5                                           delay 10 ms;
+   }
+   st_test {
+      f_Read_1                                           delay 10 ms;
+      f_Read_4                                           delay 10 ms;
+      f_Read_5                                           delay 10 ms;
+   }
+   st_pwm_test {
+      f_Write_3                                          delay 10 ms;
+   }
+}
+

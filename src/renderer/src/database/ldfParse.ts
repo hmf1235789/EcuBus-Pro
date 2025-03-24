@@ -264,7 +264,7 @@ const Diagnostic_signals = createToken({
   name: 'Diagnostic_signals',
   pattern: /Diagnostic_signals\s+/
 })
-const DiagReq = createToken({ name: 'DiagReq', pattern: /(Master|Slave)(Req|Resp)B[0-7]:\s*/ })
+const DiagReq = createToken({ name: 'DiagReq', pattern: /(Master|Slave)(Req|Resp)B[0-7]\s*:\s*/ })
 const Frames = createToken({ name: 'Frames', pattern: /Frames\s*/ })
 const Signal_groups = createToken({ name: 'Signal_groups', pattern: /Signal_groups\s+/ })
 const Sporadic_frames = createToken({ name: 'Sporadic_frames', pattern: /Sporadic_frames\s+/ })
@@ -278,11 +278,12 @@ const Diagnostic_frames = createToken({
 })
 const DiagReqFrame = createToken({
   name: 'DiagReqFrame',
-  pattern: /((MasterReq\s*:\s*(0x3c|60)\s*)|(SlaveResp\s*:\s*(0x3d|61)\s*))/
+  pattern:
+    /((MasterReq\s*:\s*(0x3c|60|0x3C|0X3C|0X3c)\s*)|(SlaveResp\s*:\s*(0x3d|61|0x3D|0X3D|0X3d)\s*))/
 })
 const SubDiagReq = createToken({
   name: 'SubDiagReq',
-  pattern: /(Master|Slave)(Req|Resp)B[0-7],\s*/
+  pattern: /(Master|Slave)(Req|Resp)B[0-7]\s*,\s*/
 })
 const Schedule_tables = createToken({ name: 'Schedule_tables', pattern: /Schedule_tables\s+/ })
 const MasterReqSlaveResp = createToken({
@@ -1191,7 +1192,8 @@ class LdfVistor extends visitor {
     this.ldf = {
       eventTriggeredFrames: {},
       sporadicFrames: {},
-      signalRep: {}
+      signalRep: {},
+      signalEncodeTypes: {}
     } as LDF
   }
   ldf!: LDF
@@ -1545,58 +1547,61 @@ class LdfVistor extends visitor {
   }
 
   Signal_encoding_typesClause(ctx: CstChildrenDictionary) {
-    this.ldf.signalEncodeTypes = {}
-    for (const m of ctx.MSignalValueClause) {
-      const rm = (m as CstNode).children
-      const name = (rm.Identifier[0] as IToken).image
-      const item: any = {
-        name: name,
-        encodingTypes: []
-      }
-
-      for (const s of rm.SignalValueClause) {
-        const args: any = {}
-        let type = ''
-        const rs = (s as CstNode).children
-        if (rs.logical_valueClause) {
-          const rrm = (rs.logical_valueClause[0] as CstNode).children
-          type = 'logicalValue'
-          args.logicalValue = {
-            signalValue: Number((rrm.Interger[0] as IToken).image),
-            textInfo: rrm.Identifier ? (rrm.Identifier[0] as IToken).image : undefined
-          }
-        } else if (rs.physical_rangeClause) {
-          type = 'physicalValue'
-          const rrm = (rs.physical_rangeClause[0] as CstNode).children
-          args.physicalValue = {
-            minValue: Number((rrm.Interger[0] as IToken).image),
-            maxValue: Number((rrm.Interger[1] as IToken).image),
-            scale: Number((rrm.Interger[2] as IToken).image),
-            offset: Number((rrm.Interger[3] as IToken).image),
-            textInfo: rrm.CharString
-              ? (rrm.CharString[0] as IToken).image.replace(/"+/g, '')
-              : undefined
-          }
-        } else if (rs.bcd_valueClause) {
-          type = 'bcdValue'
-        } else if (rs.ascii_valueClause) {
-          type = 'asciiValue'
+    if (ctx.MSignalValueClause) {
+      for (const m of ctx.MSignalValueClause) {
+        const rm = (m as CstNode).children
+        const name = (rm.Identifier[0] as IToken).image
+        const item: any = {
+          name: name,
+          encodingTypes: []
         }
-        item.encodingTypes.push({
-          type: type,
-          ...args
-        })
+
+        for (const s of rm.SignalValueClause) {
+          const args: any = {}
+          let type = ''
+          const rs = (s as CstNode).children
+          if (rs.logical_valueClause) {
+            const rrm = (rs.logical_valueClause[0] as CstNode).children
+            type = 'logicalValue'
+            args.logicalValue = {
+              signalValue: Number((rrm.Interger[0] as IToken).image),
+              textInfo: rrm.Identifier ? (rrm.Identifier[0] as IToken).image : undefined
+            }
+          } else if (rs.physical_rangeClause) {
+            type = 'physicalValue'
+            const rrm = (rs.physical_rangeClause[0] as CstNode).children
+            args.physicalValue = {
+              minValue: Number((rrm.Interger[0] as IToken).image),
+              maxValue: Number((rrm.Interger[1] as IToken).image),
+              scale: Number((rrm.Interger[2] as IToken).image),
+              offset: Number((rrm.Interger[3] as IToken).image),
+              textInfo: rrm.CharString
+                ? (rrm.CharString[0] as IToken).image.replace(/"+/g, '')
+                : undefined
+            }
+          } else if (rs.bcd_valueClause) {
+            type = 'bcdValue'
+          } else if (rs.ascii_valueClause) {
+            type = 'asciiValue'
+          }
+          item.encodingTypes.push({
+            type: type,
+            ...args
+          })
+        }
+        this.ldf.signalEncodeTypes[item.name] = item
       }
-      this.ldf.signalEncodeTypes[item.name] = item
     }
   }
 
   Signal_representationClause(ctx: CstChildrenDictionary) {
     this.ldf.signalRep = {}
-    for (const m of ctx.SubSignal_representationClause) {
-      const rm = (m as CstNode).children
-      const name = (rm.Identifier[0] as IToken).image
-      this.ldf.signalRep[name] = [...rm.Identifier.slice(1).map((item) => (item as IToken).image)]
+    if (ctx.SubSignal_representationClause) {
+      for (const m of ctx.SubSignal_representationClause) {
+        const rm = (m as CstNode).children
+        const name = (rm.Identifier[0] as IToken).image
+        this.ldf.signalRep[name] = [...rm.Identifier.slice(1).map((item) => (item as IToken).image)]
+      }
     }
   }
 

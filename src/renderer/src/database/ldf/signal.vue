@@ -297,7 +297,7 @@ const gridOptions = computed<VxeGridProps<signalTable>>(() => {
       {
         type: 'seq',
         width: 50,
-        title: '',
+        title: '#',
         align: 'center',
         fixed: 'left',
         resizable: false

@@ -266,7 +266,7 @@ const gridOptions = computed<VxeGridProps<SchTable>>(() => ({
     slots: { tools: 'toolbar' }
   },
   columns: [
-    { type: 'seq', width: 50, title: '', fixed: 'left' },
+    { type: 'seq', width: 50, title: '#', fixed: 'left', align: 'center' },
     { field: 'name', title: 'Schedule Table', minWidth: 200 },
     {
       field: 'frameCount',

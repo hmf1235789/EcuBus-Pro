@@ -63,3 +63,9 @@ describe('signal update', () => {
     expect(val).toEqual(Buffer.from([5, 0x2, 0x80, 0xf8, 0x7a, 1]))
   })
 })
+
+test('ldf file2', () => {
+  const ldf = fs.readFileSync(path.join(__dirname, 'file2.ldf'), 'utf-8')
+  const r = parse(ldf)
+  // console.log(r)
+})

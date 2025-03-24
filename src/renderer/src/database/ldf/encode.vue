@@ -225,7 +225,7 @@ const gridOptions = computed<VxeGridProps<SignalEncodeType>>(() => ({
     slots: { tools: 'toolbar' }
   },
   columns: [
-    { type: 'seq', width: 50, title: '', fixed: 'left' },
+    { type: 'seq', width: 50, title: '#', fixed: 'left', align: 'center' },
     { field: 'name', title: 'Encoding Type Name', minWidth: 200 },
     {
       field: 'encodingTypes',
