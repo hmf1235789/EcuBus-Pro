@@ -36,3 +36,7 @@ jobs:
         run: npm run cli:build:win
       - name: Build APP
         run: npm run build:win
+      - uses: actions/upload-artifact@v4
+        with:
+          name: artifact
+          path: dist/*.exe
