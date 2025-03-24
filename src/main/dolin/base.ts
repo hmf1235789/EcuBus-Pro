@@ -513,7 +513,7 @@ export default abstract class LinBase {
             const data = frameData || getFrameData(db, frame)
             const id = frameId || frame.id
             const checksum =
-              id == 0x3 || id == 0x3d ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED
+              id == 0x3c || id == 0x3d ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED
 
             this.write(
               {
