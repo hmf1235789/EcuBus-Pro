@@ -210,6 +210,7 @@ function insertData2(data: LogData[]) {
     allLogData.splice(0, excessRows)
   }
   grid.loadData(allLogData)
+  grid.scrollToRowIndex(logIndex - 1)
   // grid.scrollYTo(allLogData.length*28+100)
   // nextTick(() => {
   //   grid.scrollToRowIndex(logIndex - 1)
@@ -466,7 +467,7 @@ const isPaused = ref(false)
 // const autoScroll = ref(true)
 
 function getData() {
-  return xGrid.value.getTableData()
+  return allLogData
 }
 
 defineExpose({
@@ -551,11 +552,11 @@ onMounted(() => {
     }
   })
 
-  grid.on('onScrollY', (v) => {
-    console.log(v)
-    // if (!isPaused.value) {
-    //   isPaused.value = true
-    // }
+  grid.on('onScrollY', (v, isTrust) => {
+    console.log(v, isTrust)
+    if (!isPaused.value && isTrust) {
+      isPaused.value = true
+    }
   })
 })
 watch([tableWidth, tableHeight], () => {
