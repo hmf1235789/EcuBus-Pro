@@ -76,7 +76,7 @@ export class PeakLin extends LinBase {
     super(info)
     this.client = this.registerClient()
     this.connectClient(this.client, info.device)
-    this.initHardware(info.device, this.client, info.mode == LinMode.MASTER, info.baudRate)
+    this.initHardware(info.device, this.client, info.mode == LinMode.MASTER, Number(info.baudRate))
     LIN.LIN_RegisterFrameId(this.client, info.device.handle, 0, 0x3f)
     LIN.CreateTSFN(this.client, this.info.id, this.callback.bind(this))
     this.log = new LinLOG('PEAK', info.name, this.event)

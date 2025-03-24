@@ -108,7 +108,7 @@ export class ToomossLin extends LinBase {
     ret = LIN.LIN_EX_Init(
       this.handle,
       this.deviceIndex,
-      info.baudRate,
+      Number(info.baudRate),
       info.mode == LinMode.MASTER ? 1 : 0
     )
 

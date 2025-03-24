@@ -68,8 +68,8 @@
       <el-col :span="12">
         <el-form-item label="Baud Rate" prop="baudRate">
           <el-select v-model="data.baudRate" required>
-            <el-option label="9600" value="9600" />
-            <el-option label="19200" value="19200" />
+            <el-option label="9600" :value="9600" />
+            <el-option label="19200" :value="19200" />
           </el-select>
         </el-form-item>
       </el-col>
