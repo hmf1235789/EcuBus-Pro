@@ -36,6 +36,8 @@ This example demonstrates how to use the EcuBus-Pro to upgrade Application firmw
 
 ## Diagnostic Steps
 
+![Diagnostic Steps](./image.png)
+
 This example implements firmware upgrade through UDS diagnostic protocol. The main steps are as follows:
 
 1. Session Control and Communication Control

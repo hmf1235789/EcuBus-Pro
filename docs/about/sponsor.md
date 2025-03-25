@@ -85,4 +85,4 @@ Please contact me to discuss what you want for this tier!
 
 | Date | Supporter | Method | Amount | Comment |
 | --- | --- | --- | --- | --- |
-| 2025-03-24 | 胖胖的风笛 | WeChat | ¥20 | 一杯coffee |
+| 2025-03-25 | 胖胖的风笛 | WeChat | ¥20 | 一杯coffee |
