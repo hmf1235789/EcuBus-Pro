@@ -1206,7 +1206,7 @@ export * from './utli'
             }
           ],
           extensions: {
-            recommendations: ['ms-vscode.vscode-typescript-next']
+            recommendations: [] /*'ms-vscode.vscode-typescript-next'*/
           }
         },
         null,
