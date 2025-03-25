@@ -122,7 +122,7 @@ import scrollIcon2 from '@iconify/icons-material-symbols/autopause'
 
 import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
-import { LinDirection, LinMsg } from 'nodeCan/lin'
+import { LinChecksumType, LinDirection, LinMsg } from 'nodeCan/lin'
 
 interface LogData {
   dir?: 'Tx' | 'Rx' | '--'
@@ -282,7 +282,7 @@ function logDisplay(vals: LogItem[]) {
         len: val.message.data.data.length,
         device: val.label,
         channel: val.instance,
-        msgType: 'LIN',
+        msgType: `LIN ${val.message.data.checksumType}`,
         dlc: val.message.data.data.length,
         name: val.message.data.name
       })
