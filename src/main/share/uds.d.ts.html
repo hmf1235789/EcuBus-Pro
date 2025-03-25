@@ -111,11 +111,6 @@ interface CanMsgType {
     uuid?: string;
 }
 
-/**
- * @category UDS
- */
-type ServiceId = '0x10' | '0x11' | '0x27' | '0x28' | '0x29' | '0x3E' | '0x83' | '0x84' | '0x85' | '0x87' | '0x22' | '0x23' | '0x24' | '0x2A' | '0x2C' | '0x2E' | '0x3D' | '0x14' | '0x19' | '0x2F' | '0x31' | '0x34' | '0x35' | '0x36' | '0x37' | '0x38' | 'Job' | 'Job1';
-
 interface VinInfo {
     vin: string;
     logicalAddr: number;
@@ -212,6 +207,10 @@ interface Param {
     deletable?: boolean;
     editable?: boolean;
 }
+/**
+ * @category UDS
+ */
+type ServiceId = '0x10' | '0x11' | '0x27' | '0x28' | '0x29' | '0x3E' | '0x83' | '0x84' | '0x85' | '0x22' | '0x23' | '0x24' | '0x2A' | '0x2C' | '0x2E' | '0x3D' | '0x14' | '0x87' | '0x19' | '0x2F' | '0x31' | '0x34' | '0x35' | '0x36' | '0x37' | '0x38' | 'Job';
 
 /**
  * @category UDS
@@ -1073,6 +1072,15 @@ declare class UtilClass {
      *     ```
      */
     Init(fc: () => void | Promise<void>): void;
+    /**
+     * Register a function, this function will be invoked when UDSClass is terminated.
+     * @param fc Non-async or async function
+     *
+     * @example
+     *
+     *
+     */
+    End(fc: () => void | Promise<void>): void;
 }
 /**
  * Global instance of UDSClass, providing access to UDS functionality throughout the application.

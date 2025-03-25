@@ -105,7 +105,7 @@ export default class UdsTester {
       maxWorkers: 1,
       workerType: 'thread',
       emitStdStreams: false,
-      workerTerminateTimeout: 0,
+      workerTerminateTimeout: 1000,
       workerThreadOpts: {
         stderr: true,
         stdout: true,
@@ -362,13 +362,18 @@ export default class UdsTester {
         })
     })
   }
-  stop() {
+  async stop() {
+    globalThis.keyEvent?.off('keydown', this.cb)
     if (this.getInfoPromise) {
       this.getInfoPromise.reject(new Error('worker terminated'))
     }
     this.selfStop = true
-    this.pool?.terminate(true).catch(null)
+    await this.workerEmit('__end', [])
+    try {
+      await this.pool?.terminate()
+    } catch {
+      null
+    }
     this.worker?.worker?.terminate()
-    globalThis.keyEvent?.off('keydown', this.cb)
   }
 }

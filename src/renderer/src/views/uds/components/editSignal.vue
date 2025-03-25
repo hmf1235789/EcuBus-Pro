@@ -164,7 +164,6 @@ const handleSubmit = () => {
       symbol: form.value.series.symbol
     }
   }
-  console.log(node)
   emit('save', node)
 }
 

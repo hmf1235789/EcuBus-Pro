@@ -1234,6 +1234,18 @@ export class UtilClass {
     this.event.clearListeners('__varFc' as any)
     this.event.on('__varFc' as any, fc)
   }
+  /**
+   * Register a function, this function will be invoked when UDSClass is terminated.
+   * @param fc Non-async or async function
+   *
+   * @example
+   *
+   *
+   */
+  End(fc: () => void | Promise<void>) {
+    this.event.clearListeners('__end' as any)
+    this.event.on('__end' as any, fc)
+  }
 }
 
 /**
