@@ -78,3 +78,11 @@ Add a large logo and link to the websites of my major open source projects
 
 All previous tier rewards
 Please contact me to discuss what you want for this tier!
+
+---
+
+## Supporters
+
+| Date | Supporter | Method | Amount | Comment |
+| --- | --- | --- | --- | --- |
+| 2025-03-24 | 胖胖的风笛 | WeChat | ¥20 | 一杯coffee |
