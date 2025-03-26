@@ -93,6 +93,7 @@ export interface Signal {
   }
   value?: number
   physValue?: number | string
+  physValueEnum?: string
   generatorType?: string
 }
 

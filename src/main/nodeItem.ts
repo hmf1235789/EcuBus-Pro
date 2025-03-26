@@ -8,7 +8,7 @@ import { UdsLOG } from './log'
 import { applyBuffer, getRxPdu, getTxPdu, ServiceItem } from './share/uds'
 import { findService } from './docan/uds'
 import { cloneDeep } from 'lodash'
-import type { Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
+import type { Message, Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
 import { updateSignalPhys, updateSignalRaw } from 'src/renderer/src/database/dbc/calc'
 import { NodeItem } from 'src/preload/data'
 import LinBase from './dolin/base'
@@ -736,7 +736,6 @@ export class NodeClass {
     const db = Object.values(global.database.can).find((db) => db.name == s[0])
     if (db) {
       const signalName = s[1]
-
       let ss: Signal | undefined
       for (const msg of Object.values(db.messages)) {
         for (const signal of Object.values(msg.signals)) {

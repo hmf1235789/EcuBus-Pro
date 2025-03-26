@@ -253,6 +253,14 @@ function readSignalFromBuffer(signal: Signal, data: Buffer, db: DBC) {
   // 更新物理值
   if (signal.values || signal.valueTable) {
     signal.physValue = rawValue
+    if (signal.values) {
+      signal.physValueEnum = signal.values?.find((v) => v.value === signal.value)?.label
+    } else if (signal.valueTable) {
+      const vt = Object.values(db.valueTables).find((vt) => vt.name === signal.valueTable)
+      if (vt) {
+        signal.physValueEnum = vt.values?.find((v) => v.value === signal.value)?.label
+      }
+    }
   } else {
     if (signal.isSigned) {
       // 检查最高位是否为1（负数）

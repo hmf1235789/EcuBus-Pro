@@ -52,14 +52,15 @@
         </template>
       </el-dropdown>
       <el-divider direction="vertical" />
-      <el-dropdown size="small">
-        <el-button type="info" link @click="saveAll">
+      <el-dropdown size="small" @command="saveAll">
+        <el-button type="info" link>
           <Icon :icon="saveIcon" />
         </el-button>
 
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item>Save as raw</el-dropdown-item>
+            <el-dropdown-item command="excel">Save as Excel</el-dropdown-item>
+            <el-dropdown-item command="asc">Save as ASC</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -232,8 +233,6 @@ function logDisplay(method: string, vals: LogItem[]) {
     logData.push(data)
   }
   for (const val of vals) {
-    console.log(val)
-
     if (val.message.method == 'canBase') {
       insertData({
         method: val.message.method,
@@ -451,60 +450,182 @@ const tableHeight = computed(() => {
 const tableWidth = computed(() => {
   return props.width
 })
-
-function saveAll() {
+// DLC 计算辅助函数
+function len2dlc(len: number) {
+  if (len <= 8) return len
+  if (len <= 12) return 9
+  if (len <= 16) return 10
+  if (len <= 20) return 11
+  if (len <= 24) return 12
+  if (len <= 32) return 13
+  if (len <= 48) return 14
+  return 15
+}
+function saveAll(command: string) {
   isPaused.value = true
   const loadingInstance = ElLoading.service()
 
-  const workbook = new ExcelJS.Workbook()
-  const worksheet = workbook.addWorksheet('Log Data')
+  if (command == 'excel') {
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet('Log Data')
 
-  // Define columns
-  worksheet.columns = [
-    { header: 'Time', key: 'ts', width: 15 },
-    { header: 'Name', key: 'name', width: 20 },
-    { header: 'Data', key: 'data', width: 40 },
-    { header: 'Dir', key: 'dir', width: 10 },
-    { header: 'ID', key: 'id', width: 15 },
-    { header: 'DLC', key: 'dlc', width: 10 },
-    { header: 'Len', key: 'len', width: 10 },
-    { header: 'Type', key: 'msgType', width: 15 },
-    { header: 'Channel', key: 'channel', width: 15 },
-    { header: 'Device', key: 'device', width: 20 }
-  ]
+    // Define columns
+    worksheet.columns = [
+      { header: 'Time', key: 'ts', width: 15 },
+      { header: 'Name', key: 'name', width: 20 },
+      { header: 'Data', key: 'data', width: 40 },
+      { header: 'Dir', key: 'dir', width: 10 },
+      { header: 'ID', key: 'id', width: 15 },
+      { header: 'DLC', key: 'dlc', width: 10 },
+      { header: 'Len', key: 'len', width: 10 },
+      { header: 'Type', key: 'msgType', width: 15 },
+      { header: 'Channel', key: 'channel', width: 15 },
+      { header: 'Device', key: 'device', width: 20 }
+    ]
 
-  // Add data
-  allLogData.forEach((log) => {
-    worksheet.addRow(log)
-  })
+    // Add data
+    allLogData.forEach((log) => {
+      worksheet.addRow(log)
+    })
 
-  // Style the header row
-  worksheet.getRow(1).font = { bold: true }
-  worksheet.getRow(1).fill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FFE0E0E0' }
-  }
+    // Style the header row
+    worksheet.getRow(1).font = { bold: true }
+    worksheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' }
+    }
 
-  // Generate and download the file
-  workbook.xlsx
-    .writeBuffer()
-    .then((buffer) => {
-      const blob = new Blob([buffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    // Generate and download the file
+    workbook.xlsx
+      .writeBuffer()
+      .then((buffer) => {
+        const blob = new Blob([buffer], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        })
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `log_data_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.xlsx`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
       })
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `log_data_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.xlsx`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+      .finally(() => {
+        loadingInstance.close()
+      })
+  } else if (command == 'asc') {
+    //参考https://github.com/hardbyte/python-can/blob/main/can/io/asc.py
+    // 生成 ASC 格式的日志内容
+    let ascContent = ''
+
+    // 添加文件头
+    const now = new Date()
+    const dateStr = now.toLocaleString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+      year: 'numeric'
     })
-    .finally(() => {
-      loadingInstance.close()
+    ascContent += `date ${dateStr}\n`
+    ascContent += 'base hex  timestamps absolute\n'
+    ascContent += 'internal events logged\n'
+
+    // 开始测量块
+    ascContent += `Begin Triggerblock ${dateStr}\n`
+    ascContent += '0.000000 Start of measurement\n'
+
+    // 添加数据
+    let startTime = 0
+    if (allLogData.length > 0) {
+      startTime = parseFloat(allLogData[0].ts)
+    }
+
+    allLogData.forEach((log) => {
+      const timestamp = parseFloat(log.ts)
+      const relativeTime = timestamp - startTime
+
+      // 格式化通道号
+      const channel = log.channel && Number.isInteger(log.channel) ? parseInt(log.channel) + 1 : 1
+
+      // 格式化 ID
+      let id = ''
+      if (log.id) {
+        id = log.id.replace('0x', '').toUpperCase()
+        if (log.msgType && log.msgType.includes('EXT')) {
+          id += 'x' // 扩展帧标记
+        }
+      }
+
+      // 格式化数据
+      let data = ''
+      if (log.data) {
+        data = log.data.replace(/\s+/g, ' ').trim()
+      }
+
+      // 构建消息行
+      let messageLine = ''
+
+      if (log.method === 'canBase') {
+        // CAN 消息
+        const dlc = log.dlc ? log.dlc.toString(16) : '0'
+        const dir = log.dir === 'Tx' ? 'Tx' : 'Rx'
+
+        if (log.msgType && log.msgType.includes('CANFD')) {
+          // CANFD 消息
+          const brs = log.msgType.includes('BRS') ? '1' : '0'
+          const esi = '0' // 假设 ESI 始终为 0
+          const dataLength = log.len || 0
+
+          messageLine = `CANFD ${channel}  ${dir} ${id}                                 ${brs} ${esi} ${dlc} ${dataLength} ${data} 0 0 1000 0 0 0 0 0`
+        } else {
+          // 普通 CAN 消息
+          const dtype = log.data ? `d ${dlc}` : `r ${dlc}`
+          messageLine = `${channel}  ${id.padEnd(15)} ${dir.padEnd(4)} ${dtype} ${data}`
+        }
+      } else if (log.method === 'canError') {
+        messageLine = `${channel}  ErrorFrame`
+      } else if (log.method === 'linBase') {
+        // LIN 消息 (按照 CAN 格式处理)
+        const dlc = log.dlc ? log.dlc.toString(16) : '0'
+        const dir = log.dir === 'Tx' ? 'Tx' : 'Rx'
+        messageLine = `${channel}  ${id.padEnd(15)} ${dir.padEnd(4)} d ${dlc} ${data}`
+      } else if (
+        log.method === 'udsSent' ||
+        log.method === 'udsRecv' ||
+        log.method === 'udsNegRecv'
+      ) {
+        // UDS 消息 (按照 CAN 格式处理)
+        const dlc = log.len ? len2dlc(log.len).toString(16) : '0'
+        const dir = log.method === 'udsSent' ? 'Tx' : 'Rx'
+        messageLine = `${channel}  ${id.padEnd(15)} ${dir.padEnd(4)} d ${dlc} ${data}`
+      }
+
+      if (messageLine) {
+        ascContent += `${relativeTime.toFixed(6)} ${messageLine}\n`
+      }
     })
+
+    // 添加文件尾
+    ascContent += 'End TriggerBlock\n'
+
+    // 下载文件
+    const blob = new Blob([ascContent], { type: 'text/plain' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `log_data_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.asc`
+    document.body.appendChild(a)
+    a.click()
+    window.URL.revokeObjectURL(url)
+    document.body.removeChild(a)
+    loadingInstance.close()
+  }
 }
 const isPaused = ref(false)
 // const autoScroll = ref(true)

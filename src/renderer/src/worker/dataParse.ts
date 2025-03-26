@@ -164,7 +164,9 @@ function parseCanData(raw: any) {
           result[signalKey].push([ts, value!])
           msg.children.push({
             name: signal.name,
-            data: `${signal.physValue}  ${signal.value}`
+            data: `${signal.physValueEnum ? signal.physValueEnum : signal.physValue}  ${
+              signal.value
+            }`
           })
         }
       }
