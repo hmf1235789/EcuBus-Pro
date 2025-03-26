@@ -98,11 +98,13 @@ import pauseIcon from '@iconify/icons-material-symbols/pause-circle-outline'
 import playIcon from '@iconify/icons-material-symbols/play-circle-outline'
 import scrollIcon1 from '@iconify/icons-material-symbols/autoplay'
 import scrollIcon2 from '@iconify/icons-material-symbols/autopause'
+import ExcelJS from 'exceljs'
 
 import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
 import { LinDirection, LinMsg } from 'nodeCan/lin'
 import EVirtTable from 'e-virt-table'
+import { ElLoading } from 'element-plus'
 let allLogData: LogData[] = []
 let logIndex = 0
 interface LogData {
@@ -119,10 +121,10 @@ interface LogData {
   method: string
   name?: string
   seqIndex?: number
+  children?: LogData[]
 }
 
 const database = useDataStore()
-const xGrid = ref()
 // const logData = ref<LogData[]>([])
 
 interface CanBaseLog {
@@ -210,7 +212,7 @@ function insertData2(data: LogData[]) {
     allLogData.splice(0, excessRows)
   }
   grid.loadData(allLogData)
-  grid.scrollToRowIndex(logIndex - 1)
+  grid.scrollYTo(99999999999)
   // grid.scrollYTo(allLogData.length*28+100)
   // nextTick(() => {
   //   grid.scrollToRowIndex(logIndex - 1)
@@ -225,14 +227,12 @@ function logDisplay(vals: LogItem[]) {
     logData.push(data)
   }
   for (const val of vals) {
+    let children: LogData[] | undefined = []
     if (val.message.method == 'canBase') {
-      // let name=
-      // if(val.message.data.msgType.uuid){
-      //    const node=database.nodes[val.message.data.msgType.uuid]
-      //    if(node){
-      //       name=node.name
-      //    }
-      // }
+      if (val.message.data.database && val.message.data.name) {
+        const fake: any = {}
+        children = [fake]
+      }
       insertData({
         index: String(logIndex++),
         method: val.message.method,
@@ -245,7 +245,8 @@ function logDisplay(vals: LogItem[]) {
         device: val.label,
         channel: val.instance,
         msgType: CanMsgType2Str(val.message.data.msgType),
-        name: val.message.data.name
+        name: val.message.data.name,
+        children: children
       })
     } else if (val.message.method == 'ipBase') {
       insertData({
@@ -260,9 +261,14 @@ function logDisplay(vals: LogItem[]) {
         device: val.label,
         channel: val.instance,
         msgType: val.message.data.type.toLocaleUpperCase(),
-        name: val.message.data.name
+        name: val.message.data.name,
+        children: children
       })
     } else if (val.message.method == 'linBase') {
+      if (val.message.data.database && val.message.data.name) {
+        const fake: any = {}
+        children = [fake]
+      }
       insertData({
         index: String(logIndex++),
         method: val.message.method,
@@ -275,7 +281,8 @@ function logDisplay(vals: LogItem[]) {
         channel: val.instance,
         msgType: `LIN ${val.message.data.checksumType}`,
         dlc: val.message.data.data.length,
-        name: val.message.data.name
+        name: val.message.data.name,
+        children: children
       })
     } else if (val.message.method == 'udsSent') {
       let testerName = val.message.data.service.name
@@ -294,7 +301,8 @@ function logDisplay(vals: LogItem[]) {
         len: val.message.data.recvData ? val.message.data.recvData.length : 0,
         device: val.label,
         channel: val.instance,
-        msgType: 'UDS Req' + (val.message.data.msg || '')
+        msgType: 'UDS Req' + (val.message.data.msg || ''),
+        children: children
       })
     } else if (val.message.method == 'udsRecv') {
       let testerName = val.message.data.service.name
@@ -320,7 +328,8 @@ function logDisplay(vals: LogItem[]) {
         len: val.message.data.recvData ? val.message.data.recvData.length : 0,
         device: val.label,
         channel: val.instance,
-        msgType: msgType
+        msgType: msgType,
+        children: children
       })
     } else if (val.message.method == 'canError') {
       //find last udsSent or udsPreSend
@@ -335,7 +344,8 @@ function logDisplay(vals: LogItem[]) {
         len: 0,
         device: val.label,
         channel: val.instance,
-        msgType: 'CAN Error'
+        msgType: 'CAN Error',
+        children: children
       })
     } else if (val.message.method == 'linError') {
       if (val.message.data.data) {
@@ -355,7 +365,8 @@ function logDisplay(vals: LogItem[]) {
           dir: val.message.data.data.direction == LinDirection.SEND ? 'Tx' : 'Rx',
           device: val.label,
           channel: val.instance,
-          msgType: 'LIN Error'
+          msgType: 'LIN Error',
+          children: children
         })
       } else {
         insertData({
@@ -368,7 +379,8 @@ function logDisplay(vals: LogItem[]) {
           len: 0,
           device: val.label,
           channel: val.instance,
-          msgType: 'LIN Error'
+          msgType: 'LIN Error',
+          children: children
         })
       }
     } else if (val.message.method == 'linEvent') {
@@ -382,7 +394,8 @@ function logDisplay(vals: LogItem[]) {
         len: 0,
         device: val.label,
         channel: val.instance,
-        msgType: 'LIN Event'
+        msgType: 'LIN Event',
+        children: children
       })
     } else if (val.message.method == 'udsScript') {
       insertData({
@@ -395,7 +408,8 @@ function logDisplay(vals: LogItem[]) {
         len: 0,
         device: val.label,
         channel: val.instance,
-        msgType: 'Script Message'
+        msgType: 'Script Message',
+        children: children
       })
     } else if (val.message.method == 'udsSystem') {
       insertData({
@@ -408,7 +422,8 @@ function logDisplay(vals: LogItem[]) {
         len: 0,
         device: val.label,
         channel: val.instance,
-        msgType: 'System Message'
+        msgType: 'System Message',
+        children: children
       })
     }
   }
@@ -461,7 +476,58 @@ const tableWidth = computed(() => {
 })
 
 function saveAll() {
-  // xGrid.value.exportData()
+  isPaused.value = true
+  const loadingInstance = ElLoading.service()
+
+  const workbook = new ExcelJS.Workbook()
+  const worksheet = workbook.addWorksheet('Log Data')
+
+  // Define columns
+  worksheet.columns = [
+    { header: 'Time', key: 'ts', width: 15 },
+    { header: 'Name', key: 'name', width: 20 },
+    { header: 'Data', key: 'data', width: 40 },
+    { header: 'Dir', key: 'dir', width: 10 },
+    { header: 'ID', key: 'id', width: 15 },
+    { header: 'DLC', key: 'dlc', width: 10 },
+    { header: 'Len', key: 'len', width: 10 },
+    { header: 'Type', key: 'msgType', width: 15 },
+    { header: 'Channel', key: 'channel', width: 15 },
+    { header: 'Device', key: 'device', width: 20 }
+  ]
+
+  // Add data
+  allLogData.forEach((log) => {
+    worksheet.addRow(log)
+  })
+
+  // Style the header row
+  worksheet.getRow(1).font = { bold: true }
+  worksheet.getRow(1).fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFE0E0E0' }
+  }
+
+  // Generate and download the file
+  workbook.xlsx
+    .writeBuffer()
+    .then((buffer) => {
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `log_data_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    })
+    .finally(() => {
+      loadingInstance.close()
+    })
 }
 const isPaused = ref(false)
 // const autoScroll = ref(true)
@@ -510,6 +576,7 @@ const LogFilter = ref<
 ])
 
 let grid: EVirtTable
+let scrollY: number = -1
 onMounted(() => {
   for (const item of checkList.value) {
     const v = LogFilter.value.find((v) => v.v == item)
@@ -524,7 +591,7 @@ onMounted(() => {
   grid = new EVirtTable(target as any, {
     data: [],
     columns: [
-      { key: 'ts', title: 'Time', width: 100 },
+      { key: 'ts', title: 'Time', width: 100, type: 'tree' },
       { key: 'name', title: 'Name', width: 200 },
       { key: 'data', title: 'Data', width: 300 },
       { key: 'dir', title: 'Dir', width: 50 },
@@ -548,14 +615,70 @@ onMounted(() => {
       ENABLE_KEYBOARD: false,
       ENABLE_RESIZE_ROW: false,
       EMPTY_TEXT: 'No data',
-      ROW_KEY: 'index'
+      ROW_KEY: 'index',
+      BODY_CELL_STYLE_METHOD: ({ row }) => {
+        const method = row.method
+        let color = ''
+        switch (method) {
+          case 'canBase':
+            color = getComputedStyle(document.documentElement)
+              .getPropertyValue('--el-color-primary')
+              .trim()
+            break
+          case 'linEvent':
+            color = getComputedStyle(document.documentElement)
+              .getPropertyValue('--el-color-success')
+              .trim()
+            break
+          case 'ipBase':
+            color = getComputedStyle(document.documentElement)
+              .getPropertyValue('--el-color-primary-dark-2')
+              .trim()
+            break
+          case 'udsSent':
+          case 'udsRecv':
+            color = getComputedStyle(document.documentElement)
+              .getPropertyValue('--el-color-info')
+              .trim()
+            break
+          case 'canError':
+          case 'linError':
+          case 'ipError':
+            color = getComputedStyle(document.documentElement)
+              .getPropertyValue('--el-color-danger')
+              .trim()
+            break
+          case 'linWarning':
+          case 'udsWarning':
+          case 'udsNegRecv':
+            color = getComputedStyle(document.documentElement)
+              .getPropertyValue('--el-color-warning')
+              .trim()
+            break
+          case 'udsSystem':
+            color = getComputedStyle(document.documentElement)
+              .getPropertyValue('--el-color-primary')
+              .trim()
+            break
+        }
+        return {
+          color: color
+        }
+      },
+      EXPAND_LAZY: true,
+      EXPAND_LAZY_METHOD: ({ row }) => {
+        console.log(row)
+        isPaused.value = true
+        return Promise.resolve([])
+      }
     }
   })
 
-  grid.on('onScrollY', (v, isTrust) => {
-    console.log(v, isTrust)
-    if (!isPaused.value && isTrust) {
+  grid.on('onScrollY', (v) => {
+    if (!isPaused.value && scrollY !== -1 && v < scrollY) {
       isPaused.value = true
+    } else {
+      scrollY = v
     }
   })
 })
