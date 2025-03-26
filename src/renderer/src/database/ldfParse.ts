@@ -194,6 +194,7 @@ export interface SignalEncodeType {
 }
 
 export interface LDF {
+  id: string
   name: string
   global: GlobalDef
   node: NodeDef

@@ -7,19 +7,15 @@ import { DataSet } from 'src/preload/data'
 let database: DataSet['database']
 
 // Process LIN data messages
-function parseLinData(data: LinMsg[]) {
-  const findDb = (name?: string) => {
-    if (!name) return null
-    for (const db of Object.values(database.lin)) {
-      if (db.name === name) {
-        return db
-      }
-    }
-    return null
+function parseLinData(raw: any) {
+  const findDb = (db?: string) => {
+    if (!db) return null
+    return database.lin[db]
   }
 
-  const result: Record<string, (number | string)[][]> = {}
-
+  const result: Record<string, any> = {}
+  result['linBase'] = raw
+  const data: LinMsg[] = raw.map((item: any) => item.message.data)
   for (const msg of data) {
     const db = findDb(msg.database)
 
@@ -140,22 +136,23 @@ function parseLinData(data: LinMsg[]) {
   return result
 }
 
-function parseCanData(data: CanMessage[]) {
-  const result: Record<string, (number | string)[][]> = {}
-  const findDb = (name?: string) => {
-    if (!name) return null
-    for (const db of Object.values(database.can)) {
-      if (db.name === name) {
-        return db
-      }
-    }
-    return null
+function parseCanData(raw: any) {
+  const result: Record<string, any> = {}
+  const findDb = (db?: string) => {
+    if (!db) return null
+    return database.can[db]
   }
-  for (const msg of data) {
+  const list: any[] = []
+
+  for (const sraw of raw) {
+    const msg: CanMessage = sraw.message.data
     const db = findDb(msg.database)
     if (db) {
       const frame = db.messages[msg.id]
+      msg.name = frame.name
+
       if (frame) {
+        msg.children = []
         writeMessageData(frame, msg.data, db)
         for (const signal of Object.values(frame.signals)) {
           const signalKey = `can.${db.name}.signals.${signal.name}`
@@ -165,10 +162,17 @@ function parseCanData(data: CanMessage[]) {
           const ts = parseFloat(((msg.ts || 0) / 1000000).toFixed(3))
           const value = signal.physValue
           result[signalKey].push([ts, value!])
+          msg.children.push({
+            name: signal.name,
+            data: `${signal.physValue}  ${signal.value}`
+          })
         }
       }
     }
+
+    list.push(sraw)
   }
+  result['canBase'] = list
   return result
 }
 // Initialize database reference
@@ -194,7 +198,7 @@ if (isWorker) {
         break
       }
       case 'canBase': {
-        const result = parseCanData(data.map((item: any) => item.message.data))
+        const result = parseCanData(data)
         if (result) {
           self.postMessage(result)
         }
@@ -202,7 +206,7 @@ if (isWorker) {
       }
 
       case 'linBase': {
-        const result = parseLinData(data.map((item: any) => item.message.data))
+        const result = parseLinData(data)
         if (result) {
           self.postMessage(result)
         }
@@ -210,6 +214,9 @@ if (isWorker) {
       }
 
       default:
+        self.postMessage({
+          [method]: data
+        })
         break
     }
   }

@@ -10,8 +10,8 @@
       "
     >
       <el-button-group>
-        <el-tooltip effect="light" content="Clear Log" placement="bottom">
-          <el-button type="danger" link @click="clearLog">
+        <el-tooltip effect="light" content="Clear Trace" placement="bottom">
+          <el-button type="danger" link @click="clearLog('Clear Trace')">
             <Icon :icon="circlePlusFilled" />
           </el-button>
         </el-tooltip>
@@ -78,7 +78,8 @@ import {
   watchEffect,
   PropType,
   nextTick,
-  handleError
+  handleError,
+  Ref
 } from 'vue'
 
 import { CAN_ID_TYPE, CanMessage, CanMsgType, getDlcByLen } from 'nodeCan/can'
@@ -103,12 +104,11 @@ import ExcelJS from 'exceljs'
 import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
 import { LinDirection, LinMsg } from 'nodeCan/lin'
-import EVirtTable from 'e-virt-table'
+import EVirtTable, { Column } from 'e-virt-table'
 import { ElLoading } from 'element-plus'
 let allLogData: LogData[] = []
-let logIndex = 0
+
 interface LogData {
-  index: string
   dir?: 'Tx' | 'Rx' | '--'
   data: string
   ts: string
@@ -121,7 +121,7 @@ interface LogData {
   method: string
   name?: string
   seqIndex?: number
-  children?: LogData[]
+  children?: LogData[] | { name: string; data: string }[]
 }
 
 const database = useDataStore()
@@ -171,15 +171,18 @@ interface LogItem {
 
 watch(window.globalStart, (val) => {
   if (val) {
-    clearLog()
+    clearLog('Start Trace')
     isPaused.value = false
   }
 })
 
-function clearLog() {
+function clearLog(msg = 'Clear Trace') {
   allLogData = []
-  logIndex = 0
+
+  scrollY = -1
+  //TODO:
   grid.loadData([])
+  grid.scrollYTo(0)
 }
 function data2str(data: Uint8Array) {
   return data.reduce((acc, val) => acc + val.toString(16).padStart(2, '0') + ' ', '')
@@ -213,12 +216,14 @@ function insertData2(data: LogData[]) {
   }
   grid.loadData(allLogData)
   grid.scrollYTo(99999999999)
+
+  // grid.scrollToRowIndex(allLogData.length - 1)
   // grid.scrollYTo(allLogData.length*28+100)
   // nextTick(() => {
   //   grid.scrollToRowIndex(logIndex - 1)
   // })
 }
-function logDisplay(vals: LogItem[]) {
+function logDisplay(method: string, vals: LogItem[]) {
   // Don't process logs when paused
   if (isPaused.value) return
 
@@ -227,14 +232,10 @@ function logDisplay(vals: LogItem[]) {
     logData.push(data)
   }
   for (const val of vals) {
-    let children: LogData[] | undefined = []
+    console.log(val)
+
     if (val.message.method == 'canBase') {
-      if (val.message.data.database && val.message.data.name) {
-        const fake: any = {}
-        children = [fake]
-      }
       insertData({
-        index: String(logIndex++),
         method: val.message.method,
         dir: val.message.data.dir == 'OUT' ? 'Tx' : 'Rx',
         data: data2str(val.message.data.data),
@@ -246,11 +247,10 @@ function logDisplay(vals: LogItem[]) {
         channel: val.instance,
         msgType: CanMsgType2Str(val.message.data.msgType),
         name: val.message.data.name,
-        children: children
+        children: val.message.data.children
       })
     } else if (val.message.method == 'ipBase') {
       insertData({
-        index: String(logIndex++),
         method: val.message.method,
         dir: val.message.data.dir == 'OUT' ? 'Tx' : 'Rx',
         data: data2str(val.message.data.data),
@@ -261,16 +261,10 @@ function logDisplay(vals: LogItem[]) {
         device: val.label,
         channel: val.instance,
         msgType: val.message.data.type.toLocaleUpperCase(),
-        name: val.message.data.name,
-        children: children
+        name: val.message.data.name
       })
     } else if (val.message.method == 'linBase') {
-      if (val.message.data.database && val.message.data.name) {
-        const fake: any = {}
-        children = [fake]
-      }
       insertData({
-        index: String(logIndex++),
         method: val.message.method,
         dir: val.message.data.direction == LinDirection.SEND ? 'Tx' : 'Rx',
         data: data2str(val.message.data.data),
@@ -281,8 +275,7 @@ function logDisplay(vals: LogItem[]) {
         channel: val.instance,
         msgType: `LIN ${val.message.data.checksumType}`,
         dlc: val.message.data.data.length,
-        name: val.message.data.name,
-        children: children
+        name: val.message.data.name
       })
     } else if (val.message.method == 'udsSent') {
       let testerName = val.message.data.service.name
@@ -291,7 +284,6 @@ function logDisplay(vals: LogItem[]) {
       }
 
       insertData({
-        index: String(logIndex++),
         method: val.message.method,
         dir: '--',
         name: testerName,
@@ -301,8 +293,7 @@ function logDisplay(vals: LogItem[]) {
         len: val.message.data.recvData ? val.message.data.recvData.length : 0,
         device: val.label,
         channel: val.instance,
-        msgType: 'UDS Req' + (val.message.data.msg || ''),
-        children: children
+        msgType: 'UDS Req' + (val.message.data.msg || '')
       })
     } else if (val.message.method == 'udsRecv') {
       let testerName = val.message.data.service.name
@@ -318,7 +309,6 @@ function logDisplay(vals: LogItem[]) {
         msgType = 'UDS Negative Resp' + (val.message.data.msg || '')
       }
       insertData({
-        index: String(logIndex++),
         method: method,
         dir: '--',
         name: testerName,
@@ -328,14 +318,12 @@ function logDisplay(vals: LogItem[]) {
         len: val.message.data.recvData ? val.message.data.recvData.length : 0,
         device: val.label,
         channel: val.instance,
-        msgType: msgType,
-        children: children
+        msgType: msgType
       })
     } else if (val.message.method == 'canError') {
       //find last udsSent or udsPreSend
 
       insertData({
-        index: String(logIndex++),
         method: val.message.method,
         name: '',
         data: val.message.data.msg,
@@ -344,8 +332,7 @@ function logDisplay(vals: LogItem[]) {
         len: 0,
         device: val.label,
         channel: val.instance,
-        msgType: 'CAN Error',
-        children: children
+        msgType: 'CAN Error'
       })
     } else if (val.message.method == 'linError') {
       if (val.message.data.data) {
@@ -354,7 +341,6 @@ function logDisplay(vals: LogItem[]) {
           method = 'linWarning'
         }
         insertData({
-          index: String(logIndex++),
           method: method,
           name: val.message.data.data.name,
           data: val.message.data.msg,
@@ -365,12 +351,10 @@ function logDisplay(vals: LogItem[]) {
           dir: val.message.data.data.direction == LinDirection.SEND ? 'Tx' : 'Rx',
           device: val.label,
           channel: val.instance,
-          msgType: 'LIN Error',
-          children: children
+          msgType: 'LIN Error'
         })
       } else {
         insertData({
-          index: String(logIndex++),
           method: val.message.method,
           name: '',
           data: val.message.data.msg,
@@ -379,13 +363,11 @@ function logDisplay(vals: LogItem[]) {
           len: 0,
           device: val.label,
           channel: val.instance,
-          msgType: 'LIN Error',
-          children: children
+          msgType: 'LIN Error'
         })
       }
     } else if (val.message.method == 'linEvent') {
       insertData({
-        index: String(logIndex++),
         method: val.message.method,
         name: '',
         data: val.message.data.msg,
@@ -394,12 +376,10 @@ function logDisplay(vals: LogItem[]) {
         len: 0,
         device: val.label,
         channel: val.instance,
-        msgType: 'LIN Event',
-        children: children
+        msgType: 'LIN Event'
       })
     } else if (val.message.method == 'udsScript') {
       insertData({
-        index: String(logIndex++),
         method: val.message.method,
         name: '',
         data: val.message.data.msg,
@@ -408,12 +388,10 @@ function logDisplay(vals: LogItem[]) {
         len: 0,
         device: val.label,
         channel: val.instance,
-        msgType: 'Script Message',
-        children: children
+        msgType: 'Script Message'
       })
     } else if (val.message.method == 'udsSystem') {
       insertData({
-        index: String(logIndex++),
         method: val.message.method,
         name: '',
         data: val.message.data.msg,
@@ -422,8 +400,7 @@ function logDisplay(vals: LogItem[]) {
         len: 0,
         device: val.label,
         channel: val.instance,
-        msgType: 'System Message',
-        children: children
+        msgType: 'System Message'
       })
     }
   }
@@ -544,6 +521,7 @@ defineExpose({
 
 function togglePause() {
   isPaused.value = !isPaused.value
+  scrollY = -1
 }
 
 const LogFilter = ref<
@@ -577,6 +555,34 @@ const LogFilter = ref<
 
 let grid: EVirtTable
 let scrollY: number = -1
+
+const columes: Ref<Column[]> = ref([
+  { key: 'ts', title: 'Time', width: 100 },
+  { key: 'name', title: 'Name', width: 200 },
+  { key: 'data', title: 'Data', width: 300 },
+  { key: 'dir', title: 'Dir', width: 50 },
+  { key: 'id', title: 'ID', width: 100 },
+  { key: 'dlc', title: 'DLC', width: 100 },
+  { key: 'len', title: 'Len', width: 100 },
+  { key: 'msgType', title: 'Type', width: 100 },
+  { key: 'channel', title: 'Channel', width: 100 },
+  { key: 'device', title: 'Device', width: 200 }
+])
+watch(
+  columes,
+  () => {
+    grid.loadColumns(columes.value)
+  },
+  { deep: true }
+)
+watch(isPaused, (v) => {
+  if (v) {
+    columes.value[0].type = 'tree'
+  } else {
+    columes.value[0].type = undefined
+  }
+})
+
 onMounted(() => {
   for (const item of checkList.value) {
     const v = LogFilter.value.find((v) => v.v == item)
@@ -590,18 +596,7 @@ onMounted(() => {
 
   grid = new EVirtTable(target as any, {
     data: [],
-    columns: [
-      { key: 'ts', title: 'Time', width: 100, type: 'tree' },
-      { key: 'name', title: 'Name', width: 200 },
-      { key: 'data', title: 'Data', width: 300 },
-      { key: 'dir', title: 'Dir', width: 50 },
-      { key: 'id', title: 'ID', width: 100 },
-      { key: 'dlc', title: 'DLC', width: 100 },
-      { key: 'len', title: 'Len', width: 100 },
-      { key: 'msgType', title: 'Type', width: 100 },
-      { key: 'channel', title: 'Channel', width: 100 },
-      { key: 'device', title: 'Device', width: 200 }
-    ],
+    columns: columes.value,
     config: {
       WIDTH: tableWidth.value,
       HEIGHT: tableHeight.value,
@@ -615,7 +610,6 @@ onMounted(() => {
       ENABLE_KEYBOARD: false,
       ENABLE_RESIZE_ROW: false,
       EMPTY_TEXT: 'No data',
-      ROW_KEY: 'index',
       BODY_CELL_STYLE_METHOD: ({ row }) => {
         const method = row.method
         let color = ''
@@ -664,12 +658,6 @@ onMounted(() => {
         return {
           color: color
         }
-      },
-      EXPAND_LAZY: true,
-      EXPAND_LAZY_METHOD: ({ row }) => {
-        console.log(row)
-        isPaused.value = true
-        return Promise.resolve([])
       }
     }
   })

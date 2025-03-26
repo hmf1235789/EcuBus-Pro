@@ -813,7 +813,8 @@ export class PEAK_TP extends CanBase implements CanTp {
                       ? CAN_ID_TYPE.EXTENDED
                       : CAN_ID_TYPE.STANDARD
                 },
-                device: this.info.name
+                device: this.info.name,
+                database: this.info.database
               }
               //log must before emit
               this.log.canBase(message)

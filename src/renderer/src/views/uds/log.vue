@@ -232,7 +232,7 @@ function saveLog() {
   xGrid.value.exportData()
 }
 
-function udsLog(datas) {
+function udsLog(method: string, datas: any[]) {
   const logData: {
     time: string
     label: string
@@ -255,6 +255,7 @@ function udsLog(datas) {
 }
 
 function testLog(
+  method: string,
   data: {
     message: {
       id: string

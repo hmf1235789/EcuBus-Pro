@@ -258,7 +258,8 @@ export class KVASER_CAN extends CanBase {
             data: buf,
             ts: ts,
             msgType: msgType,
-            device: this.info.name
+            device: this.info.name,
+            database: this.info.database
           }
           this.log.canBase(message)
           this.event.emit(cmdId, message)

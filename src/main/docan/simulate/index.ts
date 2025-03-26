@@ -59,6 +59,7 @@ export class SIMULATE_CAN extends CanBase {
   busCbFunction(val: CanMessage) {
     //rxNotify
     val.dir = 'IN'
+    val.database = this.info.database
     this.log.canBase(val)
     val.ts = getTsUs() - this.startTime
     const cmdId = this.getReadBaseId(val.id, val.msgType)

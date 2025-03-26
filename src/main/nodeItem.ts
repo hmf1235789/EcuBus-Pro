@@ -802,13 +802,17 @@ export class NodeClass {
       if (this.canBaseId.length == 1) {
         const baseItem = this.canBaseMap.get(this.canBaseId[0])
         if (baseItem) {
-          return await baseItem.writeBase(frame.id, frame.msgType, frame.data)
+          return await baseItem.writeBase(frame.id, frame.msgType, frame.data, {
+            database: baseItem.info.database
+          })
         }
       }
       for (const c of this.canBaseId) {
         const baseItem = this.canBaseMap.get(c)
         if (baseItem && baseItem.info.name == frame.device) {
-          return await baseItem.writeBase(frame.id, frame.msgType, frame.data)
+          return await baseItem.writeBase(frame.id, frame.msgType, frame.data, {
+            database: baseItem.info.database
+          })
         }
       }
       throw new Error(`device ${frame.device} not found`)
@@ -826,12 +830,14 @@ export class NodeClass {
             frame.data,
             frame.isEvent ? 2 : 1
           )
+          frame.database = baseItem.info.database
           return await baseItem.write(frame)
         }
       }
       for (const c of this.linBaseId) {
         const baseItem = this.linBaseMap.get(c)
         if (baseItem && baseItem.info.name == frame.device) {
+          frame.database = baseItem.info.database
           return await baseItem.write(frame)
         }
       }

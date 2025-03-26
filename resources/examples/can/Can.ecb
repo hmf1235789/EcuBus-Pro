@@ -35,23 +35,23 @@
             "trigger": {
               "type": "periodic"
             },
-            "database": "Model3CAN",
+            "database": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13",
             "name": "ID142VCLEFT_liftgateStatus",
             "id": "142",
             "channel": "30dc0575-1555-40e4-802a-150e76338671",
             "type": "can",
             "dlc": 8,
             "data": [
-              "0",
-              "0",
-              "4",
-              "0",
-              "0",
-              "0",
-              "0",
-              "0"
+              "00",
+              "00",
+              "00",
+              "00",
+              "00",
+              "00",
+              "00",
+              "00"
             ],
-            "_X_ROW_KEY": "row_9162"
+            "_X_ROW_KEY": "row_2971"
           }
         ]
       }
@@ -68533,7 +68533,8 @@
             }
           },
           "comments": [],
-          "version": ""
+          "version": "",
+          "id": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13"
         }
       }
     },
@@ -68557,7 +68558,8 @@
           "frameId": 322
         }
       }
-    }
+    },
+    "tests": {}
   },
   "project": {
     "wins": {
@@ -68590,10 +68592,10 @@
       },
       "trace": {
         "pos": {
-          "x": -2.5,
-          "y": 406,
+          "x": 768.5,
+          "y": 420,
           "w": 1353,
-          "h": 400
+          "h": 490
         },
         "title": "trace",
         "label": "Trace",

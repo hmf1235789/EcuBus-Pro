@@ -73,6 +73,14 @@ export interface CanMessage {
    * The database name of the CAN message.
    */
   database?: string
+  /**
+   * The children signals of the CAN message.
+   * internal use
+   */
+  children?: {
+    name: string
+    data: string
+  }[]
 }
 
 /**

@@ -145,7 +145,8 @@ export class PeakLin extends LinBase {
                 : LinDirection.RECV_AUTO_LEN,
           checksumType:
             recvMsg.ChecksumType == 1 ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED,
-          checksum: recvMsg.Checksum
+          checksum: recvMsg.Checksum,
+          database: this.info.database
         }
 
         if (recvMsg.ErrorFlags == 0) {

@@ -203,7 +203,8 @@ export class ZLG_CAN extends CanBase {
         id: frame.canId,
         data: frame.data,
         ts: ts,
-        msgType: frame.msgType
+        msgType: frame.msgType,
+        database: this.info.database
       }
       this.log.canBase(message)
       this.event.emit(cmdId, message)

@@ -383,7 +383,7 @@ function ceilClick(val: any) {
   actionRow.value = val.rowIndex
 }
 
-function error(vals: LogItem[]) {
+function error(method: string, vals: LogItem[]) {
   for (const val of vals) {
     if (val.message.id != props.id) {
       continue
@@ -430,7 +430,7 @@ interface LogItem {
     method: string
   }
 }
-function logDisplay(vals: LogItem[]) {
+function logDisplay(method: string, vals: LogItem[]) {
   for (const val of vals) {
     if (val.message.id != props.id) {
       continue

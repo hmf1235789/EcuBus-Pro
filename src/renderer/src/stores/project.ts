@@ -171,6 +171,14 @@ export const useProjectStore = defineStore('project', {
 
               data.$patch((ss) => {
                 merge(ss, rdata.data)
+
+                //TODO: remove id in 0.9 version
+                for (const key in ss.database.lin) {
+                  ss.database.lin[key].id = key
+                }
+                for (const key in ss.database.can) {
+                  ss.database.can[key].id = key
+                }
               })
               this.project = rdata.project
               this.open = true
