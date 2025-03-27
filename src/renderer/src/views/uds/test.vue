@@ -696,6 +696,7 @@ async function openTs() {
 }
 
 function testLog(
+  method: string,
   data: {
     message: {
       id: string

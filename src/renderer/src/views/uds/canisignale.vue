@@ -125,7 +125,7 @@ const editDialogVisible = ref(false)
 const currentSignal = ref<Signal | null>(null)
 
 const message = computed<Message | undefined>(() => {
-  const db = Object.values(dataStore.database.can).find((db) => db.name === props.database)
+  const db = dataStore.database.can[props.database]
   if (db) {
     const msg = db.messages[parseInt(props.messageId, 16)]
     return msg
@@ -176,7 +176,7 @@ const signals = computed(() => {
 
 function getValues(valueTable: string) {
   const t: { label: string; value: number }[] = []
-  const db = Object.values(dataStore.database.can).find((db) => db.name === props.database)
+  const db = dataStore.database.can[props.database]
   if (db) {
     const vt = Object.values(db.valueTables).find((vt) => vt.name === valueTable)
     if (vt) {

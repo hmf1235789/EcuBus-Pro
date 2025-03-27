@@ -1,108 +1,89 @@
 <template>
   <div>
-    <VxeGrid
-      ref="xGrid"
-      v-bind="gridOptions"
-      class="sequenceTable"
-      :height="tableHeight"
-      @menu-click="menuClick"
-      @scroll="scrollHandle"
+    <div
+      style="
+        justify-content: flex-start;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        margin-left: 5px;
+      "
     >
-      <template #default_type="{ row }">
-        <Icon
-          v-if="row.method == 'canBase' || row.method == 'ipBase'"
-          :icon="email"
-          style="font-size: 14px"
-        />
-        <Icon
-          v-else-if="
-            row.method == 'udsSent' || row.method == 'udsRecv' || row.method == 'udsNegRecv'
-          "
-          :icon="emailFill"
-          style="font-size: 14px"
-        />
-        <Icon v-else-if="row.method == 'udsSystem'" :icon="systemIcon" style="font-size: 14px" />
-        <Icon v-else :icon="errorIcon" style="font-size: 14px" />
-      </template>
-      <template #toolbar>
-        <div
-          style="
-            justify-content: flex-start;
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            margin-left: 5px;
-          "
-        >
-          <el-button-group>
-            <el-tooltip effect="light" content="Clear Log" placement="bottom">
-              <el-button type="danger" link @click="clearLog">
-                <Icon :icon="circlePlusFilled" />
-              </el-button>
-            </el-tooltip>
+      <el-button-group>
+        <el-tooltip effect="light" content="Clear Trace" placement="bottom">
+          <el-button type="danger" link @click="clearLog('Clear Trace')">
+            <Icon :icon="circlePlusFilled" />
+          </el-button>
+        </el-tooltip>
 
-            <!-- <el-tooltip effect="light" :content="autoScroll ? 'Disable Auto-Scroll' : 'Enable Auto-Scroll'" placement="bottom" >
+        <!-- <el-tooltip effect="light" :content="autoScroll ? 'Disable Auto-Scroll' : 'Enable Auto-Scroll'" placement="bottom" >
                      <el-button :type="autoScroll ? 'success' : 'warning'" link @click="toggleAutoScroll">
                         <Icon :icon="autoScroll ? scrollIcon2 : scrollIcon1" />
                      </el-button>
                   </el-tooltip> -->
-          </el-button-group>
-          <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom">
-            <el-button
-              :type="isPaused ? 'success' : 'warning'"
-              link
-              :class="{ 'pause-active': isPaused }"
-              @click="togglePause"
-            >
-              <Icon :icon="isPaused ? playIcon : pauseIcon" />
-            </el-button>
-          </el-tooltip>
-          <el-divider v-if="showFilter" direction="vertical" />
-          <el-dropdown v-if="showFilter">
-            <span class="el-dropdown-link">
-              <Icon :icon="filterIcon" />
-            </span>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-checkbox-group
-                  v-model="checkList"
-                  size="small"
-                  style="width: 200px; margin: 10px"
-                >
-                  <el-checkbox
-                    v-for="item of LogFilter"
-                    :key="item.v"
-                    :label="item.label"
-                    :value="item.v"
-                    @change="filterChange(item.v, $event)"
-                  />
-                </el-checkbox-group>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-          <el-divider direction="vertical" />
-          <el-dropdown size="small">
-            <el-button type="info" link @click="saveAll">
-              <Icon :icon="saveIcon" />
-            </el-button>
+      </el-button-group>
+      <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom">
+        <el-button
+          :type="isPaused ? 'success' : 'warning'"
+          link
+          :class="{ 'pause-active': isPaused }"
+          @click="togglePause"
+        >
+          <Icon :icon="isPaused ? playIcon : pauseIcon" />
+        </el-button>
+      </el-tooltip>
+      <el-divider v-if="showFilter" direction="vertical" />
+      <el-dropdown v-if="showFilter">
+        <span class="el-dropdown-link">
+          <Icon :icon="filterIcon" />
+        </span>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-checkbox-group v-model="checkList" size="small" style="width: 200px; margin: 10px">
+              <el-checkbox
+                v-for="item of LogFilter"
+                :key="item.v"
+                :label="item.label"
+                :value="item.v"
+                @change="filterChange(item.v, $event)"
+              />
+            </el-checkbox-group>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+      <el-divider direction="vertical" />
+      <el-dropdown size="small" @command="saveAll">
+        <el-button type="info" link>
+          <Icon :icon="saveIcon" />
+        </el-button>
 
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item>Save as raw</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </div>
-      </template>
-    </VxeGrid>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item command="excel">Save as Excel</el-dropdown-item>
+            <el-dropdown-item command="asc">Save as ASC</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+    </div>
+    <div :id="`traceTable-${props.editIndex}`" class="realLog"></div>
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted, computed, toRef, watch, watchEffect, PropType } from 'vue'
+import {
+  ref,
+  onMounted,
+  onUnmounted,
+  computed,
+  toRef,
+  watch,
+  watchEffect,
+  PropType,
+  nextTick,
+  handleError,
+  Ref
+} from 'vue'
 
 import { CAN_ID_TYPE, CanMessage, CanMsgType, getDlcByLen } from 'nodeCan/can'
-import { VxeGridProps } from 'vxe-table'
-import { VxeGrid } from 'vxe-table'
 import { Icon } from '@iconify/vue'
 import circlePlusFilled from '@iconify/icons-material-symbols/scan-delete-outline'
 import email from '@iconify/icons-material-symbols/mark-email-unread-outline-rounded'
@@ -119,10 +100,14 @@ import pauseIcon from '@iconify/icons-material-symbols/pause-circle-outline'
 import playIcon from '@iconify/icons-material-symbols/play-circle-outline'
 import scrollIcon1 from '@iconify/icons-material-symbols/autoplay'
 import scrollIcon2 from '@iconify/icons-material-symbols/autopause'
+import ExcelJS from 'exceljs'
 
 import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
-import { LinChecksumType, LinDirection, LinMsg } from 'nodeCan/lin'
+import { LinDirection, LinMsg } from 'nodeCan/lin'
+import EVirtTable, { Column } from 'e-virt-table'
+import { ElLoading } from 'element-plus'
+let allLogData: LogData[] = []
 
 interface LogData {
   dir?: 'Tx' | 'Rx' | '--'
@@ -137,10 +122,10 @@ interface LogData {
   method: string
   name?: string
   seqIndex?: number
+  children?: LogData[] | { name: string; data: string }[]
 }
 
 const database = useDataStore()
-const xGrid = ref()
 // const logData = ref<LogData[]>([])
 
 interface CanBaseLog {
@@ -187,13 +172,18 @@ interface LogItem {
 
 watch(window.globalStart, (val) => {
   if (val) {
-    clearLog()
+    clearLog('Start Trace')
     isPaused.value = false
   }
 })
-function clearLog() {
-  // logData.value = []
-  xGrid.value?.remove()
+
+function clearLog(msg = 'Clear Trace') {
+  allLogData = []
+
+  scrollY = -1
+  //TODO:
+  grid.loadData([])
+  grid.scrollYTo(0)
 }
 function data2str(data: Uint8Array) {
   return data.reduce((acc, val) => acc + val.toString(16).padStart(2, '0') + ' ', '')
@@ -216,19 +206,25 @@ function CanMsgType2Str(msgType: CanMsgType) {
   }
   return str
 }
-function insertData1(data: LogData[]) {
-  xGrid.value.insertAt(data, -1).then((v: any) => {
-    xGrid.value.scrollToRow(v.row)
 
-    const { fullData } = xGrid.value.getTableData()
-    const limit = 1000
-    if (fullData.length > limit) {
-      xGrid.value.remove(fullData.slice(0, fullData.length - limit + 10))
-    }
-  })
+const maxLogCount = 10000
+function insertData2(data: LogData[]) {
+  // grid.loadData(data)
+  allLogData.push(...data)
+  if (allLogData.length > maxLogCount) {
+    const excessRows = allLogData.length - maxLogCount
+    allLogData.splice(0, excessRows)
+  }
+  grid.loadData(allLogData)
+  grid.scrollYTo(99999999999)
+
+  // grid.scrollToRowIndex(allLogData.length - 1)
+  // grid.scrollYTo(allLogData.length*28+100)
+  // nextTick(() => {
+  //   grid.scrollToRowIndex(logIndex - 1)
+  // })
 }
-
-function logDisplay(vals: LogItem[]) {
+function logDisplay(method: string, vals: LogItem[]) {
   // Don't process logs when paused
   if (isPaused.value) return
 
@@ -238,13 +234,6 @@ function logDisplay(vals: LogItem[]) {
   }
   for (const val of vals) {
     if (val.message.method == 'canBase') {
-      // let name=
-      // if(val.message.data.msgType.uuid){
-      //    const node=database.nodes[val.message.data.msgType.uuid]
-      //    if(node){
-      //       name=node.name
-      //    }
-      // }
       insertData({
         method: val.message.method,
         dir: val.message.data.dir == 'OUT' ? 'Tx' : 'Rx',
@@ -256,7 +245,8 @@ function logDisplay(vals: LogItem[]) {
         device: val.label,
         channel: val.instance,
         msgType: CanMsgType2Str(val.message.data.msgType),
-        name: val.message.data.name
+        name: val.message.data.name,
+        children: val.message.data.children
       })
     } else if (val.message.method == 'ipBase') {
       insertData({
@@ -284,7 +274,8 @@ function logDisplay(vals: LogItem[]) {
         channel: val.instance,
         msgType: `LIN ${val.message.data.checksumType}`,
         dlc: val.message.data.data.length,
-        name: val.message.data.name
+        name: val.message.data.name,
+        children: val.message.data.children
       })
     } else if (val.message.method == 'udsSent') {
       let testerName = val.message.data.service.name
@@ -413,10 +404,18 @@ function logDisplay(vals: LogItem[]) {
       })
     }
   }
-  insertData1(logData)
+  insertData2(logData)
 }
 
 const props = defineProps({
+  editIndex: {
+    type: String,
+    default: ''
+  },
+  width: {
+    type: Number,
+    required: true
+  },
   height: {
     type: Number,
     required: true
@@ -446,123 +445,205 @@ function filterChange(method: 'uds' | 'canBase' | 'ipBase' | 'linBase', val: boo
   }
 }
 
-const tableHeight = toRef(props, 'height')
-
-const gridOptions = computed(() => {
-  const v: VxeGridProps<LogData> = {
-    border: true,
-    size: 'mini',
-
-    columnConfig: {
-      resizable: true
-    },
-    showOverflow: true,
-    scrollY: {
-      enabled: true,
-      gt: 0,
-      mode: 'wheel'
-    },
-    rowConfig: {
-      isCurrent: true,
-      height: 30
-    },
-    toolbarConfig: {
-      slots: {
-        tools: 'toolbar'
-      }
-    },
-    align: 'center',
-    columns: [
-      {
-        field: 'type',
-        title: '',
-        width: 36,
-        resizable: false,
-        editRender: {},
-        slots: { default: 'default_type' }
-      },
-      { field: 'ts', title: 'Time', width: 100 },
-      { field: 'name', title: 'Name', width: 200 },
-      { field: 'data', title: 'Data', minWidth: 300 },
-      { field: 'dir', title: 'Dir', width: 50 },
-      // { field: 'seqIndex', title: 'Num', width: 50 },
-
-      { field: 'id', title: 'ID', width: 100 },
-
-      { field: 'dlc', title: 'DLC', width: 100 },
-      { field: 'len', title: 'Len', width: 100 },
-      { field: 'msgType', title: 'Type', width: 100 },
-      { field: 'channel', title: 'Channel', width: 100 },
-      { field: 'device', title: 'Device', width: 200 }
-    ],
-    rowClassName: ({ row }) => {
-      return row.method
-    },
-    menuConfig: {
-      body: {
-        options: [
-          [
-            { code: 'copyRaw', name: 'Copy data as raw', visible: true, disabled: false },
-            { code: 'copyArray', name: 'Copy data as array', visible: true, disabled: false },
-            { code: 'copyRow', name: 'Copy row (json)', visible: true, disabled: false }
-          ]
-        ]
-      }
-    }
-  }
-
-  return v
+const tableHeight = computed(() => {
+  return props.height - 20
 })
-
-function menuClick(val: any) {
-  switch (val.menu.code) {
-    case 'copyRaw': {
-      const data = val.row.data
-      navigator.clipboard.writeText(data)
-
-      break
-    }
-    case 'copyArray': {
-      const data1 = val.row.data
-        .split(' ')
-        .map((v: any) => `0x${v}`)
-        .join(',')
-      navigator.clipboard.writeText(data1)
-
-      break
-    }
-    case 'copyRow': {
-      const data2 = JSON.stringify(val.row, null, 2)
-      navigator.clipboard.writeText(data2)
-
-      break
-    }
-  }
+const tableWidth = computed(() => {
+  return props.width
+})
+// DLC 计算辅助函数
+function len2dlc(len: number) {
+  if (len <= 8) return len
+  if (len <= 12) return 9
+  if (len <= 16) return 10
+  if (len <= 20) return 11
+  if (len <= 24) return 12
+  if (len <= 32) return 13
+  if (len <= 48) return 14
+  return 15
 }
+function saveAll(command: string) {
+  isPaused.value = true
+  const loadingInstance = ElLoading.service()
 
-function saveAll() {
-  xGrid.value.exportData()
+  if (command == 'excel') {
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet('Log Data')
+
+    // Define columns
+    worksheet.columns = [
+      { header: 'Time', key: 'ts', width: 15 },
+      { header: 'Name', key: 'name', width: 20 },
+      { header: 'Data', key: 'data', width: 40 },
+      { header: 'Dir', key: 'dir', width: 10 },
+      { header: 'ID', key: 'id', width: 15 },
+      { header: 'DLC', key: 'dlc', width: 10 },
+      { header: 'Len', key: 'len', width: 10 },
+      { header: 'Type', key: 'msgType', width: 15 },
+      { header: 'Channel', key: 'channel', width: 15 },
+      { header: 'Device', key: 'device', width: 20 }
+    ]
+
+    // Add data
+    allLogData.forEach((log) => {
+      worksheet.addRow(log)
+    })
+
+    // Style the header row
+    worksheet.getRow(1).font = { bold: true }
+    worksheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' }
+    }
+
+    // Generate and download the file
+    workbook.xlsx
+      .writeBuffer()
+      .then((buffer) => {
+        const blob = new Blob([buffer], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        })
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `log_data_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.xlsx`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+      })
+      .finally(() => {
+        loadingInstance.close()
+      })
+  } else if (command == 'asc') {
+    //参考https://github.com/hardbyte/python-can/blob/main/can/io/asc.py
+    // 生成 ASC 格式的日志内容
+    let ascContent = ''
+
+    // 添加文件头
+    const now = new Date()
+    const dateStr = now.toLocaleString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+      year: 'numeric'
+    })
+    ascContent += `date ${dateStr}\n`
+    ascContent += 'base hex  timestamps absolute\n'
+    ascContent += 'internal events logged\n'
+
+    // 开始测量块
+    ascContent += `Begin Triggerblock ${dateStr}\n`
+    ascContent += '0.000000 Start of measurement\n'
+
+    // 添加数据
+    let startTime = 0
+    if (allLogData.length > 0) {
+      startTime = parseFloat(allLogData[0].ts)
+    }
+
+    allLogData.forEach((log) => {
+      const timestamp = parseFloat(log.ts)
+      const relativeTime = timestamp - startTime
+
+      // 格式化通道号
+      const channel = log.channel && Number.isInteger(log.channel) ? parseInt(log.channel) + 1 : 1
+
+      // 格式化 ID
+      let id = ''
+      if (log.id) {
+        id = log.id.replace('0x', '').toUpperCase()
+        if (log.msgType && log.msgType.includes('EXT')) {
+          id += 'x' // 扩展帧标记
+        }
+      }
+
+      // 格式化数据
+      let data = ''
+      if (log.data) {
+        data = log.data.replace(/\s+/g, ' ').trim()
+      }
+
+      // 构建消息行
+      let messageLine = ''
+
+      if (log.method === 'canBase') {
+        // CAN 消息
+        const dlc = log.dlc ? log.dlc.toString(16) : '0'
+        const dir = log.dir === 'Tx' ? 'Tx' : 'Rx'
+
+        if (log.msgType && log.msgType.includes('CANFD')) {
+          // CANFD 消息
+          const brs = log.msgType.includes('BRS') ? '1' : '0'
+          const esi = '0' // 假设 ESI 始终为 0
+          const dataLength = log.len || 0
+
+          messageLine = `CANFD ${channel}  ${dir} ${id}                                 ${brs} ${esi} ${dlc} ${dataLength} ${data} 0 0 1000 0 0 0 0 0`
+        } else {
+          // 普通 CAN 消息
+          const dtype = log.data ? `d ${dlc}` : `r ${dlc}`
+          messageLine = `${channel}  ${id.padEnd(15)} ${dir.padEnd(4)} ${dtype} ${data}`
+        }
+      } else if (log.method === 'canError') {
+        messageLine = `${channel}  ErrorFrame`
+      } else if (log.method === 'linBase') {
+        // LIN 消息 (按照 CAN 格式处理)
+        const dlc = log.dlc ? log.dlc.toString(16) : '0'
+        const dir = log.dir === 'Tx' ? 'Tx' : 'Rx'
+        messageLine = `${channel}  ${id.padEnd(15)} ${dir.padEnd(4)} d ${dlc} ${data}`
+      } else if (
+        log.method === 'udsSent' ||
+        log.method === 'udsRecv' ||
+        log.method === 'udsNegRecv'
+      ) {
+        // UDS 消息 (按照 CAN 格式处理)
+        const dlc = log.len ? len2dlc(log.len).toString(16) : '0'
+        const dir = log.method === 'udsSent' ? 'Tx' : 'Rx'
+        messageLine = `${channel}  ${id.padEnd(15)} ${dir.padEnd(4)} d ${dlc} ${data}`
+      }
+
+      if (messageLine) {
+        ascContent += `${relativeTime.toFixed(6)} ${messageLine}\n`
+      }
+    })
+
+    // 添加文件尾
+    ascContent += 'End TriggerBlock\n'
+
+    // 下载文件
+    const blob = new Blob([ascContent], { type: 'text/plain' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `log_data_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.asc`
+    document.body.appendChild(a)
+    a.click()
+    window.URL.revokeObjectURL(url)
+    document.body.removeChild(a)
+    loadingInstance.close()
+  }
 }
 const isPaused = ref(false)
 // const autoScroll = ref(true)
-function scrollHandle(x) {
-  if (x.type == 'body' && !isPaused.value && x.direction != 'left' && x.direction != 'right') {
-    isPaused.value = true
-  }
-}
 
 function getData() {
-  return xGrid.value.getTableData()
+  return allLogData
 }
 
 defineExpose({
   clearLog,
-  insertData: insertData1,
+  insertData: insertData2,
   getData
 })
 
 function togglePause() {
   isPaused.value = !isPaused.value
+  scrollY = -1
 }
 
 const LogFilter = ref<
@@ -594,6 +675,36 @@ const LogFilter = ref<
   }
 ])
 
+let grid: EVirtTable
+let scrollY: number = -1
+
+const columes: Ref<Column[]> = ref([
+  { key: 'ts', title: 'Time', width: 100 },
+  { key: 'name', title: 'Name', width: 200 },
+  { key: 'data', title: 'Data', width: 300 },
+  { key: 'dir', title: 'Dir', width: 50 },
+  { key: 'id', title: 'ID', width: 100 },
+  { key: 'dlc', title: 'DLC', width: 100 },
+  { key: 'len', title: 'Len', width: 100 },
+  { key: 'msgType', title: 'Type', width: 100 },
+  { key: 'channel', title: 'Channel', width: 100 },
+  { key: 'device', title: 'Device', width: 200 }
+])
+watch(
+  columes,
+  () => {
+    grid.loadColumns(columes.value)
+  },
+  { deep: true }
+)
+watch(isPaused, (v) => {
+  if (v) {
+    columes.value[0].type = 'tree'
+  } else {
+    columes.value[0].type = undefined
+  }
+})
+
 onMounted(() => {
   for (const item of checkList.value) {
     const v = LogFilter.value.find((v) => v.v == item)
@@ -603,6 +714,89 @@ onMounted(() => {
       }
     }
   }
+  const target = document.getElementById(`traceTable-${props.editIndex}`)
+
+  grid = new EVirtTable(target as any, {
+    data: [],
+    columns: columes.value,
+    config: {
+      WIDTH: tableWidth.value,
+      HEIGHT: tableHeight.value,
+      DISABLED: true,
+      HEADER_HEIGHT: 28,
+      CELL_HEIGHT: 28,
+      ENABLE_SELECTOR: false,
+      ENABLE_HISTORY: false,
+      ENABLE_COPY: false,
+      ENABLE_PASTER: false,
+      ENABLE_KEYBOARD: false,
+      ENABLE_RESIZE_ROW: false,
+      EMPTY_TEXT: 'No data',
+      BODY_CELL_STYLE_METHOD: ({ row }) => {
+        const method = row.method
+        let color = ''
+        switch (method) {
+          case 'canBase':
+            color = getComputedStyle(document.documentElement)
+              .getPropertyValue('--el-color-primary')
+              .trim()
+            break
+          case 'linEvent':
+            color = getComputedStyle(document.documentElement)
+              .getPropertyValue('--el-color-success')
+              .trim()
+            break
+          case 'ipBase':
+            color = getComputedStyle(document.documentElement)
+              .getPropertyValue('--el-color-primary-dark-2')
+              .trim()
+            break
+          case 'udsSent':
+          case 'udsRecv':
+            color = getComputedStyle(document.documentElement)
+              .getPropertyValue('--el-color-info')
+              .trim()
+            break
+          case 'canError':
+          case 'linError':
+          case 'ipError':
+            color = getComputedStyle(document.documentElement)
+              .getPropertyValue('--el-color-danger')
+              .trim()
+            break
+          case 'linWarning':
+          case 'udsWarning':
+          case 'udsNegRecv':
+            color = getComputedStyle(document.documentElement)
+              .getPropertyValue('--el-color-warning')
+              .trim()
+            break
+          case 'udsSystem':
+            color = getComputedStyle(document.documentElement)
+              .getPropertyValue('--el-color-primary')
+              .trim()
+            break
+        }
+        return {
+          color: color
+        }
+      }
+    }
+  })
+
+  grid.on('onScrollY', (v) => {
+    if (!isPaused.value && scrollY !== -1 && v < scrollY) {
+      isPaused.value = true
+    } else {
+      scrollY = v
+    }
+  })
+})
+watch([tableWidth, tableHeight], () => {
+  grid.loadConfig({
+    WIDTH: tableWidth.value,
+    HEIGHT: tableHeight.value
+  })
 })
 
 onUnmounted(() => {
@@ -611,6 +805,9 @@ onUnmounted(() => {
       window.logBus.detach(val, logDisplay)
     }
   })
+  // cTable.close()
+  // stage.destroy()
+  grid.destroy()
 })
 </script>
 
@@ -622,6 +819,7 @@ onUnmounted(() => {
 .linEvent {
   color: var(--el-color-success);
 }
+
 .ipBase {
   color: var(--el-color-primary-dark-2);
 }
@@ -637,12 +835,15 @@ onUnmounted(() => {
 .canError {
   color: var(--el-color-danger);
 }
+
 .linError {
   color: var(--el-color-danger);
 }
+
 .linWarning {
   color: var(--el-color-warning);
 }
+
 .ipError {
   color: var(--el-color-danger);
 }
@@ -654,9 +855,11 @@ onUnmounted(() => {
 .udsWarning {
   color: var(--el-color-warning);
 }
+
 .udsNegRecv {
   color: var(--el-color-warning);
 }
+
 .pause-active {
   box-shadow: inset 0 0 4px var(--el-color-info-light-5);
   border-radius: 4px;

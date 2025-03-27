@@ -682,7 +682,7 @@ ipcMain.on('ipc-send-can', (event, ...arg) => {
     let db: DBC | undefined
     let message: Message | undefined
     if (ia.database) {
-      db = Object.values(global.database.can).find((d) => d.name == ia.database)
+      db = global.database.can[ia.database]
       if (db) {
         message = db.messages[parseInt(ia.id, 16)]
         if (message) {
@@ -720,7 +720,7 @@ function send(id: string) {
   let db: DBC | undefined
   let message: Message | undefined
   if (item.ia.database) {
-    db = Object.values(global.database.can).find((d) => d.name == item.ia.database)
+    db = global.database.can[item.ia.database]
     if (db) {
       message = db.messages[parseInt(item.ia.id, 16)]
     }
@@ -742,7 +742,7 @@ ipcMain.on('ipc-update-can-signal', (event, ...arg) => {
   const signalName = arg[2] as string
   const signal = arg[3] as Signal
 
-  const db = Object.values(global.database.can).find((d) => d.name == dbName)
+  const db = global.database.can[dbName]
   if (db) {
     const message = db.messages[id]
     if (message) {

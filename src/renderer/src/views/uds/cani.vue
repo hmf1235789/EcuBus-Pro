@@ -760,7 +760,7 @@ function handleFrameSelect(frame: GraphNode<GraphBindFrameValue>) {
       trigger: {
         type: 'manual'
       },
-      database: frame.bindValue.dbName,
+      database: frame.bindValue.dbKey,
       name: frameInfo.name,
       id: frameInfo.id.toString(16), // 转换为16进制字符串
       channel: channel,

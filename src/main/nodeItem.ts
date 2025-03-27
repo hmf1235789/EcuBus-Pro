@@ -8,7 +8,7 @@ import { UdsLOG } from './log'
 import { applyBuffer, getRxPdu, getTxPdu, ServiceItem } from './share/uds'
 import { findService } from './docan/uds'
 import { cloneDeep } from 'lodash'
-import type { Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
+import type { Message, Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
 import { updateSignalPhys, updateSignalRaw } from 'src/renderer/src/database/dbc/calc'
 import { NodeItem } from 'src/preload/data'
 import LinBase from './dolin/base'
@@ -736,7 +736,6 @@ export class NodeClass {
     const db = Object.values(global.database.can).find((db) => db.name == s[0])
     if (db) {
       const signalName = s[1]
-
       let ss: Signal | undefined
       for (const msg of Object.values(db.messages)) {
         for (const signal of Object.values(msg.signals)) {
@@ -802,13 +801,17 @@ export class NodeClass {
       if (this.canBaseId.length == 1) {
         const baseItem = this.canBaseMap.get(this.canBaseId[0])
         if (baseItem) {
-          return await baseItem.writeBase(frame.id, frame.msgType, frame.data)
+          return await baseItem.writeBase(frame.id, frame.msgType, frame.data, {
+            database: baseItem.info.database
+          })
         }
       }
       for (const c of this.canBaseId) {
         const baseItem = this.canBaseMap.get(c)
         if (baseItem && baseItem.info.name == frame.device) {
-          return await baseItem.writeBase(frame.id, frame.msgType, frame.data)
+          return await baseItem.writeBase(frame.id, frame.msgType, frame.data, {
+            database: baseItem.info.database
+          })
         }
       }
       throw new Error(`device ${frame.device} not found`)
@@ -826,12 +829,14 @@ export class NodeClass {
             frame.data,
             frame.isEvent ? 2 : 1
           )
+          frame.database = baseItem.info.database
           return await baseItem.write(frame)
         }
       }
       for (const c of this.linBaseId) {
         const baseItem = this.linBaseMap.get(c)
         if (baseItem && baseItem.info.name == frame.device) {
+          frame.database = baseItem.info.database
           return await baseItem.write(frame)
         }
       }

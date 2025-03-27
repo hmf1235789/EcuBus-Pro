@@ -378,7 +378,7 @@ export default abstract class LinBase {
           const lastDiag = this.sch?.diag
           this.write(
             {
-              database: db.name,
+              database: db.id,
               frameId: frameId,
               data: this.sch?.diag?.msg.data || data,
               direction: this.sch?.diag?.msg.direction || LinDirection.SEND,
@@ -521,7 +521,7 @@ export default abstract class LinBase {
                 data: data,
                 direction: dir,
                 checksumType: checksum,
-                database: db.name,
+                database: db.id,
                 workNode: workNode,
                 name: eventFrame ? eventFrame.name : frame.name,
                 isEvent: eventFrame ? true : false

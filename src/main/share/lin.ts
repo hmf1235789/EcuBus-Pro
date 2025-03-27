@@ -81,6 +81,14 @@ export interface LinMsg {
   isEvent?: boolean
   uuid?: string
   ts?: number
+  /**
+   * The children signals of the CAN message.
+   * internal use
+   */
+  children?: {
+    name: string
+    data: string
+  }[]
 }
 
 export class LinError extends Error {

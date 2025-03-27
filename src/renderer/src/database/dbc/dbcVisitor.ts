@@ -45,6 +45,7 @@ import {
 } from './dbc_cst'
 import { cloneDeep } from 'lodash'
 import { isCanFd } from '../dbcParse'
+import { v4 } from 'uuid'
 
 export interface NodeItem {
   name: string
@@ -53,6 +54,7 @@ export interface NodeItem {
 }
 
 export interface DBC {
+  id: string
   name: string
   version?: string
   busConfig?: BusConfig
@@ -91,6 +93,7 @@ export interface Signal {
   }
   value?: number
   physValue?: number | string
+  physValueEnum?: string
   generatorType?: string
 }
 
@@ -150,6 +153,7 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
   }
   dbcFile(ctx: DbcFileCstChildren): DBC {
     const dbc: DBC = {
+      id: v4(),
       name: '',
       nodes: {},
       messages: {},

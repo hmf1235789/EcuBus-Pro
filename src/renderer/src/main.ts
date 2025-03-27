@@ -61,7 +61,7 @@ window.electron.ipcRenderer.on('ipc-log', (event, data) => {
 
   // 按顺序发送每个组的数据
   groups.forEach((group) => {
-    window.logBus.emit(group.method, undefined, group.data)
+    // window.logBus.emit(group.method, undefined, group.data)
     dataParseWorker.postMessage({
       method: group.method,
       data: group.data
