@@ -1,5 +1,11 @@
 # Feature Request Process
 
+## Steps
+
+1. Create a feature request issue in the GitHub repository.
+2. Clearly describe the feature you want to add, including its purpose and how it will benefit users.
+3. Label the issue with `enhancement` to categorize it appropriately.
+
 To ensure we prioritize features that benefit the community, new feature requests need at least 5 GitHub reactions (👍) before being considered for our backlog.
 
 ## How to Up-vote

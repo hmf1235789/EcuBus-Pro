@@ -740,6 +740,7 @@ onMounted(() => {
         let color = ''
         switch (method) {
           case 'canBase':
+          case 'linBase':
             color = getComputedStyle(document.documentElement)
               .getPropertyValue('--el-color-primary')
               .trim()
