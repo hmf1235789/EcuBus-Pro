@@ -21,6 +21,7 @@ const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) {
   app.quit()
 }
+log.info(app.getGPUFeatureStatus())
 
 function registerLocalResourceProtocol() {
   eProtocol.registerFileProtocol('local-resource', (request, callback) => {

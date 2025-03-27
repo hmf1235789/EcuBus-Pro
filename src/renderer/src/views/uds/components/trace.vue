@@ -208,21 +208,19 @@ function CanMsgType2Str(msgType: CanMsgType) {
 }
 
 const maxLogCount = 10000
+const showLogCount = 500
+
 function insertData2(data: LogData[]) {
-  // grid.loadData(data)
   allLogData.push(...data)
   if (allLogData.length > maxLogCount) {
     const excessRows = allLogData.length - maxLogCount
     allLogData.splice(0, excessRows)
   }
-  grid.loadData(allLogData)
-  grid.scrollYTo(99999999999)
 
-  // grid.scrollToRowIndex(allLogData.length - 1)
-  // grid.scrollYTo(allLogData.length*28+100)
-  // nextTick(() => {
-  //   grid.scrollToRowIndex(logIndex - 1)
-  // })
+  // 根据暂停状态决定加载多少数据
+  const displayData = isPaused.value ? allLogData : allLogData.slice(-showLogCount)
+  grid.loadData(displayData)
+  grid.scrollYTo(99999999999)
 }
 function logDisplay(method: string, vals: LogItem[]) {
   // Don't process logs when paused
@@ -644,6 +642,11 @@ defineExpose({
 function togglePause() {
   isPaused.value = !isPaused.value
   scrollY = -1
+
+  // 切换显示模式时重新加载数据
+  const displayData = isPaused.value ? allLogData : allLogData.slice(-showLogCount)
+  grid.loadData(displayData)
+  grid.scrollYTo(99999999999)
 }
 
 const LogFilter = ref<
