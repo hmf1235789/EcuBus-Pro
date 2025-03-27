@@ -274,7 +274,8 @@ function logDisplay(method: string, vals: LogItem[]) {
         channel: val.instance,
         msgType: `LIN ${val.message.data.checksumType}`,
         dlc: val.message.data.data.length,
-        name: val.message.data.name
+        name: val.message.data.name,
+        children: val.message.data.children
       })
     } else if (val.message.method == 'udsSent') {
       let testerName = val.message.data.service.name

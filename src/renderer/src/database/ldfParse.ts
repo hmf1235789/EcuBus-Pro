@@ -83,6 +83,8 @@ export interface SignalDef {
   signalSizeBits: number
   initValue: number | number[]
   value?: number | number[]
+  physValue?: number | string
+  physValueEnum?: string
   update?: boolean
   punishedBy: string
   subscribedBy: string[]
@@ -178,7 +180,7 @@ export interface SchTable {
 export interface SignalEncodeType {
   name: string
   encodingTypes: {
-    type: string
+    type: 'logicalValue' | 'physicalValue' | 'bcdValue' | 'asciiValue'
     logicalValue?: {
       signalValue: number
       textInfo?: string
