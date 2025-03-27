@@ -1,5 +1,22 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.25
+Changes from v0.8.24 to v0.8.25:
+
+ 
+* [feat]:add UI zoom feature 
+* [feat]:refactor trace done 
+* [feat]:add script end callback 
+* [feat]:add node-bindings for esbuild, but still need copy .node to .ScriptBuild 
+* [bug]:fix toomoss lin output voltage error 
+* [feat]:add lin checksum type in trace windows 
+* [bug]:fix lin id error 
+* [bug]:fix save project failed 
+* [bug]:fix lin baudrate isn't number 
+* [bug]:Increase ldf parsing compatibility 
+* [bug]:fix close project doesn't clean data
+---
+
 ## v0.8.24
 Changes from v0.8.23 to v0.8.24:
 
