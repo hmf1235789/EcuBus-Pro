@@ -237,6 +237,26 @@
                 <span>Setting</span>
               </span>
             </template>
+            <el-tabs
+              tab-position="left"
+              :style="{
+                height: height - 110 + 'px'
+              }"
+            >
+              <el-tab-pane label="general">
+                <template #label>
+                  <span class="custom-tabs-label">
+                    <Icon :icon="generalIcon" />
+                    <span>General</span>
+                  </span>
+                </template>
+                <general
+                  :style="{
+                    height: height - 170 + 'px'
+                  }"
+                />
+              </el-tab-pane>
+            </el-tabs>
           </el-tab-pane>
 
           <el-tab-pane label="Others" name="others">
@@ -368,6 +388,9 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 import update from './update.vue'
 import updateIcon from '@iconify/icons-material-symbols/browser-updated-sharp'
 import baseIcon from '@iconify/icons-material-symbols/align-start'
+import generalIcon from '@iconify/icons-material-symbols/settings-outline'
+import general from './general.vue'
+
 // dayjs.extend(relativeTime);
 dayjs.extend(isSameOrAfter)
 const hasUpdate = ref(false)
