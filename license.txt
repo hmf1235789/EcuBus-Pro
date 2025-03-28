@@ -1,4 +1,4 @@
-# Open Source License
+Open Source License
 
 EcuBus-Pro is licensed under a modified version of the Apache License 2.0, with the following additional conditions:
 
