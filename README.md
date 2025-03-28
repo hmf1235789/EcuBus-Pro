@@ -93,4 +93,4 @@ Thanks to these amazing people who helped improve `EcuBus-Pro` by reporting issu
 
 ## License
 
-Apache-2.0
+[License](./license.txt)
