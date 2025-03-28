@@ -1,4 +1,4 @@
-name: Build-Linux
+name: Build-macOS
 
 on:
   push:
@@ -9,18 +9,18 @@ on:
 jobs:
   # Build job
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Not needed if lastUpdated is not enabled
+          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm # or pnpm / yarn
+          cache: npm
       - name: Install dependencies
         run: npm install
       - name: Build with VitePress
@@ -34,12 +34,13 @@ jobs:
       - name: Build api
         run: npm run api
       - name: Build cli
-        run: npm run cli:build:linux
+        run: npm run cli:build:mac
       - name: Build APP
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run build:linux
+        run: npm run build:mac
       - uses: actions/upload-artifact@v4
         with:
           name: artifact
-          path: dist/*.deb
+          path: dist/*.dmg
+

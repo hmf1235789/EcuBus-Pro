@@ -9,6 +9,7 @@
     },
     "scripts": {
       "linux": "pkg . -t node20-linux",
-      "win": "pkg . -t node20-win"
+      "win": "pkg . -t node20-win",
+      "mac": "pkg . -t node20-macos"
     }
   }
