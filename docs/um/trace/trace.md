@@ -1,27 +1,53 @@
-# Trace
-Trace窗口提供了一个用于查看和导出数据的界面。用户可以通过工具栏上的按钮将数据保存，以便进一步分析或存档。
+# Trace 
+
+The Trace window provides an interface for viewing and exporting data. Users can save data through buttons on the toolbar for further analysis or archival purposes.
+
 ![alt text](image.png)
 
+>[!INFO]
+> Currently, Trace has a maximum storage capacity of 50,000 entries. When this limit is exceeded, the oldest data will be automatically deleted.
 
-## 支持的导出数据格式
+## Supported Receive Filters
 
-* Excel
-* ASC (ASCII)
-* 
+* CAN - Receive CAN-related data
+* LIN - Receive LIN-related data
+* UDS - Receive UDS-related data
+* ETH - Receive Ethernet-related data
 
-## 列信息
+## Supported Export Formats
 
-Trace窗口中通常包含以下列信息：
-- **时间戳 (Timestamp)**: 显示事件发生的精确时间。
-- **信号名称 (Signal Name)**: 表示触发事件的信号名称。
-- **信号值 (Signal Value)**: 显示信号的当前值。
-- **信号类型 (Signal Type)**: 指示信号的类型，例如布尔值、整数或浮点数。
-- **源 (Source)**: 表示信号的来源，例如模块或设备名称。
-- **描述 (Description)**: 提供信号的附加说明或注释。
+* Excel - Export data in Microsoft Excel format
+* ASC (ASCII) - Export data in ASCII format, compatible with various CAN analysis tools
+* [Feature Request](./../../dev/feature.md)
 
-这些列信息帮助用户快速理解和分析系统的运行状态。
+## Column Information
 
-![alt text](image-1.png)
-![alt text](image-2.png)
+The Trace window typically includes the following columns:
+
+- **Timestamp**: Displays the precise time when the event occurred
+- **Name**: Represents the frame signal name that triggered the event
+- **Signal Value**: Shows the current value of the signal
+- **DIR (Direction)**: Indicates the signal direction (Tx for transmit, Rx for receive)
+- **ID**: Represents the signal identifier
+- **DLC (Data Length Code)**: Shows the data length code
+- **LEN (Length)**: Displays the actual data length
+- **Type**: Indicates the signal type (e.g., boolean, integer, float)
+- **Channel**: Shows the communication channel number
+- **Device**: Displays the device name
+
+When the corresponding hardware channel is bound to a [database](../database.md), these column information helps users quickly understand and analyze the system's operating state.
+
+>[!INFO]
+> Signal values within frames can only be viewed when the Trace window is paused
+
+## LIN Signal Display
+![lin](image-1.png)
+
+## CAN Signal Display
+![can](image-2.png)
+
+
+
+
 
 

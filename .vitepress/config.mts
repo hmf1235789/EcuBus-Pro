@@ -229,6 +229,15 @@ export default withMermaid({
               { text: 'LIN LDF', link: '/docs/um/ldf' },
               { text: 'CAN DBC', link: '/docs/um/dbc' }
             ]
+          },
+          {
+            text: 'Setting',
+          
+            items: [
+              { text: 'General', link: '/docs/um/setting/general' },
+             
+              
+            ]
           }
         ]
       },

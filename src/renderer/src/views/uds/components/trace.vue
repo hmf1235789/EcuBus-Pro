@@ -207,7 +207,7 @@ function CanMsgType2Str(msgType: CanMsgType) {
   return str
 }
 
-const maxLogCount = 10000
+const maxLogCount = 50000
 const showLogCount = 500
 
 function insertData2(data: LogData[]) {
@@ -642,11 +642,6 @@ defineExpose({
 function togglePause() {
   isPaused.value = !isPaused.value
   scrollY = -1
-
-  // 切换显示模式时重新加载数据
-  const displayData = isPaused.value ? allLogData : allLogData.slice(-showLogCount)
-  grid.loadData(displayData)
-  grid.scrollYTo(99999999999)
 }
 
 const LogFilter = ref<
