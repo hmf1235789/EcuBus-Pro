@@ -2,7 +2,7 @@
 
 ## Steps
 
-1. Create a feature request issue in the GitHub repository.
+1. Create a feature [issue](https://github.com/ecubus/EcuBus-Pro/issues/new/choose) in the GitHub repository.
 2. Clearly describe the feature you want to add, including its purpose and how it will benefit users.
 3. Label the issue with `enhancement` to categorize it appropriately.
 
