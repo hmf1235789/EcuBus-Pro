@@ -52,7 +52,7 @@
       >
         <el-option label="Onput 0V" :value="0" />
         <el-option label="Output 12V" :value="1" />
-        <el-option label="Output 5V" :value="1" />
+        <el-option label="Output 5V" :value="2" />
       </el-select>
     </el-form-item>
     <el-divider content-position="left"> Lin Parameters </el-divider>

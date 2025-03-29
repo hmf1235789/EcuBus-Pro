@@ -3,16 +3,105 @@ import { Frame, LDF, SignalEncodeType } from '../ldfParse'
 
 export function getPhysicalValue(
   rawValue: number,
-  encodingType: SignalEncodeType['encodingTypes'][0],
+  encodingTypes: SignalEncodeType['encodingTypes'],
   db: LDF
-): number {
-  const { minValue, maxValue, scale, offset } = encodingType.physicalValue!
-  // Check if raw value is within the valid range (min to max)
-  if (rawValue >= minValue && rawValue <= maxValue) {
-    // Apply the physical value calculation formula
-    return scale * rawValue + offset
+): { numVal?: number; strVal?: string; usedEncode?: SignalEncodeType['encodingTypes'][0] } {
+  // 遍历所有编码类型
+  for (const encodingType of encodingTypes) {
+    switch (encodingType.type) {
+      case 'physicalValue': {
+        if (encodingType.physicalValue) {
+          const { minValue, maxValue, scale, offset } = encodingType.physicalValue
+          if (rawValue >= minValue && rawValue <= maxValue) {
+            const tt = encodingType.physicalValue.textInfo
+              ? `${scale * rawValue + offset}${encodingType.physicalValue.textInfo}`
+              : undefined
+            return { numVal: scale * rawValue + offset, strVal: tt, usedEncode: encodingType }
+          }
+        }
+        break
+      }
+      case 'logicalValue': {
+        if (encodingType.logicalValue && encodingType.logicalValue.signalValue === rawValue) {
+          return { strVal: encodingType.logicalValue.textInfo || '', usedEncode: encodingType }
+        }
+        break
+      }
+      case 'bcdValue': {
+        // BCD编码：每4位表示一个十进制数字
+        return {
+          numVal: rawValue
+            .toString()
+            .split('')
+            .map(Number)
+            .reduce((acc, digit) => (acc << 4) | digit, 0),
+          usedEncode: encodingType
+        }
+      }
+      case 'asciiValue': {
+        // ASCII编码：直接转换为字符串
+        return { strVal: rawValue.toString(), usedEncode: encodingType }
+      }
+    }
   }
-  return rawValue
+  // 如果没有找到匹配的编码，返回原始值
+  return {}
+}
+
+export function getRawValue(
+  physValue: number | string,
+  encodingTypes: SignalEncodeType['encodingTypes'],
+  db: LDF
+): number | undefined {
+  // 遍历所有编码类型
+  for (const encodingType of encodingTypes) {
+    switch (encodingType.type) {
+      case 'physicalValue': {
+        if (encodingType.physicalValue && !Number.isNaN(Number(physValue))) {
+          const { minValue, maxValue, scale, offset } = encodingType.physicalValue
+          // 反向计算：raw = (phys - offset) / scale
+          const rawValue = (Number(physValue) - offset) / scale
+          // 检查计算出的raw值是否在有效范围内
+          if (rawValue >= minValue && rawValue <= maxValue) {
+            return Math.round(rawValue)
+          }
+        }
+        break
+      }
+      case 'logicalValue': {
+        if (encodingType.logicalValue) {
+          // 如果是字符串，检查是否匹配文本信息
+          if (typeof physValue === 'string' && encodingType.logicalValue.textInfo === physValue) {
+            return encodingType.logicalValue.signalValue
+          }
+          // 如果是数字，检查是否匹配信号值
+          if (
+            typeof physValue === 'number' &&
+            encodingType.logicalValue.signalValue === physValue
+          ) {
+            return encodingType.logicalValue.signalValue
+          }
+        }
+        break
+      }
+      case 'bcdValue': {
+        // BCD编码反向转换：将数字转换为BCD格式
+
+        return parseInt(Number(physValue).toString(16), 10)
+
+        break
+      }
+      case 'asciiValue': {
+        // ASCII编码反向转换：将字符串转换为数字
+        if (typeof physValue === 'string') {
+          return parseInt(physValue, 10)
+        }
+        break
+      }
+    }
+  }
+  // 如果没有找到匹配的编码，返回undefined
+  return undefined
 }
 
 export function writeMessageData(frame: Frame, data: Buffer, db: LDF) {
@@ -110,34 +199,17 @@ export function writeMessageData(frame: Frame, data: Buffer, db: LDF) {
       for (const encodeKey of Object.keys(db.signalRep)) {
         if (db.signalRep[encodeKey].includes(signalDef.signalName)) {
           const encodeInfo = db.signalEncodeTypes[encodeKey]
-          const isPhysicalValue = encodeInfo.encodingTypes.find(
-            (type) => type.type === 'physicalValue'
+          // 直接使用所有编码类型进行转换
+          const { numVal, strVal, usedEncode } = getPhysicalValue(
+            tempValue,
+            encodeInfo.encodingTypes,
+            db
           )
-          if (isPhysicalValue) {
-            signalDef.physValue = getPhysicalValue(tempValue, isPhysicalValue, db)
-            signalDef.physValueEnum = `${signalDef.physValue}${isPhysicalValue.physicalValue?.textInfo || ''}`
-            break
-          }
-          const isBcdValue = encodeInfo.encodingTypes.find((type) => type.type === 'bcdValue')
-          if (isBcdValue) {
-            //raw bcd 编码
-            const bcdValue = tempValue
-              .toString()
-              .split('')
-              .map(Number)
-              .reduce((acc, digit) => (acc << 4) | digit, 0)
-            signalDef.physValue = bcdValue
-            break
-          }
-          const isAsciiValue = encodeInfo.encodingTypes.find((type) => type.type === 'asciiValue')
-          if (isAsciiValue) {
-            signalDef.physValue = tempValue.toString()
-            break
-          }
-          for (const encodeType of encodeInfo.encodingTypes) {
-            if (encodeType.logicalValue?.signalValue == tempValue) {
-              signalDef.physValueEnum = encodeType.logicalValue?.textInfo
-              break
+
+          if (usedEncode) {
+            signalDef.physValueEnum = strVal
+            if (numVal !== undefined) {
+              signalDef.physValue = numVal
             }
           }
           break

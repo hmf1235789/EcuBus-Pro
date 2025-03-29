@@ -92,6 +92,8 @@ interface TreeItem {
   txNode?: string
   bitLen?: number
   frameId?: number
+  min?: number
+  max?: number
   dbInfo?: {
     name: string
     key: string
@@ -189,7 +191,45 @@ function getLinSignals() {
       }
       db.children.push(frameItem)
       //add signals in the frame
+
       for (const signalId of frame.signals) {
+        const signalDef = ldf.signals[signalId.name]
+        let min: number | undefined = undefined
+        let max: number | undefined = undefined
+        if (signalDef && signalDef.singleType != 'ByteArray') {
+          const encodingType = Object.entries(ldf.signalRep).find(([_, signals]) =>
+            signals.includes(signalId.name)
+          )?.[0]
+          if (encodingType) {
+            const encodeInfo = ldf.signalEncodeTypes[encodingType]
+            for (const type of encodeInfo.encodingTypes) {
+              if (type.type === 'physicalValue') {
+                if (min === undefined) {
+                  min =
+                    type.physicalValue!.minValue * type.physicalValue!.scale +
+                    type.physicalValue!.offset
+                } else {
+                  min = Math.min(
+                    min,
+                    type.physicalValue!.minValue * type.physicalValue!.scale +
+                      type.physicalValue!.offset
+                  )
+                }
+                if (max === undefined) {
+                  max =
+                    type.physicalValue!.maxValue * type.physicalValue!.scale +
+                    type.physicalValue!.offset
+                } else {
+                  max = Math.max(
+                    max,
+                    type.physicalValue!.maxValue * type.physicalValue!.scale +
+                      type.physicalValue!.offset
+                  )
+                }
+              }
+            }
+          }
+        }
         const signalItem: TreeItem = {
           id: `lin.${ldf.name}.signals.${signalId.name}`,
           name: signalId.name,
@@ -199,6 +239,8 @@ function getLinSignals() {
           startBit: signalId.offset,
           bitLen: ldf.signals[signalId.name].signalSizeBits,
           txNode: ldf.signals[signalId.name].punishedBy,
+          min: min,
+          max: max,
           dbInfo: {
             name: ldf.name,
             key: key
@@ -331,8 +373,8 @@ function addSignal() {
       name: highlightedRow.value.name,
       color: randomColor(),
       yAxis: {
-        min: 0,
-        max: getMaxByBitLength(highlightedRow.value.bitLen || 0)
+        min: highlightedRow.value.min || 0,
+        max: highlightedRow.value.max || getMaxByBitLength(highlightedRow.value.bitLen || 0)
       },
       bindValue: {
         signalName: highlightedRow.value.name,
