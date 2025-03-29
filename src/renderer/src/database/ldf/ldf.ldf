@@ -107,7 +107,7 @@ Node_attributes {
 {{#isDefined this.initial_NAD}}
     initial_NAD = {{this.initial_NAD}} ;
 {{/isDefined}}
-    product_id = {{this.supplier_id}}, {{this.function_id}}{{#isDefined this}}, {{this}}{{/isDefined}} ;
+    product_id = {{this.supplier_id}}, {{this.function_id}}{{#isDefined this.variant}}, {{this.variant}}{{/isDefined}} ;
     response_error = {{this.response_error}} ;
 {{#isDefined this.fault_state_signals}}
 {{#gte this.fault_state_signals.length 1}}

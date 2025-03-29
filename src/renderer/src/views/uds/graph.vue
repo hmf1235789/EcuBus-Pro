@@ -693,7 +693,7 @@ const getChartOption = (
           if (val.length > 6) {
             return ''
           }
-          return val
+          return val + (chart.yAxis?.unit ?? '')
         }
       },
       name: chart.name,

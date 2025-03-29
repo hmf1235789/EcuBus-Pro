@@ -212,16 +212,11 @@ const rules: FormRules<NodeAttrDef> = {
   ],
   variant: [
     {
-      required: true,
+      required: false,
       type: 'number',
       validator: (rule: any, value: number | undefined, callback: any) => {
-        if (typeof value === 'string') {
-          //报错
-          callback(new Error('Please enter variant'))
-          return
-        }
         if (value === undefined) {
-          callback(new Error('Please enter variant'))
+          callback()
           return
         }
         if (value < 0 || value > 255) {

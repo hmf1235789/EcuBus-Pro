@@ -53,7 +53,7 @@ export function getRawValue(
   physValue: number | string,
   encodingTypes: SignalEncodeType['encodingTypes'],
   db: LDF
-): number | undefined {
+): { value?: number; usedEncode?: SignalEncodeType['encodingTypes'][0] } {
   // 遍历所有编码类型
   for (const encodingType of encodingTypes) {
     switch (encodingType.type) {
@@ -64,7 +64,7 @@ export function getRawValue(
           const rawValue = (Number(physValue) - offset) / scale
           // 检查计算出的raw值是否在有效范围内
           if (rawValue >= minValue && rawValue <= maxValue) {
-            return Math.round(rawValue)
+            return { value: Math.round(rawValue), usedEncode: encodingType }
           }
         }
         break
@@ -73,14 +73,14 @@ export function getRawValue(
         if (encodingType.logicalValue) {
           // 如果是字符串，检查是否匹配文本信息
           if (typeof physValue === 'string' && encodingType.logicalValue.textInfo === physValue) {
-            return encodingType.logicalValue.signalValue
+            return { value: encodingType.logicalValue.signalValue, usedEncode: encodingType }
           }
           // 如果是数字，检查是否匹配信号值
           if (
             typeof physValue === 'number' &&
             encodingType.logicalValue.signalValue === physValue
           ) {
-            return encodingType.logicalValue.signalValue
+            return { value: encodingType.logicalValue.signalValue, usedEncode: encodingType }
           }
         }
         break
@@ -88,21 +88,21 @@ export function getRawValue(
       case 'bcdValue': {
         // BCD编码反向转换：将数字转换为BCD格式
 
-        return parseInt(Number(physValue).toString(16), 10)
+        return { value: parseInt(Number(physValue).toString(16), 10), usedEncode: encodingType }
 
         break
       }
       case 'asciiValue': {
         // ASCII编码反向转换：将字符串转换为数字
         if (typeof physValue === 'string') {
-          return parseInt(physValue, 10)
+          return { value: parseInt(physValue, 10), usedEncode: encodingType }
         }
         break
       }
     }
   }
   // 如果没有找到匹配的编码，返回undefined
-  return undefined
+  return {}
 }
 
 export function writeMessageData(frame: Frame, data: Buffer, db: LDF) {

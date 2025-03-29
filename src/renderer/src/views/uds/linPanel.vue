@@ -163,7 +163,7 @@ const updateSignalDisplayValues = (
     )
     if (usedEncode) {
       physicalValues.value[`${frameName}-${signal.name}`] =
-        strVal !== undefined ? strVal : numVal !== undefined ? numVal.toString() : ''
+        numVal !== undefined ? numVal.toString() : ''
     }
   }
 }
@@ -336,16 +336,16 @@ const handlePhysicalValueChange = (value: string, frameName: string, signal: Sig
   if (!signal.encodingType) return
   const encodeInfo = db.value.signalEncodeTypes[signal.encodingType]
   const val = getRawValue(Number(value), encodeInfo.encodingTypes, db.value)
-  if (val === undefined) {
+  if (val.value === undefined) {
     updateSignalDisplayValues(frameName, signal, true)
     return
   }
 
   if (!db.value) return
 
-  rawValues.value[`${frameName}-${signal.name}`] = val.toString()
+  rawValues.value[`${frameName}-${signal.name}`] = val.value.toString()
   // 更新数据库
-  updateSignalValue(frameName, signal.name, val)
+  updateSignalValue(frameName, signal.name, val.value)
 }
 
 const handleRawValueChange = (value: string, frameName: string, signal: SignalRow) => {
@@ -377,7 +377,7 @@ const handleRawValueChange = (value: string, frameName: string, signal: SignalRo
         //
 
         physicalValues.value[`${frameName}-${signal.name}`] =
-          strVal !== undefined ? strVal : numVal !== undefined ? numVal.toString() : ''
+          numVal !== undefined ? numVal.toString() : ''
       } else {
         updateSignalDisplayValues(frameName, signal, true)
       }

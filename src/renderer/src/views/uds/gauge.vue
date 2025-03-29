@@ -312,12 +312,7 @@ watch(
       enabledCharts.value.forEach((c) => {
         chartInstances[c.id].setOption({
           series: {
-            data: [
-              {
-                value: 0,
-                name: c.name || ''
-              }
-            ]
+            data: []
           }
         })
       })
@@ -427,9 +422,21 @@ const getChartOption = (chart: GraphNode<GraphBindSignalValue>): ECBasicOption =
       progress: {
         show: true
       },
+      animation: true,
+
+      animationDuration: 500, // 初始动画时长
+      animationDurationUpdate: 200, // 数据更新动画时长
       axisLabel: {
         show: true,
-
+        formatter: (value: number) => {
+          if (Number.isInteger(value)) {
+            return value.toFixed(0) + (chart.yAxis?.unit ?? '')
+          }
+          const val = value.toFixed(2)
+          //remove 0 in tail
+          const r = val.replace(/\.?0+$/, '')
+          return r + (chart.yAxis?.unit ?? '')
+        },
         fontSize: 10
       },
       axisLine: {
@@ -453,17 +460,18 @@ const getChartOption = (chart: GraphNode<GraphBindSignalValue>): ECBasicOption =
       },
       detail: {
         valueAnimation: false,
-
-        offsetCenter: [0, '50%'],
-        fontSize: 18,
+        formatter: (value: number) => {
+          if (Number.isInteger(value)) {
+            return value.toFixed(0) + (chart.yAxis?.unit ?? '')
+          }
+          const r = value.toFixed(2)
+          return r.replace(/\.?0+$/, '') + (chart.yAxis?.unit ?? '')
+        },
+        offsetCenter: [0, '30%'],
+        fontSize: 16,
         color: chart.color
       },
-      data: [
-        {
-          value: 1,
-          name: chart.name
-        }
-      ]
+      data: []
     }
   }
 

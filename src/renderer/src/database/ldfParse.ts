@@ -1690,6 +1690,7 @@ function formatLexerError(
   const lines = text.split('\n')
   const originalLines = originalText.split('\n')
   const lineNumber = error.line - 1
+  console.log(lineNumber, lineMapping)
   const originalLineNumber = lineMapping[lineNumber]
 
   // Get context from original text
@@ -1758,11 +1759,12 @@ Expected one of: ${(error.expectedTokens || []).join(', ')}`
 
 export default function parseInput(text: string) {
   const originalText = text
-  text = text.replace(/\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/gm, '$1').replace(/^\s*\n/gm, '')
+
   const lineMapping = createLineMapping(originalText, text)
 
   const lexingResult = LdfLexer.tokenize(text)
   if (lexingResult.errors.length > 0) {
+    console.log(lexingResult.errors)
     const formattedErrors = lexingResult.errors.map((err) =>
       formatLexerError(err, text, originalText, lineMapping)
     )
