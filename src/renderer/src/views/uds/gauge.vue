@@ -423,13 +423,22 @@ const getChartOption = (chart: GraphNode<GraphBindSignalValue>): ECBasicOption =
   const option: ECBasicOption = {
     series: {
       type: 'gauge',
-      radius: '90%', // this
+      radius: '85%', // this
       progress: {
         show: true
       },
       axisLabel: {
-        show: false
+        show: true,
+
+        fontSize: 10
       },
+      axisLine: {
+        lineStyle: {
+          width: 5
+        }
+      },
+
+      splitNumber: 10,
 
       title: {
         offsetCenter: [0, '90%'],
