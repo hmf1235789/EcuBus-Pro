@@ -19,6 +19,8 @@ import panelIcon from '@iconify/icons-material-symbols/pan-tool'
 import log from 'electron-log'
 import graphIcon from '@iconify/icons-ep/histogram'
 import testIcon from '@iconify/icons-grommet-icons/test'
+import lineIcon from '@iconify/icons-mdi/chart-line'
+import gaugeIcon from '@iconify/icons-mdi/gauge'
 
 type WinsType = ProjectState['project']['wins']
 type WinValueType = WinsType[keyof WinsType]
@@ -55,11 +57,23 @@ const layoutMap: Record<string, LayoutItem> = {
     y: 0,
     w: 600,
     h: 400,
-    label: 'Graph',
+    label: 'Line',
     key: 'graph',
     component: defineAsyncComponent(() => import('./graph.vue')),
-    icon: graphIcon
+    icon: lineIcon
   },
+  gauge: {
+    i: 'Gauge',
+    x: 0,
+    y: 0,
+    w: 600,
+    h: 400,
+    label: 'Gauge',
+    key: 'gauge',
+    component: defineAsyncComponent(() => import('./gauge.vue')),
+    icon: gaugeIcon
+  },
+
   network: {
     i: 'Network',
     x: 0,

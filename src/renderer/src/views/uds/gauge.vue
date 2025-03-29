@@ -94,33 +94,23 @@
           </el-scrollbar>
         </div>
         <div v-show="!hideTree" :id="`graphShift-${props.editIndex}`" class="shift" />
-        <div class="right" :style="{ left: hideTree ? '0px' : leftWidth + 5 + 'px' }">
-          <div
-            class="canvas-container"
-            :style="{ width: canvasWidth + 'px', height: height + 'px' }"
-          >
-            <div
-              v-if="isZoomY"
-              style="position: absolute; top: 5px; right: 3px; color: var(--el-color-primary)"
-            >
-              <Icon :icon="zoomInIcon" />
-            </div>
-            <div
-              v-if="isDragging"
-              style="position: absolute; top: 5px; right: 3px; color: var(--el-color-primary)"
-            >
-              <Icon :icon="dragVerticalIcon" />
-            </div>
-            <div
-              v-for="(chart, index) in enabledCharts"
-              :key="chart.id"
-              :style="{
-                height: `${(height - (enabledCharts.length - 1) * 5) / enabledCharts.length}px`,
-                marginTop: index === 0 ? '0' : '5px'
-              }"
-              class="chart-container"
-            >
-              <div :id="`chart-${props.editIndex}-${chart.id}`" style="width: 100%; height: 100%" />
+        <div
+          class="right"
+          :style="{ left: hideTree ? '0px' : leftWidth + 5 + 'px', width: canvasWidth + 'px' }"
+        >
+          <div class="canvas-container" :style="{ height: height + 'px' }">
+            <div class="charts-grid">
+              <div
+                v-for="(chart, index) in enabledCharts"
+                :key="chart.id"
+                class="chart-container"
+                :style="getChartContainerStyle(index)"
+              >
+                <div
+                  :id="`chart-${props.editIndex}-${chart.id}`"
+                  style="width: 100%; height: 100%"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -146,7 +136,7 @@
       :append-to="appendId"
     >
       <edit-signal
-        stype="line"
+        stype="gauge"
         :height="tableHeight"
         :node="editingNode"
         @save="handleEditSave"
@@ -171,16 +161,29 @@ import { Icon } from '@iconify/vue'
 import { useDataStore } from '@r/stores/data'
 import { GraphBindSignalValue, GraphNode } from 'src/preload/data'
 import { use } from 'echarts/core'
-import { LineChart } from 'echarts/charts'
-import { GridComponent, DataZoomComponent } from 'echarts/components'
+import { LineChart, GaugeChart } from 'echarts/charts'
+import {
+  GridComponent,
+  DataZoomComponent,
+  TitleComponent,
+  TooltipComponent
+} from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import type { ECBasicOption } from 'echarts/types/dist/shared'
 import { ElNotification, formatter } from 'element-plus'
 import signal from './components/signal.vue'
 import editSignal from './components/editSignal.vue'
-import { LineSeriesOption } from 'echarts'
+import { GaugeSeriesOption } from 'echarts'
 
-use([LineChart, GridComponent, DataZoomComponent, CanvasRenderer])
+use([
+  LineChart,
+  GaugeChart,
+  GridComponent,
+  DataZoomComponent,
+  TitleComponent,
+  TooltipComponent,
+  CanvasRenderer
+])
 
 const isPaused = ref(false)
 const hideTree = ref(false)
@@ -191,12 +194,12 @@ const props = defineProps<{
   editIndex?: string
 }>()
 const popoverRefs = ref<Record<string, any>>({})
-const graphs = useDataStore().graphs
+const graphs = useDataStore().guages
 const appendId = computed(() => (props.editIndex ? `#win${props.editIndex}` : '#wingraph'))
 const height = computed(() => props.height - 22)
 const tableHeight = computed(() => (height.value * 2) / 3)
 // 修改测试数据
-const filteredTreeData = ref<GraphNode<GraphBindSignalValue, LineSeriesOption>[]>([])
+const filteredTreeData = ref<GraphNode<GraphBindSignalValue, GaugeSeriesOption>[]>([])
 const treeRef = ref()
 const time = ref(0)
 
@@ -214,7 +217,7 @@ function treeHide() {
 }
 
 function handleCheckChange(
-  data: GraphNode<GraphBindSignalValue, LineSeriesOption>,
+  data: GraphNode<GraphBindSignalValue, GaugeSeriesOption>,
   checked: boolean
 ) {
   graphs[data.id].enable = checked
@@ -235,13 +238,13 @@ const canvasWidth = computed(() => {
   return hideTree.value ? props.width : props.width - leftWidth.value - 5
 })
 
-const handleEdit = (data: GraphNode<GraphBindSignalValue, LineSeriesOption>, event: Event) => {
+const handleEdit = (data: GraphNode<GraphBindSignalValue, GaugeSeriesOption>, event: Event) => {
   popoverRefs.value[data.id]?.hide()
   editingNode.value = { ...data }
   editDialogVisible.value = true
 }
 
-const handleEditSave = (updatedNode: GraphNode<GraphBindSignalValue, LineSeriesOption>) => {
+const handleEditSave = (updatedNode: GraphNode<GraphBindSignalValue>) => {
   const index = filteredTreeData.value.findIndex((v) => v.id === updatedNode.id)
   if (index !== -1) {
     filteredTreeData.value[index] = updatedNode
@@ -249,34 +252,21 @@ const handleEditSave = (updatedNode: GraphNode<GraphBindSignalValue, LineSeriesO
 
     // 更新图表配置
     chartInstances[updatedNode.id].setOption({
-      yAxis: {
-        ...updatedNode.yAxis,
-        // 更新轴标签颜色
-        nameTextStyle: {
-          color: updatedNode.color
-        }
-      },
-      xAxis: updatedNode.xAxis,
       series: {
         ...updatedNode.series,
         // 更新线条颜色
-        lineStyle: {
+        pointer: {
+          itemStyle: {
+            color: updatedNode.color
+          }
+        },
+        detail: {
           color: updatedNode.color
         },
-        itemStyle: {
-          color: updatedNode.color
-        }
+        min: updatedNode.yAxis?.min,
+        max: updatedNode.yAxis?.max
       }
     })
-
-    // 如果有缓存的数据，使用新的颜色重绘
-    if (chartDataCache[updatedNode.id]?.length > 0) {
-      chartInstances[updatedNode.id].setOption({
-        series: {
-          data: chartDataCache[updatedNode.id]
-        }
-      })
-    }
   }
 
   editDialogVisible.value = false
@@ -287,80 +277,74 @@ const handleEditCancel = () => {
   editDialogVisible.value = false
   editingNode.value = null
 }
+
+let timer: ReturnType<typeof setInterval> | null = null
+
+// 更新时间显示的函数
 const updateTime = () => {
-  if (isPaused.value) {
-    return
-  }
-  // 更新x轴范围
+  if (isPaused.value) return
+
+  // 更新x轴范围和时间
   let maxX = 5
   let minX = 0
-  Object.values(chartDataCache).forEach((v) => {
-    const lastOne = v[v.length - 1]
-    if (lastOne) {
-      const val = lastOne[0] as number
-      if (val > maxX) {
-        maxX = val
-      }
-    }
-    // 获取每个图表数据的最小x值
-    const firstOne = v[0]
-    if (firstOne) {
-      const val = firstOne[0] as number
-      if (val < minX || minX === 0) {
-        minX = val
-      }
-    }
-  })
+
+  // 使用当前时间更新time值
   const ts = (Date.now() - window.startTime) / 1000
+
   if (ts > maxX) {
     maxX = ts
   }
 
+  // 设置time值，与graph.vue保持一致
   time.value = maxX
+
+  // 计算x轴范围
   maxX = Math.ceil(maxX) + 5
   minX = Math.floor(minX)
-
-  enabledCharts.value.forEach((c) => {
-    chartInstances[c.id].setOption({
-      xAxis: {
-        min: minX,
-        max: maxX
-      }
-    })
-  })
 }
+
+// 确保定时器时间间隔与graph.vue保持一致
 watch(
   () => window.globalStart.value,
   (val) => {
     if (val) {
-      //clear cache
-      Object.keys(chartDataCache).forEach((key) => {
-        chartDataCache[key] = []
-      })
       //clear all charts data and set start to 0
       enabledCharts.value.forEach((c) => {
         chartInstances[c.id].setOption({
           series: {
-            data: []
-          },
-          xAxis: {
-            min: 0,
-            max: 10
+            data: [
+              {
+                value: 0,
+                name: c.name || ''
+              }
+            ]
           }
         })
       })
-      if (timer) {
-        clearInterval(timer)
-      }
+
+      // 启动定时器更新时间，使用500ms间隔
+      if (timer) clearInterval(timer)
       timer = setInterval(updateTime, 500)
-    } else {
+    } else if (timer) {
       clearInterval(timer)
+      timer = null
     }
   }
 )
 
-// 添加数据缓存
-const chartDataCache: Record<string, (number | string)[][]> = {}
+// 监听暂停/恢复状态
+watch(
+  () => isPaused.value,
+  (paused) => {
+    if (paused && timer) {
+      clearInterval(timer)
+      timer = null
+    } else if (!paused && window.globalStart.value) {
+      if (timer) clearInterval(timer)
+      timer = setInterval(updateTime, 500)
+    }
+  }
+)
 
 function dataUpdate(key: string, datas: (number | string)[][]) {
   if (isPaused.value) {
@@ -371,47 +355,41 @@ function dataUpdate(key: string, datas: (number | string)[][]) {
   const chart = chartInstances[key]
   if (!chart) return
 
-  // 初始化或获取缓存数据
-  if (!chartDataCache[key]) {
-    chartDataCache[key] = []
-  }
+  // 仅获取最后一条数据
+  if (datas && datas.length > 0) {
+    const latestData = datas[datas.length - 1]
 
-  // 添加新数据
-  chartDataCache[key] = chartDataCache[key].concat(datas)
-
-  // 如果数据超过1000个点，移除最早的数据
-  if (chartDataCache[key].length > 1000) {
-    chartDataCache[key].splice(0, chartDataCache[key].length - 1000)
-  }
-
-  // 更新图表
-  chart.setOption({
-    series: {
-      data: chartDataCache[key]
+    // 更新时间
+    if (latestData && typeof latestData[0] === 'number') {
+      const dataTime = latestData[0] as number
+      // 与graph.vue保持一致的时间更新逻辑
+      if (dataTime > time.value) {
+        time.value = dataTime
+      }
     }
-  })
+
+    // 更新仪表盘数据 - 只需要最新值
+    chart.setOption({
+      series: [
+        {
+          data: [
+            {
+              value: latestData ? latestData[1] : 0,
+              name: enabledCharts.value.find((c) => c.id === key)?.name || ''
+            }
+          ]
+        }
+      ]
+    })
+  }
 }
 
 const enabledCharts = computed(() => {
   return Object.values(filteredTreeData.value).filter((node) => node.enable)
 })
 
-// 修改模拟数据生成函数，返回二维数组格式
-const generateMockData = (count: number) => {
-  return Array.from({ length: count }, (_, i) => [
-    i * 0.1, // 时间
-    Math.sin(i * 0.1) * 5 // 值
-  ])
-}
-
 // 添加图表实例管理
 const chartInstances: Record<string, echarts.ECharts> = {}
-
-// 替换拖拽相关的状态和处理函数
-const isDragging = ref(false)
-const isZoomY = ref(false)
-const inYArea = ref(false)
-let timer
 
 // 修改初始化图表实例函数
 const initChart = (chartId: string) => {
@@ -421,180 +399,13 @@ const initChart = (chartId: string) => {
     const chart = echarts.init(dom)
     chartInstances[chartId] = chart
 
-    // 使用 echarts 事件
-    chart.on('mousedown', (params) => {
-      if (params.componentType == 'yAxis' || params.componentType == 'series') {
-        if (params.event?.event.ctrlKey) {
-          isDragging.value = false
-        } else {
-          isDragging.value = true
-        }
-      }
-    })
-    chart.on('dataZoom', (event: any) => {
-      let dz = { start: event.start, end: event.end }
-      if (event.batch) dz = { start: event.batch[0].start, end: event.batch[0].end }
-      //update all charts except the current one
-      enabledCharts.value.forEach((c) => {
-        if (c.id !== chartId) {
-          chartInstances[c.id].setOption({
-            dataZoom: [
-              {
-                start: dz.start,
-                end: dz.end
-              }
-            ]
-          })
-        }
-      })
-    })
-    chart.on('mouseover', (params) => {
-      if (params.componentType == 'yAxis' || params.componentType == 'series') {
-        inYArea.value = true
+    // 仪表盘配置
+    const node = filteredTreeData.value.find((n) => n.id === chartId)
+    if (!node) return
 
-        if (params.event?.event.ctrlKey && !graphs[chartId].disZoom) {
-          isZoomY.value = true
-        }
-      }
-    })
-
-    // Add mouseout handler to reset cursor
-    chart.on('mouseout', (params) => {
-      inYArea.value = false
-      isZoomY.value = false
-    })
-
-    // Add keyup handler to reset cursor when ctrl is released
-    document.addEventListener('keyup', (event) => {
-      isZoomY.value = false
-    })
-
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Control' && inYArea.value && !graphs[chartId].disZoom) {
-        isZoomY.value = true
-      }
-      isDragging.value = false
-    })
-
-    dom.addEventListener('mouseup', (event) => {
-      isDragging.value = false
-      isZoomY.value = false
-      inYArea.value = false
-    })
-    dom.addEventListener('mousemove', (event) => {
-      if (event.ctrlKey) {
-        isDragging.value = false
-      }
-      if (isDragging.value) {
-        const range = chartInstances[chartId].getOption().yAxis as ECBasicOption['yAxis'] as any
-        const { min, max } = range[0]
-        const offset = max - min
-        let deltaY = event.movementY
-        if (deltaY > 0) {
-          deltaY += offset * 0.2
-        } else {
-          deltaY -= offset * 0.2
-        }
-        const newRange = {
-          min: min + deltaY * 0.05,
-          max: max + deltaY * 0.05
-        }
-
-        chartInstances[chartId].setOption({
-          yAxis: {
-            min: newRange.min,
-            max: newRange.max
-          }
-        })
-
-        // 更新graph的yAxis信息
-        const node = filteredTreeData.value.find((n) => n.id === chartId)
-        if (node) {
-          node.yAxis = {
-            ...node.yAxis,
-            min: newRange.min,
-            max: newRange.max
-          }
-          graphs[chartId].yAxis = node.yAxis
-        }
-      }
-    })
-
-    // Add wheel event handler for zooming
-    dom.addEventListener(
-      'wheel',
-      (event: WheelEvent) => {
-        if (event.ctrlKey && isZoomY.value) {
-          if (graphs[chartId].disZoom) {
-            isZoomY.value = false
-            return
-          }
-          const yAxis = (chart.getOption() as any).yAxis[0]
-          const range = yAxis.max - yAxis.min
-          const offset = range * 0.2
-
-          let newMin: number, newMax: number
-          if (event.deltaY < 0) {
-            //zoom in
-            newMin = yAxis.min + offset
-            newMax = yAxis.max - offset
-          } else {
-            //zoom out
-            newMin = yAxis.min - offset
-            newMax = yAxis.max + offset
-          }
-
-          chart.setOption({
-            yAxis: {
-              min: newMin,
-              max: newMax
-            }
-          })
-
-          // 更新graph的yAxis信息
-          const node = filteredTreeData.value.find((n) => n.id === chartId)
-          if (node) {
-            node.yAxis = {
-              ...node.yAxis,
-              min: newMin,
-              max: newMax
-            }
-            graphs[chartId].yAxis = node.yAxis
-          }
-        }
-      },
-      { passive: false }
-    )
-
-    //dom outside
-    dom.addEventListener('mouseleave', (event) => {
-      isDragging.value = false
-    })
-
-    chart.on('mouseout', (params) => {
-      //prevent mouseup event
-      params.event?.event.preventDefault()
-    })
-
-    updateChartOption(chartId)
-    if (graphs[chartId]) {
-      chart.setOption({
-        yAxis: graphs[chartId].yAxis,
-        xAxis: graphs[chartId].xAxis,
-        series: graphs[chartId].series
-      })
-    }
-  }
-}
-
-// 更新图表配置
-const updateChartOption = (chartId: string) => {
-  const chart = enabledCharts.value.find((c) => c.id === chartId)
-  const index = enabledCharts.value.findIndex((c) => c.id === chartId)
-
-  if (chart && chartInstances[chartId]) {
-    const option = getChartOption(chart, index)
-    chartInstances[chartId].setOption(option)
+    // 获取设置项
+    const option = getChartOption(node)
+    chart.setOption(option)
   }
 }
 
@@ -607,132 +418,46 @@ watch([() => canvasWidth.value, () => height.value, enabledCharts], () => {
   })
 })
 
-const getChartOption = (
-  chart: GraphNode<GraphBindSignalValue, LineSeriesOption>,
-  index: number
-): ECBasicOption => {
-  const isLast = index === enabledCharts.value.length - 1
-  const isFirst = index === 0
+const getChartOption = (chart: GraphNode<GraphBindSignalValue>): ECBasicOption => {
+  // 仪表盘配置
   const option: ECBasicOption = {
-    animation: false,
-    dataZoom: [
-      {
-        show: isLast,
-        type: 'slider',
-        height: 20,
-        bottom: 10,
-        showDetail: true,
-        showDataShadow: false
-      }
-    ],
-    grid: {
-      left: '80px', // 增加左边距，为标题留出空间
-      right: '20px',
-      top: isFirst ? '20px' : '10px',
-      bottom: isLast ? '45px' : '4px',
-      containLabel: false
-    },
-    xAxis: {
-      type: 'value',
-      min: 0,
-      max: 10,
-      name: isLast ? '[s]' : '',
-      nameLocation: 'end',
-      nameGap: 0,
-      nameTextStyle: {
-        fontSize: 12,
-        padding: [0, 0, 0, 5] // 调整 [s] 的位置，上右下左
-      },
-
-      axisLabel: {
-        show: isLast
-        // interval:1,
-        // formatter: (value: number) => Number.isInteger(value) ? value.toFixed(0) : ''
-      },
-      axisTick: {
-        show: isLast,
-        interval: 10
-      },
-      splitLine: {
-        show: false
-      },
-      axisLine: {
-        show: true,
-        onZero: false,
-        lineStyle: {
-          color: '#333'
-        }
-      },
-      triggerEvent: false,
-      position: 'bottom'
-    },
-    yAxis: {
-      triggerEvent: true,
-      splitLine: {
-        show: false
-      },
-      axisLine: {
+    series: {
+      type: 'gauge',
+      radius: '90%', // this
+      progress: {
         show: true
       },
-      axisTick: {
-        show: true,
-        length: 4
-      },
-
-      min: 0,
-      max: 20,
       axisLabel: {
-        fontSize: 10,
-        show: true,
-        formatter: (value: number) => {
-          let val = Number.isInteger(value) ? value.toFixed(0) : ''
-          //如果val太大，显示科学计数法
-          if (val.length > 6) {
-            val = value.toExponential()
-          }
-          if (val.length > 6) {
-            return ''
-          }
-          return val
-        }
+        show: false
       },
-      name: chart.name,
-      nameLocation: 'middle',
-      nameGap: 65, // 调整标题距离轴的距离
-      nameRotate: 90, // 垂直旋转文字
-      nameTextStyle: {
-        fontSize: 11,
-        padding: [0, 0, 0, 5], // 微调文字位置
-        align: 'center',
-        color: chart.color
-      }
-    },
-    series: [
-      {
-        name: chart.name,
-        type: 'line',
-        triggerLineEvent: true,
-        showSymbol: false,
 
+      title: {
+        offsetCenter: [0, '90%'],
+        fontSize: 12
+      },
+      min: chart.yAxis?.min,
+      max: chart.yAxis?.max,
+      pointer: {
         itemStyle: {
           color: chart.color
-        },
-        lineStyle: {
-          color: chart.color,
-          width: 2
-        },
-        cursor: 'ns-resize', // 添加鼠标样式
-        emphasis: {
-          // 添加鼠标悬停效果
-          focus: 'series',
-          lineStyle: {
-            width: 3
-          }
-        },
-        silent: false // Enable mouse events on the line
-      }
-    ]
+        }
+      },
+      detail: {
+        valueAnimation: false,
+
+        offsetCenter: [0, '50%'],
+        fontSize: 18,
+        color: chart.color
+      },
+      data: [
+        {
+          value: 1,
+          name: chart.name
+        }
+      ]
+    }
   }
+
   return option
 }
 
@@ -761,10 +486,13 @@ onMounted(() => {
       }
       window.logBus.on(chart.id, dataUpdate)
     })
+
+    // 如果全局启动标志为true，则启动定时器
+    if (window.globalStart.value && !isPaused.value) {
+      if (timer) clearInterval(timer)
+      timer = setInterval(updateTime, 500)
+    }
   })
-  if (window.globalStart.value) {
-    timer = setInterval(updateTime, 500)
-  }
 })
 
 // 监听启用图表的变化
@@ -785,45 +513,22 @@ watch(
           delete chartInstances[id]
         }
       })
-      //update grid and dataZoom for all charts
-      enabledCharts.value.forEach((c, index) => {
-        const isLast = index === enabledCharts.value.length - 1
-        const isFirst = index === 0
-        chartInstances[c.id].setOption({
-          grid: {
-            top: isFirst ? '20px' : '10px',
-            bottom: isLast ? '45px' : '4px'
-          },
-          dataZoom: [
-            {
-              show: isLast,
-              type: 'slider',
-              height: 12,
-              bottom: 10,
-              showDetail: true,
-              showDataShadow: false
-            }
-          ]
-        })
-      })
     })
   }
 )
 
 onUnmounted(() => {
-  clearInterval(timer)
+  // 清除定时器
+  if (timer) {
+    clearInterval(timer)
+    timer = null
+  }
+
   // 清理所有图表实例
   Object.values(chartInstances).forEach((instance) => {
-    instance.off('mousedown')
-    instance.off('mousemove')
-    instance.off('globalout')
-    instance.off('mouseup')
     instance.dispose()
   })
-  // 清理数据缓存
-  Object.keys(chartDataCache).forEach((key) => {
-    delete chartDataCache[key]
-  })
+
   //detach
   filteredTreeData.value.forEach((key) => {
     window.logBus.detach(key.id, dataUpdate)
@@ -875,12 +580,49 @@ const handleDelete = (data: GraphNode<GraphBindSignalValue>, event: Event) => {
     chartInstances[data.id].dispose()
     delete chartInstances[data.id]
   }
-  // 删除数据缓存
-  delete chartDataCache[data.id]
 
   filteredTreeData.value.splice(index, 1)
   delete graphs[data.id]
   window.logBus.detach(data.id, dataUpdate)
+}
+
+const getChartContainerStyle = (index: number) => {
+  const count = enabledCharts.value.length
+
+  // 计算每个表盘的位置
+  // 基于图表数量计算行列
+  let cols = 1,
+    rows = 1
+
+  // 根据图表数量优化布局计算
+  if (count <= 1) {
+    cols = rows = 1
+  } else if (count <= 2) {
+    cols = 2
+    rows = 1
+  } else if (count <= 4) {
+    cols = rows = 2
+  } else {
+    // 对于更多图表,使用最接近正方形的布局
+    cols = Math.ceil(Math.sqrt(count))
+    rows = Math.ceil(count / cols)
+  }
+
+  // 计算每个表盘的宽高和位置
+  const containerWidth = canvasWidth.value
+  const containerHeight = height.value
+
+  const itemWidth = containerWidth / cols
+  const itemHeight = containerHeight / rows
+
+  const row = Math.floor(index / cols)
+  const col = index % cols
+
+  const top = row * itemHeight
+  const left = col * itemWidth
+
+  // 使用字符串直接设置样式，避免类型问题
+  return `position: absolute; width: ${itemWidth}px; height: ${itemHeight}px; top: ${top}px; left: ${left}px; padding: 5px; box-sizing: border-box;`
 }
 </script>
 <style scoped>
@@ -931,7 +673,6 @@ const handleDelete = (data: GraphNode<GraphBindSignalValue>, event: Event) => {
 
 .right {
   position: absolute;
-  right: 0;
   height: v-bind(height + 'px');
   z-index: 1;
   overflow: hidden;
@@ -940,6 +681,7 @@ const handleDelete = (data: GraphNode<GraphBindSignalValue>, event: Event) => {
 
 .canvas-container {
   position: relative;
+  width: 100%;
   background-color: var(--el-bg-color);
 }
 
@@ -1024,9 +766,17 @@ const handleDelete = (data: GraphNode<GraphBindSignalValue>, event: Event) => {
   display: block;
 }
 
-:deep(.chart-container .echarts) {
-  width: 100% !important;
-  height: 100% !important;
+.charts-grid {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+}
+
+.chart-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
 
 .dialog-footer {

@@ -33,52 +33,62 @@
           <el-form-item label="Color">
             <el-color-picker v-model="form.color" show-alpha />
           </el-form-item>
-          <el-divider content-position="left">Y Axis</el-divider>
-          <el-form-item label="Y Axis Min">
-            <el-input-number v-model="form.yAxis.min" :controls="false" />
-          </el-form-item>
-          <el-form-item label="Y Axis Max">
-            <el-input-number v-model="form.yAxis.max" :controls="false" />
-          </el-form-item>
-          <el-form-item label="Split Line">
-            <el-switch v-model="form.yAxis.splitLine.show" />
-          </el-form-item>
-          <el-form-item label="Disable Zoom">
-            <el-switch v-model="form.disZoom" />
-          </el-form-item>
-          <el-divider content-position="left">X Axis</el-divider>
-          <el-form-item label="Show Grid">
-            <el-switch v-model="form.xAxis.splitLine.show" />
-          </el-form-item>
-          <el-form-item label="Grid Style">
-            <el-select
-              v-model="form.xAxis.splitLine.lineStyle.type"
-              :disabled="!form.xAxis.splitLine.show"
-            >
-              <el-option label="Solid" value="solid" />
-              <el-option label="Dashed" value="dashed" />
-              <el-option label="Dotted" value="dotted" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="Show Value">
-            <el-switch v-model="form.xAxis.axisPointer.show" />
-          </el-form-item>
+          <template v-if="props.stype == 'line'">
+            <el-divider content-position="left">Y Axis</el-divider>
+            <el-form-item label="Y Axis Min">
+              <el-input-number v-model="form.yAxis.min" :controls="false" />
+            </el-form-item>
+            <el-form-item label="Y Axis Max">
+              <el-input-number v-model="form.yAxis.max" :controls="false" />
+            </el-form-item>
+            <el-form-item label="Split Line">
+              <el-switch v-model="form.yAxis.splitLine.show" />
+            </el-form-item>
+            <el-form-item label="Disable Zoom">
+              <el-switch v-model="form.disZoom" />
+            </el-form-item>
+            <el-divider content-position="left">X Axis</el-divider>
+            <el-form-item label="Show Grid">
+              <el-switch v-model="form.xAxis.splitLine.show" />
+            </el-form-item>
+            <el-form-item label="Grid Style">
+              <el-select
+                v-model="form.xAxis.splitLine.lineStyle.type"
+                :disabled="!form.xAxis.splitLine.show"
+              >
+                <el-option label="Solid" value="solid" />
+                <el-option label="Dashed" value="dashed" />
+                <el-option label="Dotted" value="dotted" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="Show Value">
+              <el-switch v-model="form.xAxis.axisPointer.show" />
+            </el-form-item>
 
-          <el-divider content-position="left">Series</el-divider>
-          <el-form-item label="Show Points">
-            <el-switch v-model="form.series.showSymbol" />
-          </el-form-item>
-          <el-form-item v-if="form.series.showSymbol" label="Point Size">
-            <el-input-number v-model="form.series.symbolSize" :min="2" :max="10" :step="1" />
-          </el-form-item>
-          <el-form-item v-if="form.series.showSymbol" label="Point Style">
-            <el-select v-model="form.series.symbol">
-              <el-option label="Circle" value="circle" />
-              <el-option label="Rectangle" value="rect" />
-              <el-option label="Triangle" value="triangle" />
-              <el-option label="Diamond" value="diamond" />
-            </el-select>
-          </el-form-item>
+            <el-divider content-position="left">Series</el-divider>
+            <el-form-item label="Show Points">
+              <el-switch v-model="form.series.showSymbol" />
+            </el-form-item>
+            <el-form-item v-if="form.series.showSymbol" label="Point Size">
+              <el-input-number v-model="form.series.symbolSize" :min="2" :max="10" :step="1" />
+            </el-form-item>
+            <el-form-item v-if="form.series.showSymbol" label="Point Style">
+              <el-select v-model="form.series.symbol">
+                <el-option label="Circle" value="circle" />
+                <el-option label="Rectangle" value="rect" />
+                <el-option label="Triangle" value="triangle" />
+                <el-option label="Diamond" value="diamond" />
+              </el-select>
+            </el-form-item>
+          </template>
+          <template v-if="props.stype == 'gauge'">
+            <el-form-item label="Min">
+              <el-input-number v-model="form.yAxis.min" :controls="false" />
+            </el-form-item>
+            <el-form-item label="Max">
+              <el-input-number v-model="form.yAxis.max" :controls="false" />
+            </el-form-item>
+          </template>
 
           <el-form-item>
             <el-button type="primary" @click="handleSubmit">Save</el-button>
@@ -93,8 +103,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { GraphBindSignalValue, GraphNode } from 'src/preload/data'
+import { LineSeriesOption, GaugeSeriesOption } from 'echarts'
 
 const props = defineProps<{
+  stype: 'line' | 'gauge'
   node: GraphNode<GraphBindSignalValue>
   height: number
 }>()

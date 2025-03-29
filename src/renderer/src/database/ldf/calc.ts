@@ -13,10 +13,11 @@ export function getPhysicalValue(
         if (encodingType.physicalValue) {
           const { minValue, maxValue, scale, offset } = encodingType.physicalValue
           if (rawValue >= minValue && rawValue <= maxValue) {
+            const physValue = Number((scale * rawValue + offset).toFixed(3))
             const tt = encodingType.physicalValue.textInfo
-              ? `${scale * rawValue + offset}${encodingType.physicalValue.textInfo}`
+              ? `${physValue}${encodingType.physicalValue.textInfo}`
               : undefined
-            return { numVal: scale * rawValue + offset, strVal: tt, usedEncode: encodingType }
+            return { numVal: physValue, strVal: tt, usedEncode: encodingType }
           }
         }
         break

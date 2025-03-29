@@ -48,7 +48,26 @@
             <el-divider direction="vertical" style="height: 54px" />
             <div class="grid girdenable" @click="handleSelect(['graph'])">
               <Icon :icon="graphIcon" style="font-size: 24px" />
-              <span>Graph</span>
+              <el-dropdown @command="openGraph">
+                <span class="lr">
+                  Graph
+                  <el-icon class="el-icon--right">
+                    <arrow-down />
+                  </el-icon>
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu size="small">
+                    <el-dropdown-item command="graph">
+                      <Icon :icon="lineIcon" style="margin-right: 5px" />
+                      Line</el-dropdown-item
+                    >
+                    <el-dropdown-item command="gauge">
+                      <Icon :icon="gaugeIcon" style="margin-right: 5px" />
+                      Gauge</el-dropdown-item
+                    >
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </div>
             <el-divider direction="vertical" style="height: 54px" />
             <div class="grid girdenable" @click="handleSelect(['message'])">
@@ -568,6 +587,8 @@ import { useProjectStore } from '@r/stores/project'
 import ldfParse from '@r/database/ldfParse'
 import testConfig from '@iconify/icons-grommet-icons/test'
 import testConfigIcon from '@iconify/icons-grommet-icons/test-desktop'
+import lineIcon from '@iconify/icons-mdi/chart-line'
+import gaugeIcon from '@iconify/icons-mdi/gauge'
 
 const activeMenu = ref('')
 const pined = ref(true)
@@ -584,7 +605,21 @@ provide('udsView', udsView)
 function firstByteUpper(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
-
+function openGraph(command: string) {
+  if (command == 'graph') {
+    layoutMaster.addWin('graph', 'graph', {
+      params: {
+        'edit-index': 'graph'
+      }
+    })
+  } else if (command == 'gauge') {
+    layoutMaster.addWin('gauge', 'gauge', {
+      params: {
+        'edit-index': 'gauge'
+      }
+    })
+  }
+}
 function openService(testerIndex: string) {
   layoutMaster.addWin('testerService', `${testerIndex}_services`, {
     name: dataBase.tester[testerIndex].name,

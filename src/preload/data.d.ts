@@ -4,7 +4,7 @@ import type { TesterInfo } from 'src/main/share/tester'
 import type { LDF } from 'src/renderer/src/database/ldfParse'
 import type { DBC } from 'src/renderer/src/database/dbc/dbcVisitor'
 
-import type { YAXisOption, XAXisOption, LineSeriesOption } from 'echarts/types/dist/shared'
+import type { YAXisOption, XAXisOption, LineSeriesOption, GaugeSeriesOption } from 'echarts'
 
 export interface CanInter {
   type: 'can'
@@ -47,7 +47,7 @@ export type GraphBindFrameValue = {
   dbKey: string
 }
 
-export type GraphNode<T> = {
+export type GraphNode<T, S = any> = {
   enable: boolean
   id: string
   name: string
@@ -58,10 +58,12 @@ export type GraphNode<T> = {
   disZoom?: boolean
   yAxis?: YAXisOption
   xAxis?: XAXisOption
-  series?: SeriesOption
+
+  series?: S
   type: 'signal' | 'variable' | 'frame'
   bindValue: T
 }
+
 export type TestConfig = {
   id: string
   name: string
@@ -79,6 +81,7 @@ export interface DataSet {
     lin: Record<string, LDF>
     can: Record<string, DBC>
   }
-  graphs: Record<string, GraphNode>
+  graphs: Record<string, GraphNode<GraphBindSignalValue, LineSeriesOption>>
+  guages: Record<string, GraphNode<GraphBindSignalValue, GaugeSeriesOption>>
   tests: Record<string, TestConfig>
 }
