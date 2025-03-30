@@ -1568,7 +1568,9 @@ class LdfVistor extends visitor {
             type = 'logicalValue'
             args.logicalValue = {
               signalValue: Number((rrm.Interger[0] as IToken).image),
-              textInfo: rrm.CharString ? (rrm.CharString[0] as IToken).image : undefined
+              textInfo: rrm.CharString
+                ? (rrm.CharString[0] as IToken).image.replace(/"+/g, '')
+                : undefined
             }
           } else if (rs.physical_rangeClause) {
             type = 'physicalValue'

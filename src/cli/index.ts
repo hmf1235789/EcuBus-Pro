@@ -208,16 +208,6 @@ seq.action(async (project, testerName, options) => {
   }
 })
 
-const npm = program
-  .command('pnpm')
-  .description(
-    'run pnpm command, see "https://pnpm.io/" or ecb_cli pnpm --help for more information'
-  )
-npm.argument('<command>', 'pnpm command')
-// npm.option('-i, --install <package>', 'Prints the location of the globally installed executables.')
-// npm.action(async (command)=>{
-//     console.log('run npm command',command)
-
 const test = program.command('test').description('run test config')
 test.argument('<project>', 'EcuBus-Pro project path')
 test.argument('<name>', 'test config name')
@@ -236,6 +226,16 @@ test.action(async (project, name, options) => {
     exit(1)
   }
 })
+
+const npm = program
+  .command('pnpm')
+  .description(
+    'run pnpm command, see "https://pnpm.io/" or ecb_cli pnpm --help for more information'
+  )
+npm.argument('<command>', 'pnpm command')
+// npm.option('-i, --install <package>', 'Prints the location of the globally installed executables.')
+// npm.action(async (command)=>{
+//     console.log('run npm command',command)
 
 // })
 if (process.argv[1] == 'pnpm' || process.argv[2] == 'pnpm') {
@@ -265,7 +265,8 @@ if (process.argv[1] == 'pnpm' || process.argv[2] == 'pnpm') {
     console.log(`created package.json to ${path.join(process.cwd(), 'package.json')}`)
     exit(0)
   }
-
+  //修改process.argv
+  process.argv = process.argv.slice(index)
   const vmModule = { exports: {} }
   const context = vm.createContext({
     exports: vmModule.exports,
