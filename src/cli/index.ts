@@ -267,7 +267,7 @@ if (process.argv[1] == 'pnpm' || process.argv[2] == 'pnpm') {
   }
   //修改process.argv
   process.argv = ['ecubus-pro', 'pnpm', ...process.argv.slice(index + 1)]
-
+  const [major, minor] = process.version.slice(1).split('.')
   const vmModule = { exports: {} }
   const context = vm.createContext({
     exports: vmModule.exports,
@@ -276,9 +276,13 @@ if (process.argv[1] == 'pnpm' || process.argv[2] == 'pnpm') {
     require: require,
     global: global,
     Buffer: Buffer,
+    major: major,
+    minor: minor,
+    pnpm__startedAt: Date.now(),
     URLSearchParams: URLSearchParams,
     console: console,
-    __dirname: __dirname,
+    __dirname: path.dirname(pnpmScript),
+    __filename: __filename,
     URL: URL,
     setInterval: setInterval,
     clearInterval: clearInterval,
