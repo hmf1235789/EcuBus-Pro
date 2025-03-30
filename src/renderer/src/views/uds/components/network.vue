@@ -395,7 +395,7 @@ onMounted(() => {
   nextTick(() => {
     if (project.project.wins['network'].hide) {
       const q = watch(
-        () => project.project.wins['network'].hide,
+        () => project.project.wins['network']?.hide,
         (v) => {
           if (v) {
             //hide

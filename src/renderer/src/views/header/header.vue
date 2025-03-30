@@ -106,6 +106,17 @@ function backHomeHandler() {
 const title = ref('')
 const globalStart = toRef(window, 'globalStart')
 const dataBase = useDataStore()
+
+async function closeHandle() {
+  if (project.projectDirty) {
+    //save project
+    const r = await project.closeProject('close')
+    if (r == false) {
+      return
+    }
+  }
+  window.electron.ipcRenderer.send('close')
+}
 function winHandle(action: string) {
   if (action == 'min') {
     window.electron.ipcRenderer.send('minimize')
@@ -116,10 +127,10 @@ function winHandle(action: string) {
       //TODO:add force close
       ElLoading.service()
       window.electron.ipcRenderer.invoke('ipc-global-stop').finally(() => {
-        window.electron.ipcRenderer.send('close')
+        closeHandle()
       })
     } else {
-      window.electron.ipcRenderer.send('close')
+      closeHandle()
     }
   }
 }
