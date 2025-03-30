@@ -405,3 +405,48 @@ Remember to:
 - Test timeout handling
 
 
+## Add In UI
+
+1. edit vendor in  `src/main/share/can.ts`
+```typescript
+export type CanVendor = 'peak' | 'simulate' | 'zlg' | 'kvaser' | 'toomoss'| 'your_adapter_name'
+```
+
+2. add device in `src/main/docan/can.ts`
+you should edit these functions:
+  - `openCanDevice`
+  - `getCanVersion`
+  - `getCanDevices`
+  - `canClean`
+
+
+3. add device in `src/renderer/src/views/uds/components/hardware.vue`
+
+```typescript
+function buildTree() {
+  const t: tree[] = []
+  const zlg: tree = {
+    label: 'ZLG',
+    vendor: 'zlg',
+    append: false,
+    id: 'ZLG',
+    children: []
+  }
+  t.push(zlg)
+  addSubTree('zlg', zlg)
+  // add your device here
+  const your_device: tree = {
+    label: 'your_device_name',
+    vendor: 'your_adapter_name',
+    append: false,
+    id: 'your_device_id',
+    children: []
+  }
+  t.push(your_device)
+  addSubTree('your_adapter_name', your_device)
+}
+```
+
+4. then almost done, you can config your device in `Device` window
+
+

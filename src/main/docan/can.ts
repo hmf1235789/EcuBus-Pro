@@ -18,7 +18,6 @@ TOOMOSS_CAN.loadDllPath(libPath)
 export function openCanDevice(canDevice: CanBaseInfo) {
   let canBase: CanBase | undefined
 
-  // #v-ifdef IGNORE_NODE!='1'
   if (canDevice.vendor == 'peak') {
     canBase = new PEAK_TP(canDevice)
   } else if (canDevice.vendor == 'zlg') {
@@ -35,7 +34,6 @@ export function openCanDevice(canDevice: CanBaseInfo) {
 }
 
 export function getCanVersion(vendor: string) {
-  // #v-ifdef IGNORE_NODE!='1'
   vendor = vendor.toUpperCase()
   if (vendor === 'PEAK') {
     return PEAK_TP.getLibVersion()
@@ -47,9 +45,7 @@ export function getCanVersion(vendor: string) {
     return SIMULATE_CAN.getLibVersion()
   } else if (vendor === 'TOOMOSS') {
     return TOOMOSS_CAN.getLibVersion()
-  }
-  // #v-endif
-  else {
+  } else {
     return 'unknown'
   }
 }
