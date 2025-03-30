@@ -31,6 +31,7 @@
                     v-model="encodeForm.logicalValue.signalValue"
                     :min="0"
                     :max="65535"
+                    step-strictly
                     :step="1"
                     style="width: 130px"
                     controls-position="right"
@@ -49,6 +50,7 @@
                     :min="0"
                     :max="65535"
                     :step="1"
+                    step-strictly
                     style="width: 130px"
                     controls-position="right"
                   />
@@ -59,6 +61,7 @@
                     :min="0"
                     :max="65535"
                     :step="1"
+                    step-strictly
                     style="width: 130px"
                     controls-position="right"
                   />

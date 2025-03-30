@@ -426,9 +426,18 @@ const getChartOption = (chart: GraphNode<GraphBindSignalValue>): ECBasicOption =
 
       animationDuration: 500, // 初始动画时长
       animationDurationUpdate: 200, // 数据更新动画时长
+
       axisLabel: {
+        distance: 10,
         show: true,
         formatter: (value: number) => {
+          if (chart.yAxis?.enums) {
+            const enumItem = chart.yAxis?.enums.find((item) => item.value === value)
+            if (enumItem) {
+              return enumItem.label
+            }
+          }
+
           if (Number.isInteger(value)) {
             return value.toFixed(0) + (chart.yAxis?.unit ?? '')
           }
@@ -444,9 +453,6 @@ const getChartOption = (chart: GraphNode<GraphBindSignalValue>): ECBasicOption =
           width: 5
         }
       },
-
-      splitNumber: 10,
-
       title: {
         offsetCenter: [0, '90%'],
         fontSize: 12
@@ -458,9 +464,16 @@ const getChartOption = (chart: GraphNode<GraphBindSignalValue>): ECBasicOption =
           color: chart.color
         }
       },
+      splitNumber: chart.yAxis?.enums?.length + 1 || 10,
       detail: {
         valueAnimation: false,
         formatter: (value: number) => {
+          if (chart.yAxis?.enums) {
+            const enumItem = chart.yAxis?.enums.find((item) => item.value === value)
+            if (enumItem) {
+              return enumItem.label
+            }
+          }
           if (Number.isInteger(value)) {
             return value.toFixed(0) + (chart.yAxis?.unit ?? '')
           }

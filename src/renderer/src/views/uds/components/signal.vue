@@ -95,6 +95,10 @@ interface TreeItem {
   min?: number
   max?: number
   unit?: string
+  enums?: {
+    label: string
+    value: number
+  }[]
   dbInfo?: {
     name: string
     key: string
@@ -198,6 +202,7 @@ function getLinSignals() {
         let min: number | undefined = undefined
         let max: number | undefined = undefined
         let unit: string | undefined = undefined
+        let enums: { label: string; value: number }[] | undefined = undefined
         if (signalDef && signalDef.singleType != 'ByteArray') {
           const encodingType = Object.entries(ldf.signalRep).find(([_, signals]) =>
             signals.includes(signalId.name)
@@ -229,6 +234,14 @@ function getLinSignals() {
                       type.physicalValue!.offset
                   )
                 }
+              } else if (type.type === 'logicalValue') {
+                if (enums === undefined) {
+                  enums = []
+                }
+                enums.push({
+                  label: type.logicalValue?.textInfo || '',
+                  value: type.logicalValue!.signalValue
+                })
               }
             }
           }
@@ -241,6 +254,7 @@ function getLinSignals() {
           frameId: frame.id,
           startBit: signalId.offset,
           unit: unit,
+          enums: enums,
           bitLen: ldf.signals[signalId.name].signalSizeBits,
           txNode: ldf.signals[signalId.name].punishedBy,
           min: min,
@@ -288,6 +302,21 @@ function getCanSignals() {
 
       // add signals in the message
       for (const [signalName, signal] of Object.entries(message.signals)) {
+        let enums: { label: string; value: number }[] | undefined = undefined
+        if (signal.values) {
+          enums = signal.values.map((value) => ({
+            label: value.label,
+            value: value.value
+          }))
+        } else if (signal.valueTable) {
+          const tt = dbc.valueTables[signal.valueTable]
+          if (tt) {
+            enums = tt.values.map((value) => ({
+              label: value.label,
+              value: value.value
+            }))
+          }
+        }
         const signalItem: TreeItem = {
           id: `can.${dbc.name}.signals.${signalName}`,
           name: signalName,
@@ -297,6 +326,7 @@ function getCanSignals() {
           startBit: signal.startBit,
           bitLen: signal.length,
           txNode: signal.receivers?.join(','),
+          enums: enums,
           dbInfo: {
             name: dbc.name,
             key: key
@@ -379,7 +409,8 @@ function addSignal() {
       yAxis: {
         min: highlightedRow.value.min || 0,
         max: highlightedRow.value.max || getMaxByBitLength(highlightedRow.value.bitLen || 0),
-        unit: highlightedRow.value.unit
+        unit: highlightedRow.value.unit,
+        enums: highlightedRow.value.enums
       },
       bindValue: {
         signalName: highlightedRow.value.name,

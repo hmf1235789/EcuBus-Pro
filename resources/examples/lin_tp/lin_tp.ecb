@@ -190,6 +190,9 @@
             "encTemperature": [
               "Motor1Temp",
               "Motor2Temp"
+            ],
+            "test": [
+              "MotorDirection"
             ]
           },
           "global": {
@@ -738,6 +741,28 @@
                 }
               ],
               "_X_ROW_KEY": "row_96"
+            },
+            "test": {
+              "name": "test",
+              "encodingTypes": [
+                {
+                  "type": "logicalValue",
+                  "logicalValue": {
+                    "signalValue": 0,
+                    "textInfo": "open"
+                  },
+                  "_X_ROW_KEY": "row_331"
+                },
+                {
+                  "type": "logicalValue",
+                  "logicalValue": {
+                    "signalValue": 1,
+                    "textInfo": "close"
+                  },
+                  "_X_ROW_KEY": "row_332"
+                }
+              ],
+              "_X_ROW_KEY": "row_294"
             }
           },
           "name": "lin",
@@ -817,10 +842,20 @@
         "enable": true,
         "id": "lin.lin.signals.MotorDirection",
         "name": "MotorDirection",
-        "color": "#b2986f",
+        "color": "#82fa6d",
         "yAxis": {
           "min": 0,
-          "max": 3
+          "max": 3,
+          "enums": [
+            {
+              "label": "open",
+              "value": 0
+            },
+            {
+              "label": "close",
+              "value": 1
+            }
+          ]
         },
         "bindValue": {
           "signalName": "MotorDirection",
@@ -865,11 +900,11 @@
         "label": "Network",
         "id": "network",
         "options": {},
-        "hide": true
+        "hide": false
       },
       "25cec12a-572d-4221-b85e-2728628134f7_ia": {
         "pos": {
-          "x": 547,
+          "x": 546,
           "y": 101,
           "w": 931,
           "h": 400
@@ -944,8 +979,8 @@
       },
       "9505c05a-4fe5-42e1-a45d-b1cbc14854ba": {
         "pos": {
-          "x": 191,
-          "y": 53,
+          "x": 352,
+          "y": 18,
           "w": 765,
           "h": 400
         },
@@ -962,8 +997,8 @@
       },
       "trace": {
         "pos": {
-          "x": 775.5,
-          "y": 79,
+          "x": 898.5,
+          "y": 46,
           "w": 700,
           "h": 400
         },
@@ -971,6 +1006,40 @@
         "label": "Trace",
         "id": "trace",
         "options": {}
+      },
+      "655bf90d-b010-49b5-9cf8-a9787319b5b4": {
+        "pos": {
+          "x": 837.5,
+          "y": 48,
+          "w": 700,
+          "h": 400
+        },
+        "title": "ldf",
+        "label": "LDF",
+        "id": "655bf90d-b010-49b5-9cf8-a9787319b5b4",
+        "options": {
+          "params": {
+            "edit-index": "655bf90d-b010-49b5-9cf8-a9787319b5b4"
+          },
+          "name": "lin"
+        },
+        "hide": true
+      },
+      "gauge": {
+        "pos": {
+          "x": 22.5,
+          "y": 49,
+          "w": 924,
+          "h": 400
+        },
+        "title": "gauge",
+        "label": "Gauge",
+        "id": "gauge",
+        "options": {
+          "params": {
+            "edit-index": "gauge"
+          }
+        }
       }
     },
     "example": {
