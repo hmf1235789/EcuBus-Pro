@@ -38,6 +38,20 @@
                 style="width: 100px"
                 @change="handlePhysicalValueChange($event, parent.row.name, row)"
               />
+              <el-select
+                v-else-if="getLogicalValue(row.encodingType).length > 0"
+                v-model="rawValues[`${parent.row.name}-${row.name}`]"
+                size="small"
+                style="width: 100%"
+                @change="handleRawValueChange($event, parent.row.name, row)"
+              >
+                <el-option
+                  v-for="item in getLogicalValue(row.encodingType)"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
               <span v-else>-</span>
             </template>
             <template #raw="{ row }">
@@ -138,6 +152,27 @@ const hasPhysicalEncoding = (encodingType?: string) => {
   if (!encoding) return false
 
   return encoding.encodingTypes.some((type) => type.type === 'physicalValue')
+}
+
+const getLogicalValue = (encodingType?: string) => {
+  const list: {
+    label: string
+    value: string
+  }[] = []
+  if (!encodingType || !db.value) return list
+
+  const encoding = db.value.signalEncodeTypes[encodingType]
+  if (!encoding) return list
+
+  for (const type of encoding.encodingTypes) {
+    if (type.type === 'logicalValue') {
+      list.push({
+        label: type.logicalValue!.textInfo || `${type.logicalValue!.signalValue}`,
+        value: type.logicalValue!.signalValue.toString()
+      })
+    }
+  }
+  return list
 }
 
 // 修改工具函数
@@ -264,7 +299,7 @@ const childGridOptions = computed(() => {
       { field: 'bitLength', title: 'Bits', width: 100 },
       {
         field: 'physicalValue',
-        title: 'Physical Value',
+        title: 'Physical/Logical Value',
         minWidth: 200,
         slots: { default: 'physical' }
       },
@@ -372,14 +407,11 @@ const handleRawValueChange = (value: string, frameName: string, signal: SignalRo
         encodeInfo.encodingTypes,
         db.value
       )
-
       if (usedEncode) {
         //
 
         physicalValues.value[`${frameName}-${signal.name}`] =
           numVal !== undefined ? numVal.toString() : ''
-      } else {
-        updateSignalDisplayValues(frameName, signal, true)
       }
     }
     updateSignalValue(frameName, signal.name, numValue)

@@ -252,7 +252,9 @@ function saveDataBase() {
   valid()
     .then(() => {
       database.$patch(() => {
-        database.database.can[props.editIndex] = cloneDeep(dbcObj.value)
+        const db = cloneDeep(dbcObj.value)
+        db.id = props.editIndex
+        database.database.can[props.editIndex] = db
       })
       layout.changeWinName(props.editIndex, dbcObj.value.name)
       layout.setWinModified(props.editIndex, false)

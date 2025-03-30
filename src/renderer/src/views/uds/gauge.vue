@@ -312,7 +312,11 @@ watch(
       enabledCharts.value.forEach((c) => {
         chartInstances[c.id].setOption({
           series: {
-            data: []
+            data: [
+              {
+                name: c.name
+              }
+            ]
           }
         })
       })
@@ -414,13 +418,16 @@ watch([() => canvasWidth.value, () => height.value, enabledCharts], () => {
 })
 
 const getChartOption = (chart: GraphNode<GraphBindSignalValue>): ECBasicOption => {
+  // 检查是否存在枚举值
+  const hasEnums = !!chart.yAxis?.enums && chart.yAxis.enums.length > 0
+
   // 仪表盘配置
   const option: ECBasicOption = {
     series: {
       type: 'gauge',
-      radius: '85%', // this
+      radius: hasEnums ? '100%' : '85%', // 存在枚举时设置为0%，相当于隐藏仪表盘
       progress: {
-        show: true
+        show: !hasEnums
       },
       animation: true,
 
@@ -429,7 +436,7 @@ const getChartOption = (chart: GraphNode<GraphBindSignalValue>): ECBasicOption =
 
       axisLabel: {
         distance: 10,
-        show: true,
+        show: !hasEnums,
         formatter: (value: number) => {
           if (chart.yAxis?.enums) {
             const enumItem = chart.yAxis?.enums.find((item) => item.value === value)
@@ -449,9 +456,13 @@ const getChartOption = (chart: GraphNode<GraphBindSignalValue>): ECBasicOption =
         fontSize: 10
       },
       axisLine: {
+        show: !hasEnums, // 存在枚举时不显示轴线
         lineStyle: {
           width: 5
         }
+      },
+      axisTick: {
+        show: !hasEnums // 存在枚举时不显示刻度
       },
       title: {
         offsetCenter: [0, '90%'],
@@ -460,14 +471,21 @@ const getChartOption = (chart: GraphNode<GraphBindSignalValue>): ECBasicOption =
       min: chart.yAxis?.min,
       max: chart.yAxis?.max,
       pointer: {
+        show: !hasEnums, // 存在枚举时不显示指针
         itemStyle: {
           color: chart.color
         }
       },
-      splitNumber: chart.yAxis?.enums?.length + 1 || 10,
+      splitLine: {
+        show: !hasEnums // 存在枚举时不显示分隔线
+      },
+      splitNumber: 10,
       detail: {
         valueAnimation: false,
         formatter: (value: number) => {
+          if (Number.isNaN(value)) {
+            return 'N/A'
+          }
           if (chart.yAxis?.enums) {
             const enumItem = chart.yAxis?.enums.find((item) => item.value === value)
             if (enumItem) {
@@ -480,11 +498,21 @@ const getChartOption = (chart: GraphNode<GraphBindSignalValue>): ECBasicOption =
           const r = value.toFixed(2)
           return r.replace(/\.?0+$/, '') + (chart.yAxis?.unit ?? '')
         },
-        offsetCenter: [0, '30%'],
-        fontSize: 16,
-        color: chart.color
+        offsetCenter: [0, hasEnums ? '0%' : '35%'], // 存在枚举时将detail文本居中显示
+        fontSize: hasEnums ? 24 : 14, // 存在枚举时增大字体
+        color: chart.color,
+        backgroundColor: hasEnums ? 'rgba(0,0,0,0.05)' : 'transparent', // 枚举时添加背景
+        borderRadius: 10,
+        borderWidth: hasEnums ? 1 : 0,
+        padding: hasEnums ? [10, 10] : [0, 0], // 枚举时添加内边距
+        width: hasEnums ? '100%' : 'auto', // 枚举时设置宽度
+        height: hasEnums ? '60%' : 'auto' // 枚举时设置高度
       },
-      data: []
+      data: [
+        {
+          name: chart.name
+        }
+      ]
     }
   }
 

@@ -233,7 +233,9 @@ function saveDataBase() {
   valid()
     .then(() => {
       database.$patch(() => {
-        database.database.lin[props.editIndex] = cloneDeep(ldfObj.value)
+        const db = cloneDeep(ldfObj.value)
+        db.id = props.editIndex
+        database.database.lin[props.editIndex] = db
       })
       layout.changeWinName(props.editIndex, ldfObj.value.name)
       layout.setWinModified(props.editIndex, false)
