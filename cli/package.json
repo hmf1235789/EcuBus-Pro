@@ -9,7 +9,7 @@
       "./../resources/bin/**/*",
       "./../resources/buildInScript/**/*"
     ],
-      "outputPath": "./../resources/bin"
+      "outputPath": "./../resources/lib"
     },
     "scripts": {
       "linux": "pkg . -t node20-linux",

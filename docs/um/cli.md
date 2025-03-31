@@ -4,7 +4,7 @@ EcuBus-Pro provides a command line interface (CLI) that allows you run your code
 
 ## CLl Installed Path
 
-`${InstallPath}/resources/app.asar.unpacked/resources/bin` you can add this path to your system environment variable `PATH` to use the `ecb_cli` command in any directory.
+`${InstallPath}/resources/app.asar.unpacked/resources/lib` you can add this path to your system environment variable `PATH` to use the `ecb_cli` command in any directory.
 
 ## Usage
 

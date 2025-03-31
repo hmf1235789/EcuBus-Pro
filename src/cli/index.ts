@@ -19,7 +19,6 @@ import pnpmScript from '../../resources/bin/pnpm/pnpm.cjs?asset&asarUnpack'
 import glob from 'glob'
 import testMain from './test'
 import { TestEvent } from 'node:test/reporters'
-import log from 'electron-log/main'
 import dllLib from '../../resources/lib/zlgcan.dll?asset&asarUnpack'
 import { build as buildFunc } from './build'
 
@@ -27,16 +26,6 @@ declare global {
   var sysLog: Logger
   var scriptLog: Logger
 }
-log.transports.file.resolvePathFn = (variables, message) => {
-  const logPath = path.join(variables.appData, 'ecubuspro', 'logs', 'cli.log')
-  return logPath
-}
-log.transports.console.writeFn = (message) => {
-  //do nothing
-}
-log.info('pnpmScript path', pnpmScript)
-const libPath = path.dirname(dllLib)
-log.info('libPath', libPath)
 // 创建一个自定义的 Transport 来过滤掉不需要的日志
 class FilteredConsoleTransport extends Transport {
   constructor(options: any) {
