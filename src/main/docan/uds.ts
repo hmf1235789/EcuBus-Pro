@@ -1371,7 +1371,8 @@ async function compileTscEntry(
     dot: true, // 包含以点开头的文件/文件夹
     follow: false, // 关键：跟随软链接
     nodir: true, // 只匹配文件
-    absolute: false // 返回相对路径
+    absolute: false, // 返回相对路径
+    ignore: ['@types/**'] // 排除@types目录
   })
   for (const nodeFile of nodeFilesInProject) {
     const src = path.join(projectPath, 'node_modules', nodeFile)
