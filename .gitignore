@@ -17,3 +17,4 @@ resources/examples/**/tsconfig.json
 resources/examples/**/*.code-workspace
 resources/examples/**/*.html
 resources/examples/**/**/*/.html
+*.bak

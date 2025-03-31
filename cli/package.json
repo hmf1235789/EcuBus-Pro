@@ -4,7 +4,11 @@
     "description": "EcbBus-Pro CLI Tool",
     "bin":"out/ecb_cli.js",
     "pkg": {
-      "assets": "./out/chunks/*.node",
+      "assets": ["./out/chunks/*.node",
+      "./../resources/lib/**/*",
+      "./../resources/bin/**/*",
+      "./../resources/buildInScript/**/*"
+    ],
       "outputPath": "./../resources/bin"
     },
     "scripts": {
