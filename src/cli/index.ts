@@ -21,6 +21,7 @@ import testMain from './test'
 import { TestEvent } from 'node:test/reporters'
 import log from 'electron-log/main'
 import dllLib from '../../resources/lib/zlgcan.dll?asset&asarUnpack'
+import { build as buildFunc } from './build'
 
 declare global {
   var sysLog: Logger
@@ -231,6 +232,27 @@ test.action(async (project, name, options) => {
     const { data, projectPath, projectName } = await parseProject(project)
 
     await testMain(projectPath, projectName, data, name, options.report, options.build)
+  } catch (e: any) {
+    console.trace(e)
+    sysLog.error(e.message || 'failed to run test config')
+    exit(1)
+  }
+})
+
+const build = program.command('build').description('buils script file')
+build.argument('<project>', 'EcuBus-Pro project path')
+build.argument('<file>', 'scriptfile')
+test.option('-t, --test', 'Indicate is test file')
+addLoggingOption(build)
+build.action(async (project, file, options) => {
+  createLog(options.logLevel, options.logFile)
+  try {
+    const { data, projectPath, projectName } = await parseProject(project)
+    if (!path.isAbsolute(file)) {
+      file = path.join(process.cwd(), file)
+    }
+
+    await buildFunc(projectPath, projectName, data, file, options.test)
   } catch (e: any) {
     console.trace(e)
     sysLog.error(e.message || 'failed to run test config')
