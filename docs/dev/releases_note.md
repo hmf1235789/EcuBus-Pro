@@ -1,5 +1,17 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.26
+Changes from v0.8.25 to v0.8.26:
+
+ 
+* [feat]:add build *.node and *.dll copy 
+* [bug]:fix pnpm not found 
+* [opt]:add tip when close software 
+* [feat]:add graph gauge feature 
+* [feat]:opt lin signal physical value 
+* [feat]:add lin encode change
+---
+
 ## v0.8.25
 Changes from v0.8.24 to v0.8.25:
 
