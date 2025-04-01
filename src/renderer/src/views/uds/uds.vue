@@ -274,6 +274,10 @@
               <Icon :icon="apiIcon" style="font-size: 24px" />
               <span>Script Api</span>
             </div>
+            <div class="grid girdenable" @click="openPackage()">
+              <Icon :icon="packageIcon" style="font-size: 24px" />
+              <span>Packages</span>
+            </div>
           </div>
         </el-tab-pane>
       </el-tabs>
@@ -589,6 +593,7 @@ import testConfig from '@iconify/icons-grommet-icons/test'
 import testConfigIcon from '@iconify/icons-grommet-icons/test-desktop'
 import lineIcon from '@iconify/icons-mdi/chart-line'
 import gaugeIcon from '@iconify/icons-mdi/gauge'
+import packageIcon from '@iconify/icons-mdi/package-variant'
 
 const activeMenu = ref('')
 const pined = ref(true)
@@ -627,6 +632,9 @@ function openService(testerIndex: string) {
       'edit-index': testerIndex
     }
   })
+}
+function openPackage() {
+  layoutMaster.addWin('package', 'package', {})
 }
 function openIA(testerIndex: string) {
   const item = dataBase.ia[testerIndex]
