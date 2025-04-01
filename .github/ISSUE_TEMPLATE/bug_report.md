@@ -24,6 +24,8 @@ Steps to reproduce the behavior:
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
+1. Message Window
+2. Trace Window
 
 **Additional context**
 Add any other context about the problem here.
