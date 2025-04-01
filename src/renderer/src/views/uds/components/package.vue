@@ -24,23 +24,14 @@
     </div>
 
     <template v-else>
-      <div class="content-container">
-        <div class="install-section">
+      <div>
+        <div style="padding: 10px">
           <el-form :inline="true" class="install-form" @submit.prevent="installPackage">
             <el-form-item>
-              <el-input
-                v-model="packageName"
-                placeholder="Enter package name"
-                clearable
-                :style="{ width: `${Math.min(300, w * 0.4)}px` }"
-              />
+              <el-input v-model="packageName" placeholder="Enter package name" clearable />
             </el-form-item>
             <el-form-item>
-              <el-select
-                v-model="installType"
-                placeholder="Install type"
-                :style="{ width: `${Math.min(160, w * 0.2)}px` }"
-              >
+              <el-select v-model="installType" placeholder="Install type">
                 <el-option label="Dependencies" value="dependencies" />
                 <el-option label="Dev Dependencies" value="devDependencies" />
               </el-select>
@@ -53,24 +44,21 @@
           </el-form>
         </div>
 
-        <div v-show="showTerminal" class="terminal-container">
+        <div class="terminal-container">
           <div class="terminal-header">
             <span>Installation Log</span>
-            <el-button type="text" @click="clearTerminal">Clear</el-button>
+            <el-button link @click="clearTerminal">Clear</el-button>
           </div>
-          <div ref="terminalElement" class="terminal"></div>
+          <div id="terminalElement" class="terminal"></div>
         </div>
 
-        <div
-          class="packages-list"
-          :style="{ height: showTerminal ? `${h - 380}px` : `${h - 180}px` }"
-        >
+        <div>
           <h3>Installed Packages</h3>
 
           <el-tabs v-model="activeTab">
             <el-tab-pane label="Dependencies" name="dependencies">
               <div class="table-container">
-                <el-table :data="dependenciesList" :height="`${h - 250}px`" style="width: 100%">
+                <el-table :data="dependenciesList" style="width: 100%">
                   <el-table-column prop="name" label="Package Name" min-width="180" />
                   <el-table-column prop="version" label="Version" width="180" />
                   <el-table-column label="Actions" width="120" fixed="right">
@@ -90,7 +78,7 @@
 
             <el-tab-pane label="Dev Dependencies" name="devDependencies">
               <div class="table-container">
-                <el-table :data="devDependenciesList" :height="`${h - 250}px`" style="width: 100%">
+                <el-table :data="devDependenciesList" style="width: 100%">
                   <el-table-column prop="name" label="Package Name" min-width="180" />
                   <el-table-column prop="version" label="Version" width="180" />
                   <el-table-column label="Actions" width="120" fixed="right">
@@ -115,7 +103,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, toRef, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onMounted, toRef, onBeforeUnmount, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useProjectStore } from '@r/stores/project'
 import { Terminal } from 'xterm'
@@ -129,9 +117,8 @@ const activeTab = ref('dependencies')
 const packageJson = ref<any>(null)
 const isInstalling = ref(false)
 const showTerminal = ref(false)
-const terminal = ref<Terminal>()
-const fitAddon = ref<FitAddon>()
-const terminalElement = ref<HTMLElement>()
+let terminal: Terminal | null = null
+let fitAddon: FitAddon | null = null
 
 const props = defineProps<{
   height: number
@@ -166,54 +153,98 @@ const devDependenciesList = computed(() => {
   }))
 })
 
+// 写入日志到终端
+const writeToTerminal = (data: string, type: 'success' | 'error' | 'info' = 'info') => {
+  if (!terminal) return
+
+  const colorCodes = {
+    success: '\x1b[32m', // 绿色
+    error: '\x1b[31m', // 红色
+    info: '\x1b[0m' // 默认色
+  }
+
+  const resetCode = '\x1b[0m'
+  const colorCode = colorCodes[type]
+
+  // 确保每行都是新行
+  const lines = data.split('\n')
+  lines.forEach((line, index) => {
+    if (index === lines.length - 1 && line === '') return
+    terminal?.write(colorCode + line + resetCode + '\r\n')
+  })
+
+  // 滚动到底部
+  terminal.scrollToBottom()
+  fitAddon?.fit()
+}
+
 // 初始化终端
 const initTerminal = () => {
-  if (terminalElement.value) {
-    terminal.value = new Terminal({
-      cursorBlink: true,
-      fontSize: 12,
-      lineHeight: 1.2,
-      theme: {
-        background: '#1e1e1e',
-        foreground: '#ffffff'
-      }
-    })
-    fitAddon.value = new FitAddon()
-    terminal.value.loadAddon(fitAddon.value)
-    terminal.value.open(terminalElement.value)
-    fitAddon.value.fit()
-  }
+  terminal = new Terminal({
+    theme: {
+      background: '#ffffff',
+      foreground: '#333333',
+      black: '#000000',
+      red: '#cc0000',
+      green: '#4e9a06',
+      yellow: '#c4a000',
+      blue: '#3465a4',
+      magenta: '#75507b',
+      cyan: '#06989a',
+      white: '#ffffff',
+      brightBlack: '#555753',
+      brightRed: '#ef2929',
+      brightGreen: '#8ae234',
+      brightYellow: '#fce94f',
+      brightBlue: '#729fcf',
+      brightMagenta: '#ad7fa8',
+      brightCyan: '#34e2e2',
+      brightWhite: '#ffffff'
+    },
+    fontSize: 12,
+    fontFamily: 'Consolas, "Courier New", monospace',
+    lineHeight: 1.2,
+    convertEol: true,
+    disableStdin: true,
+    cursorStyle: 'block',
+    cursorBlink: false
+  })
+
+  fitAddon = new FitAddon()
+  terminal.loadAddon(fitAddon)
+  terminal.open(document.getElementById('terminalElement') as HTMLElement)
+  terminal.clear()
+  fitAddon.fit()
 }
 
 // 清空终端
 const clearTerminal = () => {
-  terminal.value?.clear()
-}
-
-// 写入日志到终端
-const writeToTerminal = (data: string) => {
-  terminal.value?.writeln(data)
-  fitAddon.value?.fit()
+  if (!terminal) return
+  terminal.clear()
+  terminal.reset()
 }
 
 let close
 // 监听安装日志事件
 const setupLogListener = () => {
   close = window.electron.ipcRenderer.on('ipc-pnpm-log', (_event, log) => {
-    writeToTerminal(log)
+    writeToTerminal(log, 'info')
   })
 }
 
 // 初始化 package.json
 const initPackageJson = async () => {
   try {
-    showTerminal.value = true
+    clearTerminal()
     isInstalling.value = true
     await window.electron.ipcRenderer.invoke('ipc-pnpm-init', project.projectInfo.path)
-    ElMessage.success('package.json initialized successfully')
+    writeToTerminal('✓ package.json initialized successfully', 'success')
     await loadPackageJson()
-  } catch (error) {
-    ElMessage.error('Failed to initialize package.json')
+  } catch (error: any) {
+    writeToTerminal(
+      `✗ Failed to initialize package.json: ${error?.message || 'Unknown error'}`,
+      'error'
+    )
     console.error(error)
   } finally {
     isInstalling.value = false
@@ -223,12 +254,11 @@ const initPackageJson = async () => {
 // 安装包
 const installPackage = async () => {
   if (!packageName.value) {
-    ElMessage.warning('Please enter a package name')
+    writeToTerminal('✗ Please enter a package name', 'error')
     return
   }
 
   try {
-    showTerminal.value = true
     isInstalling.value = true
     await window.electron.ipcRenderer.invoke(
       'ipc-pnpm-install',
@@ -236,11 +266,14 @@ const installPackage = async () => {
       packageName.value,
       installType.value === 'devDependencies'
     )
-    ElMessage.success(`Package ${packageName.value} installed successfully`)
+    writeToTerminal(`✓ Package ${packageName.value} installed successfully`, 'success')
     packageName.value = ''
     await loadPackageJson()
-  } catch (error) {
-    ElMessage.error(`Failed to install package ${packageName.value}`)
+  } catch (error: any) {
+    writeToTerminal(
+      `✗ Failed to install package ${packageName.value}: ${error?.message || 'Unknown error'}`,
+      'error'
+    )
     console.error(error)
   } finally {
     isInstalling.value = false
@@ -250,13 +283,15 @@ const installPackage = async () => {
 // 卸载包
 const uninstallPackage = async (name: string, isDev: boolean = false) => {
   try {
-    showTerminal.value = true
     isInstalling.value = true
     await window.electron.ipcRenderer.invoke('ipc-pnpm-uninstall', project.projectInfo.path, name)
-    ElMessage.success(`Package ${name} uninstalled successfully`)
+    writeToTerminal(`✓ Package ${name} uninstalled successfully`, 'success')
     await loadPackageJson()
-  } catch (error) {
-    ElMessage.error(`Failed to uninstall package ${name}`)
+  } catch (error: any) {
+    writeToTerminal(
+      `✗ Failed to uninstall package ${name}: ${error?.message || 'Unknown error'}`,
+      'error'
+    )
     console.error(error)
   } finally {
     isInstalling.value = false
@@ -271,8 +306,13 @@ const loadPackageJson = async () => {
       project.projectInfo.path
     )
     packageJson.value = result
-  } catch (error) {
-    console.error('Failed to load package.json:', error)
+    nextTick(() => {
+      initTerminal()
+    })
+  } catch (error: any) {
+    writeToTerminal(`✗ Failed to load package.json: ${error?.message || 'Unknown error'}`, 'error')
+    console.error(error)
+    initTerminal()
   }
 }
 
@@ -281,12 +321,11 @@ const handleInitPackageJson = async () => {
 }
 
 watch([h, w], () => {
-  fitAddon.value?.fit()
+  fitAddon?.fit()
 })
 
 onMounted(() => {
   loadPackageJson()
-  initTerminal()
   setupLogListener()
 })
 
@@ -294,7 +333,7 @@ onBeforeUnmount(() => {
   // 清理事件监听
   close()
   // 销毁终端
-  terminal.value?.dispose()
+  terminal?.dispose()
 })
 </script>
 
@@ -302,8 +341,6 @@ onBeforeUnmount(() => {
 .package-manager {
   box-sizing: border-box;
   padding: 16px;
-  display: flex;
-  flex-direction: column;
 }
 
 .header {
@@ -319,6 +356,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  margin-bottom: 16px;
 }
 
 .install-section {
@@ -331,21 +369,27 @@ onBeforeUnmount(() => {
 
 .install-form {
   display: flex;
-  align-items: center;
-  gap: 10px;
   flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
 }
 
-.packages-list {
+.install-form .el-form-item:first-child {
   flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  width: 200px;
 }
 
-.table-container {
-  flex: 1;
-  overflow: hidden;
+.install-form .el-form-item:nth-child(2) {
+  width: 160px;
+}
+
+.install-form .el-form-item:last-child {
+  margin-right: 0;
+}
+
+.el-form-item {
+  margin: 0;
+  width: 100%;
 }
 
 .no-package-json {
@@ -392,27 +436,15 @@ h3 {
   margin: 0 0 16px 0;
 }
 
-:deep(.el-tabs__content) {
-  flex: 1;
-  overflow: hidden;
-}
-
-:deep(.el-tab-pane) {
-  height: 100%;
-}
-
 :deep(.el-empty__image) {
   margin-bottom: 16px;
 }
 
 .terminal-container {
   margin-bottom: 16px;
-  background-color: #1e1e1e;
+  background-color: #ffffff;
   border-radius: 4px;
-  overflow: hidden;
-  height: 200px;
-  display: flex;
-  flex-direction: column;
+  border: 1px solid #dcdfe6;
 }
 
 .terminal-header {
@@ -420,12 +452,26 @@ h3 {
   justify-content: space-between;
   align-items: center;
   padding: 8px 16px;
-  background-color: #2d2d2d;
-  color: #ffffff;
+  background-color: #f5f7fa;
+  color: #333333;
+  border-bottom: 1px solid #dcdfe6;
 }
 
 .terminal {
-  flex: 1;
+  height: 200px;
   padding: 8px;
+  overflow-y: auto;
+}
+
+:deep(.el-form-item__content) {
+  width: 100%;
+}
+
+:deep(.el-input) {
+  width: 100% !important;
+}
+
+:deep(.el-select) {
+  width: 100% !important;
 }
 </style>

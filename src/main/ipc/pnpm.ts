@@ -5,7 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import { exec, execSync, spawn } from 'child_process'
 import { promisify } from 'util'
-import dllFile from '../../../resources/bin/libusb-1.0.dll?asset&asarUnpack'
+import dllFile from '../../../resources/lib/libusb-1.0.dll?asset&asarUnpack'
 
 const execAsync = promisify(exec)
 const dllPath = path.dirname(dllFile)
