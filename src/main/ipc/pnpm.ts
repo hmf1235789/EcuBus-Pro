@@ -3,7 +3,7 @@ import { glob } from 'glob'
 import fsP from 'fs/promises'
 import fs from 'fs'
 import path from 'path'
-import { exec, execSync } from 'child_process'
+import { exec, execSync, spawn } from 'child_process'
 import { promisify } from 'util'
 import dllFile from '../../../resources/bin/libusb-1.0.dll?asset&asarUnpack'
 
@@ -13,16 +13,32 @@ const ecb_cli = path.join(dllPath, 'ecb_cli')
 
 // 执行命令的工具函数
 async function execCommand(command: string, cwd: string) {
-  try {
-    const { stdout, stderr } = await execAsync(command, { cwd })
-    if (stderr) {
-      console.error('Command stderr:', stderr)
-    }
-    return stdout
-  } catch (error) {
-    console.error('Command execution error:', error)
-    throw error
-  }
+  return new Promise((resolve, reject) => {
+    const [cmd, ...args] = command.split(' ')
+    const process = spawn(cmd, args, { cwd })
+
+    process.stdout.on('data', (data) => {
+      const output = data.toString()
+      global.mainWindow?.webContents.send('ipc-pnpm-log', output)
+    })
+
+    process.stderr.on('data', (data) => {
+      const output = data.toString()
+      global.mainWindow?.webContents.send('ipc-pnpm-log', output)
+    })
+
+    process.on('close', (code) => {
+      if (code === 0) {
+        resolve(null)
+      } else {
+        reject(new Error(`Command failed with code ${code}`))
+      }
+    })
+
+    process.on('error', (error) => {
+      reject(error)
+    })
+  })
 }
 
 ipcMain.handle('ipc-pnpm-init', async (event, ...args) => {
@@ -40,7 +56,9 @@ ipcMain.handle('ipc-pnpm-init', async (event, ...args) => {
     // 检查是否已经存在 package.json
     const packageJsonPath = path.join(projectPath, 'package.json')
     if (fs.existsSync(packageJsonPath)) {
-      return
+      //read package.json
+      const packageJson = await fsP.readFile(packageJsonPath, 'utf-8')
+      return JSON.parse(packageJson)
     }
 
     // 执行 pnpm init 命令

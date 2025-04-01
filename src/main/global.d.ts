@@ -3,6 +3,7 @@ import type { Logger } from 'winston'
 import type { EventEmitter } from 'events'
 import { LDF } from 'src/renderer/src/database/ldfParse'
 import { DBC } from 'src/renderer/src/database/dbc/dbcVisitor'
+import { BrowserWindow } from 'electron'
 declare global {
   var sysLog: Logger
   var scriptLog: Logger
@@ -11,6 +12,7 @@ declare global {
     lin: Record<string, LDF>
     can: Record<string, DBC>
   }
+  var mainWindow: BrowserWindow
   var toomossDeviceHandles:
     | Map<
         number,

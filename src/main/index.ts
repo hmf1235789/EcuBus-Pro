@@ -12,8 +12,6 @@ import Transport from 'winston-transport'
 
 log.initialize()
 
-let mainWindow: BrowserWindow
-
 const protocol = 'ecubuspro'
 const ProtocolRegExp = new RegExp(`^${protocol}://`)
 /* single instance */
@@ -107,13 +105,13 @@ function createWindow(): void {
   const isMaximized = store.get('windowMaximized', false)
 
   function getBounds() {
-    const bounds = mainWindow.getBounds()
+    const bounds = global.mainWindow.getBounds()
     // bounds.x += 5
     // bounds.y += 5
     return bounds
   }
   // Create the browser window.
-  mainWindow = new BrowserWindow({
+  const mainWindow = new BrowserWindow({
     minWidth: 1000,
     minHeight: 600,
     width: windowBounds.width,
@@ -129,6 +127,7 @@ function createWindow(): void {
       contextIsolation: true
     }
   })
+  global.mainWindow = mainWindow
   const logQ = new LogQueue(mainWindow)
   createLogs(
     [
