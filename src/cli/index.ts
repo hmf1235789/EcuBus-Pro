@@ -291,6 +291,7 @@ if (process.argv[1] == 'pnpm' || process.argv[2] == 'pnpm') {
   process.argv = ['ecubus-pro', 'pnpm', ...process.argv.slice(index + 1)]
   const [major, minor] = process.version.slice(1).split('.')
   const vmModule = { exports: {} }
+  process.env.XDG_CONFIG_HOME = path.join(process.cwd(), '.config')
   const context = vm.createContext({
     exports: vmModule.exports,
     module: vmModule,
