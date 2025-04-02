@@ -74,26 +74,6 @@ Thanks to all the contributors who have helped shape EcuBus-Pro:
 
 We welcome contributions! Please review our [contribution guidelines](./.github/contributing.md) before getting started.
 
-## Issue Contributors
-
-Thanks to these amazing people who helped improve `EcuBus-Pro` by reporting issues and providing valuable feedback:
-
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="14.28%"><img src="https://avatars.githubusercontent.com/u/60444879?v=4" width="100px;"/>
-      <br /><sub><b>Robin Gerg</b></sub>
-      </td>
-      <td align="center" valign="top" width="14.28%"><img src="https://avatars.githubusercontent.com/u/64514563?v=4" width="100px;"/>
-      <br /><sub><b>ootonn
-</b></sub>
-      </td>
-      </tr>
-  </tbody>
-</table>
-      
-
-
 ## License
 
 [License](./license.txt)
