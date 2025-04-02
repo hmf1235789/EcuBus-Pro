@@ -62,7 +62,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./resources/bin/ecb_cli.exe
+          asset_path: ./resources/lib/ecb_cli.exe
           asset_name: ecb_cli.exe
           asset_content_type: application/vnd.microsoft.portable-executable
       - name: Upload Release Asset
@@ -139,7 +139,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.build-windows.outputs.upload_url }}
-          asset_path: ./resources/bin/ecb_cli
+          asset_path: ./resources/lib/ecb_cli
           asset_name: ecb_cli
           asset_content_type: application/octet-stream
 

@@ -114,7 +114,7 @@ import { ref, computed, onMounted, toRef, onBeforeUnmount, watch, nextTick } fro
 import { ElMessage } from 'element-plus'
 import { useProjectStore } from '@r/stores/project'
 import { Terminal } from 'xterm'
-import { FitAddon } from 'xterm-addon-fit'
+import { FitAddon } from '@xterm/addon-fit'
 import 'xterm/css/xterm.css'
 
 const project = useProjectStore()
@@ -433,6 +433,6 @@ h3 {
   height: 200px;
   padding: 8px;
   width: v-bind(w-55 + 'px');
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 </style>

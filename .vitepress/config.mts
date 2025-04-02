@@ -215,7 +215,7 @@ export default withMermaid({
           {
             text: 'Script',
             link: '/docs/um/script',
-            items: [{ text: 'Use External Package', link: '/docs/um/scriptSerialPort' }]
+            items: [{ text: 'Use External Package', link: '/docs/um/script/scriptSerialPort' }]
           },
           {
             text: 'Test',
