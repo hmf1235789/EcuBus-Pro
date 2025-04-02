@@ -1,19 +1,20 @@
 {
-    "name": "ecb_cli",
-    "author": "frankie.zengfu@gmail.com",
-    "description": "EcbBus-Pro CLI Tool",
-    "bin":"out/ecb_cli.js",
-    "pkg": {
-      "assets": ["./out/chunks/*.node",
+  "name": "ecb_cli",
+  "author": "frankie.zengfu@gmail.com",
+  "description": "EcbBus-Pro CLI Tool",
+  "bin": "out/ecb_cli.js",
+  "pkg": {
+    "assets": [
+      "./out/chunks/*.node",
       "./../resources/lib/**/*",
       "./../resources/bin/**/*",
       "./../resources/buildInScript/**/*"
     ],
-      "outputPath": "./../resources/lib"
-    },
-    "scripts": {
-      "linux": "pkg . -t node20-linux",
-      "win": "pkg . -t node20-win",
-      "mac": "pkg . -t node20-macos"
-    }
+    "outputPath": "./../resources/lib"
+  },
+  "scripts": {
+    "linux": "pkg . -t node20-linux",
+    "win": "pkg . -t node20-win",
+    "mac": "pkg . -t node20-macos"
   }
+}

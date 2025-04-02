@@ -104,7 +104,9 @@
     "vxe-pc-ui": "^4.2.53",
     "vxe-table": "4.9.4",
     "winston": "^3.17.0",
-    "workerpool": "github:frankie-zeng/workerpool#24f9e85"
+    "workerpool": "github:frankie-zeng/workerpool#24f9e85",
+    "xterm": "^5.3.0",
+    "xterm-addon-fit": "^0.8.0"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config": "^1.0.2",
