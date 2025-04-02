@@ -45,7 +45,7 @@ ecb_cli pnpm install package_name
 
 #### Example:
 
-![alt text](pnpm.gif)
+![alt text](script/pnpm.gif)
 
 ### Test command
 
