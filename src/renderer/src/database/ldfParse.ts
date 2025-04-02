@@ -217,6 +217,20 @@ const WhiteSpace = createToken({
   pattern: /\s+/,
   group: Lexer.SKIPPED
 })
+
+// 添加注释token处理
+const BlockComment = createToken({
+  name: 'BlockComment',
+  pattern: /\/\*[\s\S]*?\*\//,
+  group: Lexer.SKIPPED
+})
+
+const LineComment = createToken({
+  name: 'LineComment',
+  pattern: /\/\/[^\n]*/,
+  group: Lexer.SKIPPED
+})
+
 const Header = createToken({ name: 'Header', pattern: /LIN_description_file\s*/ })
 const Version = createToken({ name: 'Version', pattern: /LIN_protocol_version\s+/ })
 const LVersion = createToken({ name: 'LVersion', pattern: /LIN_language_version\s+/ })
@@ -323,6 +337,9 @@ const Signal_representation = createToken({
 })
 
 const allTokens = [
+  // 注释token必须放在最前面，以确保它们有更高的优先级
+  BlockComment,
+  LineComment,
   Header,
   Version,
   LVersion,
