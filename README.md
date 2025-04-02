@@ -26,7 +26,7 @@
 
 ## Overview
 
-![main](./docs/about/main.png)
+![main](https://ecubus.oss-cn-chengdu.aliyuncs.com/img/main.png)
 
 EcuBus-Pro is an open-source alternative to commercial automotive diagnostic tools like `CAN-OE`. It provides a comprehensive solution for ECU development and testing with:
 
