@@ -309,7 +309,9 @@ if (process.argv[1] == 'pnpm' || process.argv[2] == 'pnpm') {
     setInterval: setInterval,
     clearInterval: clearInterval,
     setTimeout: setTimeout,
-    clearTimeout: clearTimeout
+    clearTimeout: clearTimeout,
+    setImmediate: setImmediate,
+    clearImmediate: clearImmediate
   })
   const content = fs.readFileSync(pnpmScript, 'utf-8')
   const script = new vm.Script(content)

@@ -1,5 +1,5 @@
 <template>
-  <div class="package-manager" :style="{ width: `${w - 5}px`, height: `${h}px` }">
+  <div class="package-manager" :style="{ width: `${w - 4}px`, height: `${h}px` }">
     <div class="header">
       <h2>Package Manager</h2>
     </div>
@@ -26,18 +26,23 @@
     <template v-else>
       <div>
         <div style="padding: 10px">
-          <el-form :inline="true" class="install-form" @submit.prevent="installPackage">
+          <el-form :inline="true" @submit.prevent="installPackage">
             <el-form-item>
-              <el-input v-model="packageName" placeholder="Enter package name" clearable />
+              <el-input
+                v-model="packageName"
+                placeholder="Enter package name"
+                clearable
+                style="width: 200px"
+              />
             </el-form-item>
             <el-form-item>
-              <el-select v-model="installType" placeholder="Install type">
+              <el-select v-model="installType" placeholder="Install type" style="width: 200px">
                 <el-option label="Dependencies" value="dependencies" />
                 <el-option label="Dev Dependencies" value="devDependencies" />
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :loading="isInstalling" @click="installPackage"
+              <el-button type="primary" :loading="isInstalling" plain @click="installPackage"
                 >Install</el-button
               >
             </el-form-item>
@@ -58,7 +63,7 @@
           <el-tabs v-model="activeTab">
             <el-tab-pane label="Dependencies" name="dependencies">
               <div class="table-container">
-                <el-table :data="dependenciesList" style="width: 100%">
+                <el-table :data="dependenciesList" style="width: 100%; min-height: 200px">
                   <el-table-column prop="name" label="Package Name" min-width="180" />
                   <el-table-column prop="version" label="Version" width="180" />
                   <el-table-column label="Actions" width="120" fixed="right">
@@ -66,6 +71,7 @@
                       <el-button
                         type="danger"
                         size="small"
+                        plain
                         @click="uninstallPackage(scope.row.name)"
                       >
                         Uninstall
@@ -78,7 +84,7 @@
 
             <el-tab-pane label="Dev Dependencies" name="devDependencies">
               <div class="table-container">
-                <el-table :data="devDependenciesList" style="width: 100%">
+                <el-table :data="devDependenciesList" style="width: 100%; min-height: 200px">
                   <el-table-column prop="name" label="Package Name" min-width="180" />
                   <el-table-column prop="version" label="Version" width="180" />
                   <el-table-column label="Actions" width="120" fixed="right">
@@ -86,6 +92,7 @@
                       <el-button
                         type="danger"
                         size="small"
+                        plain
                         @click="uninstallPackage(scope.row.name, true)"
                       >
                         Uninstall
@@ -116,7 +123,6 @@ const installType = ref('dependencies')
 const activeTab = ref('dependencies')
 const packageJson = ref<any>(null)
 const isInstalling = ref(false)
-const showTerminal = ref(false)
 let terminal: Terminal | null = null
 let fitAddon: FitAddon | null = null
 
@@ -221,7 +227,6 @@ const initTerminal = () => {
 const clearTerminal = () => {
   if (!terminal) return
   terminal.clear()
-  terminal.reset()
 }
 
 let close
@@ -235,7 +240,6 @@ const setupLogListener = () => {
 // 初始化 package.json
 const initPackageJson = async () => {
   try {
-    clearTerminal()
     isInstalling.value = true
     await window.electron.ipcRenderer.invoke('ipc-pnpm-init', project.projectInfo.path)
     writeToTerminal('✓ package.json initialized successfully', 'success')
@@ -245,7 +249,6 @@ const initPackageJson = async () => {
       `✗ Failed to initialize package.json: ${error?.message || 'Unknown error'}`,
       'error'
     )
-    console.error(error)
   } finally {
     isInstalling.value = false
   }
@@ -274,7 +277,6 @@ const installPackage = async () => {
       `✗ Failed to install package ${packageName.value}: ${error?.message || 'Unknown error'}`,
       'error'
     )
-    console.error(error)
   } finally {
     isInstalling.value = false
   }
@@ -292,7 +294,6 @@ const uninstallPackage = async (name: string, isDev: boolean = false) => {
       `✗ Failed to uninstall package ${name}: ${error?.message || 'Unknown error'}`,
       'error'
     )
-    console.error(error)
   } finally {
     isInstalling.value = false
   }
@@ -311,7 +312,6 @@ const loadPackageJson = async () => {
     })
   } catch (error: any) {
     writeToTerminal(`✗ Failed to load package.json: ${error?.message || 'Unknown error'}`, 'error')
-    console.error(error)
     initTerminal()
   }
 }
@@ -321,7 +321,9 @@ const handleInitPackageJson = async () => {
 }
 
 watch([h, w], () => {
-  fitAddon?.fit()
+  nextTick(() => {
+    fitAddon?.fit()
+  })
 })
 
 onMounted(() => {
@@ -367,31 +369,6 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
 }
 
-.install-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-}
-
-.install-form .el-form-item:first-child {
-  flex: 1;
-  width: 200px;
-}
-
-.install-form .el-form-item:nth-child(2) {
-  width: 160px;
-}
-
-.install-form .el-form-item:last-child {
-  margin-right: 0;
-}
-
-.el-form-item {
-  margin: 0;
-  width: 100%;
-}
-
 .no-package-json {
   margin-top: 16px;
   display: flex;
@@ -427,11 +404,6 @@ onBeforeUnmount(() => {
   margin-top: 16px;
 }
 
-.el-form-item {
-  margin-bottom: 0;
-  margin-right: 10px;
-}
-
 h3 {
   margin: 0 0 16px 0;
 }
@@ -460,18 +432,7 @@ h3 {
 .terminal {
   height: 200px;
   padding: 8px;
-  overflow-y: auto;
-}
-
-:deep(.el-form-item__content) {
-  width: 100%;
-}
-
-:deep(.el-input) {
-  width: 100% !important;
-}
-
-:deep(.el-select) {
-  width: 100% !important;
+  width: v-bind(w-55 + 'px');
+  overflow-y: hidden;
 }
 </style>
