@@ -1,5 +1,13 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.27
+Changes from v0.8.26 to v0.8.27:
+
+ 
+* [bug]:fix ldf comment #99 
+* [feat]:add package manage
+---
+
 ## v0.8.26
 Changes from v0.8.25 to v0.8.26:
 
