@@ -73,6 +73,23 @@
                 </template>
               </el-dropdown>
             </div>
+            <div class="grid girdenable" @click="handleSelect(['graph'])">
+              <Icon :icon="panelIcon1" style="font-size: 24px" />
+              <el-dropdown @command="openPanel">
+                <span class="lr">
+                  Panel
+
+                  <el-icon class="el-icon--right">
+                    <arrow-down />
+                  </el-icon>
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu size="small">
+                    <el-dropdown-item command="panel" icon="Plus"> Add Panel</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
             <el-divider direction="vertical" style="height: 54px" />
             <div class="grid girdenable" @click="handleSelect(['message'])">
               <Icon :icon="msgIcon" style="font-size: 24px" />
@@ -601,6 +618,7 @@ import gaugeIcon from '@iconify/icons-mdi/gauge'
 import packageIcon from '@iconify/icons-mdi/package-variant'
 import varIcon from '@iconify/icons-mdi/application-variable-outline'
 import dataIcon from '@iconify/icons-mdi/data-usage'
+import panelIcon1 from '@iconify/icons-mdi/solar-panel'
 
 const activeMenu = ref('')
 const pined = ref(true)
@@ -634,6 +652,17 @@ function openGraph(command: string) {
     layoutMaster.addWin('datas', 'datas', {
       params: {
         'edit-index': 'datas'
+      }
+    })
+  }
+}
+function openPanel(command: string) {
+  if (command == 'panel') {
+    layoutMaster.addWin('panel', 'panel', {})
+  } else {
+    layoutMaster.addWin('panel', 'panel', {
+      params: {
+        'edit-index': command
       }
     })
   }
