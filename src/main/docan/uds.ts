@@ -14,11 +14,6 @@ import {
 } from '../share/uds'
 import { CanAddr, getTsUs } from '../share/can'
 import { CanBase } from './base'
-// #v-ifdef IGNORE_NODE!='1'
-import { PEAK_TP } from './peak'
-import { KVASER_CAN } from './kvaser'
-import { ZLG_CAN } from './zlg'
-// #v-endif
 import path from 'path'
 import Handlebars from 'handlebars'
 import fsP from 'fs/promises'

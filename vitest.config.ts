@@ -1,6 +1,8 @@
 import { defineConfig, mergeConfig } from 'vitest/config'
 import path from 'path'
-import config from './electron.vite.config'
+import fs from 'fs/promises'
+import { normalizePath, Plugin } from 'vite'
+
 export const nodejsPolarsDirnamePlugin = () => {
   const name = 'nodejs-polars-dirname-plugin'
   return {
@@ -8,7 +10,6 @@ export const nodejsPolarsDirnamePlugin = () => {
 
     transform(code: string, id: string) {
       // aim for the node_modules/nodejs-polars/bin/native-polars.js file
-
       if (id.endsWith('.node')) {
         const file = path.basename(id)
         return `
@@ -22,12 +23,29 @@ export const nodejsPolarsDirnamePlugin = () => {
                 // export the content straight back out again
                 export default content
                 `
+      } else if (id.includes('?asset')) {
+        const file = path.basename(id)
+        // Remove query parameters
+        const cleanFile = file.split('?')[0]
+        return `
+                import { join } from 'path'
+                export default join(__dirname, "${cleanFile}")
+                `
+      } else if (id.includes('?asarUnpack')) {
+        const file = path.basename(id)
+        // Remove query parameters
+        const cleanFile = file.split('?')[0]
+        return `
+                import { join } from 'path'
+                export default join(__dirname, "${cleanFile}")
+                `
       }
       // else return the original code (leave code unrelated to nodejs-polars untouched)
       return code
     }
   }
 }
+
 //export default mergeConfig(config.main as any, defineConfig({
 export default defineConfig({
   test: {
