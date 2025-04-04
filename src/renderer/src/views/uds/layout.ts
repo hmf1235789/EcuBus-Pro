@@ -599,6 +599,19 @@ export class Layout {
       this.maxWinId.value = undefined
       item.pos = cloneDeep(item.backupPos ?? item.pos)
       this.layoutInit(key, `#win${key} .uds-draggable`, `#win${key}`, true, layoutType)
+      // 在恢复窗口大小后，重新设置containment
+      nextTick(() => {
+        if (this.winEl[key] && layoutType != 'bottom') {
+          const offset = this.winEl[key].offset()
+          const topGap = offset.top - item.pos.y
+          this.winEl[key].draggable('option', 'containment', [
+            200 - item.pos.w,
+            topGap,
+            this.width - 100,
+            topGap + this.height - 50
+          ])
+        }
+      })
       this.event.emit(`max:${key}`, item, false)
     } else {
       this.maxWinId.value = key
