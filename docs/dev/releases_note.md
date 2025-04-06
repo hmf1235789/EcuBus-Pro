@@ -1,5 +1,13 @@
 # EcuBus-Pro Release Notes
 
+## 0.8.28
+Changes from v0.8.27 to v0.8.28:
+
+ 
+* [bug]:fix layout max windows min containment setup
+* [bug]:fix PEAK can baudrate bug
+---
+
 ## v0.8.27
 Changes from v0.8.26 to v0.8.27:
 
