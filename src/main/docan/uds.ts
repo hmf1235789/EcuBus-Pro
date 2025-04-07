@@ -10,9 +10,10 @@ import {
   UdsAddress,
   getUdsAddrName,
   getUdsDeviceName,
-  applyBuffer
+  applyBuffer,
+  UdsInfo
 } from '../share/uds'
-import { CanAddr, getTsUs } from '../share/can'
+import { CAN_ADDR_TYPE, CanAddr, getTsUs } from '../share/can'
 import { CanBase } from './base'
 import path from 'path'
 import Handlebars from 'handlebars'
@@ -96,7 +97,7 @@ import { glob } from 'glob'
 import { DOIP, DOIP_SOCKET } from '../doip'
 import LinBase from '../dolin/base'
 import { LIN_TP, LIN_TP_SOCKET } from '../dolin/lintp'
-import { LinMode } from '../share/lin'
+import { LIN_ADDR_TYPE, LinMode } from '../share/lin'
 import { LDF } from 'src/renderer/src/database/ldfParse'
 import { DataSet, NodeItem } from 'src/preload/data'
 import { getJsPath } from '../util'
@@ -374,6 +375,29 @@ export class UDSTesterMain {
     cycleCount: number
   ) {
     const tp = new CAN_TP(base)
+    if (
+      this.tester.udsTime.testerPresentEnable &&
+      this.tester.udsTime.testerPresentAddrIndex != undefined
+    ) {
+      const addr = this.tester.address[this.tester.udsTime.testerPresentAddrIndex]
+
+      if (addr && addr.canAddr) {
+        let data = Buffer.from([0x3e, 0x00])
+        if (this.tester.udsTime.testerPresentSpecialSerivce) {
+          const service = this.tester.allServiceList['0x3E']?.find(
+            (e) => e.id == this.tester.udsTime.testerPresentSpecialSerivce
+          )
+          if (service) {
+            data = getTxPdu(service)
+          }
+        }
+        tp.setOption('testerPresent', {
+          addr: addr.canAddr,
+          timeout: this.tester.udsTime.s3Time,
+          data: data
+        })
+      }
+    }
     await this.runTp(
       {
         createSocket: async (addr: UdsAddress) => {
@@ -390,6 +414,7 @@ export class UDSTesterMain {
       log,
       cycleCount
     ).finally(() => {
+      tp.setOption('stopTesterPresent', undefined)
       tp.close(this.closeBase)
     })
   }
@@ -559,22 +584,38 @@ export class UDSTesterMain {
               }
 
               const subFunction = s.params[0].value[0]
-
+              let needResponse = true
               if ((subFunction & 0x80) == 0x80) {
+                needResponse = false
+              } else if (
+                addrItem.type == 'can' &&
+                addrItem.canAddr?.addrType == CAN_ADDR_TYPE.FUNCTIONAL
+              ) {
+                needResponse = false
+              } else if (
+                addrItem.type == 'lin' &&
+                addrItem.linAddr?.addrType == LIN_ADDR_TYPE.FUNCTIONAL
+              ) {
+                needResponse = false
+              } else if (addrItem.type == 'eth' && addrItem.ethAddr?.taType == 'functional') {
+                needResponse = false
+              }
+              if (!needResponse) {
                 await tester.delay(service.delay)
                 socket.close()
                 return true
               }
             }
+            let timeout = tester.tester.udsTime.pTime
             do {
               let rxData = undefined
-              let timeout = tester.tester.udsTime.pTime
+
               try {
                 const curUs = getTsUs()
                 if (tester.ac.signal.aborted) {
                   throw new Error('aborted')
                 }
-                rxData = await socket.read(tester.tester.udsTime.pTime).catch((e) => {
+                rxData = await socket.read(timeout).catch((e) => {
                   tester.lastActiveTs += getTsUs() - curUs
                   throw e
                 })
@@ -613,6 +654,15 @@ export class UDSTesterMain {
                       `negative response, received length ${rxData.data.length} is invalid`
                     )
                   }
+                }
+                if (rxData.data[0] != Number(targetService.serviceId)) {
+                  const usedTime = Math.floor((getTsUs() - curUs) / 1000)
+                  if (usedTime > timeout) {
+                    timeout = 0
+                  } else {
+                    timeout -= usedTime
+                  }
+                  continue
                 }
                 //compare
                 const minLen = Math.min(rxBuffer.length, rxData.data.length)

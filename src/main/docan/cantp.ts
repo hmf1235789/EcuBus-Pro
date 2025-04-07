@@ -172,6 +172,13 @@ export class CAN_TP implements CanTp {
     }
   > = {}
   lastWriteError?: TpError
+  enableTesterPresent?: {
+    timerStart: boolean
+    timeout: number
+    addr: CanAddr
+    data: Buffer
+    timer: NodeJS.Timeout | undefined
+  }
   constructor(
     base: CanBase,
     private listenOnly = false
@@ -192,9 +199,34 @@ export class CAN_TP implements CanTp {
       this.event.emit(cb[0], new TpError(TP_ERROR_ID.TP_BUS_CLOSED, cb[1].addr))
       this.base.event.off(cb[1].baseId, cb[1].cb)
     }
+    clearTimeout(this.enableTesterPresent?.timer)
   }
-  setOption(cmd: string, val: any) {
-    return
+  setOption(cmd: string, val: any): any {
+    if (cmd == 'testerPresent') {
+      clearTimeout(this.enableTesterPresent?.timer)
+      this.enableTesterPresent = val
+    } else if (cmd == 'startTesterPresent') {
+      if (this.enableTesterPresent) {
+        clearTimeout(this.enableTesterPresent.timer)
+        this.enableTesterPresent.timerStart = true
+        this.enableTesterPresent.timer = setTimeout(() => {
+          if (this.enableTesterPresent) {
+            this.writeTp(this.enableTesterPresent.addr, this.enableTesterPresent.data)
+          }
+        }, this.enableTesterPresent.timeout)
+      }
+    } else if (cmd == 'stopTesterPresent') {
+      if (this.enableTesterPresent) {
+        this.enableTesterPresent.timerStart = false
+        clearTimeout(this.enableTesterPresent.timer)
+      }
+    } else if (cmd == 'getTesterPresent') {
+      if (this.enableTesterPresent) {
+        return this.enableTesterPresent
+      } else {
+        return undefined
+      }
+    }
   }
 
   isSingleFrame(addr: CanAddr, data: Buffer) {

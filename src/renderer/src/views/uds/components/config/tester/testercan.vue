@@ -112,7 +112,40 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="Tester Present Enable" prop="udsTime.testerPresentEnable">
-            <el-checkbox v-model="data.udsTime.testerPresentEnable" disabled />
+            <el-checkbox
+              v-model="data.udsTime.testerPresentEnable"
+              :disabled="props.type != 'can'"
+            />
+          </el-form-item>
+        </el-col>
+      </el-form-item>
+      <el-form-item v-if="data.udsTime.testerPresentEnable" label-width="0">
+        <el-col :span="12">
+          <el-form-item
+            label="Used Address"
+            prop="udsTime.testerPresentAddrIndex"
+            :required="data.udsTime.testerPresentEnable"
+          >
+            <el-select v-model.number="data.udsTime.testerPresentAddrIndex">
+              <el-option
+                v-for="(item, index) in data.address"
+                :key="index"
+                :label="getAddrName(item, index)"
+                :value="index"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="From Speical Service" prop="udsTime.testerPresentSpecialSerivce">
+            <el-select v-model="data.udsTime.testerPresentSpecialSerivce">
+              <el-option
+                v-for="(item, index) in all3EServices"
+                :key="index"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
           </el-form-item>
         </el-col>
       </el-form-item>
@@ -240,7 +273,7 @@ import { assign, cloneDeep } from 'lodash'
 import { useDataStore } from '@r/stores/data'
 import { TesterInfo } from 'nodeCan/tester'
 import { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE } from 'nodeCan/can'
-import { HardwareType, UdsAddress, UdsDevice } from 'nodeCan/uds'
+import { HardwareType, ServiceItem, UdsAddress, UdsDevice } from 'nodeCan/uds'
 import { useProjectStore } from '@r/stores/project'
 import { Icon } from '@iconify/vue'
 import buildIcon from '@iconify/icons-material-symbols/build-circle-outline-sharp'
@@ -321,6 +354,17 @@ const nameCheck = (rule: any, value: any, callback: any) => {
 const activeTabName = ref('')
 const emits = defineEmits(['change'])
 
+const all3EServices = computed(() => {
+  let services: ServiceItem[] = []
+  for (const key of Object.keys(dataBase.tester)) {
+    const tester = dataBase.tester[key]
+    if (tester && tester.id == data.value.id) {
+      services = tester.allServiceList['0x3E'] || []
+      break
+    }
+  }
+  return services
+})
 const rules: FormRules = {
   name: [
     {
