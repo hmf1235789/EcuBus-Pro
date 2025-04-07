@@ -15,7 +15,7 @@ import {
 import { CAN_ID_TYPE, CanInterAction, formatError, swapAddr } from '../share/can'
 import { CAN_SOCKET, CanBase } from '../docan/base'
 import { CAN_TP, TpError } from '../docan/cantp'
-import { UdsAddress, UdsDevice } from '../share/uds'
+import { getTxPdu, UdsAddress, UdsDevice } from '../share/uds'
 import { TesterInfo } from '../share/tester'
 import log from 'electron-log'
 
@@ -332,6 +332,30 @@ async function globalStart(
         }
         if (cantp.rxBaseHandleExist.size > 0) {
           cantps.push(cantp)
+
+          if (
+            tester.udsTime.testerPresentEnable &&
+            tester.udsTime.testerPresentAddrIndex != undefined
+          ) {
+            const addr = tester.address[tester.udsTime.testerPresentAddrIndex].canAddr
+            if (addr) {
+              let data = Buffer.from([0x3e, 0])
+              const service = tester.allServiceList['0x3E']?.find(
+                (e) => e.id == tester.udsTime.testerPresentSpecialSerivce
+              )
+              if (service) {
+                data = getTxPdu(service)
+              }
+              const val = {
+                action: () => {
+                  cantp.writeTp(addr, data)
+                },
+                addr: addr,
+                timeout: tester.udsTime.s3Time
+              }
+              cantp.setOption('testerPresent', val)
+            }
+          }
         }
       }
     } else if (tester.type == 'eth') {

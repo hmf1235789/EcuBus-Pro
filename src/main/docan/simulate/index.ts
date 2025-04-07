@@ -65,8 +65,8 @@ export class SIMULATE_CAN extends CanBase {
     const cmdId = this.getReadBaseId(val.id, val.msgType)
     this.event.emit(cmdId, val)
   }
-  setOption(cmd: string, val: any): void {
-    null
+  setOption(cmd: string, val: any): any {
+    return this._setOption(cmd, val)
   }
   static override getValidDevices(): CanDevice[] {
     return Array.from({ length: vBusCount }, (_, i) => {
@@ -93,6 +93,7 @@ export class SIMULATE_CAN extends CanBase {
     this.event.off('bus', this.busCb)
 
     busInitStatus[this.info.handle] = false
+    this._close()
   }
   writeBase(
     id: number,

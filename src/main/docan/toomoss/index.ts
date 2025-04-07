@@ -303,8 +303,8 @@ export class TOOMOSS_CAN extends CanBase {
     this.close(true)
   }
 
-  setOption(cmd: string, val: any): void {
-    null
+  setOption(cmd: string, val: any): any {
+    return this._setOption(cmd, val)
   }
   _read(frame: CANFrame) {
     if (this.tsOffset == undefined) {
@@ -417,6 +417,7 @@ export class TOOMOSS_CAN extends CanBase {
         global.toomossDeviceHandles?.delete(this.handle)
       }
     }
+    this._close()
   }
 
   writeBase(

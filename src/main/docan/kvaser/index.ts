@@ -267,8 +267,8 @@ export class KVASER_CAN extends CanBase {
       }
     }
   }
-  setOption(cmd: string, val: any): void {
-    null
+  setOption(cmd: string, val: any): any {
+    return this._setOption(cmd, val)
   }
   static override getValidDevices(): CanDevice[] {
     if (process.platform == 'win32') {
@@ -328,6 +328,7 @@ export class KVASER_CAN extends CanBase {
       KV.canClose(this.handle)
       KV.FreeTSFN(this.id)
       this.event.emit('close', msg)
+      this._close()
     }
   }
   writeBase(

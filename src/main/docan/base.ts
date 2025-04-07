@@ -1,6 +1,8 @@
 import EventEmitter from 'events'
 import {
+  addrToStr,
   CAN_ERROR_ID,
+  CanAddr,
   CanBaseInfo,
   CanBitrate,
   CanDevice,
@@ -11,6 +13,15 @@ import {
 import { CanLOG } from '../log'
 
 export abstract class CanBase {
+  enableTesterPresent: Record<
+    string,
+    {
+      addr: CanAddr
+      timeout: number
+      timer?: NodeJS.Timeout
+      action: () => Promise<void>
+    }
+  > = {}
   abstract info: CanBaseInfo
   abstract log: CanLOG
   abstract close(): void
@@ -27,7 +38,7 @@ export abstract class CanBase {
     extra?: { database?: string; name?: string }
   ): Promise<number>
   abstract getReadBaseId(id: number, msgType: CanMsgType): string
-  abstract setOption(cmd: string, val: any): void
+  abstract setOption(cmd: string, val: any): any
 
   abstract event: EventEmitter
   static getValidDevices(): CanDevice[] {
@@ -44,6 +55,46 @@ export abstract class CanBase {
   }
   detachCanMessage(cb: (msg: CanMessage) => void) {
     this.event.off('can-frame', cb)
+  }
+  protected _close() {
+    Object.values(this.enableTesterPresent).forEach((e) => {
+      clearTimeout(e.timer)
+    })
+  }
+  protected _setOption(cmd: string, val: any): any {
+    if (cmd == 'testerPresent') {
+      const id = addrToStr(val.addr)
+      const present = this.enableTesterPresent[id]
+      clearTimeout(present?.timer)
+      this.enableTesterPresent[id] = val
+    } else if (cmd == 'startTesterPresent') {
+      const id = addrToStr(val.canAddr)
+      const present = this.enableTesterPresent[id]
+      if (present) {
+        clearTimeout(present.timer)
+        present.timer = setTimeout(() => {
+          if (present) {
+            present.action().finally(() => {
+              this._setOption('startTesterPresent', val)
+            })
+          }
+        }, present.timeout)
+      }
+    } else if (cmd == 'stopTesterPresent') {
+      const id = addrToStr(val.canAddr)
+      const present = this.enableTesterPresent[id]
+      if (present) {
+        clearTimeout(present.timer)
+        present.timer = undefined
+      }
+    } else if (cmd == 'getTesterPresent') {
+      if (val) {
+        const id = addrToStr(val)
+        return this.enableTesterPresent[id]
+      } else {
+        return this.enableTesterPresent
+      }
+    }
   }
 }
 

@@ -408,6 +408,9 @@ export class UDSTesterMain {
         },
         close: (base: boolean) => {
           tp.close(base)
+        },
+        setOption: (cmd: string, val: any) => {
+          tp.setOption(cmd, val)
         }
       },
       seqIndex,
@@ -437,6 +440,9 @@ export class UDSTesterMain {
         },
         close: (base: boolean) => {
           null
+        },
+        setOption: (cmd: string, val: any) => {
+          null
         }
       },
       seqIndex,
@@ -465,6 +471,9 @@ export class UDSTesterMain {
         },
         close: (base: boolean) => {
           tp.close(base)
+        },
+        setOption: (cmd: string, val: any) => {
+          null
         }
       },
       seqIndex,
@@ -527,6 +536,7 @@ export class UDSTesterMain {
         read: (timeout: number) => Promise<{ ts: number; data: Buffer }>
         close: () => void
       }>
+      setOption: (cmd: string, val: any) => void
       close: (base: boolean) => void
     },
     seqIndex: number,
@@ -824,7 +834,10 @@ export class UDSTesterMain {
             } else {
               // eslint-disable-next-line no-constant-condition
               while (true) {
-                const r = await serviceRun(tester, s)
+                canTp.setOption('stopTesterPresent', addrItem)
+                const r = await serviceRun(tester, s).finally(() => {
+                  canTp.setOption('startTesterPresent', addrItem)
+                })
 
                 if (r) {
                   break
