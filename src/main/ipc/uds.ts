@@ -15,7 +15,7 @@ import {
 import { CAN_ID_TYPE, CanInterAction, formatError, swapAddr } from '../share/can'
 import { CAN_SOCKET, CanBase } from '../docan/base'
 import { CAN_TP, TpError } from '../docan/cantp'
-import { UdsAddress, UdsDevice } from '../share/uds'
+import { getTxPdu, UdsAddress, UdsDevice } from '../share/uds'
 import { TesterInfo } from '../share/tester'
 import log from 'electron-log'
 
@@ -332,6 +332,33 @@ async function globalStart(
         }
         if (cantp.rxBaseHandleExist.size > 0) {
           cantps.push(cantp)
+          if (
+            tester.udsTime.testerPresentEnable &&
+            tester.udsTime.testerPresentAddrIndex != undefined
+          ) {
+            const addr = tester.address[tester.udsTime.testerPresentAddrIndex]
+
+            if (addr && addr.canAddr) {
+              let data = Buffer.from([0x3e, 0x00])
+              if (tester.udsTime.testerPresentSpecialService) {
+                const service = tester.allServiceList['0x3E']?.find(
+                  (e) => e.id == tester.udsTime.testerPresentSpecialService
+                )
+                if (service) {
+                  data = getTxPdu(service)
+                }
+              }
+              const taddr = addr.canAddr
+              cantp.setOption('testerPresent', {
+                addr: taddr,
+                timeout: tester.udsTime.s3Time,
+                action: () => {
+                  return cantp.writeTp(taddr, data)
+                },
+                tester: tester
+              })
+            }
+          }
         }
       }
     } else if (tester.type == 'eth') {
@@ -441,6 +468,26 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   } catch (err: any) {
     globalStop(true)
     throw err
+  }
+})
+
+ipcMain.handle('ipc-switch-tester-present', async (event, ...arg) => {
+  const tester = arg[0] as TesterInfo
+  const enable = arg[1] as boolean
+  if (tester.udsTime.testerPresentEnable && tester.udsTime.testerPresentAddrIndex != undefined) {
+    const addr = tester.address[tester.udsTime.testerPresentAddrIndex]
+
+    if (addr && addr.canAddr) {
+      for (const base of canBaseMap.values()) {
+        if (base.info.id == tester.targetDeviceId) {
+          if (enable) {
+            base.setOption('enableTesterPresent', addr.canAddr)
+          } else {
+            base.setOption('disableTesterPresent', addr.canAddr)
+          }
+        }
+      }
+    }
   }
 })
 

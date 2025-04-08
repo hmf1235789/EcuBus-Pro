@@ -6,6 +6,7 @@
       label-width="150px"
       :rules="rules"
       size="small"
+      :disabled="globalStart"
       hide-required-asterisk
     >
       <el-form-item label="Tester Name" prop="name">
@@ -112,7 +113,36 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="Tester Present Enable" prop="udsTime.testerPresentEnable">
-            <el-checkbox v-model="data.udsTime.testerPresentEnable" disabled />
+            <el-checkbox
+              v-model="data.udsTime.testerPresentEnable"
+              :disabled="props.type != 'can'"
+            />
+          </el-form-item>
+        </el-col>
+      </el-form-item>
+      <el-form-item v-if="data.udsTime.testerPresentEnable" label-width="0">
+        <el-col :span="12">
+          <el-form-item label="Tester Present Address" prop="udsTime.testerPresentAddrIndex">
+            <el-select v-model.number="data.udsTime.testerPresentAddrIndex">
+              <el-option
+                v-for="(item, index) in data.address"
+                :key="index"
+                :label="getAddrName(item, index)"
+                :value="index"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="From Special Service" prop="udsTime.testerPresentSpecialService">
+            <el-select v-model="data.udsTime.testerPresentSpecialService">
+              <el-option
+                v-for="(item, index) in all3EServices"
+                :key="index"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
           </el-form-item>
         </el-col>
       </el-form-item>
@@ -240,7 +270,7 @@ import { assign, cloneDeep } from 'lodash'
 import { useDataStore } from '@r/stores/data'
 import { TesterInfo } from 'nodeCan/tester'
 import { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE } from 'nodeCan/can'
-import { HardwareType, UdsAddress, UdsDevice } from 'nodeCan/uds'
+import { HardwareType, ServiceItem, UdsAddress, UdsDevice } from 'nodeCan/uds'
 import { useProjectStore } from '@r/stores/project'
 import { Icon } from '@iconify/vue'
 import buildIcon from '@iconify/icons-material-symbols/build-circle-outline-sharp'
@@ -321,38 +351,57 @@ const nameCheck = (rule: any, value: any, callback: any) => {
 const activeTabName = ref('')
 const emits = defineEmits(['change'])
 
-const rules: FormRules = {
-  name: [
-    {
-      required: true,
-      trigger: 'blur',
-      validator: nameCheck
+const all3EServices = computed(() => {
+  let services: ServiceItem[] = []
+  for (const key of Object.keys(dataBase.tester)) {
+    const tester = dataBase.tester[key]
+    if (tester && tester.id == data.value.id) {
+      services = tester.allServiceList['0x3E'] || []
+      break
     }
-  ],
-  targetDeviceId: [
-    {
-      required: true,
-      message: 'Please select target device',
-      trigger: 'change'
-    }
-  ],
-  'udsTime.pTime': [
-    {
-      required: true,
-      message: 'Please input UDS Timeout',
-      trigger: 'blur',
-      type: 'number'
-    }
-  ],
-  'udsTime.s3Time': [
-    {
-      required: true,
-      message: 'Please input S3 Time',
-      trigger: 'blur',
-      type: 'number'
-    }
-  ]
-}
+  }
+  return services
+})
+const rules = computed<FormRules>(() => {
+  return {
+    name: [
+      {
+        required: true,
+        trigger: 'blur',
+        validator: nameCheck
+      }
+    ],
+    targetDeviceId: [
+      {
+        required: true,
+        message: 'Please select target device',
+        trigger: 'change'
+      }
+    ],
+    'udsTime.pTime': [
+      {
+        required: true,
+        message: 'Please input UDS Timeout',
+        trigger: 'blur',
+        type: 'number'
+      }
+    ],
+    'udsTime.s3Time': [
+      {
+        required: true,
+        message: 'Please input S3 Time',
+        trigger: 'blur',
+        type: 'number'
+      }
+    ],
+    'udsTime.testerPresentAddrIndex': [
+      {
+        required: data.value.udsTime.testerPresentEnable,
+        message: 'Address is required'
+      }
+    ]
+  }
+})
 
 const project = useProjectStore()
 

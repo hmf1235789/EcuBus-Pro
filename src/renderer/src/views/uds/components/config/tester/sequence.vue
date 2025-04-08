@@ -7,6 +7,20 @@
         </el-button>
       </el-tooltip>
       <el-divider direction="vertical" />
+      <el-tooltip effect="light" content="Tester Present Control" placement="bottom">
+        <el-button
+          :disabled="!tester.udsTime.testerPresentEnable"
+          type="warning"
+          size="small"
+          link
+          plain
+          :class="{ 'tester-present-active': presentStart }"
+          @click="switchTesterPresent"
+        >
+          <Icon :icon="presentIcon" class="icon" />
+        </el-button>
+      </el-tooltip>
+      <el-divider direction="vertical" />
       <el-button-group>
         <el-tooltip effect="light" content="Run chosen sequence" placement="bottom">
           <el-button
@@ -112,7 +126,7 @@
 <script lang="ts" setup>
 import { v4 } from 'uuid'
 import { Param, param2len, param2str, paramSetVal, DataType, UdsDevice } from 'nodeCan/uds'
-import { onMounted, ref, nextTick, computed, toRef, onBeforeMount } from 'vue'
+import { onMounted, ref, nextTick, computed, toRef, onBeforeMount, onUnmounted } from 'vue'
 import subseqeunce from './subsequence.vue'
 import { useDataStore } from '@r/stores/data'
 import addCircle from '@iconify/icons-material-symbols/add-circle-outline-rounded'
@@ -125,6 +139,8 @@ import { ElMessageBox } from 'element-plus'
 import { useProjectStore } from '@r/stores/project'
 import { clone, cloneDeep } from 'lodash'
 import deviceIcon from '@iconify/icons-material-symbols/important-devices-outline'
+import presentIcon from '@iconify/icons-mdi/presentation-play'
+import { TesterInfo } from 'nodeCan/tester'
 
 const seqCycle = ref(1)
 const dataBase = useDataStore()
@@ -255,6 +271,40 @@ const tableHeight = computed(() => {
 onBeforeMount(() => {
   if (tester.value.seqList.length > 0) activeTabName.value = `index${0}`
 })
+
+const presentStart = ref(false)
+function presentChange(medhotd: string, present: any[]) {
+  for (const p of present) {
+    if (p.message.method == 'setOption' && p.message.data.cmd == 'startTesterPresent') {
+      if (tester.value.id == p.message.data.val.id) {
+        presentStart.value = true
+      }
+    }
+  }
+}
+async function switchTesterPresent() {
+  if (window.globalStart.value == false) {
+    ElMessageBox.alert('Sequence can only be start during a running measurement', 'Warning', {
+      confirmButtonText: 'OK',
+      type: 'warning',
+      buttonSize: 'small',
+      appendTo: `#win${props.editIndex}_sequence`
+    })
+    return
+  }
+  await window.electron.ipcRenderer.invoke(
+    'ipc-switch-tester-present',
+    cloneDeep(tester.value),
+    !presentStart.value
+  )
+  presentStart.value = !presentStart.value
+}
+onMounted(() => {
+  window.logBus.on('setOption', presentChange)
+})
+onUnmounted(() => {
+  window.logBus.detach('setOption', presentChange)
+})
 </script>
 <style scoped>
 .seqTabs {
@@ -289,5 +339,10 @@ onBeforeMount(() => {
 
 .icon {
   font-size: 20px;
+}
+
+.tester-present-active {
+  background-color: var(--el-color-success-light-9) !important;
+  border-color: var(--el-color-success-light-7) !important;
 }
 </style>

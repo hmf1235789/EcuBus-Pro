@@ -286,8 +286,8 @@ export class ZLG_CAN extends CanBase {
       // setImmediate(()=>{this.callbackFd(100)})
     }
   }
-  setOption(cmd: string, val: any): void {
-    null
+  setOption(cmd: string, val: any): any {
+    return this._setOption(cmd, val)
   }
   static override getValidDevices(): CanDevice[] {
     if (process.platform == 'win32') {
@@ -373,6 +373,7 @@ export class ZLG_CAN extends CanBase {
         }
       }
       ZLG.FreeTSFN(this.id)
+      this._close()
     }
   }
 

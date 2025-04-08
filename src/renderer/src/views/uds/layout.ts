@@ -342,7 +342,7 @@ export class Layout {
     this.event.removeAllListeners(event)
   }
   getLayoutType(id: string) {
-    return this.validLayout[this.data.project.wins[id].title].layoutType
+    return this.validLayout[this.data.project.wins[id].title]?.layoutType
   }
   layoutInit(
     id: string,

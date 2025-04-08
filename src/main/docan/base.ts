@@ -1,6 +1,8 @@
 import EventEmitter from 'events'
 import {
+  addrToStr,
   CAN_ERROR_ID,
+  CanAddr,
   CanBaseInfo,
   CanBitrate,
   CanDevice,
@@ -9,8 +11,21 @@ import {
   CanMsgType
 } from '../share/can'
 import { CanLOG } from '../log'
+import { cloneDeep } from 'lodash'
+import { TesterInfo } from 'nodeCan/tester'
 
 export abstract class CanBase {
+  enableTesterPresent: Record<
+    string,
+    {
+      enable: boolean
+      addr: CanAddr
+      tester: TesterInfo
+      timeout: number
+      timer?: NodeJS.Timeout
+      action: () => Promise<void>
+    }
+  > = {}
   abstract info: CanBaseInfo
   abstract log: CanLOG
   abstract close(): void
@@ -27,7 +42,7 @@ export abstract class CanBase {
     extra?: { database?: string; name?: string }
   ): Promise<number>
   abstract getReadBaseId(id: number, msgType: CanMsgType): string
-  abstract setOption(cmd: string, val: any): void
+  abstract setOption(cmd: string, val: any): any
 
   abstract event: EventEmitter
   static getValidDevices(): CanDevice[] {
@@ -44,6 +59,63 @@ export abstract class CanBase {
   }
   detachCanMessage(cb: (msg: CanMessage) => void) {
     this.event.off('can-frame', cb)
+  }
+  protected _close() {
+    Object.values(this.enableTesterPresent).forEach((e) => {
+      clearTimeout(e.timer)
+    })
+  }
+  protected _setOption(cmd: string, val: any): any {
+    if (cmd == 'testerPresent') {
+      const id = addrToStr(val.addr)
+      const present = this.enableTesterPresent[id]
+      clearTimeout(present?.timer)
+      const cval = cloneDeep(val)
+      cval.enable = true
+      this.enableTesterPresent[id] = cval
+    } else if (cmd == 'startTesterPresent') {
+      const id = addrToStr(val)
+      const present = this.enableTesterPresent[id]
+      if (present && present.enable && present.timer == undefined) {
+        this.log.setOption(cmd, present.tester)
+        present.timer = setTimeout(() => {
+          present.timer = undefined
+          present.action().finally(() => {
+            this._setOption('startTesterPresent', val)
+          })
+        }, present.timeout)
+      }
+    } else if (cmd == 'stopTesterPresent') {
+      const id = addrToStr(val)
+      const present = this.enableTesterPresent[id]
+      if (present) {
+        clearTimeout(present.timer)
+        present.timer = undefined
+      }
+    } else if (cmd == 'disableTesterPresent') {
+      const id = addrToStr(val)
+      const present = this.enableTesterPresent[id]
+      if (present) {
+        present.enable = false
+        clearTimeout(present.timer)
+      }
+    } else if (cmd == 'enableTesterPresent') {
+      const id = addrToStr(val)
+      const present = this.enableTesterPresent[id]
+      if (present) {
+        present.enable = true
+        present.action().finally(() => {
+          this._setOption('startTesterPresent', val)
+        })
+      }
+    } else if (cmd == 'getTesterPresent') {
+      if (val) {
+        const id = addrToStr(val)
+        return this.enableTesterPresent[id]
+      } else {
+        return this.enableTesterPresent
+      }
+    }
   }
 }
 

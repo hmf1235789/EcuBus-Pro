@@ -225,7 +225,7 @@
           <el-form-item label="Channel">
             <el-select v-model="formData.channel" size="small" style="width: 100%" clearable>
               <el-option
-                v-for="(item, key) in dataBase.ia[editIndex].devices"
+                v-for="key in dataBase.ia[editIndex].devices"
                 :key="key"
                 :value="key"
                 :label="devices[key].name"

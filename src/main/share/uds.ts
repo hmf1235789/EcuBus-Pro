@@ -427,6 +427,8 @@ export interface UdsInfo {
   pExtTime: number
   s3Time: number
   testerPresentEnable: boolean
+  testerPresentSpecialService?: string
+  testerPresentAddrIndex?: number
 }
 
 export interface UdsAddress {

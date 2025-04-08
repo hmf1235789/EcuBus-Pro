@@ -539,7 +539,7 @@ export class PEAK_TP extends CanBase implements CanTp {
       peak.LoadDll(dllPath)
     }
   }
-  setOption(option: string, value: any) {
+  setOption(option: string, value: any): any {
     if (option.startsWith('PEAK:')) {
       const buf = Buffer.alloc(1)
       if (value) {
@@ -555,7 +555,9 @@ export class PEAK_TP extends CanBase implements CanTp {
       if (ret != 0) {
         throw new Error(err2str(ret))
       }
+      return
     }
+    return this._setOption(option, value)
   }
   close(isReset = false, msg?: string) {
     try {
@@ -631,6 +633,7 @@ export class PEAK_TP extends CanBase implements CanTp {
         peak.CANTP_Uninitialize_2016(this.handle)
         peak.FreeTSFN(this.id)
         this.event.emit('close', msg)
+        this._close()
       } else {
         this.reset()
       }

@@ -206,6 +206,10 @@ export default withMermaid({
               {
                 text:'Build In Script',
                 link:'/docs/um/uds/buildInScript.md'
+              },
+              {
+                text:'Tester Present',
+                link:'/docs/um/uds/testerPresent.md'
               }
             ]
           },

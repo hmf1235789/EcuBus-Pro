@@ -336,7 +336,7 @@
     <div v-if="!maxWinId && hideLayout.length > 0" class="windows">
       <div v-for="item in hideLayout" :key="item.id" class="littleWin">
         <Icon
-          v-if="layoutMaster.validLayout[item.title].icon"
+          v-if="layoutMaster.validLayout[item.title]?.icon"
           :icon="layoutMaster.validLayout[item.title].icon || ''"
           style="margin-right: 5px; font-size: 14px"
         />
@@ -409,7 +409,7 @@
             >
               <span class="title" :style="{ width: `${item.pos.w - 85}px` }">
                 <Icon
-                  v-if="layoutMaster.validLayout[item.title].icon"
+                  v-if="layoutMaster.validLayout[item.title]?.icon"
                   :icon="layoutMaster.validLayout[item.title].icon || ''"
                   style="margin-right: 5px; font-size: 14px"
                 />
@@ -448,7 +448,7 @@
             }"
           >
             <component
-              :is="layoutMaster.validLayout[item.title].component"
+              :is="layoutMaster.validLayout[item.title]?.component"
               :id="item.id"
               :ref="
                 (r) => {
