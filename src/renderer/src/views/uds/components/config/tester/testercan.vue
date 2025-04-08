@@ -134,8 +134,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="From Speical Service" prop="udsTime.testerPresentSpecialSerivce">
-            <el-select v-model="data.udsTime.testerPresentSpecialSerivce">
+          <el-form-item label="From Special Service" prop="udsTime.testerPresentSpecialService">
+            <el-select v-model="data.udsTime.testerPresentSpecialService">
               <el-option
                 v-for="(item, index) in all3EServices"
                 :key="index"

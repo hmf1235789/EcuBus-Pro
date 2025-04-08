@@ -340,9 +340,9 @@ async function globalStart(
 
             if (addr && addr.canAddr) {
               let data = Buffer.from([0x3e, 0x00])
-              if (tester.udsTime.testerPresentSpecialSerivce) {
+              if (tester.udsTime.testerPresentSpecialService) {
                 const service = tester.allServiceList['0x3E']?.find(
-                  (e) => e.id == tester.udsTime.testerPresentSpecialSerivce
+                  (e) => e.id == tester.udsTime.testerPresentSpecialService
                 )
                 if (service) {
                   data = getTxPdu(service)
