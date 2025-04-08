@@ -6,6 +6,7 @@
       label-width="150px"
       :rules="rules"
       size="small"
+      :disabled="globalStart"
       hide-required-asterisk
     >
       <el-form-item label="Tester Name" prop="name">
@@ -121,11 +122,7 @@
       </el-form-item>
       <el-form-item v-if="data.udsTime.testerPresentEnable" label-width="0">
         <el-col :span="12">
-          <el-form-item
-            label="Used Address"
-            prop="udsTime.testerPresentAddrIndex"
-            :required="data.udsTime.testerPresentEnable"
-          >
+          <el-form-item label="Tester Present Address" prop="udsTime.testerPresentAddrIndex">
             <el-select v-model.number="data.udsTime.testerPresentAddrIndex">
               <el-option
                 v-for="(item, index) in data.address"
@@ -365,38 +362,46 @@ const all3EServices = computed(() => {
   }
   return services
 })
-const rules: FormRules = {
-  name: [
-    {
-      required: true,
-      trigger: 'blur',
-      validator: nameCheck
-    }
-  ],
-  targetDeviceId: [
-    {
-      required: true,
-      message: 'Please select target device',
-      trigger: 'change'
-    }
-  ],
-  'udsTime.pTime': [
-    {
-      required: true,
-      message: 'Please input UDS Timeout',
-      trigger: 'blur',
-      type: 'number'
-    }
-  ],
-  'udsTime.s3Time': [
-    {
-      required: true,
-      message: 'Please input S3 Time',
-      trigger: 'blur',
-      type: 'number'
-    }
-  ]
-}
+const rules = computed<FormRules>(() => {
+  return {
+    name: [
+      {
+        required: true,
+        trigger: 'blur',
+        validator: nameCheck
+      }
+    ],
+    targetDeviceId: [
+      {
+        required: true,
+        message: 'Please select target device',
+        trigger: 'change'
+      }
+    ],
+    'udsTime.pTime': [
+      {
+        required: true,
+        message: 'Please input UDS Timeout',
+        trigger: 'blur',
+        type: 'number'
+      }
+    ],
+    'udsTime.s3Time': [
+      {
+        required: true,
+        message: 'Please input S3 Time',
+        trigger: 'blur',
+        type: 'number'
+      }
+    ],
+    'udsTime.testerPresentAddrIndex': [
+      {
+        required: data.value.udsTime.testerPresentEnable,
+        message: 'Address is required'
+      }
+    ]
+  }
+})
 
 const project = useProjectStore()
 

@@ -460,102 +460,118 @@ export class CAN_TP implements CanTp {
         prefixBuffer.push(Number(addr.AE))
       }
     }
+    this.setOption('stopTesterPresent', addr)
+    try {
+      if (this.isSingleFrame(addr, data)) {
+        let lenLimit = 7
+        if (
+          addr.addrFormat == CAN_ADDR_FORMAT.EXTENDED ||
+          addr.addrFormat == CAN_ADDR_FORMAT.MIXED
+        ) {
+          lenLimit -= 1
+        }
+        let pci
 
-    if (this.isSingleFrame(addr, data)) {
-      let lenLimit = 7
-      if (addr.addrFormat == CAN_ADDR_FORMAT.EXTENDED || addr.addrFormat == CAN_ADDR_FORMAT.MIXED) {
-        lenLimit -= 1
-      }
-      let pci
-
-      if (data.length > lenLimit) {
-        pci = Buffer.from([...prefixBuffer, 0, data.length])
+        if (data.length > lenLimit) {
+          pci = Buffer.from([...prefixBuffer, 0, data.length])
+        } else {
+          pci = Buffer.from([...prefixBuffer, data.length])
+        }
+        const { sendData } = this.getSendData(pci, addr, data)
+        const { ts } = await this.sendCanFrame(addr, sendData)
+        this.setOption('startTesterPresent', addr)
+        return ts
       } else {
-        pci = Buffer.from([...prefixBuffer, data.length])
-      }
-      const { sendData } = this.getSendData(pci, addr, data)
-      const { ts } = await this.sendCanFrame(addr, sendData)
-      return ts
-    } else {
-      if (addr.addrType == CAN_ADDR_TYPE.FUNCTIONAL) {
-        throw new TpError(
-          TP_ERROR_ID.TP_PARAM_ERROR,
-          addr,
-          data,
-          'functional address not support multi frame'
-        )
-      }
-      let waitFlowControl = true
-      let sn = 1
-      let sendLen = 0
-      let sessionBs = 0
-      let sessionStMin = 0
-      let sessionCurBs = 0
-      let lastFrameSentTs = 0
-      const pci = Buffer.from([
-        ...prefixBuffer,
-        0x10 | (Math.floor(data.length / 256) & 0xf),
-        data.length % 256
-      ])
-      //ff
-      const { sendData, usedLen } = this.getSendData(pci, addr, data)
-      const { ts } = await this.sendCanFrame(addr, sendData)
-      lastFrameSentTs = ts
-      sendLen = usedLen
-      const recvId = addrToId(swapAddr(addr))
-      const socket = new CAN_SOCKET(this.base, recvId, addr)
-      while (sendLen < data.length) {
-        if (this.lastWriteError) {
-          throw this.lastWriteError
+        if (addr.addrType == CAN_ADDR_TYPE.FUNCTIONAL) {
+          throw new TpError(
+            TP_ERROR_ID.TP_PARAM_ERROR,
+            addr,
+            data,
+            'functional address not support multi frame'
+          )
         }
-        if (waitFlowControl) {
-          const { stMin, bs, recvTs } = await this.waitFlowControl(socket, addr)
-          if (recvTs < lastFrameSentTs) {
-            throw new TpError(
-              TP_ERROR_ID.TP_INTERNAL_ERROR,
-              addr,
-              data,
-              `received flow control ts(${recvTs}) less than last frame sent ts${lastFrameSentTs}`
-            )
+        let waitFlowControl = true
+        let sn = 1
+        let sendLen = 0
+        let sessionBs = 0
+        let sessionStMin = 0
+        let sessionCurBs = 0
+        let lastFrameSentTs = 0
+        const pci = Buffer.from([
+          ...prefixBuffer,
+          0x10 | (Math.floor(data.length / 256) & 0xf),
+          data.length % 256
+        ])
+        //ff
+        const { sendData, usedLen } = this.getSendData(pci, addr, data)
+        const { ts } = await this.sendCanFrame(addr, sendData)
+        lastFrameSentTs = ts
+        sendLen = usedLen
+        const recvId = addrToId(swapAddr(addr))
+        const socket = new CAN_SOCKET(this.base, recvId, addr)
+        while (sendLen < data.length) {
+          if (this.lastWriteError) {
+            socket.close()
+            throw this.lastWriteError
+          }
+          if (waitFlowControl) {
+            try {
+              const { stMin, bs, recvTs } = await this.waitFlowControl(socket, addr)
+              if (recvTs < lastFrameSentTs) {
+                throw new TpError(
+                  TP_ERROR_ID.TP_INTERNAL_ERROR,
+                  addr,
+                  data,
+                  `received flow control ts(${recvTs}) less than last frame sent ts${lastFrameSentTs}`
+                )
+              }
+
+              sessionBs = bs
+              sessionStMin = Math.max(stMin, addr.nCs || 0)
+              sessionCurBs = 0
+              waitFlowControl = false
+
+              await this.delay(sessionStMin, addr)
+            } catch (e) {
+              socket.close()
+              throw e
+            }
+          }
+          const snData = Buffer.from([...prefixBuffer, 0x20 | (sn & 0xf)])
+          const { sendData, usedLen } = this.getSendData(snData, addr, data.subarray(sendLen))
+          this.sendCanFrame(addr, sendData)
+            .then(({ ts }) => {
+              lastFrameSentTs = ts
+            })
+            .catch((e) => {
+              this.lastWriteError = e
+            })
+
+          sendLen += usedLen
+
+          sn++
+          if (sessionStMin > 0) {
+            await this.delay(sessionStMin, addr)
+          }
+          if (sn == 0x10) {
+            sn = 0
           }
 
-          sessionBs = bs
-          sessionStMin = Math.max(stMin, addr.nCs || 0)
-          sessionCurBs = 0
-          waitFlowControl = false
-
-          await this.delay(sessionStMin, addr)
-        }
-        const snData = Buffer.from([...prefixBuffer, 0x20 | (sn & 0xf)])
-        const { sendData, usedLen } = this.getSendData(snData, addr, data.subarray(sendLen))
-        this.sendCanFrame(addr, sendData)
-          .then(({ ts }) => {
-            lastFrameSentTs = ts
-          })
-          .catch((e) => {
-            this.lastWriteError = e
-          })
-
-        sendLen += usedLen
-
-        sn++
-        if (sessionStMin > 0) {
-          await this.delay(sessionStMin, addr)
-        }
-        if (sn == 0x10) {
-          sn = 0
-        }
-
-        if (sessionBs != 0) {
-          sessionCurBs++
-          if (sessionCurBs >= sessionBs) {
-            waitFlowControl = true
-            sessionCurBs = 0
+          if (sessionBs != 0) {
+            sessionCurBs++
+            if (sessionCurBs >= sessionBs) {
+              waitFlowControl = true
+              sessionCurBs = 0
+            }
           }
         }
+        socket.close()
+        this.setOption('startTesterPresent', addr)
+        return lastFrameSentTs
       }
-      socket.close()
-      return lastFrameSentTs
+    } catch (e) {
+      this.setOption('startTesterPresent', addr)
+      throw e
     }
   }
 

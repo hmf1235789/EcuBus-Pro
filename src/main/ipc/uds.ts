@@ -332,28 +332,31 @@ async function globalStart(
         }
         if (cantp.rxBaseHandleExist.size > 0) {
           cantps.push(cantp)
-
           if (
             tester.udsTime.testerPresentEnable &&
             tester.udsTime.testerPresentAddrIndex != undefined
           ) {
-            const addr = tester.address[tester.udsTime.testerPresentAddrIndex].canAddr
-            if (addr) {
-              let data = Buffer.from([0x3e, 0])
-              const service = tester.allServiceList['0x3E']?.find(
-                (e) => e.id == tester.udsTime.testerPresentSpecialSerivce
-              )
-              if (service) {
-                data = getTxPdu(service)
+            const addr = tester.address[tester.udsTime.testerPresentAddrIndex]
+
+            if (addr && addr.canAddr) {
+              let data = Buffer.from([0x3e, 0x00])
+              if (tester.udsTime.testerPresentSpecialSerivce) {
+                const service = tester.allServiceList['0x3E']?.find(
+                  (e) => e.id == tester.udsTime.testerPresentSpecialSerivce
+                )
+                if (service) {
+                  data = getTxPdu(service)
+                }
               }
-              const val = {
+              const taddr = addr.canAddr
+              cantp.setOption('testerPresent', {
+                addr: taddr,
+                timeout: tester.udsTime.s3Time,
                 action: () => {
-                  cantp.writeTp(addr, data)
+                  return cantp.writeTp(taddr, data)
                 },
-                addr: addr,
-                timeout: tester.udsTime.s3Time
-              }
-              cantp.setOption('testerPresent', val)
+                tester: tester
+              })
             }
           }
         }
@@ -465,6 +468,24 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   } catch (err: any) {
     globalStop(true)
     throw err
+  }
+})
+
+ipcMain.handle('ipc-switch-tester-present', async (event, ...arg) => {
+  const tester = arg[0] as TesterInfo
+  const enable = arg[1] as boolean
+  if (tester.udsTime.testerPresentEnable && tester.udsTime.testerPresentAddrIndex != undefined) {
+    const addr = tester.address[tester.udsTime.testerPresentAddrIndex]
+
+    if (addr && addr.canAddr) {
+      for (const base of canBaseMap.values()) {
+        if (enable) {
+          base.setOption('enableTesterPresent', addr.canAddr)
+        } else {
+          base.setOption('disableTesterPresent', addr.canAddr)
+        }
+      }
+    }
   }
 })
 

@@ -11,12 +11,16 @@ import {
   CanMsgType
 } from '../share/can'
 import { CanLOG } from '../log'
+import { cloneDeep } from 'lodash'
+import { TesterInfo } from 'nodeCan/tester'
 
 export abstract class CanBase {
   enableTesterPresent: Record<
     string,
     {
+      enable: boolean
       addr: CanAddr
+      tester: TesterInfo
       timeout: number
       timer?: NodeJS.Timeout
       action: () => Promise<void>
@@ -66,26 +70,43 @@ export abstract class CanBase {
       const id = addrToStr(val.addr)
       const present = this.enableTesterPresent[id]
       clearTimeout(present?.timer)
-      this.enableTesterPresent[id] = val
+      const cval = cloneDeep(val)
+      cval.enable = true
+      this.enableTesterPresent[id] = cval
     } else if (cmd == 'startTesterPresent') {
-      const id = addrToStr(val.canAddr)
+      const id = addrToStr(val)
       const present = this.enableTesterPresent[id]
-      if (present) {
-        clearTimeout(present.timer)
+      if (present && present.enable && present.timer == undefined) {
+        this.log.setOption(cmd, present.tester)
         present.timer = setTimeout(() => {
-          if (present) {
-            present.action().finally(() => {
-              this._setOption('startTesterPresent', val)
-            })
-          }
+          present.timer = undefined
+          present.action().finally(() => {
+            this._setOption('startTesterPresent', val)
+          })
         }, present.timeout)
       }
     } else if (cmd == 'stopTesterPresent') {
-      const id = addrToStr(val.canAddr)
+      const id = addrToStr(val)
       const present = this.enableTesterPresent[id]
       if (present) {
         clearTimeout(present.timer)
         present.timer = undefined
+      }
+    } else if (cmd == 'disableTesterPresent') {
+      const id = addrToStr(val)
+      const present = this.enableTesterPresent[id]
+      if (present) {
+        present.enable = false
+        clearTimeout(present.timer)
+      }
+    } else if (cmd == 'enableTesterPresent') {
+      const id = addrToStr(val)
+      const present = this.enableTesterPresent[id]
+      if (present) {
+        present.enable = true
+        present.action().finally(() => {
+          this._setOption('startTesterPresent', val)
+        })
       }
     } else if (cmd == 'getTesterPresent') {
       if (val) {

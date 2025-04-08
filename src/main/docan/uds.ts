@@ -375,29 +375,6 @@ export class UDSTesterMain {
     cycleCount: number
   ) {
     const tp = new CAN_TP(base)
-    if (
-      this.tester.udsTime.testerPresentEnable &&
-      this.tester.udsTime.testerPresentAddrIndex != undefined
-    ) {
-      const addr = this.tester.address[this.tester.udsTime.testerPresentAddrIndex]
-
-      if (addr && addr.canAddr) {
-        let data = Buffer.from([0x3e, 0x00])
-        if (this.tester.udsTime.testerPresentSpecialSerivce) {
-          const service = this.tester.allServiceList['0x3E']?.find(
-            (e) => e.id == this.tester.udsTime.testerPresentSpecialSerivce
-          )
-          if (service) {
-            data = getTxPdu(service)
-          }
-        }
-        tp.setOption('testerPresent', {
-          addr: addr.canAddr,
-          timeout: this.tester.udsTime.s3Time,
-          data: data
-        })
-      }
-    }
     await this.runTp(
       {
         createSocket: async (addr: UdsAddress) => {
@@ -417,7 +394,6 @@ export class UDSTesterMain {
       log,
       cycleCount
     ).finally(() => {
-      tp.setOption('stopTesterPresent', undefined)
       tp.close(this.closeBase)
     })
   }
@@ -665,15 +641,6 @@ export class UDSTesterMain {
                     )
                   }
                 }
-                if (rxData.data[0] != Number(targetService.serviceId)) {
-                  const usedTime = Math.floor((getTsUs() - curUs) / 1000)
-                  if (usedTime > timeout) {
-                    timeout = 0
-                  } else {
-                    timeout -= usedTime
-                  }
-                  continue
-                }
                 //compare
                 const minLen = Math.min(rxBuffer.length, rxData.data.length)
                 const ret = Buffer.compare(
@@ -834,11 +801,7 @@ export class UDSTesterMain {
             } else {
               // eslint-disable-next-line no-constant-condition
               while (true) {
-                canTp.setOption('stopTesterPresent', addrItem)
-                const r = await serviceRun(tester, s).finally(() => {
-                  canTp.setOption('startTesterPresent', addrItem)
-                })
-
+                const r = await serviceRun(tester, s)
                 if (r) {
                   break
                 }
@@ -871,7 +834,7 @@ export function findService(
       sid -= 0x40
     }
   }
-  const serviceId = `0x${sid.toString(16)}` as ServiceId
+  const serviceId = `0x${sid.toString(16).toLocaleUpperCase()}` as ServiceId
   const service = serviceDetail[serviceId]
   if (service && isNeg == false) {
     let matchLen = 0

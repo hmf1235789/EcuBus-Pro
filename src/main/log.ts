@@ -104,6 +104,12 @@ export class CanLOG {
       data
     })
   }
+  setOption(cmd: string, val: any) {
+    this.log.info({
+      method: 'setOption',
+      data: { cmd, val }
+    })
+  }
   error(ts: number, msg?: string) {
     this.log.error({
       method: 'canError',
