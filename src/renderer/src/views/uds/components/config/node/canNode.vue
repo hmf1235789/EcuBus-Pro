@@ -88,7 +88,7 @@
           <el-input v-model="row.freq" />
         </template>
         <template #edit_clock="{ row, rowIndex }">
-          <el-select v-if="rowIndex == 0" v-model="row.clock" size="small">
+          <el-select v-if="rowIndex == 0" v-model="row.clock" size="small" allow-create filterable>
             <el-option
               v-for="item in clockList"
               :key="item.clock"
@@ -440,9 +440,9 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
       callback(new Error('Please select clock'))
     }
     //must be in clockList
-    if (!clockList.value.some((item) => item.clock == data.value.bitrate.clock)) {
-      callback(new Error('Please select correct clock'))
-    }
+    // if (!clockList.value.some((item) => item.clock == data.value.bitrate.clock)) {
+    //   callback(new Error('Please select correct clock'))
+    // }
     if (data.value.bitrate.timeSeg1 + 1 < data.value.bitrate.timeSeg2) {
       callback(new Error('normal tseg1 must be greater than tseg2-1'))
     }
