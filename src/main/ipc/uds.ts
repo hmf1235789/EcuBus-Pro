@@ -479,10 +479,12 @@ ipcMain.handle('ipc-switch-tester-present', async (event, ...arg) => {
 
     if (addr && addr.canAddr) {
       for (const base of canBaseMap.values()) {
-        if (enable) {
-          base.setOption('enableTesterPresent', addr.canAddr)
-        } else {
-          base.setOption('disableTesterPresent', addr.canAddr)
+        if (base.info.id == tester.targetDeviceId) {
+          if (enable) {
+            base.setOption('enableTesterPresent', addr.canAddr)
+          } else {
+            base.setOption('disableTesterPresent', addr.canAddr)
+          }
         }
       }
     }
