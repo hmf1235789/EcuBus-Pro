@@ -259,6 +259,7 @@ export class TOOMOSS_CAN extends CanBase {
         name: pendingCmds.extra?.name
       }
       this.log.canBase(message)
+      this.event.emit(this.getReadBaseId(message.id, message.msgType), message)
       pendingCmds.resolve(ts)
       pendingBaseCmds.delete(cmdId)
     }
