@@ -439,59 +439,55 @@ describe('toomoss cantp', () => {
   let server!: CanTp
   beforeAll(() => {
     server = new CAN_TP(
-      new TOOMOSS_CAN(
-        {
-          handle: '1417675180:0',
-          name: 'server',
-          vendor: 'toomoss',
-          canfd: true,
+      new TOOMOSS_CAN({
+        handle: '1417675180:0',
+        name: 'server',
+        vendor: 'toomoss',
+        canfd: true,
 
-          bitrate: {
-            freq: 500000,
-            preScaler: 1,
-            timeSeg1: 68,
-            timeSeg2: 11,
-            sjw: 11
-          },
-          bitratefd: {
-            freq: 1000000,
-            preScaler: 1,
-            timeSeg1: 20,
-            timeSeg2: 19,
-            sjw: 19
-          },
-          id: 'toomoss0'
+        bitrate: {
+          freq: 500000,
+          preScaler: 1,
+          timeSeg1: 68,
+          timeSeg2: 11,
+          sjw: 11
         },
-        true
-      )
+        bitratefd: {
+          freq: 1000000,
+          preScaler: 1,
+          timeSeg1: 20,
+          timeSeg2: 19,
+          sjw: 19
+        },
+        id: 'toomoss0',
+        toomossRes: true
+      })
     )
 
     client = new CAN_TP(
-      new TOOMOSS_CAN(
-        {
-          handle: '1417675180:1',
-          name: 'client',
-          vendor: 'toomoss',
-          canfd: true,
+      new TOOMOSS_CAN({
+        handle: '1417675180:1',
+        name: 'client',
+        vendor: 'toomoss',
+        canfd: true,
 
-          bitrate: {
-            freq: 500000,
-            preScaler: 1,
-            timeSeg1: 68,
-            timeSeg2: 11,
-            sjw: 11
-          },
-          bitratefd: {
-            freq: 1000000,
-            preScaler: 1,
-            timeSeg1: 20,
-            timeSeg2: 19,
-            sjw: 19
-          },
-          id: 'toomoss1'
+        bitrate: {
+          freq: 500000,
+          preScaler: 1,
+          timeSeg1: 68,
+          timeSeg2: 11,
+          sjw: 11
         },
-        true
-      )
+        bitratefd: {
+          freq: 1000000,
+          preScaler: 1,
+          timeSeg1: 20,
+          timeSeg2: 19,
+          sjw: 19
+        },
+        id: 'toomoss1',
+        toomossRes: true
+      })
     )
   })
 

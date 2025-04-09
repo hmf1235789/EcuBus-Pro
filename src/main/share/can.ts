@@ -22,6 +22,8 @@ export interface CanBaseInfo {
   bitrate: CanBitrate
   bitratefd?: CanBitrate
   database?: string
+  toomossRes?: boolean
+  zlgRes?: boolean
 }
 
 /**

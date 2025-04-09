@@ -40,6 +40,28 @@
         </template>
       </el-select>
     </el-form-item>
+    <el-form-item
+      v-if="props.vendor == 'toomoss'"
+      label="120R Res Enable"
+      prop="toomossRes"
+      placeholder="Disable"
+    >
+      <el-select v-model="data.toomossRes" :loading="deviceLoading" style="width: 300px">
+        <el-option label="Enable" :value="true" />
+        <el-option label="Disable" :value="false" />
+      </el-select>
+    </el-form-item>
+    <el-form-item
+      v-else-if="props.vendor == 'zlg'"
+      label="120R Res Enable"
+      prop="zlgRes"
+      placeholder="Disable"
+    >
+      <el-select v-model="data.zlgRes" :loading="deviceLoading" style="width: 300px">
+        <el-option label="Enable" :value="true" />
+        <el-option label="Disable" :value="false" />
+      </el-select>
+    </el-form-item>
     <el-divider content-position="left"> Can Parameters </el-divider>
     <el-form-item label-width="0">
       <el-col :span="12">
@@ -88,7 +110,7 @@
           <el-input v-model="row.freq" />
         </template>
         <template #edit_clock="{ row, rowIndex }">
-          <el-select v-if="rowIndex == 0" v-model="row.clock" size="small">
+          <el-select v-if="rowIndex == 0" v-model="row.clock" size="small" allow-create filterable>
             <el-option
               v-for="item in clockList"
               :key="item.clock"
@@ -440,9 +462,9 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
       callback(new Error('Please select clock'))
     }
     //must be in clockList
-    if (!clockList.value.some((item) => item.clock == data.value.bitrate.clock)) {
-      callback(new Error('Please select correct clock'))
-    }
+    // if (!clockList.value.some((item) => item.clock == data.value.bitrate.clock)) {
+    //   callback(new Error('Please select correct clock'))
+    // }
     if (data.value.bitrate.timeSeg1 + 1 < data.value.bitrate.timeSeg2) {
       callback(new Error('normal tseg1 must be greater than tseg2-1'))
     }

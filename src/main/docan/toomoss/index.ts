@@ -62,7 +62,7 @@ export class TOOMOSS_CAN extends CanBase {
     }
   >()
 
-  constructor(info: CanBaseInfo, enableRes = false) {
+  constructor(info: CanBaseInfo) {
     super()
     this.id = info.id
     this.info = info
@@ -167,7 +167,7 @@ export class TOOMOSS_CAN extends CanBase {
       this.canfdConfig.Mode = 0 // 正常模式
       this.canfdConfig.ISOCRCEnable = 1
       this.canfdConfig.RetrySend = 0
-      this.canfdConfig.ResEnable = enableRes ? 1 : 0
+      this.canfdConfig.ResEnable = info.toomossRes ? 1 : 0
       // 仲裁域波特率配置
       this.canfdConfig.NBT_BRP = info.bitrate.preScaler
       this.canfdConfig.NBT_SEG1 = info.bitrate.timeSeg1
@@ -198,7 +198,7 @@ export class TOOMOSS_CAN extends CanBase {
       this.canConfig.CAN_SJW = info.bitrate.sjw
       this.canConfig.CAN_BS1 = info.bitrate.timeSeg1
       this.canConfig.CAN_BS2 = info.bitrate.timeSeg2
-      this.canConfig.CAN_Mode = enableRes ? 0x80 | 0 : 0 // 正常模式
+      this.canConfig.CAN_Mode = info.toomossRes ? 0x80 : 0 // 正常模式
       this.canConfig.CAN_ABOM = 0 // 自动离线恢复
       this.canConfig.CAN_NART = 1 // 自动重传
       this.canConfig.CAN_RFLM = 0 // 接收FIFO锁定模式
@@ -259,6 +259,7 @@ export class TOOMOSS_CAN extends CanBase {
         name: pendingCmds.extra?.name
       }
       this.log.canBase(message)
+      this.event.emit(this.getReadBaseId(message.id, message.msgType), message)
       pendingCmds.resolve(ts)
       pendingBaseCmds.delete(cmdId)
     }
