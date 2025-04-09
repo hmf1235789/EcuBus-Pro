@@ -96,7 +96,11 @@ export class ZLG_CAN extends CanBase {
     //   throw new Error('Set device recv merge failed')
     // }
 
-    ZLG.ZCAN_SetValue(this.handle, `${this.deviceIndex}/initenal_resistance`, '0')
+    ZLG.ZCAN_SetValue(
+      this.handle,
+      `${this.deviceIndex}/initenal_resistance`,
+      info.zlgRes ? '1' : '0'
+    )
 
     if (info.bitrate.zlgSpec) {
       const path = `${this.deviceIndex}/baud_rate_custom`

@@ -40,6 +40,28 @@
         </template>
       </el-select>
     </el-form-item>
+    <el-form-item
+      v-if="props.vendor == 'toomoss'"
+      label="120R Res Enable"
+      prop="toomossRes"
+      placeholder="Disable"
+    >
+      <el-select v-model="data.toomossRes" :loading="deviceLoading" style="width: 300px">
+        <el-option label="Enable" :value="true" />
+        <el-option label="Disable" :value="false" />
+      </el-select>
+    </el-form-item>
+    <el-form-item
+      v-else-if="props.vendor == 'zlg'"
+      label="120R Res Enable"
+      prop="zlgRes"
+      placeholder="Disable"
+    >
+      <el-select v-model="data.zlgRes" :loading="deviceLoading" style="width: 300px">
+        <el-option label="Enable" :value="true" />
+        <el-option label="Disable" :value="false" />
+      </el-select>
+    </el-form-item>
     <el-divider content-position="left"> Can Parameters </el-divider>
     <el-form-item label-width="0">
       <el-col :span="12">

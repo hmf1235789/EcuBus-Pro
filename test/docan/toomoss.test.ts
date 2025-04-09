@@ -276,59 +276,55 @@ describe('toomoss multi send canfd', () => {
   let client!: TOOMOSS_CAN
   let client2!: TOOMOSS_CAN
   beforeAll(() => {
-    client = new TOOMOSS_CAN(
-      {
-        handle: '1417675180:0',
-        name: 'test',
-        id: 'toomoss',
-        vendor: 'toomoss',
-        canfd: true,
-        bitrate: {
-          freq: 250000,
-          preScaler: 2,
-          timeSeg1: 68,
-          timeSeg2: 11,
-          sjw: 11,
-          clock: '40M'
-        },
-        bitratefd: {
-          freq: 1000000,
-          preScaler: 1,
-          timeSeg1: 29,
-          timeSeg2: 10,
-          sjw: 2
-        },
-        database: ''
+    client = new TOOMOSS_CAN({
+      handle: '1417675180:0',
+      name: 'test',
+      id: 'toomoss',
+      vendor: 'toomoss',
+      canfd: true,
+      bitrate: {
+        freq: 250000,
+        preScaler: 2,
+        timeSeg1: 68,
+        timeSeg2: 11,
+        sjw: 11,
+        clock: '40M'
       },
-      true
-    )
-    client2 = new TOOMOSS_CAN(
-      {
-        handle: '1417675180:1',
-        name: 'test2',
-        id: 'toomoss',
-        vendor: 'toomoss',
-        canfd: true,
+      bitratefd: {
+        freq: 1000000,
+        preScaler: 1,
+        timeSeg1: 29,
+        timeSeg2: 10,
+        sjw: 2
+      },
+      database: '',
+      toomossRes: true
+    })
+    client2 = new TOOMOSS_CAN({
+      handle: '1417675180:1',
+      name: 'test2',
+      id: 'toomoss',
+      vendor: 'toomoss',
+      canfd: true,
 
-        bitrate: {
-          freq: 250000,
-          preScaler: 2,
-          timeSeg1: 68,
-          timeSeg2: 11,
-          sjw: 11,
-          clock: '40M'
-        },
-        bitratefd: {
-          freq: 1000000,
-          preScaler: 1,
-          timeSeg1: 29,
-          timeSeg2: 10,
-          sjw: 2
-        },
-        database: ''
+      bitrate: {
+        freq: 250000,
+        preScaler: 2,
+        timeSeg1: 68,
+        timeSeg2: 11,
+        sjw: 11,
+        clock: '40M'
       },
-      true
-    )
+      bitratefd: {
+        freq: 1000000,
+        preScaler: 1,
+        timeSeg1: 29,
+        timeSeg2: 10,
+        sjw: 2
+      },
+      database: '',
+      toomossRes: true
+    })
   })
   test.skip('write multi frame #1', async () => {
     for (let i = 0; i < 50; i++) {
