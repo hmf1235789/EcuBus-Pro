@@ -69,13 +69,18 @@ std::map<std::string, TsfnContext *> tsfnContextMap;
 auto callback = []( Napi::Env env, Napi::Function jsCallback, CAN_MSG* value ) {
     // 创建返回对象
     Napi::Object msgObj = Napi::Object::New(env);
-    
+    unsigned int id = value->ID;
+    if(value->ExternFlag&0x1) {
+        id |= 0x80000000;
+    }
+    if(value->RemoteFlag&0x1) {
+        id |= 0x40000000;
+    }
     // 设置基本属性
-    msgObj.Set("ID", Napi::Number::New(env, value->ID));
+    msgObj.Set("ID", Napi::Number::New(env, id));
     msgObj.Set("TimeStamp", Napi::Number::New(env, value->TimeStamp));
-    msgObj.Set("RemoteFlag", Napi::Number::New(env, value->RemoteFlag));
-    msgObj.Set("ExternFlag", Napi::Number::New(env, value->ExternFlag));
-    msgObj.Set("DataLen", Napi::Number::New(env, value->DataLen));
+    msgObj.Set("Flags", Napi::Number::New(env, 0));
+    msgObj.Set("DLC", Napi::Number::New(env, value->DataLen));
     msgObj.Set("TimeStampHigh", Napi::Number::New(env, value->TimeStampHigh));
     
     // 创建数据Buffer
@@ -301,7 +306,7 @@ void rxThreadEntry(TsfnContext *context) {
     while (!context->closed) {
         if(!context->isCanFd) {
             ret = CAN_GetMsgWithSize(context->DevHandle, context->CanIndex, &context->canMsg, 1);
-            if(ret > 0) {
+            if(ret > 0 && ((context->canMsg.ExternFlag&0x80)==0)) {
                 context->tsfn.NonBlockingCall(&context->canMsg, callback);
             }
         } else {
