@@ -145,6 +145,9 @@ export function getRxPdu(service: ServiceItem, paddingVal = 0) {
   return buffer.subarray(0, allLen)
 }
 export function applyBuffer(service: ServiceItem, data: Buffer, isReq: boolean) {
+  if (!data || data.length === 0) {
+    return
+  }
   if (data[0] == 0x7f) {
     return
   }
@@ -166,14 +169,18 @@ export function applyBuffer(service: ServiceItem, data: Buffer, isReq: boolean) 
       params.pop()
     }
   }
-  const allLen = params.reduce((acc, item) => acc + Math.ceil(item.bitLen / 8), 0)
-  if (allLen > data.length) {
-    throw new Error(`response buffer length not enough, expect ${allLen} but got ${data.length}`)
-  }
   let len = 1
   for (const param of params) {
-    paramSetValRaw(param, data.subarray(len, len + Math.ceil(param.bitLen / 8)))
-    len += Math.ceil(param.bitLen / 8)
+    const paramLen = Math.ceil(param.bitLen / 8)
+    if (len < data.length) {
+      const subData = data.subarray(len, len + paramLen)
+      //如果 subData 的长度小于paramLen，就跳过
+      if (subData.length < paramLen) {
+        return
+      }
+      paramSetValRaw(param, subData)
+    }
+    len += paramLen
   }
   //append left to last param
   if (len < data.length) {

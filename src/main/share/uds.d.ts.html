@@ -46,6 +46,14 @@ interface CanMessage {
      * The database name of the CAN message.
      */
     database?: string;
+    /**
+     * The children signals of the CAN message.
+     * internal use
+     */
+    children?: {
+        name: string;
+        data: string;
+    }[];
 }
 /**
  * Enumeration representing different CAN (Controller Area Network) ID types.
@@ -174,6 +182,14 @@ interface LinMsg {
     isEvent?: boolean;
     uuid?: string;
     ts?: number;
+    /**
+     * The children signals of the CAN message.
+     * internal use
+     */
+    children?: {
+        name: string;
+        data: string;
+    }[];
 }
 
 type DataType = 'NUM' | 'ARRAY' | 'ASCII' | 'UNICODE' | 'FLOAT' | 'DOUBLE' | 'FILE';
