@@ -140,12 +140,15 @@ if (isWorker) {
         }
         break
       }
-
       case 'linBase': {
         const result = parseLinData(data)
         if (result) {
           self.postMessage(result)
         }
+        break
+      }
+      case 'setVar': {
+        console.table(data)
         break
       }
 

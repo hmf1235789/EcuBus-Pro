@@ -36,8 +36,7 @@ export abstract class CanBase {
     minLoading: 100,
     maxLoading: 0,
     avgLoading: 0,
-    lastUpdate: 0,
-    updateInterval: 1000 // Update stats every second
+    lastUpdate: 0
   }
 
   abstract info: CanBaseInfo
@@ -219,25 +218,6 @@ export abstract class CanBase {
       this.busLoadingStats.totalBits += totalBits
       this.busLoadingStats.currentBits += totalBits
     }
-
-    // Update statistics every second
-    if (now - this.busLoadingStats.lastUpdate >= this.busLoadingStats.updateInterval) {
-      const elapsedTime = (now - this.busLoadingStats.startTime) / 1000 // Convert to seconds
-      const bitrate = this.info.bitrate.freq // Get the current bitrate
-      const currentLoading = (this.busLoadingStats.currentBits / (bitrate * elapsedTime)) * 100
-
-      // Update min/max
-      this.busLoadingStats.minLoading = Math.min(this.busLoadingStats.minLoading, currentLoading)
-      this.busLoadingStats.maxLoading = Math.max(this.busLoadingStats.maxLoading, currentLoading)
-
-      // Update average
-      this.busLoadingStats.avgLoading =
-        (this.busLoadingStats.totalBits / (bitrate * elapsedTime)) * 100
-
-      // Reset current bits for next interval
-      this.busLoadingStats.currentBits = 0
-      this.busLoadingStats.lastUpdate = now
-    }
   }
 
   getBusLoading() {
@@ -256,6 +236,24 @@ export abstract class CanBase {
 
     // Calculate current loading
     const currentLoading = (this.busLoadingStats.currentBits / (bitrate * elapsedTime)) * 100
+
+    // Update min/max
+    this.busLoadingStats.minLoading = Math.max(
+      0,
+      Math.min(this.busLoadingStats.minLoading, currentLoading)
+    )
+    this.busLoadingStats.maxLoading = Math.min(
+      100,
+      Math.max(this.busLoadingStats.maxLoading, currentLoading)
+    )
+
+    // Update average
+    this.busLoadingStats.avgLoading =
+      (this.busLoadingStats.totalBits / (bitrate * elapsedTime)) * 100
+
+    // Reset current bits for next interval
+    this.busLoadingStats.currentBits = 0
+    this.busLoadingStats.lastUpdate = now
 
     return {
       current: Number(currentLoading.toFixed(2)),

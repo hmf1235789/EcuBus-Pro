@@ -39,12 +39,12 @@ import { getJsPath } from '../util'
 import UdsTester from '../workerClient'
 import { serviceDetail } from '../uds/service'
 import { getAllSysVar } from '../share/sysVar'
-import { cloneDeep } from 'lodash'
 import { IntervalHistogram, monitorEventLoopDelay } from 'perf_hooks'
+import { cloneDeep } from 'lodash'
 
 const libPath = path.dirname(dllLib)
 
-const monitor: IntervalHistogram = monitorEventLoopDelay({ resolution: 100 })
+let monitor: IntervalHistogram | undefined
 let timer: NodeJS.Timeout | undefined
 
 log.info('dll lib path:', libPath)
@@ -470,13 +470,14 @@ async function globalStart(
   //     }
   // })
 
+  monitor = monitorEventLoopDelay({ resolution: 100 })
   monitor.enable()
 
   periodTaskList.push(() => {
     varLog.setVarByKeyBatch([
-      { key: 'EventLoopDelay.min', value: monitor.min },
-      { key: 'EventLoopDelay.max', value: monitor.max },
-      { key: 'EventLoopDelay.avg', value: monitor.mean }
+      { key: 'EventLoopDelay.min', value: Number((monitor!.min - 100000000) / 1000000).toFixed(2) },
+      { key: 'EventLoopDelay.max', value: Number((monitor!.max - 100000000) / 1000000).toFixed(2) },
+      { key: 'EventLoopDelay.avg', value: Number((monitor!.mean - 100000000) / 1000000).toFixed(2) }
     ])
   })
   if (periodTaskList.length > 0) {
@@ -503,7 +504,7 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   const sysVars = getAllSysVar(devices)
 
   for (const v of sysVars) {
-    vars[v.id] = v
+    vars[v.id] = cloneDeep(v)
   }
 
   for (const key of Object.keys(vars)) {
@@ -606,7 +607,7 @@ export function globalStop(emit = false) {
     })
   }
   clearTimeout(timer)
-  monitor.disable()
+  monitor?.disable()
 }
 
 ipcMain.handle('ipc-global-stop', async (event, ...arg) => {

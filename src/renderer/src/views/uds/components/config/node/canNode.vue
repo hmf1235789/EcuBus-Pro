@@ -249,7 +249,7 @@ const configInfo: Record<CanVendor, any> = {
     timeSeg2: false,
     sjw: false,
     preScaler: false,
-    freq: false,
+    freq: true,
     zlgSpec: false
   },
   toomoss: {
@@ -414,7 +414,7 @@ function getBaudrateSP(speed: CanBitrate, index: number) {
     const baudrate = f_clock / (nom_brp * (nom_tseg1 + nom_tseg2 + 1))
     return `${(baudrate / 1000).toFixed(0)}K / ${(sample_point * 100).toFixed(2)}%`
   } else if (props.vendor == 'simulate') {
-    return `SIMULATE (don't care)`
+    return `${speed.freq / 1000}K/ (Don't care)`
   } else if (props.vendor == 'zlg') {
     if (data.value.bitrate.zlgSpec) {
       return `ZLG (check the ZLG Baud Calculator)`
