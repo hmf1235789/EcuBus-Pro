@@ -325,6 +325,28 @@ export class ZLG_CAN extends CanBase {
           label: 'ZCAN_USBCANFD_100U_INDEX_1_CHANNEL_0',
           id: 'ZCAN_USBCANFD_100U_INDEX_1_CHANNEL_0',
           handle: `${ZLG.ZCAN_USBCANFD_100U}_1_0`
+        },
+        //can_fd_mini
+        {
+          label: 'ZCAN_USBCANFD_MINI_INDEX_0_CHANNEL_0',
+          id: 'ZCAN_USBCANFD_MINI_INDEX_0_CHANNEL_0',
+          handle: `${ZLG.ZCAN_USBCANFD_MINI}_0_0`
+        },
+        {
+          label: 'ZCAN_USBCANFD_MINI_INDEX_1_CHANNEL_0',
+          id: 'ZCAN_USBCANFD_MINI_INDEX_1_CHANNEL_0',
+          handle: `${ZLG.ZCAN_USBCANFD_MINI}_1_0`
+        },
+        //can_e_mini
+        {
+          label: 'ZCAN_USBCAN_E_MINI_INDEX_0_CHANNEL_0',
+          id: 'ZCAN_USBCAN_E_MINI_INDEX_0_CHANNEL_0',
+          handle: `${ZLG.ZCAN_USBCAN_E_U}_0_0`
+        },
+        {
+          label: 'ZCAN_USBCAN_E_MINI_INDEX_1_CHANNEL_0',
+          id: 'ZCAN_USBCAN_E_MINI_INDEX_1_CHANNEL_0',
+          handle: `${ZLG.ZCAN_USBCAN_E_U}_1_0`
         }
       ]
       return zcanArray
