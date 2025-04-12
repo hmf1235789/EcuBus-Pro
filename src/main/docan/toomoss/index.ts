@@ -122,6 +122,7 @@ export class TOOMOSS_CAN extends CanBase {
     }
 
     this.event = new EventEmitter()
+
     this.log = new CanLOG('TOOMOSS', info.name, this.event)
 
     this.handle = parseInt(info.handle.split(':')[0])
@@ -216,6 +217,7 @@ export class TOOMOSS_CAN extends CanBase {
         throw new Error('Start CAN failed')
       }
       TOOMOSS.CAN_ResetStartTime(this.handle, this.deviceIndex)
+      this.attachCanMessage(this.busloadCb)
     }
 
     // 绑定回调函数到实例

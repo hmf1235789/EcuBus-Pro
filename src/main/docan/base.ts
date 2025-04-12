@@ -78,6 +78,7 @@ export abstract class CanBase {
     Object.values(this.enableTesterPresent).forEach((e) => {
       clearTimeout(e.timer)
     })
+    this.detachCanMessage(this.busloadCb)
   }
   protected _setOption(cmd: string, val: any): any {
     if (cmd == 'testerPresent') {
@@ -131,6 +132,7 @@ export abstract class CanBase {
       }
     }
   }
+  protected busloadCb = this.updateBusLoadingWithFrame.bind(this)
   updateBusLoadingWithFrame(msg: CanMessage) {
     // Calculate message bits
     const startBit = 1

@@ -9,6 +9,7 @@ import { PayloadType } from './doip'
 import { LinMsg } from './share/lin'
 import { TestEvent } from 'node:test/reporters'
 import { setVar, setVarByKey } from './var'
+import { VarItem } from 'src/preload/data'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -449,8 +450,8 @@ export class LinLOG {
 
 export class VarLOG {
   log: Logger
-  id: string
-  constructor(id: string) {
+  id?: string
+  constructor(id?: string) {
     this.id = id
 
     const et1 = externalTransport.map((t) => t())
@@ -460,18 +461,51 @@ export class VarLOG {
     })
   }
   setVarByKey(key: string, value: number | string | number[]) {
-    const found = setVarByKey(key, value)
-    if (found) {
+    const { found, target } = setVarByKey(key, value)
+    if (found && target) {
       this.log.info({
-        method: 'setVarByKey',
-        data: { key, value, id: this.id }
+        method: 'setVar',
+        data: { name: target.name, value, id: target.id, uuid: this.id }
       })
       globalThis.varEvent?.emit('update', {
-        name: found.target.name,
+        name: target.name,
         value,
-        id: found.target.id,
+        id: target.id,
         uuid: this.id
       })
+    }
+  }
+  setVarByKeyBatch(data: { key: string; value: number | string | number[] }[]) {
+    const founds: { index: number; var: VarItem }[] = []
+    for (const [index, item] of data.entries()) {
+      const found = setVarByKey(item.key, item.value)
+      if (found) {
+        founds.push({
+          index,
+          var: found.target
+        })
+      }
+    }
+    if (founds.length > 0) {
+      this.log.info({
+        method: 'setVar',
+        data: founds.map((f) => ({
+          index: f.index,
+          name: f.var.name,
+          value: data[f.index].value,
+          id: f.var.id,
+          uuid: this.id
+        }))
+      })
+      globalThis.varEvent?.emit(
+        'update',
+        founds.map((f) => ({
+          name: f.var.name,
+          value: data[f.index].value,
+          id: f.var.id,
+          uuid: this.id
+        }))
+      )
     }
   }
   setVar(name: string, value: number | string | number[]) {

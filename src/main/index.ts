@@ -9,6 +9,7 @@ import { createLogs } from './log'
 import './update'
 import { globalStop } from './ipc/uds'
 import Transport from 'winston-transport'
+import { monitorEventLoopDelay } from 'perf_hooks'
 
 log.initialize()
 

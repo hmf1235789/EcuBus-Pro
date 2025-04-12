@@ -231,7 +231,7 @@ const configInfo: Record<CanVendor, any> = {
     timeSeg2: true,
     sjw: true,
     preScaler: true,
-    freq: false,
+    freq: true,
     zlgSpec: false
   },
   kvaser: {
@@ -503,7 +503,7 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
         callback(new Error('data tseg2 must be between 1-16'))
       }
     }
-    if (props.vendor == 'kvaser' || props.vendor == 'toomoss') {
+    if (props.vendor == 'kvaser' || props.vendor == 'toomoss' || props.vendor == 'peak') {
       const calcFreq =
         (Number(data.value.bitrate.clock || 40) * 1000000) /
         (data.value.bitrate.preScaler *

@@ -68,6 +68,7 @@ export { after } from 'node:test'
  * @category TEST
  */
 import { describe } from 'node:test'
+import { VarUpdateItem } from '../global'
 
 const selfDescribe = process.env.ONLY ? describe.only : describe
 export { selfDescribe as describe }
@@ -1216,14 +1217,18 @@ export class UtilClass {
     await this.event.emit(`keyDown${key}` as any, key)
     await this.event.emit(`keyDown*` as any, key)
   }
-  private async varUpdate(data: {
-    name: string
-    value: number | string | number[]
-    id: string
-    uuid?: string
-  }) {
-    await this.event.emit(`varUpdate${data.name}` as any, data)
-    await this.event.emit(`varUpdate*` as any, data)
+  private async varUpdate(data: VarUpdateItem | VarUpdateItem[]) {
+    if (Array.isArray(data)) {
+      const promiseList: Promise<void>[] = []
+      for (const item of data) {
+        promiseList.push(this.event.emit(`varUpdate${item.name}` as any, item))
+        promiseList.push(this.event.emit(`varUpdate*` as any, item))
+      }
+      await Promise.all(promiseList)
+    } else {
+      await this.event.emit(`varUpdate${data.name}` as any, data)
+      await this.event.emit(`varUpdate*` as any, data)
+    }
   }
   private evnetDone(
     id: number,

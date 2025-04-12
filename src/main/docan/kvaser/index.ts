@@ -134,6 +134,7 @@ export class KVASER_CAN extends CanBase {
       throw new Error(err2str(ret))
     }
     KV.CreateTSFN(this.handle, this.id, this.callback.bind(this))
+    this.attachCanMessage(this.busloadCb)
   }
   static loadDllPath(dllPath: string) {
     if (process.platform == 'win32') {

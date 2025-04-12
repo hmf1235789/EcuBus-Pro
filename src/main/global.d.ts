@@ -5,16 +5,16 @@ import { LDF } from 'src/renderer/src/database/ldfParse'
 import { DBC } from 'src/renderer/src/database/dbc/dbcVisitor'
 import { VarItem } from 'src/preload/data'
 import { BrowserWindow } from 'electron'
+import { IntervalHistogram } from 'node:perf_hooks'
 
+type VarUpdateItem = {
+  name: string
+  value: number | string | number[]
+  id: string
+  uuid?: string
+}
 type VarEvent = {
-  update: [
-    {
-      name: string
-      value: number | string | number[]
-      id: string
-      uuid?: string
-    }
-  ]
+  update: [VarUpdateItem | VarUpdateItem[]]
 }
 
 declare global {

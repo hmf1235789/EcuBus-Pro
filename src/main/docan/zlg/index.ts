@@ -168,6 +168,7 @@ export class ZLG_CAN extends CanBase {
       this.id + 'error',
       this.callbackError.bind(this)
     )
+    this.attachCanMessage(this.busloadCb)
   }
   callbackError() {
     this.log.error(getTsUs() - this.startTime, 'bus error')

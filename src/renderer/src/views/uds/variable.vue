@@ -175,7 +175,7 @@ import { useDataStore } from '../../stores/data'
 import { VarItem, VarValueNumber, VarValueString, VarValueArray } from 'src/preload/data'
 import { v4 } from 'uuid'
 import { cloneDeep } from 'lodash'
-
+import { getAllSysVar } from 'nodeCan/sysVar'
 const variableForm = ref()
 // Initialize data store
 const dataStore = useDataStore()
@@ -196,16 +196,15 @@ const userTableData = computed(() => {
   }
   return list
 })
-const systemTableData = ref<VarItem[]>([])
+const systemTableData = computed(() => {
+  return getAllSysVar(dataStore.devices)
+})
 // Define popoverIndex to track the selected variable
 const popoverIndex = ref('')
 
 // Load variables from data store on mount
 onMounted(() => {
-  refreshSystemTable()
-
   // Process all variables and build the hierarchy
-
   // Process system variables
   // systemTableData.value = Object.values(systemVariables.value)
 })
@@ -530,42 +529,6 @@ function createOrUpdateVariable() {
       userVariableGrid.value?.clearCurrentRow()
     }
   })
-}
-
-function refreshSystemTable() {
-  systemTableData.value = []
-  //can statistics
-  systemTableData.value.push({
-    type: 'system',
-    id: `Statistics`,
-    name: `Statistics`
-  })
-  for (const device of Object.values(dataStore.devices)) {
-    if (device.type === 'can' && device.canDevice) {
-      systemTableData.value.push({
-        type: 'system',
-        id: `${device.canDevice.id}`,
-        name: `${device.canDevice.name}`,
-        parentId: `Statistics`
-      })
-
-      const list = ['BusLoad', 'BusLoadMin', 'BusLoadMax', 'BusLoadAvg']
-      for (const item of list) {
-        systemTableData.value.push({
-          type: 'system',
-          id: `${device.canDevice.id}.${item}`,
-          name: `${item}`,
-          parentId: `${device.canDevice.id}`,
-          value: {
-            type: 'number',
-            initValue: 0,
-            min: 0,
-            max: 100
-          }
-        })
-      }
-    }
-  }
 }
 
 // Add computed property for namespace tree data

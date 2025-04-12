@@ -19,7 +19,7 @@ import { getTxPdu, UdsAddress, UdsDevice } from '../share/uds'
 import { TesterInfo } from '../share/tester'
 import log from 'electron-log'
 
-import { UdsLOG } from '../log'
+import { UdsLOG, VarLOG } from '../log'
 import { clientTcp, DOIP, getEthDevices } from './../doip'
 import { EthAddr, EthBaseInfo } from '../share/doip'
 
@@ -38,8 +38,15 @@ import { NodeClass } from '../nodeItem'
 import { getJsPath } from '../util'
 import UdsTester from '../workerClient'
 import { serviceDetail } from '../uds/service'
+import { getAllSysVar } from '../share/sysVar'
+import { cloneDeep } from 'lodash'
+import { IntervalHistogram, monitorEventLoopDelay } from 'perf_hooks'
 
 const libPath = path.dirname(dllLib)
+
+const monitor: IntervalHistogram = monitorEventLoopDelay({ resolution: 100 })
+let timer: NodeJS.Timeout | undefined
+
 log.info('dll lib path:', libPath)
 
 ipcMain.on('ipc-service-detail', (event, arg) => {
@@ -246,6 +253,8 @@ async function globalStart(
   projectInfo: { path: string; name: string }
 ) {
   let activeKey = ''
+  const varLog = new VarLOG()
+  const periodTaskList: (() => void)[] = []
   testMap.forEach((value) => {
     value.close()
   })
@@ -267,6 +276,16 @@ async function globalStart(
             }
           })
           canBaseMap.set(key, canBase)
+          periodTaskList.push(() => {
+            const busLoad = canBase.getBusLoading()
+
+            varLog.setVarByKeyBatch([
+              { key: `Statistics.${canDevice.id}.BusLoad`, value: busLoad.current },
+              { key: `Statistics.${canDevice.id}.BusLoadMin`, value: busLoad.min },
+              { key: `Statistics.${canDevice.id}.BusLoadMax`, value: busLoad.max },
+              { key: `Statistics.${canDevice.id}.BusLoadAvg`, value: busLoad.average }
+            ])
+          })
         }
       } else if (device.type == 'eth' && device.ethDevice) {
         const ethDevice = device.ethDevice
@@ -450,6 +469,23 @@ async function globalStart(
   //         }
   //     }
   // })
+
+  monitor.enable()
+
+  periodTaskList.push(() => {
+    varLog.setVarByKeyBatch([
+      { key: 'EventLoopDelay.min', value: monitor.min },
+      { key: 'EventLoopDelay.max', value: monitor.max },
+      { key: 'EventLoopDelay.avg', value: monitor.mean }
+    ])
+  })
+  if (periodTaskList.length > 0) {
+    timer = setInterval(() => {
+      periodTaskList.forEach((e) => {
+        e()
+      })
+    }, 100)
+  }
 }
 ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   let i = 0
@@ -463,17 +499,31 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
 
   global.database = arg[i++]
   global.vars = {}
-  const vars: Record<string, VarItem> = arg[i++]
-  for (const key in vars) {
+  const vars: Record<string, VarItem> = arg[i++] || {}
+  const sysVars = getAllSysVar(devices)
+
+  for (const v of sysVars) {
+    vars[v.id] = v
+  }
+
+  for (const key of Object.keys(vars)) {
     const v = vars[key]
+
     if (v.value) {
       const parentName: string[] = []
-      if (v.parentId) {
-        const parent = vars[v.parentId]
+
+      // 递归查找所有父级名称
+      let currentVar = v
+      while (currentVar.parentId) {
+        const parent = vars[currentVar.parentId]
         if (parent) {
-          parentName.push(parent.name)
+          parentName.unshift(parent.name) // 将父级名称添加到数组开头
+          currentVar = parent
+        } else {
+          break
         }
       }
+
       parentName.push(v.name)
       v.name = parentName.join('.')
     }
@@ -555,6 +605,8 @@ export function globalStop(emit = false) {
       win.webContents.send('ipc-global-stop')
     })
   }
+  clearTimeout(timer)
+  monitor.disable()
 }
 
 ipcMain.handle('ipc-global-stop', async (event, ...arg) => {

@@ -388,6 +388,7 @@ export class PEAK_TP extends CanBase implements CanTp {
     this.info = baseInfo
     this.handle = baseInfo.handle
     const devices = PEAK_TP.getValidDevices()
+
     //init
     let str = `f_clock_mhz=${this.info.bitrate.clock},nom_brp=${this.info.bitrate.preScaler},nom_tseg1=${this.info.bitrate.timeSeg1},nom_tseg2=${this.info.bitrate.timeSeg2},nom_sjw=${this.info.bitrate.sjw}`
     if (this.info.canfd && this.info.bitratefd) {
@@ -400,11 +401,6 @@ export class PEAK_TP extends CanBase implements CanTp {
     let ret = peak.CANTP_InitializeFD_2016(this.handle, str)
     if (ret != 0) {
       if (ret == -2013265920) {
-        //calcuate real freq
-        this.info.bitrate.freq =
-          (Number(this.info.bitrate.clock || 40) * 1000000) /
-          (this.info.bitrate.preScaler *
-            (this.info.bitrate.timeSeg1 + this.info.bitrate.timeSeg2 + 1))
         //try init with normal
         let baud = peak.PCANTP_BAUDRATE_500K
         switch (this.info.bitrate.freq) {
@@ -483,6 +479,7 @@ export class PEAK_TP extends CanBase implements CanTp {
     // }
     this.setOption('PEAK:PCANTP_PARAMETER_SUPPORT_29B_FIXED_NORMAL', 0)
     this.setOption('PEAK:PCANTP_PARAMETER_SUPPORT_29B_MIXED', 0)
+    this.attachCanMessage(this.busloadCb)
   }
   reset() {
     const buf = Buffer.alloc(1)
