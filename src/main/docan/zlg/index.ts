@@ -194,7 +194,7 @@ export class ZLG_CAN extends CanBase {
         if (items.length == 0) {
           this.pendingBaseCmds.delete(cmdId)
         }
-        console.log('writeBase', items.length)
+
         const message: CanMessage = {
           device: this.info.name,
           dir: 'OUT',

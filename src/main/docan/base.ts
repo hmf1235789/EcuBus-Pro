@@ -32,11 +32,15 @@ export abstract class CanBase {
   private busLoadingStats = {
     startTime: 0,
     totalBits: 0,
-    currentBits: 0,
+    samples: [] as { ts: number; bits: number }[],
     minLoading: 100,
     maxLoading: 0,
     avgLoading: 0,
-    lastUpdate: 0
+    lastUpdate: 0,
+    // 帧统计
+    sentFrames: 0,
+    recvFrames: 0,
+    framesSamples: [] as { ts: number; sent: number; recv: number }[]
   }
 
   abstract info: CanBaseInfo
@@ -133,111 +137,187 @@ export abstract class CanBase {
   }
   protected busloadCb = this.updateBusLoadingWithFrame.bind(this)
   updateBusLoadingWithFrame(msg: CanMessage) {
-    // Calculate message bits
-    const startBit = 1
-    const crcDelimiter = 1
-    const ackSlot = 1
-    const ackDelimiter = 1
-    const eof = 7
-    const interFrameSpace = 3
+    // 统计发送/接收帧
+    if (msg.dir === 'OUT') {
+      this.busLoadingStats.sentFrames++
+    } else if (msg.dir === 'IN') {
+      this.busLoadingStats.recvFrames++
+    }
 
-    // Calculate arbitration field bits (always at arbitration rate)
-    let arbitrationBits = 0
+    // 计算不同阶段的位数量
+    let arbitrationBits = 0 // 仲裁阶段的位数（使用仲裁比特率）
+    let dataBits = 0 // 数据阶段的位数（CANFD可能使用数据比特率）
+
+    // 仲裁段位数（SOF + ID + 控制字段起始部分）
+    const sof = 1 // 起始帧位
+
+    // ID字段计算
     if (msg.msgType.idType === CAN_ID_TYPE.STANDARD) {
-      arbitrationBits = 11 // Standard ID
+      arbitrationBits += 11 // 标准ID (11位)
     } else {
-      arbitrationBits = 29 // Extended ID
-    }
-    arbitrationBits += 1 // IDE bit
-    arbitrationBits += 1 // RTR bit
-
-    // Calculate control field bits (always at arbitration rate)
-    let controlBits = 6 // DLC field (4 bits) + reserved bits (2 bits)
-    if (msg.msgType.canfd) {
-      controlBits += 2 // FDF and BRS bits
+      arbitrationBits += 29 // 扩展ID (29位)
     }
 
-    // Calculate data field bits (at data rate for CAN-FD)
-    const dataBits = msg.data.length * 8
-
-    // Calculate CRC field bits (at data rate for CAN-FD)
-    let crcBits = 15 // Standard CAN CRC
+    // 控制字段计算
+    arbitrationBits += 1 // RTR位
+    arbitrationBits += 1 // IDE位
     if (msg.msgType.canfd) {
-      crcBits = 21 // CAN-FD CRC
-    }
-
-    // Calculate stuff bits (approximation)
-    // Standard CAN: 1 stuff bit per 5 identical bits
-    // CAN-FD: 1 stuff bit per 4 identical bits
-    const stuffRatio = msg.msgType.canfd ? 4 : 5
-
-    // Calculate total bits for arbitration phase (at arbitration rate)
-    const arbitrationPhaseBits =
-      startBit +
-      arbitrationBits +
-      controlBits +
-      crcDelimiter +
-      ackSlot +
-      ackDelimiter +
-      eof +
-      interFrameSpace
-    const arbitrationStuffBits = Math.floor(arbitrationPhaseBits / stuffRatio)
-    const totalArbitrationBits = arbitrationPhaseBits + arbitrationStuffBits
-
-    // Calculate total bits for data phase (at data rate for CAN-FD)
-    let totalDataBits = 0
-    if (msg.msgType.canfd) {
-      const dataPhaseBits = dataBits + crcBits
-      const dataStuffBits = Math.floor(dataPhaseBits / stuffRatio)
-      totalDataBits = dataPhaseBits + dataStuffBits
+      arbitrationBits += 1 // FDF位
+      arbitrationBits += 1 // RES位
     } else {
-      const dataPhaseBits = dataBits + crcBits
-      const dataStuffBits = Math.floor(dataPhaseBits / stuffRatio)
-      totalDataBits = dataPhaseBits + dataStuffBits
+      arbitrationBits += 1 // r0位
     }
 
-    // Update bus loading statistics
+    // DLC字段（在仲裁阶段）
+    arbitrationBits += 4 // DLC 4位
+
+    // BRS位和ESI位（CANFD才有）
+    if (msg.msgType.canfd) {
+      arbitrationBits += 1 // BRS位
+      arbitrationBits += 1 // ESI位
+    }
+
+    // 数据字段计算（可能使用数据比特率）
+    dataBits += msg.data.length * 8
+
+    // CRC字段计算（可能使用数据比特率）
+    if (msg.msgType.canfd) {
+      // CAN FD: 根据数据长度确定CRC位数
+      if (msg.data.length <= 16) {
+        dataBits += 17 // CAN FD CRC17
+      } else {
+        dataBits += 21 // CAN FD CRC21
+      }
+    } else {
+      // 标准CAN: 15位CRC
+      dataBits += 15 // 标准CAN CRC15
+    }
+
+    // 固定位段计算（使用仲裁比特率）
+    let fixedBits = 0
+    fixedBits += 1 // CRC界定符
+    fixedBits += 1 // ACK槽
+    fixedBits += 1 // ACK界定符
+    fixedBits += 7 // 帧结束(EOF)
+    fixedBits += 3 // 帧间间隔(IFS)
+
+    // 位填充计算
+    // 对仲裁段进行位填充（每5个连续相同位插入1个位）
+    const arbitrationStuffBits = Math.floor(arbitrationBits / 5)
+
+    // 对数据段进行位填充
+    // CAN FD固定位填充：每4个位插入1个
+    // 标准CAN：每5个连续相同位插入1个位
+    const dataStuffRatio = msg.msgType.canfd ? 4 : 5
+    const dataStuffBits = Math.floor(dataBits / dataStuffRatio)
+
+    // 总位数计算（考虑不同的比特率）
+    const totalArbitrationBits = sof + arbitrationBits + arbitrationStuffBits
+    const totalDataBits = dataBits + dataStuffBits
+    const totalFixedBits = fixedBits // 固定位不进行位填充
+
+    // 更新总线负载统计
     const now = Date.now()
     if (this.busLoadingStats.startTime === 0) {
       this.busLoadingStats.startTime = now
     }
 
-    // For CAN-FD, we need to account for different bitrates
-    if (msg.msgType.canfd) {
-      // Add arbitration phase bits at arbitration rate
-      this.busLoadingStats.totalBits += totalArbitrationBits
-      this.busLoadingStats.currentBits += totalArbitrationBits
+    if (msg.msgType.canfd && msg.msgType.brs) {
+      // CANFD + BRS：仲裁段和固定段使用仲裁比特率，数据段使用数据比特率
+      const arbitrationRate = this.info.bitrate.freq // 仲裁比特率
 
-      // Add data phase bits at data rate
-      const dataRateMultiplier = this.info.bitrate.freq / this.info.bitrate.freq // Assuming same rate for now, adjust if needed
-      this.busLoadingStats.totalBits += totalDataBits * dataRateMultiplier
-      this.busLoadingStats.currentBits += totalDataBits * dataRateMultiplier
+      // 获取数据比特率，如果没有bitratefd，则使用bitrate的4倍
+      const dataRate = this.info.bitratefd ? this.info.bitratefd.freq : this.info.bitrate.freq * 4
+
+      // 根据不同比特率换算成"标准比特率时间"
+      const arbitrationTime = totalArbitrationBits / arbitrationRate
+      const dataTime = totalDataBits / dataRate
+      const fixedTime = totalFixedBits / arbitrationRate
+
+      // 总共等效比特数（以仲裁比特率为基准）
+      const equivalentBits = (arbitrationTime + dataTime + fixedTime) * arbitrationRate
+      this.busLoadingStats.totalBits += equivalentBits
     } else {
-      // For standard CAN, all bits are at the same rate
-      const totalBits = totalArbitrationBits + totalDataBits
+      // 标准CAN或没有BRS的CANFD：所有位使用相同的比特率
+      const totalBits = totalArbitrationBits + totalDataBits + totalFixedBits
       this.busLoadingStats.totalBits += totalBits
-      this.busLoadingStats.currentBits += totalBits
+    }
+
+    // 更新采样点
+    if (now - this.busLoadingStats.lastUpdate >= 20) {
+      // 添加总线负载采样
+      this.busLoadingStats.samples.push({
+        ts: now,
+        bits: this.busLoadingStats.totalBits
+      })
+
+      // 添加帧频率采样
+      this.busLoadingStats.framesSamples.push({
+        ts: now,
+        sent: this.busLoadingStats.sentFrames,
+        recv: this.busLoadingStats.recvFrames
+      })
+
+      this.busLoadingStats.lastUpdate = now
     }
   }
 
   getBusLoading() {
     const now = Date.now()
     if (this.busLoadingStats.startTime === 0) {
+      this.busLoadingStats.startTime = now
       return {
         current: 0,
         average: 0,
         min: 0,
-        max: 0
+        max: 0,
+        frameSentFreq: 0,
+        frameRecvFreq: 0,
+        frameFreq: 0
       }
     }
 
-    const elapsedTime = (now - this.busLoadingStats.startTime) / 1000
+    // 使用100ms的采样窗口和1秒的统计窗口
+    const sampleWindow = 100 // 100ms
+    const statsWindow = 1000 // 1秒
     const bitrate = this.info.bitrate.freq
 
-    // Calculate current loading
-    const currentLoading = (this.busLoadingStats.currentBits / (bitrate * elapsedTime)) * 100
+    // 移除超出统计窗口的采样点
+    const windowStart = now - statsWindow
+    this.busLoadingStats.samples = this.busLoadingStats.samples.filter(
+      (sample) => sample.ts >= windowStart
+    )
 
-    // Update min/max
+    // 移除超出统计窗口的帧采样点
+    this.busLoadingStats.framesSamples = this.busLoadingStats.framesSamples.filter(
+      (sample) => sample.ts >= windowStart
+    )
+
+    // 至少需要两个采样点才能计算
+    if (this.busLoadingStats.samples.length < 2) {
+      return {
+        current: 0,
+        average: 0,
+        min: 0,
+        max: 0,
+        frameSentFreq: 0,
+        frameRecvFreq: 0,
+        frameFreq: 0
+      }
+    }
+
+    // 计算当前负载
+    const samples = this.busLoadingStats.samples
+    const currentBits = samples[samples.length - 1].bits - samples[samples.length - 2].bits
+    const currentTimespan = (samples[samples.length - 1].ts - samples[samples.length - 2].ts) / 1000
+    const currentLoading = (currentBits / (bitrate * currentTimespan)) * 100
+
+    // 计算平均负载
+    const totalBits = samples[samples.length - 1].bits - samples[0].bits
+    const totalTimespan = (samples[samples.length - 1].ts - samples[0].ts) / 1000
+    const averageLoading = (totalBits / (bitrate * totalTimespan)) * 100
+
+    // 更新最大最小值
     this.busLoadingStats.minLoading = Math.max(
       0,
       Math.min(this.busLoadingStats.minLoading, currentLoading)
@@ -247,19 +327,41 @@ export abstract class CanBase {
       Math.max(this.busLoadingStats.maxLoading, currentLoading)
     )
 
-    // Update average
-    this.busLoadingStats.avgLoading =
-      (this.busLoadingStats.totalBits / (bitrate * elapsedTime)) * 100
+    // 计算帧频率 (frames/second)
+    let frameSentFreq = 0
+    let frameRecvFreq = 0
+    let frameFreq = 0
 
-    // Reset current bits for next interval
-    this.busLoadingStats.currentBits = 0
-    this.busLoadingStats.lastUpdate = now
+    // 从帧采样数据计算频率
+    if (this.busLoadingStats.framesSamples.length >= 2) {
+      const firstSample = this.busLoadingStats.framesSamples[0]
+      const lastSample =
+        this.busLoadingStats.framesSamples[this.busLoadingStats.framesSamples.length - 1]
 
+      const timeSpan = (lastSample.ts - firstSample.ts) / 1000 // 时间跨度（秒）
+
+      if (timeSpan > 0) {
+        // 计算发送帧频率（帧/秒）
+        frameSentFreq = (lastSample.sent - firstSample.sent) / timeSpan
+
+        // 计算接收帧频率（帧/秒）
+        frameRecvFreq = (lastSample.recv - firstSample.recv) / timeSpan
+
+        // 总帧频率 = 发送帧频率 + 接收帧频率
+        frameFreq = frameSentFreq + frameRecvFreq
+      }
+    }
+
+    // 限制返回值在0-100范围内并保留2位小数
     return {
-      current: Number(currentLoading.toFixed(2)),
-      average: Number(this.busLoadingStats.avgLoading.toFixed(2)),
+      current: Number(Math.min(100, Math.max(0, currentLoading)).toFixed(2)),
+      average: Number(Math.min(100, Math.max(0, averageLoading)).toFixed(2)),
       min: Number(this.busLoadingStats.minLoading.toFixed(2)),
-      max: Number(this.busLoadingStats.maxLoading.toFixed(2))
+      max: Number(this.busLoadingStats.maxLoading.toFixed(2)),
+      // 帧频率值保留2位小数
+      frameSentFreq: Math.floor(frameSentFreq),
+      frameRecvFreq: Math.floor(frameRecvFreq),
+      frameFreq: Math.floor(frameFreq)
     }
   }
 }

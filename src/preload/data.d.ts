@@ -77,6 +77,10 @@ export type GraphBindFrameValue = {
   dbName: string
   dbKey: string
 }
+export type GraphBindVariableValue = {
+  variableId: string
+  variableName: string
+}
 
 export type GraphNode<T, S = any> = {
   enable: boolean
@@ -112,8 +116,11 @@ export interface DataSet {
     lin: Record<string, LDF>
     can: Record<string, DBC>
   }
-  graphs: Record<string, GraphNode<GraphBindSignalValue, LineSeriesOption>>
-  guages: Record<string, GraphNode<GraphBindSignalValue, GaugeSeriesOption>>
+  graphs: Record<string, GraphNode<GraphBindSignalValue | GraphBindVariableValue, LineSeriesOption>>
+  guages: Record<
+    string,
+    GraphNode<GraphBindSignalValue | GraphBindVariableValue, GaugeSeriesOption>
+  >
   tests: Record<string, TestConfig>
   vars: Record<string, VarItem>
 }

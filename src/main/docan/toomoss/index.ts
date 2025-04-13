@@ -217,11 +217,8 @@ export class TOOMOSS_CAN extends CanBase {
         throw new Error('Start CAN failed')
       }
       TOOMOSS.CAN_ResetStartTime(this.handle, this.deviceIndex)
-      this.attachCanMessage(this.busloadCb)
     }
-
-    // 绑定回调函数到实例
-
+    this.attachCanMessage(this.busloadCb)
     // 初始化 TSFN
     TOOMOSS.CreateTSFN(
       this.handle,

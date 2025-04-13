@@ -40,26 +40,36 @@ export const MonitorVar: VarItem[] = [
   }
 ]
 
-export function getAllSysVar(devices: Record<string, UdsDevice>): VarItem[] {
-  const list: VarItem[] = [
-    {
+export function getAllSysVar(devices: Record<string, UdsDevice>): Record<string, VarItem> {
+  const list: Record<string, VarItem> = {
+    Statistics: {
       type: 'system',
       id: 'Statistics',
       name: `Statistics`
     }
-  ]
-  list.push(...MonitorVar)
+  }
+
   for (const device of Object.values(devices)) {
-    const buslist = ['BusLoad', 'BusLoadMin', 'BusLoadMax', 'BusLoadAvg']
+    const buslist = [
+      'BusLoad',
+      'BusLoadMin',
+      'BusLoadMax',
+      'BusLoadAvg',
+      'FrameSentFreq',
+      'FrameRecvFreq',
+      'FrameFreq'
+    ]
     if (device.type === 'can' && device.canDevice) {
-      list.push({
+      list[`Statistics.${device.canDevice.id}`] = {
         type: 'system',
         id: `Statistics.${device.canDevice.id}`,
         name: device.canDevice.name,
         parentId: 'Statistics'
-      })
+      }
       for (const item of buslist) {
-        list.push({
+        const isFrameFreq = item.includes('Frame')
+
+        list[`Statistics.${device.canDevice.id}.${item}`] = {
           type: 'system',
           id: `Statistics.${device.canDevice.id}.${item}`,
           name: `${item}`,
@@ -68,19 +78,21 @@ export function getAllSysVar(devices: Record<string, UdsDevice>): VarItem[] {
             type: 'number',
             initValue: 0,
             min: 0,
-            max: 100,
-            unit: '%'
+            max: isFrameFreq ? 10000 : 100,
+            unit: isFrameFreq ? 'f/s' : '%'
           }
-        })
+        }
       }
     }
   }
   //monitor var
-  list.push({
+  list[`EventLoopDelay`] = {
     type: 'system',
     id: 'EventLoopDelay',
     name: `EventLoopDelay`
-  })
-  list.push(...MonitorVar)
+  }
+  for (const item of MonitorVar) {
+    list[item.id] = item
+  }
   return list
 }

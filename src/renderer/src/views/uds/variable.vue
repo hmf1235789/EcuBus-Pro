@@ -197,7 +197,7 @@ const userTableData = computed(() => {
   return list
 })
 const systemTableData = computed(() => {
-  return getAllSysVar(dataStore.devices)
+  return Object.values(getAllSysVar(dataStore.devices))
 })
 // Define popoverIndex to track the selected variable
 const popoverIndex = ref('')

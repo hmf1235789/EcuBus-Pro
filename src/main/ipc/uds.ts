@@ -285,7 +285,10 @@ async function globalStart(
                 { key: `Statistics.${canDevice.id}.BusLoad`, value: busLoad.current },
                 { key: `Statistics.${canDevice.id}.BusLoadMin`, value: busLoad.min },
                 { key: `Statistics.${canDevice.id}.BusLoadMax`, value: busLoad.max },
-                { key: `Statistics.${canDevice.id}.BusLoadAvg`, value: busLoad.average }
+                { key: `Statistics.${canDevice.id}.BusLoadAvg`, value: busLoad.average },
+                { key: `Statistics.${canDevice.id}.FrameSentFreq`, value: busLoad.frameSentFreq },
+                { key: `Statistics.${canDevice.id}.FrameRecvFreq`, value: busLoad.frameRecvFreq },
+                { key: `Statistics.${canDevice.id}.FrameFreq`, value: busLoad.frameFreq }
               ],
               cnt * 1000
             )
@@ -521,7 +524,7 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   const vars: Record<string, VarItem> = arg[i++] || {}
   const sysVars = getAllSysVar(devices)
 
-  for (const v of sysVars) {
+  for (const v of Object.values(sysVars)) {
     vars[v.id] = cloneDeep(v)
   }
 

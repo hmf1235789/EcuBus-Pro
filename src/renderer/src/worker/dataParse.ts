@@ -120,17 +120,16 @@ function parseSetVar(data: any) {
   const result: Record<string, any> = {}
   for (const item of data) {
     const val = item.message.data
-    const ts = item.message.ts
+    const ts = parseFloat(((item.message.ts || 0) / 1000000).toFixed(3))
     if (Array.isArray(val)) {
       for (const sval of val) {
-        if (!result[sval.name]) {
-          result[sval.name] = []
+        if (!result[sval.id]) {
+          result[sval.id] = []
         }
-        result[sval.name].push([ts, sval.value])
+        result[sval.id].push([ts, sval.value])
       }
     }
   }
-  console.log(result)
   return result
 }
 
