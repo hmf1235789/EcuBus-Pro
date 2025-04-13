@@ -734,7 +734,7 @@ export class NodeClass {
       value: number | string | number[]
     }
   ) {
-    this.varLog.setVar(data.name, data.value)
+    this.varLog.setVar(data.name, data.value, getTsUs() - this.startTs)
   }
   setSignal(
     pool: UdsTester,

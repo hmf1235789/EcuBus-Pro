@@ -116,6 +116,24 @@ function initDataBase(db: DataSet['database']) {
   database = db
 }
 
+function parseSetVar(data: any) {
+  const result: Record<string, any> = {}
+  for (const item of data) {
+    const val = item.message.data
+    const ts = item.message.ts
+    if (Array.isArray(val)) {
+      for (const sval of val) {
+        if (!result[sval.name]) {
+          result[sval.name] = []
+        }
+        result[sval.name].push([ts, sval.value])
+      }
+    }
+  }
+  console.log(result)
+  return result
+}
+
 // Export functions for both testing and worker usage
 export { parseLinData, initDataBase, parseCanData }
 
@@ -148,7 +166,10 @@ if (isWorker) {
         break
       }
       case 'setVar': {
-        console.table(data)
+        const result = parseSetVar(data)
+        if (result) {
+          self.postMessage(result)
+        }
         break
       }
 

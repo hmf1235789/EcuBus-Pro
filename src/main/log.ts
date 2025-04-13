@@ -460,12 +460,13 @@ export class VarLOG {
       format: format.combine(format.json(), ...externalFormat)
     })
   }
-  setVarByKey(key: string, value: number | string | number[]) {
+  setVarByKey(key: string, value: number | string | number[], ts: number) {
     const { found, target } = setVarByKey(key, value)
     if (found && target) {
       this.log.info({
         method: 'setVar',
-        data: { name: target.name, value, id: target.id, uuid: this.id }
+        data: { name: target.name, value, id: target.id, uuid: this.id },
+        ts
       })
       globalThis.varEvent?.emit('update', {
         name: target.name,
@@ -475,7 +476,7 @@ export class VarLOG {
       })
     }
   }
-  setVarByKeyBatch(data: { key: string; value: number | string | number[] }[]) {
+  setVarByKeyBatch(data: { key: string; value: number | string | number[] }[], ts: number) {
     const founds: { index: number; var: VarItem }[] = []
     for (const [index, item] of data.entries()) {
       const found = setVarByKey(item.key, item.value)
@@ -495,7 +496,8 @@ export class VarLOG {
           value: data[f.index].value,
           id: f.var.id,
           uuid: this.id
-        }))
+        })),
+        ts
       })
       globalThis.varEvent?.emit(
         'update',
@@ -508,12 +510,13 @@ export class VarLOG {
       )
     }
   }
-  setVar(name: string, value: number | string | number[]) {
+  setVar(name: string, value: number | string | number[], ts: number) {
     const { found, target } = setVar(name, value)
     if (found && target) {
       this.log.info({
         method: 'setVar',
-        data: { name: target.name, value, id: target.id, uuid: this.id }
+        data: { name: target.name, value, id: target.id, uuid: this.id },
+        ts
       })
       globalThis.varEvent?.emit('update', {
         name: target.name,

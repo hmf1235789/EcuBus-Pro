@@ -10,7 +10,8 @@ export const MonitorVar: VarItem[] = [
     desc: 'Minimum event loop delay - lower values indicate better performance',
     value: {
       type: 'number',
-      initValue: 0
+      initValue: 0,
+      unit: 'ms'
     }
   },
   {
@@ -21,7 +22,8 @@ export const MonitorVar: VarItem[] = [
     parentId: 'EventLoopDelay',
     value: {
       type: 'number',
-      initValue: 0
+      initValue: 0,
+      unit: 'ms'
     }
   },
   {
@@ -32,7 +34,8 @@ export const MonitorVar: VarItem[] = [
     parentId: 'EventLoopDelay',
     value: {
       type: 'number',
-      initValue: 0
+      initValue: 0,
+      unit: 'ms'
     }
   }
 ]
@@ -65,7 +68,8 @@ export function getAllSysVar(devices: Record<string, UdsDevice>): VarItem[] {
             type: 'number',
             initValue: 0,
             min: 0,
-            max: 100
+            max: 100,
+            unit: '%'
           }
         })
       }

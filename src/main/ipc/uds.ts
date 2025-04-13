@@ -46,6 +46,7 @@ const libPath = path.dirname(dllLib)
 
 let monitor: IntervalHistogram | undefined
 let timer: NodeJS.Timeout | undefined
+let cnt = 0
 
 log.info('dll lib path:', libPath)
 
@@ -279,12 +280,15 @@ async function globalStart(
           periodTaskList.push(() => {
             const busLoad = canBase.getBusLoading()
 
-            varLog.setVarByKeyBatch([
-              { key: `Statistics.${canDevice.id}.BusLoad`, value: busLoad.current },
-              { key: `Statistics.${canDevice.id}.BusLoadMin`, value: busLoad.min },
-              { key: `Statistics.${canDevice.id}.BusLoadMax`, value: busLoad.max },
-              { key: `Statistics.${canDevice.id}.BusLoadAvg`, value: busLoad.average }
-            ])
+            varLog.setVarByKeyBatch(
+              [
+                { key: `Statistics.${canDevice.id}.BusLoad`, value: busLoad.current },
+                { key: `Statistics.${canDevice.id}.BusLoadMin`, value: busLoad.min },
+                { key: `Statistics.${canDevice.id}.BusLoadMax`, value: busLoad.max },
+                { key: `Statistics.${canDevice.id}.BusLoadAvg`, value: busLoad.average }
+              ],
+              cnt * 1000
+            )
           })
         }
       } else if (device.type == 'eth' && device.ethDevice) {
@@ -474,14 +478,28 @@ async function globalStart(
   monitor.enable()
 
   periodTaskList.push(() => {
-    varLog.setVarByKeyBatch([
-      { key: 'EventLoopDelay.min', value: Number((monitor!.min - 100000000) / 1000000).toFixed(2) },
-      { key: 'EventLoopDelay.max', value: Number((monitor!.max - 100000000) / 1000000).toFixed(2) },
-      { key: 'EventLoopDelay.avg', value: Number((monitor!.mean - 100000000) / 1000000).toFixed(2) }
-    ])
+    varLog.setVarByKeyBatch(
+      [
+        {
+          key: 'EventLoopDelay.min',
+          value: Number(((monitor!.min - 100000000) / 1000000).toFixed(2))
+        },
+        {
+          key: 'EventLoopDelay.max',
+          value: Number(((monitor!.max - 100000000) / 1000000).toFixed(2))
+        },
+        {
+          key: 'EventLoopDelay.avg',
+          value: Number(((monitor!.mean - 100000000) / 1000000).toFixed(2))
+        }
+      ],
+      cnt * 1000
+    )
   })
   if (periodTaskList.length > 0) {
+    cnt = 0
     timer = setInterval(() => {
+      cnt += 100
       periodTaskList.forEach((e) => {
         e()
       })
