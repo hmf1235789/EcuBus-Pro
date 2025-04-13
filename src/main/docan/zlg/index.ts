@@ -111,23 +111,32 @@ export class ZLG_CAN extends CanBase {
       }
     } else {
       const path1 = `${this.deviceIndex}/canfd_abit_baud_rate`
-      ret = ZLG.ZCAN_SetValue(this.handle, path1, `${info.bitrate.freq}`)
-      if (ret != 1) {
-        //close device
+      try {
+        ret = ZLG.ZCAN_SetValue(this.handle, path1, `${info.bitrate.freq}`)
+        if (ret != 1) {
+          //close device
 
-        throw new Error('Set abit baud rate failed')
-      }
-      if (info.canfd && info.bitratefd) {
-        const path2 = `${this.deviceIndex}/canfd_dbit_baud_rate`
-        ret = ZLG.ZCAN_SetValue(this.handle, path2, `${info.bitratefd.freq}`)
-        if (ret != 1) {
-          throw new Error('Set dbit baud rate failed')
+          throw new Error('Set abit baud rate failed')
         }
-      } else {
-        const path2 = `${this.deviceIndex}/canfd_dbit_baud_rate`
-        ret = ZLG.ZCAN_SetValue(this.handle, path2, `${info.bitrate.freq}`)
+        if (info.canfd && info.bitratefd) {
+          const path2 = `${this.deviceIndex}/canfd_dbit_baud_rate`
+          ret = ZLG.ZCAN_SetValue(this.handle, path2, `${info.bitratefd.freq}`)
+          if (ret != 1) {
+            throw new Error('Set dbit baud rate failed')
+          }
+        } else {
+          const path2 = `${this.deviceIndex}/canfd_dbit_baud_rate`
+          ret = ZLG.ZCAN_SetValue(this.handle, path2, `${info.bitrate.freq}`)
+          if (ret != 1) {
+            throw new Error('Set dbit baud rate failed')
+          }
+        }
+      } catch (err: any) {
+        //can device not support canfd
+        const path3 = `${this.deviceIndex}/baud_rate`
+        ret = ZLG.ZCAN_SetValue(this.handle, path3, `${info.bitrate.freq}`)
         if (ret != 1) {
-          throw new Error('Set dbit baud rate failed')
+          throw new Error('Set baud rate failed')
         }
       }
     }
