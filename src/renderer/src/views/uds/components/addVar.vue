@@ -100,7 +100,6 @@ const allVariables = computed(() => {
   const sysVars = Object.values(getAllSysVar(database.devices))
   const allList = [...Object.values(database.vars), ...sysVars]
   // 先创建所有用户变量节点
-  console.log(allList)
   for (const varItem of allList) {
     const variable: TreeItem = {
       id: varItem.id,
@@ -125,7 +124,6 @@ const allVariables = computed(() => {
       variables.push(variable)
     }
   }
-  console.log(variables)
 
   return variables
 })
@@ -191,8 +189,8 @@ function addVariable() {
     name: highlightedRow.value.name,
     color: randomColor(),
     yAxis: {
-      min: highlightedRow.value.value?.min,
-      max: highlightedRow.value.value?.max,
+      min: highlightedRow.value.value?.min || 0,
+      max: highlightedRow.value.value?.max || 100,
       unit: highlightedRow.value.value?.unit
     },
     bindValue: {

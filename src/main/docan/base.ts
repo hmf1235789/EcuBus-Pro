@@ -32,15 +32,15 @@ export abstract class CanBase {
   private busLoadingStats = {
     startTime: 0,
     totalBits: 0,
-    samples: [] as { ts: number; bits: number }[],
+    lastBits: 0,
     minLoading: 100,
     maxLoading: 0,
     avgLoading: 0,
-    lastUpdate: 0,
     // 帧统计
     sentFrames: 0,
     recvFrames: 0,
-    framesSamples: [] as { ts: number; sent: number; recv: number }[]
+    lastSentFrames: 0,
+    lastRecvFrames: 0
   }
 
   abstract info: CanBaseInfo
@@ -216,12 +216,6 @@ export abstract class CanBase {
     const totalDataBits = dataBits + dataStuffBits
     const totalFixedBits = fixedBits // 固定位不进行位填充
 
-    // 更新总线负载统计
-    const now = Date.now()
-    if (this.busLoadingStats.startTime === 0) {
-      this.busLoadingStats.startTime = now
-    }
-
     if (msg.msgType.canfd && msg.msgType.brs) {
       // CANFD + BRS：仲裁段和固定段使用仲裁比特率，数据段使用数据比特率
       const arbitrationRate = this.info.bitrate.freq // 仲裁比特率
@@ -242,30 +236,23 @@ export abstract class CanBase {
       const totalBits = totalArbitrationBits + totalDataBits + totalFixedBits
       this.busLoadingStats.totalBits += totalBits
     }
-
-    // 更新采样点
-    if (now - this.busLoadingStats.lastUpdate >= 20) {
-      // 添加总线负载采样
-      this.busLoadingStats.samples.push({
-        ts: now,
-        bits: this.busLoadingStats.totalBits
-      })
-
-      // 添加帧频率采样
-      this.busLoadingStats.framesSamples.push({
-        ts: now,
-        sent: this.busLoadingStats.sentFrames,
-        recv: this.busLoadingStats.recvFrames
-      })
-
-      this.busLoadingStats.lastUpdate = now
-    }
   }
 
-  getBusLoading() {
+  getBusLoading(timeDiff: number) {
     const now = Date.now()
+
+    // 获取当前时刻的总比特数和帧数
+    const currentBits = this.busLoadingStats.totalBits
+    const currentSentFrames = this.busLoadingStats.sentFrames
+    const currentRecvFrames = this.busLoadingStats.recvFrames
+
+    // 如果是第一次调用，初始化并返回零值
     if (this.busLoadingStats.startTime === 0) {
       this.busLoadingStats.startTime = now
+      this.busLoadingStats.lastBits = currentBits
+      this.busLoadingStats.lastSentFrames = currentSentFrames
+      this.busLoadingStats.lastRecvFrames = currentRecvFrames
+
       return {
         current: 0,
         average: 0,
@@ -277,45 +264,42 @@ export abstract class CanBase {
       }
     }
 
-    // 使用100ms的采样窗口和1秒的统计窗口
-    const sampleWindow = 100 // 100ms
-    const statsWindow = 1000 // 1秒
+    // 确保我们有有效的时间差
+    if (timeDiff <= 0) {
+      return {
+        current: this.busLoadingStats.avgLoading,
+        average: this.busLoadingStats.avgLoading,
+        min: this.busLoadingStats.minLoading,
+        max: this.busLoadingStats.maxLoading,
+        frameSentFreq: 0,
+        frameRecvFreq: 0,
+        frameFreq: 0
+      }
+    }
+
+    // 计算当前总线负载
+    const bitsSinceLastCall = currentBits - this.busLoadingStats.lastBits
     const bitrate = this.info.bitrate.freq
+    const timeDiffInSeconds = timeDiff / 1000
+    const currentLoading = (bitsSinceLastCall / (bitrate * timeDiffInSeconds)) * 100
 
-    // 移除超出统计窗口的采样点
-    const windowStart = now - statsWindow
-    this.busLoadingStats.samples = this.busLoadingStats.samples.filter(
-      (sample) => sample.ts >= windowStart
-    )
+    // 计算帧频率
+    const sentFramesSinceLastCall = currentSentFrames - this.busLoadingStats.lastSentFrames
+    const recvFramesSinceLastCall = currentRecvFrames - this.busLoadingStats.lastRecvFrames
 
-    // 移除超出统计窗口的帧采样点
-    this.busLoadingStats.framesSamples = this.busLoadingStats.framesSamples.filter(
-      (sample) => sample.ts >= windowStart
-    )
+    const frameSentFreq = sentFramesSinceLastCall / timeDiffInSeconds
+    const frameRecvFreq = recvFramesSinceLastCall / timeDiffInSeconds
+    const frameFreq = frameSentFreq + frameRecvFreq
 
-    // 至少需要两个采样点才能计算
-    if (this.busLoadingStats.samples.length < 2) {
-      return {
-        current: 0,
-        average: 0,
-        min: 0,
-        max: 0,
-        frameSentFreq: 0,
-        frameRecvFreq: 0,
-        frameFreq: 0
-      }
-    }
+    // 更新最后的值，用于下次计算
+    this.busLoadingStats.lastBits = currentBits
+    this.busLoadingStats.lastSentFrames = currentSentFrames
+    this.busLoadingStats.lastRecvFrames = currentRecvFrames
 
-    // 计算当前负载
-    const samples = this.busLoadingStats.samples
-    const currentBits = samples[samples.length - 1].bits - samples[samples.length - 2].bits
-    const currentTimespan = (samples[samples.length - 1].ts - samples[samples.length - 2].ts) / 1000
-    const currentLoading = (currentBits / (bitrate * currentTimespan)) * 100
-
-    // 计算平均负载
-    const totalBits = samples[samples.length - 1].bits - samples[0].bits
-    const totalTimespan = (samples[samples.length - 1].ts - samples[0].ts) / 1000
-    const averageLoading = (totalBits / (bitrate * totalTimespan)) * 100
+    // 更新平均负载（使用简单的移动平均）
+    const avgWeight = 0.8 // 权重因子，决定新值的影响程度
+    this.busLoadingStats.avgLoading =
+      this.busLoadingStats.avgLoading * (1 - avgWeight) + currentLoading * avgWeight
 
     // 更新最大最小值
     this.busLoadingStats.minLoading = Math.max(
@@ -327,38 +311,12 @@ export abstract class CanBase {
       Math.max(this.busLoadingStats.maxLoading, currentLoading)
     )
 
-    // 计算帧频率 (frames/second)
-    let frameSentFreq = 0
-    let frameRecvFreq = 0
-    let frameFreq = 0
-
-    // 从帧采样数据计算频率
-    if (this.busLoadingStats.framesSamples.length >= 2) {
-      const firstSample = this.busLoadingStats.framesSamples[0]
-      const lastSample =
-        this.busLoadingStats.framesSamples[this.busLoadingStats.framesSamples.length - 1]
-
-      const timeSpan = (lastSample.ts - firstSample.ts) / 1000 // 时间跨度（秒）
-
-      if (timeSpan > 0) {
-        // 计算发送帧频率（帧/秒）
-        frameSentFreq = (lastSample.sent - firstSample.sent) / timeSpan
-
-        // 计算接收帧频率（帧/秒）
-        frameRecvFreq = (lastSample.recv - firstSample.recv) / timeSpan
-
-        // 总帧频率 = 发送帧频率 + 接收帧频率
-        frameFreq = frameSentFreq + frameRecvFreq
-      }
-    }
-
     // 限制返回值在0-100范围内并保留2位小数
     return {
       current: Number(Math.min(100, Math.max(0, currentLoading)).toFixed(2)),
-      average: Number(Math.min(100, Math.max(0, averageLoading)).toFixed(2)),
+      average: Number(Math.min(100, Math.max(0, this.busLoadingStats.avgLoading)).toFixed(2)),
       min: Number(this.busLoadingStats.minLoading.toFixed(2)),
       max: Number(this.busLoadingStats.maxLoading.toFixed(2)),
-      // 帧频率值保留2位小数
       frameSentFreq: Math.floor(frameSentFreq),
       frameRecvFreq: Math.floor(frameRecvFreq),
       frameFreq: Math.floor(frameFreq)

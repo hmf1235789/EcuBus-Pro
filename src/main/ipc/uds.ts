@@ -12,7 +12,7 @@ import {
   refreshProject,
   UDSTesterMain
 } from '../docan/uds'
-import { CAN_ID_TYPE, CanInterAction, formatError, swapAddr } from '../share/can'
+import { CAN_ID_TYPE, CanInterAction, formatError, getTsUs, swapAddr } from '../share/can'
 import { CAN_SOCKET, CanBase } from '../docan/base'
 import { CAN_TP, TpError } from '../docan/cantp'
 import { getTxPdu, UdsAddress, UdsDevice } from '../share/uds'
@@ -46,7 +46,7 @@ const libPath = path.dirname(dllLib)
 
 let monitor: IntervalHistogram | undefined
 let timer: NodeJS.Timeout | undefined
-let cnt = 0
+let startTs = 0
 
 log.info('dll lib path:', libPath)
 
@@ -255,7 +255,7 @@ async function globalStart(
 ) {
   let activeKey = ''
   const varLog = new VarLOG()
-  const periodTaskList: (() => void)[] = []
+  const periodTaskList: ((diffMs: number, currentTs: number) => void)[] = []
   testMap.forEach((value) => {
     value.close()
   })
@@ -277,8 +277,8 @@ async function globalStart(
             }
           })
           canBaseMap.set(key, canBase)
-          periodTaskList.push(() => {
-            const busLoad = canBase.getBusLoading()
+          periodTaskList.push((diffMs, currentTs) => {
+            const busLoad = canBase.getBusLoading(diffMs)
 
             varLog.setVarByKeyBatch(
               [
@@ -290,7 +290,7 @@ async function globalStart(
                 { key: `Statistics.${canDevice.id}.FrameRecvFreq`, value: busLoad.frameRecvFreq },
                 { key: `Statistics.${canDevice.id}.FrameFreq`, value: busLoad.frameFreq }
               ],
-              cnt * 1000
+              currentTs
             )
           })
         }
@@ -480,7 +480,7 @@ async function globalStart(
   monitor = monitorEventLoopDelay({ resolution: 100 })
   monitor.enable()
 
-  periodTaskList.push(() => {
+  periodTaskList.push((diffMs, currentTs) => {
     varLog.setVarByKeyBatch(
       [
         {
@@ -496,17 +496,20 @@ async function globalStart(
           value: Number(((monitor!.mean - 100000000) / 1000000).toFixed(2))
         }
       ],
-      cnt * 1000
+      currentTs
     )
   })
   if (periodTaskList.length > 0) {
-    cnt = 0
+    startTs = getTsUs()
+    let lastTs = startTs
     timer = setInterval(() => {
-      cnt += 100
+      const now = getTsUs()
+      const diff = (now - lastTs) / 1000
       periodTaskList.forEach((e) => {
-        e()
+        e(diff, now - startTs)
       })
-    }, 100)
+      lastTs = now
+    }, 200)
   }
 }
 ipcMain.handle('ipc-global-start', async (event, ...arg) => {
