@@ -59,7 +59,7 @@ struct TsfnContext {
     // 发送线程相关
     std::thread txThread;
     Napi::ThreadSafeFunction txtsfn;
-    moodycamel::BlockingConcurrentQueue<TxMessage> txQueue{1024};  // 使用阻塞队列
+    moodycamel::BlockingConcurrentQueue<TxMessage> txQueue{10000};  // 使用阻塞队列
 };
 
 //a std::map store the tsfn context
