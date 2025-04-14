@@ -65,6 +65,10 @@
                       <Icon :icon="gaugeIcon" style="margin-right: 5px" />
                       Gauge</el-dropdown-item
                     >
+                    <el-dropdown-item command="datas">
+                      <Icon :icon="dataIcon" style="margin-right: 5px" />
+                      Datas</el-dropdown-item
+                    >
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
@@ -596,6 +600,7 @@ import lineIcon from '@iconify/icons-mdi/chart-line'
 import gaugeIcon from '@iconify/icons-mdi/gauge'
 import packageIcon from '@iconify/icons-mdi/package-variant'
 import varIcon from '@iconify/icons-mdi/application-variable-outline'
+import dataIcon from '@iconify/icons-mdi/data-usage'
 
 const activeMenu = ref('')
 const pined = ref(true)
@@ -623,6 +628,12 @@ function openGraph(command: string) {
     layoutMaster.addWin('gauge', 'gauge', {
       params: {
         'edit-index': 'gauge'
+      }
+    })
+  } else if (command == 'datas') {
+    layoutMaster.addWin('datas', 'datas', {
+      params: {
+        'edit-index': 'datas'
       }
     })
   }

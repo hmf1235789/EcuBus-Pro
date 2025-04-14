@@ -70,7 +70,6 @@ export type GraphBindSignalValue = {
   startBit: number
   bitLength: number
 }
-export type GraphBindVariableValue = {}
 
 export type GraphBindFrameValue = {
   frameInfo: any
@@ -106,6 +105,7 @@ export type TestConfig = {
   channel: string[]
   reportPath?: string
 }
+
 export interface DataSet {
   devices: Record<string, UdsDevice>
   tester: Record<string, TesterInfo>
@@ -121,6 +121,7 @@ export interface DataSet {
     string,
     GraphNode<GraphBindSignalValue | GraphBindVariableValue, GaugeSeriesOption>
   >
+  datas: Record<string, GraphNode<GraphBindSignalValue | GraphBindVariableValue>>
   tests: Record<string, TestConfig>
   vars: Record<string, VarItem>
 }

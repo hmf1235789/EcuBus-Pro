@@ -1,32 +1,23 @@
 {
   "data": {
     "devices": {
-      "ef29e4f1-13ee-4dae-9540-691b0bf03355": {
+      "7ce31dc7-5c89-4205-ae1b-599c4604f973": {
         "type": "can",
         "canDevice": {
-          "id": "ef29e4f1-13ee-4dae-9540-691b0bf03355",
-          "name": "TOOMOSS_1",
-          "handle": "1417675180:0",
-          "vendor": "toomoss",
-          "canfd": true,
+          "id": "7ce31dc7-5c89-4205-ae1b-599c4604f973",
+          "name": "PEAK_1",
+          "handle": 81,
+          "vendor": "peak",
+          "canfd": false,
           "database": "",
           "bitrate": {
             "sjw": 1,
             "timeSeg1": 13,
             "timeSeg2": 2,
-            "preScaler": 5,
+            "preScaler": 10,
             "freq": 500000,
-            "clock": "40",
-            "_X_ROW_KEY": "row_46"
-          },
-          "toomossRes": true,
-          "bitratefd": {
-            "sjw": 1,
-            "timeSeg1": 2,
-            "timeSeg2": 1,
-            "preScaler": 5,
-            "freq": "2000000",
-            "_X_ROW_KEY": "row_113"
+            "clock": "80",
+            "_X_ROW_KEY": "row_51"
           }
         }
       }
@@ -37,7 +28,7 @@
         "type": "can",
         "id": "7125c939-dcda-47cc-8fda-c6709a6ff01f",
         "devices": [
-          "ef29e4f1-13ee-4dae-9540-691b0bf03355"
+          "7ce31dc7-5c89-4205-ae1b-599c4604f973"
         ],
         "action": [
           {
@@ -47,7 +38,7 @@
             },
             "name": "",
             "id": "1",
-            "channel": "ef29e4f1-13ee-4dae-9540-691b0bf03355",
+            "channel": "",
             "type": "can",
             "dlc": 8,
             "data": [],
@@ -60,7 +51,7 @@
             },
             "name": "",
             "id": "11",
-            "channel": "ef29e4f1-13ee-4dae-9540-691b0bf03355",
+            "channel": "",
             "type": "canfd",
             "dlc": 15,
             "data": [
@@ -134,12 +125,12 @@
           },
           {
             "trigger": {
-              "type": "periodic",
+              "type": "manual",
               "period": 2
             },
             "name": "",
             "id": "2",
-            "channel": "ef29e4f1-13ee-4dae-9540-691b0bf03355",
+            "channel": "7ce31dc7-5c89-4205-ae1b-599c4604f973",
             "type": "can",
             "dlc": 8,
             "data": [],
@@ -475,7 +466,9 @@
         "name": "Node 1",
         "type": "can",
         "id": "5c043bd6-ddca-449a-b535-1ae865085123",
-        "channel": [],
+        "channel": [
+          "7ce31dc7-5c89-4205-ae1b-599c4604f973"
+        ],
         "workNode": "",
         "attachTester": "f304259b-dc7d-460b-9729-4eee2d1156de",
         "script": "ecu.ts"
@@ -486,50 +479,71 @@
       "can": {}
     },
     "graphs": {
-      "Statistics.ef29e4f1-13ee-4dae-9540-691b0bf03355.BusLoadAvg": {
+      "Statistics.7ce31dc7-5c89-4205-ae1b-599c4604f973.BusLoad": {
         "type": "variable",
         "enable": true,
-        "id": "Statistics.ef29e4f1-13ee-4dae-9540-691b0bf03355.BusLoadAvg",
-        "name": "BusLoadAvg",
-        "color": "#fe8297",
+        "id": "Statistics.7ce31dc7-5c89-4205-ae1b-599c4604f973.BusLoad",
+        "name": "BusLoad",
+        "color": "#86a0a1",
         "yAxis": {
-          "min": -1.255819803680689,
-          "max": 79.71697129168071,
+          "min": 0,
+          "max": 100,
           "unit": "%"
         },
         "bindValue": {
-          "variableId": "Statistics.ef29e4f1-13ee-4dae-9540-691b0bf03355.BusLoadAvg",
+          "variableId": "Statistics.7ce31dc7-5c89-4205-ae1b-599c4604f973.BusLoad",
           "variableType": "system",
-          "variableName": "BusLoadAvg"
+          "variableName": "BusLoad"
         },
         "graph": {
           "id": "graph"
         }
       },
-      "Statistics.ef29e4f1-13ee-4dae-9540-691b0bf03355.FrameFreq": {
+      "Statistics.7ce31dc7-5c89-4205-ae1b-599c4604f973.FrameFreq": {
         "type": "variable",
         "enable": true,
-        "id": "Statistics.ef29e4f1-13ee-4dae-9540-691b0bf03355.FrameFreq",
+        "id": "Statistics.7ce31dc7-5c89-4205-ae1b-599c4604f973.FrameFreq",
         "name": "FrameFreq",
-        "color": "#bf840b",
+        "color": "rgba(78, 98, 246, 1)",
         "yAxis": {
-          "min": -153.04999999999865,
-          "max": 3446.9499999999944,
-          "unit": "f/s"
+          "min": 0,
+          "max": 10000,
+          "unit": "f/s",
+          "splitLine": {
+            "show": false
+          }
         },
         "bindValue": {
-          "variableId": "Statistics.ef29e4f1-13ee-4dae-9540-691b0bf03355.FrameFreq",
+          "variableId": "Statistics.7ce31dc7-5c89-4205-ae1b-599c4604f973.FrameFreq",
           "variableType": "system",
           "variableName": "FrameFreq"
         },
         "graph": {
           "id": "graph"
+        },
+        "xAxis": {
+          "splitLine": {
+            "show": false,
+            "lineStyle": {
+              "type": "dashed"
+            }
+          },
+          "axisPointer": {
+            "show": false
+          }
+        },
+        "disZoom": false,
+        "series": {
+          "showSymbol": false,
+          "symbolSize": 6,
+          "symbol": "circle"
         }
       }
     },
     "tests": {},
     "guages": {},
-    "vars": {}
+    "vars": {},
+    "datas": {}
   },
   "project": {
     "wins": {
@@ -551,8 +565,8 @@
       },
       "tester": {
         "pos": {
-          "x": 950,
-          "y": 59,
+          "x": 952,
+          "y": 65,
           "w": 906,
           "h": 400
         },
@@ -564,8 +578,8 @@
       },
       "graph": {
         "pos": {
-          "x": 267,
-          "y": 1,
+          "x": 226,
+          "y": 8,
           "w": 822,
           "h": 525
         },
@@ -581,8 +595,8 @@
       },
       "network": {
         "pos": {
-          "x": 503,
-          "y": 87.00003051757812,
+          "x": 952,
+          "y": 65,
           "w": 600,
           "h": 400
         },
@@ -594,8 +608,8 @@
       },
       "7125c939-dcda-47cc-8fda-c6709a6ff01f_ia": {
         "pos": {
-          "x": 623,
-          "y": 0,
+          "x": 952,
+          "y": 65,
           "w": 824,
           "h": 400
         },
@@ -612,10 +626,10 @@
       },
       "trace": {
         "pos": {
-          "x": 150.5,
-          "y": 57,
-          "w": 1086,
-          "h": 400
+          "x": 281.5,
+          "y": 65,
+          "w": 752,
+          "h": 368
         },
         "title": "trace",
         "label": "Trace",
@@ -624,8 +638,8 @@
       },
       "variable": {
         "pos": {
-          "x": 553.5,
-          "y": 64,
+          "x": 632.5,
+          "y": 0,
           "w": 600,
           "h": 400
         },
@@ -633,6 +647,34 @@
         "label": "Variable",
         "id": "variable",
         "options": {}
+      },
+      "hardware": {
+        "pos": {
+          "x": 392.5,
+          "y": 65,
+          "w": 1292,
+          "h": 611
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
+      },
+      "datas": {
+        "pos": {
+          "x": 275.5,
+          "y": 246,
+          "w": 1116,
+          "h": 400
+        },
+        "title": "datas",
+        "label": "Datas",
+        "id": "datas",
+        "options": {
+          "params": {
+            "edit-index": "datas"
+          }
+        }
       }
     },
     "example": {

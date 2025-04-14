@@ -1,0 +1,524 @@
+<template>
+  <div class="uds-graph">
+    <div>
+      <div class="main">
+        <VxeGrid
+          ref="userVariableGrid"
+          v-bind="userGridOptions"
+          class="variableTable"
+          :data="userTableData"
+          @cell-click="cellClick"
+        >
+          <template #toolbar>
+            <div
+              style="
+                justify-content: space-between;
+                display: flex;
+                align-items: center;
+                gap: 0px;
+                padding-left: 5px;
+                padding: 1px;
+              "
+              class="border-bottom"
+            >
+              <div style="display: flex; align-items: center; gap: 4px">
+                <el-button-group>
+                  <el-tooltip
+                    effect="light"
+                    :content="isPaused ? 'Resume' : 'Pause'"
+                    placement="bottom"
+                  >
+                    <el-button
+                      :type="isPaused ? 'success' : 'warning'"
+                      link
+                      :class="{ 'pause-active': isPaused }"
+                      @click="isPaused = !isPaused"
+                    >
+                      <Icon :icon="isPaused ? playIcon : pauseIcon" />
+                    </el-button>
+                  </el-tooltip>
+                </el-button-group>
+                <el-divider direction="vertical"></el-divider>
+                <el-button-group>
+                  <el-tooltip effect="light" content="Add Variables" placement="bottom">
+                    <el-button link type="primary" @click="addNode">
+                      <Icon :icon="addIcon" />
+                    </el-button>
+                  </el-tooltip>
+                  <el-tooltip effect="light" content="Add Signals" placement="bottom">
+                    <el-button link type="primary" @click="addSignal">
+                      <Icon :icon="waveIcon" />
+                    </el-button>
+                  </el-tooltip>
+                  <el-divider direction="vertical"></el-divider>
+                  <el-tooltip effect="light" content="Delete Signal" placement="bottom">
+                    <el-button link type="danger" :disabled="!selectedRowId" @click="deleteSignal">
+                      <Icon :icon="deleteIcon" />
+                    </el-button>
+                  </el-tooltip>
+                </el-button-group>
+              </div>
+              <span
+                style="margin-right: 10px; font-size: 12px; color: var(--el-text-color-regular)"
+              >
+                Time: {{ time }}s
+              </span>
+            </div>
+          </template>
+          <template #default_name="{ row }">
+            {{ row.name }}
+          </template>
+        </VxeGrid>
+      </div>
+    </div>
+    <el-dialog
+      v-if="signalDialogVisible"
+      v-model="signalDialogVisible"
+      title="Add Signal"
+      width="95%"
+      align-center
+      :append-to="appendId"
+    >
+      <signal :height="tableHeight" :width="width" @add-signal="handleAddSignal" />
+    </el-dialog>
+    <el-dialog
+      v-if="variableDialogVisible"
+      v-model="variableDialogVisible"
+      title="Add Variable"
+      width="95%"
+      align-center
+      :append-to="appendId"
+    >
+      <add-var :height="tableHeight" @add-variable="handleAddSignal" />
+    </el-dialog>
+  </div>
+</template>
+<script lang="ts" setup>
+import pauseIcon from '@iconify/icons-material-symbols/pause-circle-outline'
+import playIcon from '@iconify/icons-material-symbols/play-circle-outline'
+import hideIcon from '@iconify/icons-material-symbols/hide'
+import addIcon from '@iconify/icons-material-symbols/add-circle-outline'
+import deleteIcon from '@iconify/icons-material-symbols/delete-outline'
+import editIcon from '@iconify/icons-material-symbols/edit-outline'
+import zoomInIcon from '@iconify/icons-material-symbols/zoom-in'
+import dragVerticalIcon from '@iconify/icons-material-symbols/drag-pan'
+import waveIcon from '@iconify/icons-material-symbols/airwave-rounded'
+import { ref, onMounted, computed, h, onUnmounted, watch, nextTick } from 'vue'
+import { Icon } from '@iconify/vue'
+import { useDataStore } from '@r/stores/data'
+import { GraphBindSignalValue, GraphBindVariableValue, GraphNode } from 'src/preload/data'
+
+import { ElNotification, ElMessageBox, formatter } from 'element-plus'
+import signal from './components/signal.vue'
+import addVar from './components/addVar.vue'
+import { VxeGrid, VxeGridProps, VxeTableEvents } from 'vxe-table'
+
+const isPaused = ref(false)
+
+const variableDialogVisible = ref(false)
+
+const props = defineProps<{
+  height: number
+  width: number
+  editIndex?: string
+}>()
+
+const dataStore = useDataStore()
+const datas = dataStore.datas
+const appendId = computed(() => (props.editIndex ? `#win${props.editIndex}` : '#wingraph'))
+const height = computed(() => props.height)
+const tableHeight = computed(() => (height.value * 2) / 3)
+
+// 用户表格数据和配置
+const userTableData = ref<any[]>([])
+const userVariableGrid = ref()
+const selectedRowId = ref('')
+
+// 处理单元格点击事件
+const cellClick = (params: any) => {
+  selectedRowId.value = params.row.id
+}
+
+// VxeTable配置
+const userGridOptions = computed<VxeGridProps>(() => ({
+  size: 'mini',
+  border: true,
+  showOverflow: true,
+  height: height.value,
+  columnConfig: {
+    resizable: true
+  },
+  columns: [
+    { type: 'seq', width: 50, title: '#' },
+    { field: 'name', title: 'Name', minWidth: 150, slots: { default: 'default_name' } },
+    { field: 'value', title: 'Value', minWidth: 150 },
+    { field: 'unit', title: 'Unit', width: 100 },
+    { field: 'rawValue', title: 'Raw Value', minWidth: 150 }
+  ],
+  data: userTableData.value,
+  rowConfig: {
+    keyField: 'id',
+    isHover: true,
+    isCurrent: true
+  },
+  toolbarConfig: {
+    slots: {
+      tools: 'toolbar'
+    }
+  },
+  align: 'center',
+  scrollX: {
+    enabled: true
+  },
+  scrollY: {
+    enabled: true
+  }
+}))
+
+const time = ref(0)
+
+const addNode = () => {
+  variableDialogVisible.value = true
+}
+
+let timer: ReturnType<typeof setInterval> | null = null
+
+// 更新时间显示的函数
+const updateTime = () => {
+  if (isPaused.value) return
+
+  // 更新x轴范围和时间
+  let maxX = 5
+  let minX = 0
+
+  // 使用当前时间更新time值
+  const ts = (Date.now() - window.startTime) / 1000
+
+  if (ts > maxX) {
+    maxX = ts
+  }
+
+  // 设置time值，与graph.vue保持一致
+  time.value = maxX
+
+  // 计算x轴范围
+  maxX = Math.ceil(maxX) + 5
+  minX = Math.floor(minX)
+}
+
+// 确保定时器时间间隔与graph.vue保持一致
+watch(
+  () => window.globalStart.value,
+  (val) => {
+    if (val) {
+      // 启动定时器更新时间，使用500ms间隔
+      if (timer) clearInterval(timer)
+      timer = setInterval(updateTime, 500)
+    } else if (timer) {
+      clearInterval(timer)
+      timer = null
+    }
+  }
+)
+
+// 监听暂停/恢复状态
+watch(
+  () => isPaused.value,
+  (paused) => {
+    if (paused && timer) {
+      clearInterval(timer)
+      timer = null
+    } else if (!paused && window.globalStart.value) {
+      if (timer) clearInterval(timer)
+      timer = setInterval(updateTime, 500)
+    }
+  }
+)
+
+function dataUpdate(key: string, values: (number | string)[][]) {
+  if (isPaused.value) {
+    return
+  }
+
+  // 仅获取最后一条数据
+  if (values && values.length > 0) {
+    const latestData = values[values.length - 1]
+
+    // 更新时间
+    if (latestData && typeof latestData[0] === 'number') {
+      const dataTime = latestData[0] as number
+      // 与graph.vue保持一致的时间更新逻辑
+      if (dataTime > time.value) {
+        time.value = dataTime
+      }
+    }
+
+    // 更新表格数据
+    const dataItem = datas[key]
+    if (dataItem) {
+      const existingRowIndex = userTableData.value.findIndex((row) => row.id === key)
+
+      // 格式化值显示
+      let formattedValue: string | number = latestData[1] as string | number
+      let unit = ''
+      const rawValue = latestData[1]
+
+      // 如果是GraphNode类型，提取更多信息
+      if ((dataItem as any).color !== undefined && (dataItem as any).yAxis !== undefined) {
+        const nodeInfo = dataItem as unknown as GraphNode<
+          GraphBindSignalValue | GraphBindVariableValue
+        >
+
+        // 检查是否存在枚举值
+        if (nodeInfo.yAxis?.enums && nodeInfo.yAxis.enums.length > 0) {
+          const enumItem = nodeInfo.yAxis.enums.find((item) => item.value === formattedValue)
+          if (enumItem) {
+            formattedValue = enumItem.label
+          }
+        } else if (typeof formattedValue === 'number') {
+          // 数字格式化
+          if (Number.isInteger(formattedValue)) {
+            formattedValue = formattedValue.toString()
+          } else {
+            formattedValue = parseFloat(formattedValue.toFixed(2)).toString()
+          }
+        }
+
+        unit = nodeInfo.yAxis?.unit || ''
+      }
+
+      // 构建更新行数据，避免重复属性
+      const baseProperties = {
+        time: latestData[0],
+        value: formattedValue,
+        unit: unit,
+        rawValue: rawValue
+      }
+
+      let newRow
+      if ((dataItem as any).name !== undefined) {
+        newRow = {
+          id: key,
+          ...baseProperties
+        }
+      } else {
+        newRow = {
+          id: key,
+          name: key,
+          ...baseProperties
+        }
+      }
+
+      if (existingRowIndex >= 0) {
+        // 更新现有行，保留原始数据的其他属性
+        userTableData.value[existingRowIndex] = {
+          ...userTableData.value[existingRowIndex],
+          ...newRow
+        }
+      } else {
+        // 添加新行
+        const rowData: any = {
+          id: key,
+          ...baseProperties
+        }
+
+        // 如果有name属性，添加
+        if ((dataItem as any).name) {
+          rowData.name = (dataItem as any).name
+        }
+
+        userTableData.value.push(rowData)
+      }
+
+      // 更新表格
+      nextTick(() => {
+        userVariableGrid.value?.loadData(userTableData.value)
+      })
+    }
+  }
+}
+
+onMounted(() => {
+  // 初始化数据
+  for (const [key, value] of Object.entries(datas)) {
+    // 检查值是否包含graph属性以安全地访问
+    const graphId = (value as any).graph?.id
+    if (graphId && graphId !== props.editIndex) {
+      continue
+    }
+
+    // 添加到表格数据中 - 避免属性重复
+    const rowData: any = {
+      id: key,
+      value: '',
+      rawValue: '',
+      time: 0
+    }
+
+    // 如果有name属性，添加
+    if ((value as any).name) {
+      rowData.name = (value as any).name
+    }
+
+    userTableData.value.push(rowData)
+  }
+
+  // 初始化表格数据
+  nextTick(() => {
+    // 注册数据更新事件
+    Object.keys(datas).forEach((key) => {
+      window.logBus.on(key, dataUpdate)
+    })
+
+    // 如果全局启动标志为true，则启动定时器
+    if (window.globalStart.value && !isPaused.value) {
+      if (timer) clearInterval(timer)
+      timer = setInterval(updateTime, 500)
+    }
+  })
+})
+
+onUnmounted(() => {
+  // 清除定时器
+  if (timer) {
+    clearInterval(timer)
+    timer = null
+  }
+
+  // 解除所有事件监听
+  Object.keys(datas).forEach((key) => {
+    window.logBus.detach(key, dataUpdate)
+  })
+})
+
+const signalDialogVisible = ref(false)
+
+const addSignal = () => {
+  signalDialogVisible.value = true
+}
+
+// 删除信号功能
+const deleteSignal = () => {
+  if (!selectedRowId.value) return
+
+  ElMessageBox.confirm('Are you sure you want to delete this signal?', 'Delete Signal', {
+    confirmButtonText: 'Confirm',
+    cancelButtonText: 'Cancel',
+    type: 'warning',
+    appendTo: appendId.value,
+    buttonSize: 'small'
+  })
+    .then(() => {
+      // 从表格中移除
+      const index = userTableData.value.findIndex((row) => row.id === selectedRowId.value)
+      if (index !== -1) {
+        userTableData.value.splice(index, 1)
+      }
+
+      // 解除事件监听
+      window.logBus.detach(selectedRowId.value, dataUpdate)
+
+      // 从数据存储中删除
+      if (datas[selectedRowId.value]) {
+        delete datas[selectedRowId.value]
+      }
+
+      // 清除选中状态
+      selectedRowId.value = ''
+      userVariableGrid.value?.clearCurrentRow()
+    })
+    .catch(() => {
+      // 用户取消，不做处理
+    })
+}
+
+const handleAddSignal = (node: GraphNode<GraphBindSignalValue | GraphBindVariableValue>) => {
+  signalDialogVisible.value = false
+  variableDialogVisible.value = false
+
+  // 检查是否已存在
+  const existed = userTableData.value.find((v) => v.id == node.id)
+  if (existed) {
+    ElNotification({
+      offset: 50,
+      message: 'Signal already exists',
+      type: 'warning',
+      appendTo: appendId.value
+    })
+    return
+  }
+
+  if (props.editIndex) {
+    node.graph = {
+      id: props.editIndex
+    }
+  }
+
+  // 添加到数据中 - 避免属性重复
+  const rowData: any = {
+    id: node.id,
+    value: '',
+    rawValue: '',
+    time: 0
+  }
+
+  // 如果有name属性，添加
+  if (node.name) {
+    rowData.name = node.name
+  }
+
+  userTableData.value.push(rowData)
+
+  window.logBus.on(node.id, dataUpdate)
+  datas[node.id] = node
+}
+</script>
+<style scoped>
+.pause-active {
+  box-shadow: inset 0 0 4px var(--el-color-info-light-5);
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.main {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.variableTable {
+  height: v-bind(height + 'px');
+  width: 100%;
+}
+
+.border-bottom {
+  border-bottom: solid 1px var(--el-border-color);
+  background-color: var(--el-background-color);
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+</style>
+
+<style>
+.node-menu {
+  padding: 0;
+}
+</style>
+
+<style lang="scss">
+.el-popover.el-popper {
+  min-width: 100px !important;
+  padding: 0 !important;
+  box-shadow: var(--el-box-shadow-light) !important;
+  border: 1px solid var(--el-border-color-lighter) !important;
+
+  &.node-menu {
+    padding: 0 !important;
+    background: var(--el-bg-color) !important;
+  }
+}
+</style>

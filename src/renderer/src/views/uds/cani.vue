@@ -639,7 +639,6 @@ onKeyUp(true, () => {
   }, 200)
 })
 function sendFrame(index: number) {
-  console.log(index)
   const frame = dataBase.ia[editIndex.value]?.action[index]
   if (frame) {
     if (frame.trigger.type == 'manual') {
