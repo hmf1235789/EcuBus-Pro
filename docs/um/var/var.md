@@ -75,3 +75,32 @@ To create a new user variable:
 ![UsrVar](./image-1.png)
 
 
+## Example 
+
+Use Graph-Line to record `BusLoad` and `FrameFreq`
+
+```typescript
+Util.OnKey('b', async () => {
+  const pl = []
+  const start = Date.now()
+  for (let i = 0; i < 5000; i++) {
+    const msg: CanMessage = {
+      dir: 'OUT',
+      data: Buffer.alloc(8).fill(i % 255),
+      id: 1,
+      msgType: {
+        idType: CAN_ID_TYPE.STANDARD,
+        brs: false,
+        canfd: false,
+        remote: false
+      }
+    }
+    pl.push(output(msg))
+  }
+  await Promise.any(pl)
+  const end = Date.now()
+  console.log(`send ${pl.length} messages cost ${end - start}ms`)
+})
+```
+
+![busload](./image.png)
