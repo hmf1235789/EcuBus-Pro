@@ -55,6 +55,7 @@ export class SIMULATE_CAN extends CanBase {
     this.log = new CanLOG('SIMULATE', info.name, this.event)
     this.busCb = this.busCbFunction.bind(this)
     this.event.on('bus', this.busCb)
+    this.attachCanMessage(this.busloadCb)
   }
   busCbFunction(val: CanMessage) {
     //rxNotify

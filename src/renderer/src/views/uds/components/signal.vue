@@ -107,7 +107,6 @@ interface TreeItem {
 const vxeRef = ref()
 const props = defineProps<{
   height: number
-  width: number
   protocolFilter?: ProtocolFilter // 协议过滤
   selectableLevel?: SelectableLevel // 可选择的层级
   speicalDb?: string[]

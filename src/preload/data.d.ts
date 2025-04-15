@@ -14,6 +14,37 @@ export interface CanInter {
   action: CanInterAction[]
 }
 
+export interface VarValueNumber {
+  type: 'number'
+  value?: number
+  initValue?: number
+  min?: number
+  max?: number
+  unit?: string
+  enum?: { name: string; value: number }[]
+}
+export interface VarValueString {
+  type: 'string'
+  value?: string
+  initValue?: string
+  enum?: { name: string; value: string }[]
+}
+
+export interface VarValueArray {
+  type: 'array'
+  value?: number[]
+  initValue?: number[]
+}
+
+export interface VarItem {
+  type: 'user' | 'system'
+  id: string
+  name: string
+  desc?: string
+  value?: VarValueNumber | VarValueString | VarValueArray
+  parentId?: string
+}
+
 export interface LinInter {
   id: string
   name: string
@@ -39,12 +70,17 @@ export type GraphBindSignalValue = {
   startBit: number
   bitLength: number
 }
-export type GraphBindVariableValue = {}
 
 export type GraphBindFrameValue = {
   frameInfo: any
   dbName: string
   dbKey: string
+}
+export type GraphBindVariableValue = {
+  variableId: string
+  variableType: 'user' | 'system'
+  variableName: string
+  variableFullName: string
 }
 
 export type GraphNode<T, S = any> = {
@@ -71,6 +107,7 @@ export type TestConfig = {
   channel: string[]
   reportPath?: string
 }
+
 export interface DataSet {
   devices: Record<string, UdsDevice>
   tester: Record<string, TesterInfo>
@@ -81,7 +118,12 @@ export interface DataSet {
     lin: Record<string, LDF>
     can: Record<string, DBC>
   }
-  graphs: Record<string, GraphNode<GraphBindSignalValue, LineSeriesOption>>
-  guages: Record<string, GraphNode<GraphBindSignalValue, GaugeSeriesOption>>
+  graphs: Record<string, GraphNode<GraphBindSignalValue | GraphBindVariableValue, LineSeriesOption>>
+  guages: Record<
+    string,
+    GraphNode<GraphBindSignalValue | GraphBindVariableValue, GaugeSeriesOption>
+  >
+  datas: Record<string, GraphNode<GraphBindSignalValue | GraphBindVariableValue>>
   tests: Record<string, TestConfig>
+  vars: Record<string, VarItem>
 }

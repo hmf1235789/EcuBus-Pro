@@ -12,14 +12,14 @@ import {
   refreshProject,
   UDSTesterMain
 } from '../docan/uds'
-import { CAN_ID_TYPE, CanInterAction, formatError, swapAddr } from '../share/can'
+import { CAN_ID_TYPE, CanInterAction, formatError, getTsUs, swapAddr } from '../share/can'
 import { CAN_SOCKET, CanBase } from '../docan/base'
 import { CAN_TP, TpError } from '../docan/cantp'
 import { getTxPdu, UdsAddress, UdsDevice } from '../share/uds'
 import { TesterInfo } from '../share/tester'
 import log from 'electron-log'
 
-import { UdsLOG } from '../log'
+import { UdsLOG, VarLOG } from '../log'
 import { clientTcp, DOIP, getEthDevices } from './../doip'
 import { EthAddr, EthBaseInfo } from '../share/doip'
 
@@ -28,7 +28,7 @@ import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
 import { getLinDevices, openLinDevice, updateSignalVal } from '../dolin'
 import EventEmitter from 'events'
 import LinBase from '../dolin/base'
-import { DataSet, LinInter, NodeItem, TestConfig } from 'src/preload/data'
+import { DataSet, LinInter, NodeItem, TestConfig, VarItem } from 'src/preload/data'
 import { LinMode } from '../share/lin'
 import { LIN_TP } from '../dolin/lintp'
 import { TpError as LinTpError } from '../dolin/lintp'
@@ -38,8 +38,16 @@ import { NodeClass } from '../nodeItem'
 import { getJsPath } from '../util'
 import UdsTester from '../workerClient'
 import { serviceDetail } from '../uds/service'
+import { getAllSysVar } from '../share/sysVar'
+import { IntervalHistogram, monitorEventLoopDelay } from 'perf_hooks'
+import { cloneDeep } from 'lodash'
 
 const libPath = path.dirname(dllLib)
+
+let monitor: IntervalHistogram | undefined
+let timer: NodeJS.Timeout | undefined
+let startTs = 0
+
 log.info('dll lib path:', libPath)
 
 ipcMain.on('ipc-service-detail', (event, arg) => {
@@ -246,6 +254,8 @@ async function globalStart(
   projectInfo: { path: string; name: string }
 ) {
   let activeKey = ''
+  const varLog = new VarLOG()
+  const periodTaskList: ((diffMs: number, currentTs: number) => void)[] = []
   testMap.forEach((value) => {
     value.close()
   })
@@ -267,6 +277,22 @@ async function globalStart(
             }
           })
           canBaseMap.set(key, canBase)
+          periodTaskList.push((diffMs, currentTs) => {
+            const busLoad = canBase.getBusLoading(diffMs)
+
+            varLog.setVarByKeyBatch(
+              [
+                { key: `Statistics.${canDevice.id}.BusLoad`, value: busLoad.current },
+                { key: `Statistics.${canDevice.id}.BusLoadMin`, value: busLoad.min },
+                { key: `Statistics.${canDevice.id}.BusLoadMax`, value: busLoad.max },
+                { key: `Statistics.${canDevice.id}.BusLoadAvg`, value: busLoad.average },
+                { key: `Statistics.${canDevice.id}.FrameSentFreq`, value: busLoad.frameSentFreq },
+                { key: `Statistics.${canDevice.id}.FrameRecvFreq`, value: busLoad.frameRecvFreq },
+                { key: `Statistics.${canDevice.id}.FrameFreq`, value: busLoad.frameFreq }
+              ],
+              currentTs
+            )
+          })
         }
       } else if (device.type == 'eth' && device.ethDevice) {
         const ethDevice = device.ethDevice
@@ -450,6 +476,41 @@ async function globalStart(
   //         }
   //     }
   // })
+
+  monitor = monitorEventLoopDelay({ resolution: 100 })
+  monitor.enable()
+
+  periodTaskList.push((diffMs, currentTs) => {
+    varLog.setVarByKeyBatch(
+      [
+        {
+          key: 'EventLoopDelay.min',
+          value: Number(((monitor!.min - 100000000) / 1000000).toFixed(2))
+        },
+        {
+          key: 'EventLoopDelay.max',
+          value: Number(((monitor!.max - 100000000) / 1000000).toFixed(2))
+        },
+        {
+          key: 'EventLoopDelay.avg',
+          value: Number(((monitor!.mean - 100000000) / 1000000).toFixed(2))
+        }
+      ],
+      currentTs
+    )
+  })
+  if (periodTaskList.length > 0) {
+    startTs = getTsUs()
+    let lastTs = startTs
+    timer = setInterval(() => {
+      const now = getTsUs()
+      const diff = (now - lastTs) / 1000
+      periodTaskList.forEach((e) => {
+        e(diff, now - startTs)
+      })
+      lastTs = now
+    }, 200)
+  }
 }
 ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   let i = 0
@@ -462,7 +523,37 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   const nodes = arg[i++] as Record<string, NodeItem>
 
   global.database = arg[i++]
+  global.vars = {}
+  const vars: Record<string, VarItem> = arg[i++] || {}
+  const sysVars = getAllSysVar(devices)
 
+  for (const v of Object.values(sysVars)) {
+    vars[v.id] = cloneDeep(v)
+  }
+
+  for (const key of Object.keys(vars)) {
+    const v = vars[key]
+
+    if (v.value) {
+      const parentName: string[] = []
+
+      // 递归查找所有父级名称
+      let currentVar = v
+      while (currentVar.parentId) {
+        const parent = vars[currentVar.parentId]
+        if (parent) {
+          parentName.unshift(parent.name) // 将父级名称添加到数组开头
+          currentVar = parent
+        } else {
+          break
+        }
+      }
+
+      parentName.push(v.name)
+      v.name = parentName.join('.')
+    }
+    global.vars[key] = v
+  }
   try {
     await globalStart(devices, testers, nodes, projectInfo)
   } catch (err: any) {
@@ -539,6 +630,8 @@ export function globalStop(emit = false) {
       win.webContents.send('ipc-global-stop')
     })
   }
+  clearTimeout(timer)
+  monitor?.disable()
 }
 
 ipcMain.handle('ipc-global-stop', async (event, ...arg) => {

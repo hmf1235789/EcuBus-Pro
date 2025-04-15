@@ -215,6 +215,7 @@ export default withMermaid({
           },
           { text: 'Trace', link: '/docs/um/trace/trace.md' },
           { text: 'Graph', link: '/docs/um/graph/graph.md' },
+          { text: 'Variable', link: '/docs/um/var/var.md' },
           { text: 'CLI', link: '/docs/um/cli.md' },
           {
             text: 'Script',

@@ -23,6 +23,29 @@
             </el-descriptions>
           </el-collapse-item>
         </el-collapse>
+        <el-collapse v-else-if="props.node.type === 'variable'" v-model="activeCollapse">
+          <el-collapse-item title="Variable Information" name="variable">
+            <el-descriptions v-if="varInfo" :column="1" border size="small">
+              <el-descriptions-item label="Variable Full Name">{{
+                varInfo.fullName
+              }}</el-descriptions-item>
+              <el-descriptions-item label="Variable Name">{{
+                varInfo.var?.name
+              }}</el-descriptions-item>
+              <el-descriptions-item label="Variable Type">{{
+                varInfo.var?.type.toUpperCase()
+              }}</el-descriptions-item>
+            </el-descriptions>
+
+            <el-alert
+              v-else
+              :title="`Variable ${(props.node.bindValue as any).variableName} Not Found`"
+              type="warning"
+              description="Please check in Variable Window"
+              show-icon
+            />
+          </el-collapse-item>
+        </el-collapse>
 
         <!-- 当type为variable时暂时不显示description -->
 
@@ -102,9 +125,12 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { GraphBindSignalValue, GraphNode } from 'src/preload/data'
+import { GraphBindSignalValue, GraphNode, VarItem } from 'src/preload/data'
 import { LineSeriesOption, GaugeSeriesOption } from 'echarts'
-
+import { useDataStore } from '@r/stores/data'
+import { getAllSysVar } from 'nodeCan/sysVar'
+import { cloneDeep } from 'lodash'
+const database = useDataStore()
 const props = defineProps<{
   stype: 'line' | 'gauge'
   node: GraphNode<GraphBindSignalValue>
@@ -115,6 +141,27 @@ const emit = defineEmits<{
   save: [value: GraphNode<GraphBindSignalValue>]
   cancel: []
 }>()
+
+const varInfo = computed(() => {
+  if (props.node.type === 'variable') {
+    const varInfo = database.vars[(props.node.bindValue as any).variableId]
+    if (varInfo) {
+      return {
+        fullName: (props.node.bindValue as any).variableFullName,
+        var: varInfo
+      }
+    }
+    const sysVar = getAllSysVar(database.devices)
+    const sysVarInfo = sysVar[(props.node.bindValue as any).variableId]
+    if (sysVarInfo) {
+      return {
+        fullName: (props.node.bindValue as any).variableFullName,
+        var: sysVarInfo
+      }
+    }
+  }
+  return undefined
+})
 
 const form = ref({
   name: props.node.name,

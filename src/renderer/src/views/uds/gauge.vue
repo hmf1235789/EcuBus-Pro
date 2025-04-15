@@ -31,7 +31,7 @@
         <el-divider direction="vertical"></el-divider>
         <el-button-group>
           <el-tooltip effect="light" content="Add Variables" placement="bottom">
-            <el-button link type="primary" disabled @click="addNode">
+            <el-button link type="primary" @click="addNode">
               <Icon :icon="addIcon" />
             </el-button>
           </el-tooltip>
@@ -126,7 +126,16 @@
     >
       <signal :height="tableHeight" :width="width" @add-signal="handleAddSignal" />
     </el-dialog>
-
+    <el-dialog
+      v-if="variableDialogVisible"
+      v-model="variableDialogVisible"
+      title="Add Variable"
+      width="95%"
+      align-center
+      :append-to="appendId"
+    >
+      <add-var :height="tableHeight" @add-variable="handleAddSignal" />
+    </el-dialog>
     <el-dialog
       v-if="editDialogVisible && editingNode"
       v-model="editDialogVisible"
@@ -159,7 +168,7 @@ import waveIcon from '@iconify/icons-material-symbols/airwave-rounded'
 import { ref, onMounted, computed, h, onUnmounted, watch, nextTick } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useDataStore } from '@r/stores/data'
-import { GraphBindSignalValue, GraphNode } from 'src/preload/data'
+import { GraphBindSignalValue, GraphBindVariableValue, GraphNode } from 'src/preload/data'
 import { use } from 'echarts/core'
 import { LineChart, GaugeChart } from 'echarts/charts'
 import {
@@ -174,6 +183,7 @@ import { ElNotification, formatter } from 'element-plus'
 import signal from './components/signal.vue'
 import editSignal from './components/editSignal.vue'
 import { GaugeSeriesOption } from 'echarts'
+import addVar from './components/addVar.vue'
 
 use([
   LineChart,
@@ -187,6 +197,7 @@ use([
 
 const isPaused = ref(false)
 const hideTree = ref(false)
+const variableDialogVisible = ref(false)
 const leftWidth = ref(200)
 const props = defineProps<{
   height: number
@@ -199,7 +210,9 @@ const appendId = computed(() => (props.editIndex ? `#win${props.editIndex}` : '#
 const height = computed(() => props.height - 22)
 const tableHeight = computed(() => (height.value * 2) / 3)
 // 修改测试数据
-const filteredTreeData = ref<GraphNode<GraphBindSignalValue, GaugeSeriesOption>[]>([])
+const filteredTreeData = ref<
+  GraphNode<GraphBindSignalValue | GraphBindVariableValue, GaugeSeriesOption>[]
+>([])
 const treeRef = ref()
 const time = ref(0)
 
@@ -229,8 +242,7 @@ function handleCheckChange(
 }
 
 const addNode = () => {
-  // 这里添加你的节点添加逻辑
-  console.log('Add node clicked')
+  variableDialogVisible.value = true
 }
 
 // 添加画布宽度计算
@@ -345,7 +357,7 @@ watch(
   }
 )
 
-function dataUpdate(key: string, datas: (number | string)[][]) {
+function dataUpdate(key: string, datas: [number, { value: number | string; rawValue: number }][]) {
   if (isPaused.value) {
     return
   }
@@ -373,7 +385,7 @@ function dataUpdate(key: string, datas: (number | string)[][]) {
         {
           data: [
             {
-              value: latestData ? latestData[1] : 0,
+              value: latestData ? latestData[1].value : 0,
               name: enabledCharts.value.find((c) => c.id === key)?.name || ''
             }
           ]
@@ -417,7 +429,9 @@ watch([() => canvasWidth.value, () => height.value, enabledCharts], () => {
   })
 })
 
-const getChartOption = (chart: GraphNode<GraphBindSignalValue>): ECBasicOption => {
+const getChartOption = (
+  chart: GraphNode<GraphBindSignalValue | GraphBindVariableValue>
+): ECBasicOption => {
   // 检查是否存在枚举值
   const hasEnums = !!chart.yAxis?.enums && chart.yAxis.enums.length > 0
 
@@ -601,8 +615,9 @@ const addSignal = () => {
   signalDialogVisible.value = true
 }
 
-const handleAddSignal = (node: GraphNode<GraphBindSignalValue>) => {
+const handleAddSignal = (node: GraphNode<GraphBindSignalValue | GraphBindVariableValue>) => {
   signalDialogVisible.value = false
+  variableDialogVisible.value = false
 
   //check existing graph
   const existed = filteredTreeData.value.find((v) => v.id == node.id)

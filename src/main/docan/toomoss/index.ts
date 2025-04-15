@@ -122,6 +122,7 @@ export class TOOMOSS_CAN extends CanBase {
     }
 
     this.event = new EventEmitter()
+
     this.log = new CanLOG('TOOMOSS', info.name, this.event)
 
     this.handle = parseInt(info.handle.split(':')[0])
@@ -217,9 +218,7 @@ export class TOOMOSS_CAN extends CanBase {
       }
       TOOMOSS.CAN_ResetStartTime(this.handle, this.deviceIndex)
     }
-
-    // 绑定回调函数到实例
-
+    this.attachCanMessage(this.busloadCb)
     // 初始化 TSFN
     TOOMOSS.CreateTSFN(
       this.handle,

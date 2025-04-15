@@ -31,7 +31,7 @@
         <el-divider direction="vertical"></el-divider>
         <el-button-group>
           <el-tooltip effect="light" content="Add Variables" placement="bottom">
-            <el-button link type="primary" disabled @click="addNode">
+            <el-button link type="primary" @click="addNode">
               <Icon :icon="addIcon" />
             </el-button>
           </el-tooltip>
@@ -134,13 +134,23 @@
       align-center
       :append-to="appendId"
     >
-      <signal :height="tableHeight" :width="width" @add-signal="handleAddSignal" />
+      <signal :height="tableHeight" @add-signal="handleAddSignal" />
+    </el-dialog>
+    <el-dialog
+      v-if="variableDialogVisible"
+      v-model="variableDialogVisible"
+      title="Add Variable"
+      width="95%"
+      align-center
+      :append-to="appendId"
+    >
+      <add-var :height="tableHeight" @add-variable="handleAddSignal" />
     </el-dialog>
 
     <el-dialog
       v-if="editDialogVisible && editingNode"
       v-model="editDialogVisible"
-      title="Edit Signal"
+      :title="editingNode.type === 'signal' ? 'Edit Signal' : 'Edit Variable'"
       width="500px"
       align-center
       :append-to="appendId"
@@ -169,7 +179,7 @@ import waveIcon from '@iconify/icons-material-symbols/airwave-rounded'
 import { ref, onMounted, computed, h, onUnmounted, watch, nextTick } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useDataStore } from '@r/stores/data'
-import { GraphBindSignalValue, GraphNode } from 'src/preload/data'
+import { GraphBindSignalValue, GraphBindVariableValue, GraphNode } from 'src/preload/data'
 import { use } from 'echarts/core'
 import { LineChart } from 'echarts/charts'
 import { GridComponent, DataZoomComponent } from 'echarts/components'
@@ -177,6 +187,7 @@ import { CanvasRenderer } from 'echarts/renderers'
 import type { ECBasicOption } from 'echarts/types/dist/shared'
 import { ElNotification, formatter } from 'element-plus'
 import signal from './components/signal.vue'
+import addVar from './components/addVar.vue'
 import editSignal from './components/editSignal.vue'
 import { LineSeriesOption } from 'echarts'
 
@@ -196,7 +207,9 @@ const appendId = computed(() => (props.editIndex ? `#win${props.editIndex}` : '#
 const height = computed(() => props.height - 22)
 const tableHeight = computed(() => (height.value * 2) / 3)
 // 修改测试数据
-const filteredTreeData = ref<GraphNode<GraphBindSignalValue, LineSeriesOption>[]>([])
+const filteredTreeData = ref<
+  GraphNode<GraphBindSignalValue | GraphBindVariableValue, LineSeriesOption>[]
+>([])
 const treeRef = ref()
 const time = ref(0)
 
@@ -226,8 +239,7 @@ function handleCheckChange(
 }
 
 const addNode = () => {
-  // 这里添加你的节点添加逻辑
-  console.log('Add node clicked')
+  variableDialogVisible.value = true
 }
 
 // 添加画布宽度计算
@@ -362,7 +374,7 @@ watch(
 // 添加数据缓存
 const chartDataCache: Record<string, (number | string)[][]> = {}
 
-function dataUpdate(key: string, datas: (number | string)[][]) {
+function dataUpdate(key: string, datas: [number, { value: number | string; rawValue: number }][]) {
   if (isPaused.value) {
     return
   }
@@ -376,8 +388,8 @@ function dataUpdate(key: string, datas: (number | string)[][]) {
     chartDataCache[key] = []
   }
 
-  // 添加新数据
-  chartDataCache[key] = chartDataCache[key].concat(datas)
+  // 添加新数据， 添加第一个的number，第二个Object里的value
+  chartDataCache[key] = chartDataCache[key].concat(datas.map((v) => [v[0], v[1].value]))
 
   // 如果数据超过1000个点，移除最早的数据
   if (chartDataCache[key].length > 1000) {
@@ -608,7 +620,7 @@ watch([() => canvasWidth.value, () => height.value, enabledCharts], () => {
 })
 
 const getChartOption = (
-  chart: GraphNode<GraphBindSignalValue, LineSeriesOption>,
+  chart: GraphNode<GraphBindSignalValue | GraphBindVariableValue, LineSeriesOption>,
   index: number
 ): ECBasicOption => {
   const isLast = index === enabledCharts.value.length - 1
@@ -835,14 +847,16 @@ onUnmounted(() => {
 
 const signalDialogVisible = ref(false)
 const editDialogVisible = ref(false)
+const variableDialogVisible = ref(false)
 const editingNode = ref<GraphNode<GraphBindSignalValue> | null>(null)
 
 const addSignal = () => {
   signalDialogVisible.value = true
 }
 
-const handleAddSignal = (node: GraphNode<GraphBindSignalValue>) => {
+const handleAddSignal = (node: GraphNode<GraphBindSignalValue | GraphBindVariableValue>) => {
   signalDialogVisible.value = false
+  variableDialogVisible.value = false
 
   //check existing graph
   const existed = filteredTreeData.value.find((v) => v.id == node.id)

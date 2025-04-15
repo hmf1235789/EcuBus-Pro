@@ -54,7 +54,13 @@ function parseLinData(raw: any) {
           //转为秒
           const ts = parseFloat(((msg.ts || 0) / 1000000).toFixed(3))
           const value = signalDef.physValue
-          result[signalKey].push([ts, value])
+          result[signalKey].push([
+            ts,
+            {
+              value: value,
+              rawValue: signalDef.value
+            }
+          ])
           msg.children.push({
             name: signalDef.signalName,
             data: `${signalDef.physValueEnum ? signalDef.physValueEnum : signalDef.physValue}  ${
@@ -95,7 +101,13 @@ function parseCanData(raw: any) {
           }
           const ts = parseFloat(((msg.ts || 0) / 1000000).toFixed(3))
           const value = signal.physValue
-          result[signalKey].push([ts, value!])
+          result[signalKey].push([
+            ts,
+            {
+              value: value,
+              rawValue: signal.value
+            }
+          ])
           msg.children.push({
             name: signal.name,
             data: `${signal.physValueEnum ? signal.physValueEnum : signal.physValue}  ${
@@ -114,6 +126,29 @@ function parseCanData(raw: any) {
 // Initialize database reference
 function initDataBase(db: DataSet['database']) {
   database = db
+}
+
+function parseSetVar(data: any) {
+  const result: Record<string, any> = {}
+  for (const item of data) {
+    const val = item.message.data
+    const ts = parseFloat(((item.message.ts || 0) / 1000000).toFixed(3))
+    if (Array.isArray(val)) {
+      for (const sval of val) {
+        if (!result[sval.id]) {
+          result[sval.id] = []
+        }
+        result[sval.id].push([
+          ts,
+          {
+            value: sval.value,
+            rawValue: sval.value
+          }
+        ])
+      }
+    }
+  }
+  return result
 }
 
 // Export functions for both testing and worker usage
@@ -140,9 +175,15 @@ if (isWorker) {
         }
         break
       }
-
       case 'linBase': {
         const result = parseLinData(data)
+        if (result) {
+          self.postMessage(result)
+        }
+        break
+      }
+      case 'setVar': {
+        const result = parseSetVar(data)
         if (result) {
           self.postMessage(result)
         }
