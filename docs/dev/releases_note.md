@@ -1,5 +1,18 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.30
+Changes from v0.8.29 to v0.8.30:
+ 
+* [feat]:add data graph ok [Detail](https://app.whyengineer.com/docs/um/graph/graph.html)
+* [feat]:add var system ok [Detail](https://app.whyengineer.com/docs/um/var/var.html)
+* [feat]:add some ZLG device 
+* [bug]:fix script buffer outbound 
+* [bug]:fix toomoss can event miss 
+* [feat]:add toomoss/zlg can 120res control
+---
+
+# EcuBus-Pro Release Notes
+
 ## v0.8.29
 Changes from v0.8.28 to v0.8.29:
 
