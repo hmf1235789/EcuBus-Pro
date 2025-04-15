@@ -1,5 +1,14 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.31
+Changes from v0.8.30 to v0.8.31:
+
+ 
+* [bug]:fix freq isn't number type
+---
+
+# EcuBus-Pro Release Notes
+
 ## v0.8.30
 Changes from v0.8.29 to v0.8.30:
  
