@@ -477,7 +477,7 @@
                     v-model:api="styleForm.api"
                   ></DragForm>
                 </div>
-                <div style="grid-area: event">
+                <!-- <div style="grid-area: event">
                   <el-divider v-if="eventShow">
                     {{ t('designer.event') }}
                   </el-divider>
@@ -500,7 +500,7 @@
                     @change="validateChange"
                     :key="activeRule._fc_id"
                   ></DragForm>
-                </div>
+                </div> -->
               </div>
             </el-main>
           </el-container>
@@ -632,6 +632,7 @@ export default defineComponent({
     locale: Object,
     handle: Array
   },
+  inject: ['dialogId'],
   emits: [
     'active',
     'create',
@@ -1115,7 +1116,7 @@ export default defineComponent({
         return { root: parent, parent: rule }
       },
       copyName() {
-        copyTextToClipboard(data.activeRule.name)
+        copyTextToClipboard(data.activeRule.name, this.dialogId)
       },
       updateName() {
         data.activeRule.name = 'ref_' + uniqueId()
@@ -1195,7 +1196,7 @@ export default defineComponent({
         data.preview.html = hljs.highlight(htmlTemplate(rule, options), { language: 'xml' }).value
       },
       copyCode() {
-        copyTextToClipboard(this.$refs.previewCode.innerText)
+        copyTextToClipboard(this.$refs.previewCode.innerText, this.dialogId)
       },
       getRule() {
         return methods.parseRule(deepCopy(data.dragForm.rule[0].children))
@@ -1308,7 +1309,6 @@ export default defineComponent({
       },
       setOption(opt) {
         const defOptions = deepCopy(methods.getConfig('formOptions', {}))
-        console.log(defOptions)
         const defForm = defOptions.form || {}
         delete defOptions.form
         let options = { ...defOptions, ...(is.String(opt) ? JSON.parse(opt) : deepCopy(opt || {})) }
@@ -1894,7 +1894,8 @@ export default defineComponent({
         })
         if (flag) {
           errorMessage(
-            data.t('struct.only', { label: t('com.' + menu.name + '.name') || menu.label })
+            data.t('struct.only', { label: t('com.' + menu.name + '.name') || menu.label }),
+            this.dialogId
           )
         }
         return flag
@@ -2373,7 +2374,10 @@ export default defineComponent({
           event.preventDefault()
           let rule = data.activeRule
           if (event.key === 'c') {
-            copyTextToClipboard('FormCreate:' + designerForm.toJson(methods.parseRule([rule])[0]))
+            copyTextToClipboard(
+              'FormCreate:' + designerForm.toJson(methods.parseRule([rule])[0]),
+              this.dialogId
+            )
             vm.emit('copyRule', { event, rule })
             return
           }

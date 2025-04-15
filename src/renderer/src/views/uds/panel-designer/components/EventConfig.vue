@@ -184,7 +184,7 @@ export default defineComponent({
       default: () => []
     }
   },
-  inject: ['designer'],
+  inject: ['designer', 'dialogId'],
   components: {
     FnEditor
   },
@@ -387,7 +387,7 @@ export default defineComponent({
     },
     submit() {
       if (this.activeData) {
-        return errorMessage(this.t('event.saveMsg'))
+        return errorMessage(this.t('event.saveMsg'), this.dialogId)
       }
       const { on, hooks } = this.parseFN(this.event)
       this.$emit('update:modelValue', on)

@@ -382,7 +382,7 @@ export function compareVersion(v1, v2) {
     return a1.length === a2.length ? 0 : (a1.length < a2.length ? -1 : 1);
 }
 
-export function copyTextToClipboard(text) {
+export function copyTextToClipboard(text, id) {
     const textArea = document.createElement('textarea');
 
     textArea.style.position = 'fixed';
@@ -402,7 +402,7 @@ export function copyTextToClipboard(text) {
         console.log('Oops, unable to copy');
     }
 
-    message('已复制!', 'success');
+    message('Copied', 'success', id);
 
     document.body.removeChild(textArea);
 }

@@ -24,7 +24,7 @@ import is from '@form-create/utils/lib/type'
 
 export default defineComponent({
   name: 'FieldInput',
-  inject: ['designer'],
+  inject: ['designer', 'dialogId'],
   emits: ['update:modelValue'],
   props: {
     modelValue: String,
@@ -54,7 +54,7 @@ export default defineComponent({
   },
   methods: {
     copy() {
-      copyTextToClipboard(this.modelValue)
+      copyTextToClipboard(this.modelValue, this.dialogId)
     },
     getSubChildren() {
       let subChildren = this.designer.setupState.getSubFormChildren(this.activeRule) || []
@@ -81,10 +81,10 @@ export default defineComponent({
       const oldField = this.oldValue
       let field = (this.value || '').replace(/[\s\　]/g, '')
       if (!field) {
-        errorMessage(this.t('computed.fieldEmpty'))
+        errorMessage(this.t('computed.fieldEmpty'), this.dialogId)
         return oldField
       } else if (!/^[a-zA-Z]/.test(field)) {
-        errorMessage(this.t('computed.fieldChar'))
+        errorMessage(this.t('computed.fieldChar'), this.dialogId)
         return oldField
       } else if (oldField !== field) {
         const flag = field.indexOf('.') > -1
@@ -92,7 +92,7 @@ export default defineComponent({
           field = field.replaceAll('.', '_')
         }
         if (this.getSubFieldChildren().filter((v) => v.field === field).length > 0) {
-          errorMessage(this.t('computed.fieldExist', { label: field }))
+          errorMessage(this.t('computed.fieldExist', { label: field }), this.dialogId)
           return oldField
         }
         if (flag) {

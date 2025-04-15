@@ -69,7 +69,7 @@ export default defineComponent({
     button: Boolean,
     fnx: Boolean
   },
-  inject: ['designer'],
+  inject: ['designer', 'dialogId'],
   data() {
     return {
       editor: null,
@@ -127,7 +127,7 @@ export default defineComponent({
           fn = new Function('return function ' + this.name + '(' + this.argStr + '){' + str + '}')()
         } catch (e) {
           console.error(e)
-          errorMessage(this.t('struct.errorMsg'))
+          errorMessage(this.t('struct.errorMsg'), this.dialogId)
           return false
         }
         if (this.body) {

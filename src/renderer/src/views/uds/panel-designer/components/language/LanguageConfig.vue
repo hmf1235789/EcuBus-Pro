@@ -67,7 +67,7 @@ import { copyTextToClipboard } from '../../utils'
 
 export default defineComponent({
   name: 'LanguageConfig',
-  inject: ['designer'],
+  inject: ['designer', 'dialogId'],
   computed: {
     localeOptions() {
       return this.designer.setupState.getConfig('localeOptions', [
@@ -88,7 +88,7 @@ export default defineComponent({
   },
   methods: {
     copy(key) {
-      copyTextToClipboard(key)
+      copyTextToClipboard(key, this.dialogId)
     },
     addColumn() {
       this.column.unshift({

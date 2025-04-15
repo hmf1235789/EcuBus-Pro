@@ -92,7 +92,7 @@ export default defineComponent({
     onOk() {
       const str = this.editor.getValue()
       if (this.validateXML(str)) {
-        errorMessage(this.t('struct.errorMsg'))
+        errorMessage(this.t('struct.errorMsg'), this.dialogId)
         return false
       }
       this.visible = false

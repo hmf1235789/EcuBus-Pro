@@ -1,16 +1,19 @@
 import {ElMessage} from 'element-plus';
 
 
-const message = (msg, type) => {
+const message = (msg, type, id) => {
     return ElMessage({
         message: msg,
+        plain: true,
+        offset: 30,
         type: type || 'info',
         customClass: '_fc-message-tip',
+        appendTo: id
     });
 };
 
-const errorMessage = (msg) => {
-    return message(msg, 'error');
+const errorMessage = (msg, id) => {
+    return message(msg, 'error', id);
 
 };
 

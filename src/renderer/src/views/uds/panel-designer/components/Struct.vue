@@ -15,7 +15,8 @@
       v-model="visible"
       destroy-on-close
       :close-on-click-modal="false"
-      append-to-body
+      align-center
+      :append-to="dialogId"
       width="800px"
     >
       <div ref="editor" v-if="visible"></div>
@@ -53,7 +54,7 @@ export default defineComponent({
     },
     validate: Function
   },
-  inject: ['designer'],
+  inject: ['designer', 'dialogId'],
   computed: {
     t() {
       return this.designer.setupState.t
@@ -113,11 +114,11 @@ export default defineComponent({
         val = new Function('return ' + str)()
       } catch (e) {
         console.error(e)
-        errorMessage(this.t('struct.errorMsg'))
+        errorMessage(this.t('struct.errorMsg'), this.dialogId)
         return false
       }
       if (this.validate && false === this.validate(val)) {
-        errorMessage(this.t('struct.errorMsg'))
+        errorMessage(this.t('struct.errorMsg'), this.dialogId)
         return false
       }
       this.visible = false

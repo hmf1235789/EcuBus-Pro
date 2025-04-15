@@ -181,7 +181,7 @@ export default defineComponent({
     FnEditor,
     StructEditor
   },
-  inject: ['designer'],
+  inject: ['designer', 'dialogId'],
   data() {
     return {
       visible: false,
@@ -253,7 +253,7 @@ export default defineComponent({
         })
         .catch((err) => {
           console.error(err)
-          errorMessage(err[Object.keys(err)[0]][0].message)
+          errorMessage(err[Object.keys(err)[0]][0].message, this.dialogId)
         })
     }
   },

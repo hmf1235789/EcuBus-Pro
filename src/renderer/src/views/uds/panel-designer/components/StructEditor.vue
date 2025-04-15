@@ -24,7 +24,7 @@ export default defineComponent({
     }
   },
   emits: ['blur', 'focus', 'update:modelValue'],
-  inject: ['designer'],
+  inject: ['designer', 'dialogId'],
   data() {
     return {
       editor: null,
@@ -96,7 +96,7 @@ export default defineComponent({
         val = new Function('return ' + str)()
       } catch (e) {
         console.error(e)
-        errorMessage(this.t('struct.errorMsg'))
+        errorMessage(this.t('struct.errorMsg'), this.dialogId)
         return false
       }
       if (this.validate && false === this.validate(val)) {

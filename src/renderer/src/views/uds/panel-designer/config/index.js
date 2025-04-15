@@ -42,13 +42,22 @@ import image from './rule/image';
 
 
 const ruleList = [
-    input, textarea, password, number, radio, checkbox, select, _switch, rate, time, timeRange, slider, date, dateRange, color, cascader, upload, transfer, tree, treeSelect,
+    input,select,number,radio,checkbox,_switch,
+    group, subForm,
+    alert, button, text, html, divider, tag, image,
+    row, table, tabs, space, card, collapse,
+    col, tabPane, collapseItem,
+  
+];
+/*
+
+  input, textarea, password, number, radio, checkbox, select, _switch, rate, time, timeRange, slider, date, dateRange, color, cascader, upload, transfer, tree, treeSelect,
     group, subForm, tableForm, tableFormColumn,
     alert, button, text, html, divider, tag, image,
     row, table, tabs, space, card, collapse,
     col, tabPane, collapseItem,
-];
 
+*/
 export default ruleList;
 
 export function defaultDrag(rule) {
