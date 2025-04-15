@@ -179,6 +179,16 @@ export const useProjectStore = defineStore('project', {
                 for (const key in ss.database.can) {
                   ss.database.can[key].id = key
                 }
+
+                //TODO: remove convert freq to number in 0.9 version
+                for (const device of Object.values(ss.devices)) {
+                  if (device.type == 'can' && device.canDevice) {
+                    device.canDevice.bitrate.freq = Number(device.canDevice.bitrate.freq)
+                    if (device.canDevice.bitratefd) {
+                      device.canDevice.bitratefd.freq = Number(device.canDevice.bitratefd.freq)
+                    }
+                  }
+                }
               })
               this.project = rdata.project
               this.open = true

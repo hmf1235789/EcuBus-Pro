@@ -107,7 +107,7 @@
     <el-form-item label-width="0" prop="bitrate">
       <vxe-grid v-bind="gridOptions" style="width: 100%">
         <template #edit_freq="{ row }">
-          <el-input v-model="row.freq" />
+          <el-input v-model.number="row.freq" />
         </template>
         <template #edit_clock="{ row, rowIndex }">
           <el-select v-if="rowIndex == 0" v-model="row.clock" size="small" allow-create filterable>
