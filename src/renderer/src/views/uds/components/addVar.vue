@@ -71,6 +71,7 @@ import { getAllSysVar } from 'nodeCan/sysVar'
 interface TreeItem {
   id: string
   name: string
+  parentId?: string
   children: TreeItem[]
   type: 'user' | 'system'
   value?: {
@@ -104,6 +105,7 @@ const allVariables = computed(() => {
     const variable: TreeItem = {
       id: varItem.id,
       name: varItem.name,
+      parentId: varItem.parentId,
       children: [],
       type: varItem.type,
       value: varItem.value,
@@ -182,6 +184,24 @@ function randomColor() {
 
 function addVariable() {
   if (!highlightedRow.value) return
+  const fullNameList: string[] = [highlightedRow.value.name]
+  let parent = highlightedRow.value.parentId
+  while (parent) {
+    const parentInfo = database.vars[parent]
+    if (parentInfo) {
+      fullNameList.unshift(parentInfo.name)
+      parent = parentInfo.parentId
+    } else {
+      const sysVarInfo = getAllSysVar(database.devices)[parent]
+      if (sysVarInfo) {
+        fullNameList.unshift(sysVarInfo.name)
+        parent = sysVarInfo.parentId
+      } else {
+        break
+      }
+    }
+  }
+
   emits('addVariable', {
     type: 'variable',
     enable: true,
@@ -196,7 +216,8 @@ function addVariable() {
     bindValue: {
       variableId: highlightedRow.value.id,
       variableType: highlightedRow.value.type,
-      variableName: highlightedRow.value.name
+      variableName: highlightedRow.value.name,
+      variableFullName: fullNameList.join('.')
     }
   })
 }

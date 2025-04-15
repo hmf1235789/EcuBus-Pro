@@ -26,9 +26,14 @@
         <el-collapse v-else-if="props.node.type === 'variable'" v-model="activeCollapse">
           <el-collapse-item title="Variable Information" name="variable">
             <el-descriptions v-if="varInfo" :column="1" border size="small">
-              <el-descriptions-item label="Variable Name">{{ varInfo.name }}</el-descriptions-item>
+              <el-descriptions-item label="Variable Full Name">{{
+                varInfo.fullName
+              }}</el-descriptions-item>
+              <el-descriptions-item label="Variable Name">{{
+                varInfo.var?.name
+              }}</el-descriptions-item>
               <el-descriptions-item label="Variable Type">{{
-                varInfo.type.toUpperCase()
+                varInfo.var?.type.toUpperCase()
               }}</el-descriptions-item>
             </el-descriptions>
 
@@ -120,7 +125,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { GraphBindSignalValue, GraphNode } from 'src/preload/data'
+import { GraphBindSignalValue, GraphNode, VarItem } from 'src/preload/data'
 import { LineSeriesOption, GaugeSeriesOption } from 'echarts'
 import { useDataStore } from '@r/stores/data'
 import { getAllSysVar } from 'nodeCan/sysVar'
@@ -141,21 +146,18 @@ const varInfo = computed(() => {
   if (props.node.type === 'variable') {
     const varInfo = database.vars[(props.node.bindValue as any).variableId]
     if (varInfo) {
-      return varInfo
+      return {
+        fullName: (props.node.bindValue as any).variableFullName,
+        var: varInfo
+      }
     }
     const sysVar = getAllSysVar(database.devices)
-    let sysVarInfo = cloneDeep(sysVar[(props.node.bindValue as any).variableId])
+    const sysVarInfo = sysVar[(props.node.bindValue as any).variableId]
     if (sysVarInfo) {
-      const nameList: string[] = [sysVarInfo.name]
-      let parent = sysVarInfo.parentId
-      while (parent) {
-        nameList.unshift(sysVar[parent].name)
-        sysVarInfo = sysVar[parent]
-        parent = sysVarInfo.parentId
+      return {
+        fullName: (props.node.bindValue as any).variableFullName,
+        var: sysVarInfo
       }
-
-      sysVarInfo.name = nameList.join('.')
-      return sysVarInfo
     }
   }
   return undefined

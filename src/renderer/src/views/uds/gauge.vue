@@ -357,7 +357,7 @@ watch(
   }
 )
 
-function dataUpdate(key: string, datas: (number | string)[][]) {
+function dataUpdate(key: string, datas: [number, { value: number | string; rawValue: number }][]) {
   if (isPaused.value) {
     return
   }
@@ -385,7 +385,7 @@ function dataUpdate(key: string, datas: (number | string)[][]) {
         {
           data: [
             {
-              value: latestData ? latestData[1] : 0,
+              value: latestData ? latestData[1].value : 0,
               name: enabledCharts.value.find((c) => c.id === key)?.name || ''
             }
           ]

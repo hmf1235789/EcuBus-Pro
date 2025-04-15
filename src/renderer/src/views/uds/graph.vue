@@ -374,7 +374,7 @@ watch(
 // 添加数据缓存
 const chartDataCache: Record<string, (number | string)[][]> = {}
 
-function dataUpdate(key: string, datas: (number | string)[][]) {
+function dataUpdate(key: string, datas: [number, { value: number | string; rawValue: number }][]) {
   if (isPaused.value) {
     return
   }
@@ -388,8 +388,8 @@ function dataUpdate(key: string, datas: (number | string)[][]) {
     chartDataCache[key] = []
   }
 
-  // 添加新数据
-  chartDataCache[key] = chartDataCache[key].concat(datas)
+  // 添加新数据， 添加第一个的number，第二个Object里的value
+  chartDataCache[key] = chartDataCache[key].concat(datas.map((v) => [v[0], v[1].value]))
 
   // 如果数据超过1000个点，移除最早的数据
   if (chartDataCache[key].length > 1000) {

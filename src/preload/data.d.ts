@@ -78,7 +78,9 @@ export type GraphBindFrameValue = {
 }
 export type GraphBindVariableValue = {
   variableId: string
+  variableType: 'user' | 'system'
   variableName: string
+  variableFullName: string
 }
 
 export type GraphNode<T, S = any> = {

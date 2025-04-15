@@ -5,6 +5,7 @@ The graph signal feature allows you to visualize the data flow between signals i
 
 * **Line**
 * **Gauge** 
+* **Data**
 
 
 ## Adding Signals
@@ -15,10 +16,16 @@ Add signal from database, which depends on [database](./../database.md).
 
 ![alt text](image-2.png)
 
+## Add Variabls
+![alt text](image-7.png)
+
+All valid variables from [`Variable Window`](./../var/var.md).
+
 ## Multi Signal In One Graph
 
 ![alt text](image-3.png)
 ![alt text](image-5.png)
+![alt text](image-6.png)
 
 ## Edit Signal Property
 

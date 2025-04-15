@@ -68,6 +68,21 @@
           <template #default_name="{ row }">
             {{ row.name }}
           </template>
+          <template #default_value="{ row }">
+            {{ row.value }}
+          </template>
+          <template #default_unit="{ row }">
+            {{ row.unit }}
+          </template>
+          <template #default_fullName="{ row }">
+            {{ row.fullName }}
+          </template>
+          <template #default_rawValue="{ row }">
+            {{ row.rawValue }}
+          </template>
+          <template #default_lastUpdate="{ row }">
+            {{ row.lastUpdate || '--' }}
+          </template>
         </VxeGrid>
       </div>
     </div>
@@ -129,8 +144,17 @@ const appendId = computed(() => (props.editIndex ? `#win${props.editIndex}` : '#
 const height = computed(() => props.height)
 const tableHeight = computed(() => (height.value * 2) / 3)
 
+type TableType = {
+  id: string
+  name: string
+  fullName: string
+  value: string | number
+  unit: string
+  rawValue: number | string
+  lastUpdate: number
+}
 // 用户表格数据和配置
-const userTableData = ref<any[]>([])
+const userTableData = ref<TableType[]>([])
 const userVariableGrid = ref()
 const selectedRowId = ref('')
 
@@ -139,8 +163,19 @@ const cellClick = (params: any) => {
   selectedRowId.value = params.row.id
 }
 
+function getUnit(row: GraphNode<GraphBindSignalValue | GraphBindVariableValue>) {
+  return row.yAxis?.unit
+}
+
+function getFullName(row: GraphNode<GraphBindSignalValue | GraphBindVariableValue>) {
+  if (row.type === 'variable') {
+    return (row.bindValue as any).variableFullName
+  }
+  return (row.bindValue as any).signalName
+}
+
 // VxeTable配置
-const userGridOptions = computed<VxeGridProps>(() => ({
+const userGridOptions = computed<VxeGridProps<TableType>>(() => ({
   size: 'mini',
   border: true,
   showOverflow: true,
@@ -151,9 +186,26 @@ const userGridOptions = computed<VxeGridProps>(() => ({
   columns: [
     { type: 'seq', width: 50, title: '#' },
     { field: 'name', title: 'Name', minWidth: 150, slots: { default: 'default_name' } },
-    { field: 'value', title: 'Value', minWidth: 150 },
-    { field: 'unit', title: 'Unit', width: 100 },
-    { field: 'rawValue', title: 'Raw Value', minWidth: 150 }
+    {
+      field: 'fullName',
+      title: 'Full Name',
+      minWidth: 200,
+      slots: { default: 'default_fullName' }
+    },
+    { field: 'value', title: 'Value', minWidth: 150, slots: { default: 'default_value' } },
+    { field: 'unit', title: 'Unit', width: 100, slots: { default: 'default_unit' } },
+    {
+      field: 'rawValue',
+      title: 'Raw Value',
+      minWidth: 150,
+      slots: { default: 'default_rawValue' }
+    },
+    {
+      field: 'lastUpdate',
+      title: 'Last Update',
+      minWidth: 150,
+      slots: { default: 'default_lastUpdate' }
+    }
   ],
   data: userTableData.value,
   rowConfig: {
@@ -235,7 +287,7 @@ watch(
   }
 )
 
-function dataUpdate(key: string, values: (number | string)[][]) {
+function dataUpdate(key: string, values: [number, { value: number | string; rawValue: number }][]) {
   if (isPaused.value) {
     return
   }
@@ -256,12 +308,14 @@ function dataUpdate(key: string, values: (number | string)[][]) {
     // 更新表格数据
     const dataItem = datas[key]
     if (dataItem) {
-      const existingRowIndex = userTableData.value.findIndex((row) => row.id === key)
-
       // 格式化值显示
-      let formattedValue: string | number = latestData[1] as string | number
-      let unit = ''
-      const rawValue = latestData[1]
+      let formattedValue: string | number = latestData[1].value
+
+      const rawValue = latestData[1].rawValue
+
+      // 获取当前时间作为最后更新时间
+
+      const lastUpdate = latestData[0]
 
       // 如果是GraphNode类型，提取更多信息
       if ((dataItem as any).color !== undefined && (dataItem as any).yAxis !== undefined) {
@@ -283,84 +337,47 @@ function dataUpdate(key: string, values: (number | string)[][]) {
             formattedValue = parseFloat(formattedValue.toFixed(2)).toString()
           }
         }
-
-        unit = nodeInfo.yAxis?.unit || ''
       }
 
-      // 构建更新行数据，避免重复属性
-      const baseProperties = {
-        time: latestData[0],
-        value: formattedValue,
-        unit: unit,
-        rawValue: rawValue
-      }
-
-      let newRow
-      if ((dataItem as any).name !== undefined) {
-        newRow = {
-          id: key,
-          ...baseProperties
-        }
-      } else {
-        newRow = {
-          id: key,
-          name: key,
-          ...baseProperties
-        }
-      }
+      const existingRowIndex = userTableData.value.findIndex((r) => r.id === key)
 
       if (existingRowIndex >= 0) {
-        // 更新现有行，保留原始数据的其他属性
-        userTableData.value[existingRowIndex] = {
-          ...userTableData.value[existingRowIndex],
-          ...newRow
-        }
-      } else {
-        // 添加新行
-        const rowData: any = {
-          id: key,
-          ...baseProperties
-        }
+        // 更新现有行的数据
+        const rowData = userTableData.value[existingRowIndex]
 
-        // 如果有name属性，添加
-        if ((dataItem as any).name) {
-          rowData.name = (dataItem as any).name
-        }
+        // 更新属性
 
-        userTableData.value.push(rowData)
+        rowData.value = formattedValue
+
+        rowData.rawValue = rawValue
+        rowData.lastUpdate = lastUpdate
+
+        // // 使用reloadRow方法刷新行
+        // nextTick(() => {
+        //   userVariableGrid.value?.reloadRow(rowData)
+        // })
       }
-
-      // 更新表格
-      nextTick(() => {
-        userVariableGrid.value?.loadData(userTableData.value)
-      })
     }
   }
 }
 
 onMounted(() => {
   // 初始化数据
-  for (const [key, value] of Object.entries(datas)) {
+  for (const v of Object.values(datas)) {
     // 检查值是否包含graph属性以安全地访问
-    const graphId = (value as any).graph?.id
-    if (graphId && graphId !== props.editIndex) {
+    if (v.graph && v.graph.id != props.editIndex) {
       continue
     }
 
-    // 添加到表格数据中 - 避免属性重复
-    const rowData: any = {
-      id: key,
-      value: '',
-      rawValue: '',
-      time: 0
-    }
-
-    // 如果有name属性，添加
-    if ((value as any).name) {
-      rowData.name = (value as any).name
-    }
-
-    userTableData.value.push(rowData)
+    userTableData.value.push({
+      id: v.id,
+      name: v.name,
+      fullName: getFullName(v),
+      value: '--',
+      unit: getUnit(v),
+      rawValue: '--',
+      lastUpdate: 0
+    })
   }
 
   // 初始化表格数据
@@ -454,20 +471,15 @@ const handleAddSignal = (node: GraphNode<GraphBindSignalValue | GraphBindVariabl
     }
   }
 
-  // 添加到数据中 - 避免属性重复
-  const rowData: any = {
+  userTableData.value.push({
     id: node.id,
-    value: '',
-    rawValue: '',
-    time: 0
-  }
-
-  // 如果有name属性，添加
-  if (node.name) {
-    rowData.name = node.name
-  }
-
-  userTableData.value.push(rowData)
+    name: node.name,
+    fullName: getFullName(node),
+    value: '--',
+    unit: getUnit(node),
+    rawValue: '--',
+    lastUpdate: 0
+  })
 
   window.logBus.on(node.id, dataUpdate)
   datas[node.id] = node

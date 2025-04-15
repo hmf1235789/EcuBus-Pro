@@ -1366,7 +1366,7 @@ export class UtilClass {
  *     ```
  *
  * 4. **More**
- *     > For more details, please refer to the {@link UDSClass | `UDSClass`} class.
+ *     > For more details, please refer to the {@link UtilClass | `UtilClass`} class.
  */
 export const Util = new UtilClass()
 global.Util = Util
@@ -1441,7 +1441,7 @@ export async function setSignal(
 /**
  * Set a variable value
  *
- * @category Util
+ * @category Variable
  * @param {keyof VariableMap} name - The variable name
  * @param {number|number[]|string} value - The value to set, can be single number or array
  * @returns {Promise<void>} - Returns a promise that resolves when value is set

@@ -54,7 +54,13 @@ function parseLinData(raw: any) {
           //转为秒
           const ts = parseFloat(((msg.ts || 0) / 1000000).toFixed(3))
           const value = signalDef.physValue
-          result[signalKey].push([ts, value])
+          result[signalKey].push([
+            ts,
+            {
+              value: value,
+              rawValue: signalDef.value
+            }
+          ])
           msg.children.push({
             name: signalDef.signalName,
             data: `${signalDef.physValueEnum ? signalDef.physValueEnum : signalDef.physValue}  ${
@@ -95,7 +101,13 @@ function parseCanData(raw: any) {
           }
           const ts = parseFloat(((msg.ts || 0) / 1000000).toFixed(3))
           const value = signal.physValue
-          result[signalKey].push([ts, value!])
+          result[signalKey].push([
+            ts,
+            {
+              value: value,
+              rawValue: signal.value
+            }
+          ])
           msg.children.push({
             name: signal.name,
             data: `${signal.physValueEnum ? signal.physValueEnum : signal.physValue}  ${
@@ -126,7 +138,13 @@ function parseSetVar(data: any) {
         if (!result[sval.id]) {
           result[sval.id] = []
         }
-        result[sval.id].push([ts, sval.value])
+        result[sval.id].push([
+          ts,
+          {
+            value: sval.value,
+            rawValue: sval.value
+          }
+        ])
       }
     }
   }
