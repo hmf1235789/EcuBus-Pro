@@ -2,12 +2,16 @@
 
 ## Overview
 The Variable System is a powerful feature that allows users to create, manage, and use dynamic values throughout the Ecubus Pro platform. Variables function like virtual signals flowing through the internal system, carrying information between different components and nodes. These virtual signals can be captured, transformed, and routed to create flexible and interconnected systems where changes in one area can automatically propagate to others.
-
+![VarArch](./image-4.png)
 ## Features
 
 * Set/Get variable in [Script](./../script/script.md) or [Detail API](https://app.whyengineer.com/scriptApi/classes/UtilClass.html#onVar)
 * Show variable In [Graph](./../graph/graph.md)
 * Default System Variable
+
+
+
+
 
 ## System Variables
 
