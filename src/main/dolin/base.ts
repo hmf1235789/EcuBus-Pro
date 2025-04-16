@@ -381,7 +381,9 @@ export default abstract class LinBase {
               database: db.id,
               frameId: frameId,
               data: this.sch?.diag?.msg.data || data,
-              direction: this.sch?.diag?.msg.direction || LinDirection.SEND,
+              direction:
+                this.sch?.diag?.msg.direction ||
+                (frameId == 0x3c ? LinDirection.SEND : LinDirection.RECV),
               checksumType: LinChecksumType.CLASSIC,
               name: entry.name
             },
