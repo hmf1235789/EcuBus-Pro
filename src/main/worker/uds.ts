@@ -766,7 +766,7 @@ export class DiagResponse extends Service {
    */
   diagIsPositiveResponse() {
     const rxBuffer = getRxPdu(this.service)
-    const serviceId = this.service.params[0].value[0]
+    const serviceId = Number(this.service.serviceId)
     if (serviceId + 0x40 == rxBuffer[0]) {
       return true
     } else {
