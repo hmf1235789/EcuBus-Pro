@@ -302,6 +302,7 @@ const tableData = computed(() => {
     tables.push(t)
     i++
   }
+  console.log(foundMasterReq, foundSlaveResp)
   if (!foundMasterReq || !foundSlaveResp) {
     const bytes = 8
     const baseTime = (bytes * 10 + 44) * (1 / db.global.LIN_speed)
@@ -359,7 +360,11 @@ const handleLeftCheckChange = (value: TransferKey[], movedKeys?: TransferKey[]) 
 // 修改 getFrameId 函数处理 sporadic frames
 function getFrameId(entry: any): string {
   if (entry.isCommand) {
-    return '0x3C'
+    if (entry.name == 'DiagnosticSlaveResp') {
+      return '0x3D'
+    } else {
+      return '0x3C'
+    }
   }
 
   const db = dataBase.database.lin[dbName.value]
