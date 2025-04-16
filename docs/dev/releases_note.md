@@ -1,5 +1,15 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.32
+Changes from v0.8.31 to v0.8.32:
+
+ 
+* [bug]:fix api diagIsPositiveResponse error 
+* [bug]:fix lin diag slave resp ID error
+---
+
+# EcuBus-Pro Release Notes
+
 ## v0.8.31
 Changes from v0.8.30 to v0.8.31:
 
