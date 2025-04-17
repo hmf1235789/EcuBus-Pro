@@ -214,7 +214,11 @@ const signalColumns: VxeGridProps['columns'] = [
     field: 'isSigned',
     title: 'Type',
     width: 80,
-    formatter: ({ cellValue }) => (cellValue ? 'Signed' : 'Unsigned')
+    formatter: ({ row }) => {
+      if (row.valueType === 1) return 'Float'
+      if (row.valueType === 2) return 'Double'
+      return row.isSigned ? 'Signed' : 'Unsigned'
+    }
   },
   { field: 'factor', title: 'Factor', width: 80 },
   { field: 'offset', title: 'Offset', width: 80 },
@@ -262,7 +266,7 @@ const messageColumns: VxeGridProps['columns'] = [
     field: 'signalCount',
     title: 'Signals',
     width: 100,
-    formatter: ({ row }) => Object.keys(row.signals).length
+    formatter: ({ row }) => Object.keys(row.signals || {}).length
   },
   { field: 'comment', title: 'Comment', width: 200 }
 ]
@@ -320,7 +324,7 @@ const gridOptions = computed<VxeGridProps>(() => ({
 // Handle tree node click
 const handleNodeClick = (data: any) => {
   searchText.value = '' // Clear search text when switching nodes
-  if (data.type === 'message') {
+  if (data.type === 'message' && data.data.signals) {
     currentView.value = 'signals'
     const signals = Object.values<Signal>(data.data.signals).sort((a, b) => a.startBit - b.startBit)
     xGrid.value?.remove()

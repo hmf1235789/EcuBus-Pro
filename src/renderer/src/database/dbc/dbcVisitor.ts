@@ -15,6 +15,7 @@ import {
   ValueDefinitionClauseCstNode,
   CommentClauseCstNode,
   NsSectionCstNode,
+  SignalValueTypeClauseCstNode,
   DbcFileCstChildren,
   VersionClauseCstChildren,
   BusConfigClauseCstChildren,
@@ -32,6 +33,7 @@ import {
   ValueTableClauseCstChildren,
   IntTypeCstChildren,
   HexTypeCstChildren,
+  FloatTypeCstChildren,
   EnumTypeCstChildren,
   OtherTypeCstChildren,
   AttributeClauseCstChildren,
@@ -41,7 +43,8 @@ import {
   NodeAttributeAssignmentCstChildren,
   MessageAttributeAssignmentCstChildren,
   SignalAttributeAssignmentCstChildren,
-  MultiplexedValueClauseCstChildren
+  MultiplexedValueClauseCstChildren,
+  SignalValueTypeClauseCstChildren
 } from './dbc_cst'
 import { cloneDeep } from 'lodash'
 import { isCanFd } from '../dbcParse'
@@ -95,6 +98,7 @@ export interface Signal {
   physValue?: number | string
   physValueEnum?: string
   generatorType?: string
+  valueType?: number // 0=signed, 1=float, 2=float
 }
 
 export interface Message {
@@ -143,6 +147,12 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
     return {
       min: Number(ctx.Number[0].image),
       max: Number(ctx.Number[1].image)
+    }
+  }
+  floatType(ctx: FloatTypeCstChildren) {
+    return {
+      min: parseFloat(ctx.Number[0].image),
+      max: parseFloat(ctx.Number[1].image)
     }
   }
   enumType(ctx: EnumTypeCstChildren) {
@@ -288,6 +298,20 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
               name: multiplexedValue.signalName[1],
               range: multiplexedValue.value
             }
+          }
+        }
+      })
+    }
+
+    if (ctx.signalValueTypeClause) {
+      ctx.signalValueTypeClause.forEach((signalValueTypeNode: SignalValueTypeClauseCstNode) => {
+        const signalValueType = this.visit(signalValueTypeNode)
+
+        const message = dbc.messages[signalValueType.messageId & 0x1fffffff]
+        if (message) {
+          const signal = message.signals[signalValueType.signalName]
+          if (signal) {
+            signal.valueType = signalValueType.valueType
           }
         }
       })
@@ -463,6 +487,10 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
       attrs.type = 'INT'
       attrs.min = this.visit(ctx.intType).min
       attrs.max = this.visit(ctx.intType).max
+    } else if (ctx.floatType) {
+      attrs.type = 'FLOAT'
+      attrs.min = parseFloat(this.visit(ctx.floatType).min)
+      attrs.max = parseFloat(this.visit(ctx.floatType).max)
     } else if (ctx.otherType) {
       //null, STRING
       attrs.type = 'STRING'
@@ -620,6 +648,18 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
     }
 
     return val
+  }
+
+  signalValueTypeClause(ctx: SignalValueTypeClauseCstChildren): {
+    messageId: number
+    signalName: string
+    valueType: number
+  } {
+    return {
+      messageId: parseInt(ctx.Number[0].image, 10),
+      signalName: ctx.Identifier[0].image,
+      valueType: parseInt(ctx.Number[1].image, 10)
+    }
   }
 
   valueDefinitionClause(ctx: ValueDefinitionClauseCstChildren): {

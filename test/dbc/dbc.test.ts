@@ -3,12 +3,18 @@ import parse, { isCanFd } from 'src/renderer/src/database/dbcParse'
 import fs from 'fs'
 import path from 'path'
 import { CAN_ID_TYPE } from 'src/main/share/can'
+import {
+  getMessageData,
+  updateSignalRaw,
+  writeMessageData
+} from 'src/renderer/src/database/dbc/calc'
 
 describe('DBC Parser Tests', () => {
   let dbcContentModel3: string
   let dbcContentHyundaiKia: string
   let dbcContentVwSkodaAudi: string
-
+  let dbcContentTest: string
+  let floatDbc: string
   beforeAll(() => {
     dbcContentModel3 = fs.readFileSync(path.join(__dirname, 'Model3CAN.dbc'), 'utf-8')
     dbcContentHyundaiKia = fs.readFileSync(
@@ -19,6 +25,8 @@ describe('DBC Parser Tests', () => {
       path.join(__dirname, 'can1-vw-skoda-audi-uds-v2.5.dbc'),
       'utf-8'
     )
+    dbcContentTest = fs.readFileSync(path.join(__dirname, 'testdbc.dbc'), 'utf-8')
+    floatDbc = fs.readFileSync(path.join(__dirname, 'float.dbc'), 'utf-8')
   })
 
   test('dbc model3', () => {
@@ -36,7 +44,25 @@ describe('DBC Parser Tests', () => {
     expect(result).toBeDefined()
     // Add more specific assertions based on the expected structure of can1-hyundai-kia-uds-v2.4.dbc
   })
+  test('dbc testdbc', () => {
+    const result = parse(dbcContentTest)
+    // Add assertions to verify the parsed values for can1-hyundai-kia-uds-v2.4.dbc
+    expect(result).toBeDefined()
+    // Add more specific assertions based on the expected structure of can1-hyundai-kia-uds-v2.4.dbc
+  })
+  test('float', () => {
+    const result = parse(floatDbc)
+    // Add assertions to verify the parsed values for can1-hyundai-kia-uds-v2.4.dbc
+    expect(result).toBeDefined()
+    const id = 0x12332
+    expect(result.messages[Number(id)].signals['Binary32'].valueType).toEqual(1)
 
+    writeMessageData(result.messages[Number(id)], Buffer.from([0, 0, 0x80, 0x3f]), result)
+    expect(result.messages[Number(id)].signals['Binary32'].physValue).toEqual(1.0)
+    updateSignalRaw(result.messages[Number(id)].signals['Binary32'])
+    expect(result.messages[Number(id)].signals['Binary32'].physValue).toEqual(1.0)
+    expect(getMessageData(result.messages[Number(id)])).toEqual(Buffer.from([0, 0, 0x80, 0x3f]))
+  })
   test('dbc can1-vw-skoda-audi-uds-v2.5', () => {
     const result = parse(dbcContentVwSkodaAudi)
     // Add assertions to verify the parsed values for can1-vw-skoda-audi-uds-v2.5.dbc
