@@ -136,6 +136,16 @@ export type HexTypeCstChildren = {
   Number: IToken[]
 }
 
+export interface FloatTypeCstNode extends CstNode {
+  name: 'floatType'
+  children: FloatTypeCstChildren
+}
+
+export type FloatTypeCstChildren = {
+  FLOAT: IToken[]
+  Number: IToken[]
+}
+
 export interface OtherTypeCstNode extends CstNode {
   name: 'otherType'
   children: OtherTypeCstChildren
@@ -160,6 +170,7 @@ export type AttributeClauseCstChildren = {
   enumType?: EnumTypeCstNode[]
   intType?: IntTypeCstNode[]
   hexType?: HexTypeCstNode[]
+  floatType?: FloatTypeCstNode[]
   otherType?: OtherTypeCstNode[]
   Semicolon?: IToken[]
 }
@@ -260,6 +271,19 @@ export type ValueDefinitionClauseCstChildren = {
   Number: IToken[]
   Identifier: IToken[]
   StringLiteral?: IToken[]
+  Semicolon?: IToken[]
+}
+
+export interface SignalValueTypeClauseCstNode extends CstNode {
+  name: 'signalValueTypeClause'
+  children: SignalValueTypeClauseCstChildren
+}
+
+export type SignalValueTypeClauseCstChildren = {
+  SIG_VALTYPE: IToken[]
+  Number: IToken[]
+  Identifier: IToken[]
+  Colon: IToken[]
   Semicolon?: IToken[]
 }
 
@@ -364,6 +388,7 @@ export type DbcFileCstChildren = {
   multiplexedValueClause?: MultiplexedValueClauseCstNode[]
   commentClause?: CommentClauseCstNode[]
   valueDefinitionClause?: ValueDefinitionClauseCstNode[]
+  signalValueTypeClause?: SignalValueTypeClauseCstNode[]
 }
 
 export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
@@ -378,6 +403,7 @@ export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   enumType(children: EnumTypeCstChildren, param?: IN): OUT
   intType(children: IntTypeCstChildren, param?: IN): OUT
   hexType(children: HexTypeCstChildren, param?: IN): OUT
+  floatType(children: FloatTypeCstChildren, param?: IN): OUT
   otherType(children: OtherTypeCstChildren, param?: IN): OUT
   attributeClause(children: AttributeClauseCstChildren, param?: IN): OUT
   attributeDefaultClause(children: AttributeDefaultClauseCstChildren, param?: IN): OUT
@@ -388,6 +414,7 @@ export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   attributeAssignmentClause(children: AttributeAssignmentClauseCstChildren, param?: IN): OUT
   multiplexedValueClause(children: MultiplexedValueClauseCstChildren, param?: IN): OUT
   valueDefinitionClause(children: ValueDefinitionClauseCstChildren, param?: IN): OUT
+  signalValueTypeClause(children: SignalValueTypeClauseCstChildren, param?: IN): OUT
   signalComment(children: SignalCommentCstChildren, param?: IN): OUT
   messageComment(children: MessageCommentCstChildren, param?: IN): OUT
   nodeComment(children: NodeCommentCstChildren, param?: IN): OUT

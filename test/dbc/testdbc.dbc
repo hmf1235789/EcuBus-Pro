@@ -1,0 +1,250 @@
+VERSION "EOPC"
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: MCU eModule
+
+
+BO_ 257 Debug: 8 Vector__XXX
+ SG_ Data4 : 55|16@0+ (1,-32767) [-32767|32768] "" Vector__XXX
+ SG_ Data3 : 39|16@0+ (1,-32767) [-32767|32768] "" Vector__XXX
+ SG_ Data2 : 23|16@0+ (1,-32767) [-32767|32768] "" Vector__XXX
+ SG_ Data1 : 7|16@0+ (1,-32767) [-32767|32768] "" Vector__XXX
+
+BO_ 2015 EOP_Func_Diag_Rx: 8 MCU
+ SG_ EOP_Func_Diag_Request : 7|64@0+ (1,0) [0|0] ""  eModule
+
+BO_ 1932 EOP_Phys_Diag_Rx: 8 MCU
+ SG_ EOP_Phys_Diag_Request : 7|64@0+ (1,0) [0|0] ""  eModule
+
+BO_ 1996 EOP_Diag_Tx: 8 eModule
+ SG_ EOP_Diag_Response : 7|64@0+ (1,0) [0|0] ""  MCU
+
+BO_ 433 EOP_RSP02: 8 eModule
+ SG_ MotorPWMDuty : 33|7@0+ (1,0) [0|100] "%"  MCU
+ SG_ SW_Version_Minor : 63|8@0+ (1,0) [0|255] ""  MCU
+ SG_ SW_Version_Major : 55|8@0+ (1,0) [0|255] ""  MCU
+ SG_ Motor_PhaseCurrent : 19|10@0+ (0.5,0) [0|200] "A"  MCU
+ SG_ DC_Current : 13|10@0+ (0.1,0) [0|100] "A"  MCU
+ SG_ PCB_temperature : 25|8@0+ (1,-50) [-50|205] "C"  MCU
+ SG_ DC_Voltage : 7|10@0+ (0.1,0) [0|102.3] "V"  MCU
+
+BO_ 432 EOP_RSP01: 8 eModule
+ SG_ VDDESupplyUnderError : 19|1@0+ (1,0) [0|1] ""  MCU
+ SG_ VDDESupplyOverError : 18|1@0+ (1,0) [0|1] ""  MCU
+ SG_ GDU_UnderVoltageIrrational : 29|1@0+ (1,0) [0|1] ""  MCU
+ SG_ GDU_OverVoltageIrrational : 40|1@0+ (1,0) [0|1] ""  MCU
+ SG_ EVDDOverCurrentError : 17|1@0+ (1,0) [0|1] ""  MCU
+ SG_ ZeroPositionError : 31|1@0+ (1,0) [0|1] ""  MCU
+ SG_ ResolverSigIrrational : 30|1@0+ (1,0) [0|1] ""  MCU
+ SG_ UnderspeedError : 16|1@0+ (1,0) [0|1] ""  MCU
+ SG_ OverCurrentError : 39|1@0+ (1,0) [0|1] ""  MCU
+ SG_ SpeedIrrationalityError : 37|1@0+ (1,0) [0|1] ""  MCU
+ SG_ CurrentOffsetError : 36|1@0+ (1,0) [0|1] ""  MCU
+ SG_ Checksum_Error : 38|1@0+ (1,0) [0|1] ""  MCU
+ SG_ WatchdogError : 48|1@0+ (1,0) [0|1] ""  MCU
+ SG_ Error_Level : 23|3@0+ (1,0) [0|7] ""  MCU
+ SG_ EOP_CheckSum : 63|8@0+ (1,0) [0|255] ""  MCU
+ SG_ UnderVoltageDetn : 45|1@0+ (1,0) [0|1] ""  MCU
+ SG_ TemperatureSensorUnderVDetn : 43|1@0+ (1,0) [0|1] ""  MCU
+ SG_ TemperatureSensorOverVDetn : 44|1@0+ (1,0) [0|1] ""  MCU
+ SG_ ROM_FailureDetn : 50|1@0+ (1,0) [0|1] ""  MCU
+ SG_ ResolverSensorUnderVFaultDetn : 41|1@0+ (1,0) [0|1] ""  MCU
+ SG_ ResolverSensorOverVDetn : 42|1@0+ (1,0) [0|1] ""  MCU
+ SG_ RAM_FailureDetn : 51|1@0+ (1,0) [0|1] ""  MCU
+ SG_ PowerStageFailureDetn : 55|1@0+ (1,0) [0|1] ""  MCU
+ SG_ PCB_OverTemperatureDetn : 47|1@0+ (1,0) [0|1] ""  MCU
+ SG_ OverVoltageDetn : 46|1@0+ (1,0) [0|1] ""  MCU
+ SG_ E2PROM_FailureDetn : 49|1@0+ (1,0) [0|1] ""  MCU
+ SG_ DryRunDetn : 53|1@0+ (1,0) [0|1] ""  MCU
+ SG_ CommunicationFailureDetn : 52|1@0+ (1,0) [0|1] ""  MCU
+ SG_ MotorBlockedPermanentDetn : 54|1@0+ (1,0) [0|1] ""  MCU
+ SG_ De_ratingFlag : 28|1@0+ (1,0) [0|1] ""  MCU
+ SG_ RollingCounter : 35|4@0+ (1,0) [0|15] ""  MCU
+ SG_ MotorSpeed : 5|14@0+ (1,-8191) [-8191|8192] "rpm"  MCU
+ SG_ eModuleOperationMode : 27|4@0+ (1,0) [0|15] ""  MCU
+
+BO_ 415 EOP_CMD: 8 MCU
+ SG_ eModule_CheckSum_Cmd : 63|8@0+ (1,0) [0|255] ""  eModule
+ SG_ eModule_SleepReq : 1|1@0+ (1,0) [0|1] ""  eModule
+ SG_ eModule_OilTemperature : 31|8@0+ (1,-50) [-50|205] ""  eModule
+ SG_ eModule_RollingCounter : 51|4@0+ (1,0) [0|15] ""  eModule
+ SG_ eModule_MotorEnable : 0|1@0+ (1,0) [0|1] ""  eModule
+ SG_ eModule_MotorSpeedReq : 13|14@0+ (1,-8191) [-8191|8192] "rpm"  eModule
+
+
+
+CM_ SG_ 433 MotorPWMDuty "The duty cycle of the voltage PWM";
+CM_ SG_ 433 SW_Version_Minor "SW Version: Major Version,Minor Version;
+eg. V1.2 : Major Version-1, Minor Version-2 ;";
+CM_ SG_ 433 SW_Version_Major "SW Version: Major Version,Minor Version;
+eg. V1.2 : Major Version-1, Minor Version-2 ;";
+CM_ SG_ 433 Motor_PhaseCurrent "The motor phase current";
+CM_ SG_ 433 DC_Current "The value of DC current";
+CM_ SG_ 433 PCB_temperature "The detection PCB board temperature";
+CM_ SG_ 433 DC_Voltage "The detection voltage value of power supply";
+CM_ SG_ 432 VDDESupplyUnderError "The undervoltage error of VDDE voltage ";
+CM_ SG_ 432 VDDESupplyOverError "The over voltage error of VDDE voltage ";
+CM_ SG_ 432 GDU_UnderVoltageIrrational "GDU Low VLS voltage error";
+CM_ SG_ 432 GDU_OverVoltageIrrational "GDU High HD Supply Voltage error";
+CM_ SG_ 432 EVDDOverCurrentError "The overcurrent error of the EVDD supply";
+CM_ SG_ 432 ZeroPositionError "The error status of zero position data, report failure when any of the following malfunction detected
+? Incorrect
+? No zero position calibration";
+CM_ SG_ 432 ResolverSigIrrational "The error status of resolver signal rationality,report failure when the resolver signal is Irrational";
+CM_ SG_ 432 UnderspeedError "The underspeed failure of electronic oil pump";
+CM_ SG_ 432 OverCurrentError "The error status of over phase current malfunction, report failure when detect the shortcut of HW";
+CM_ SG_ 432 SpeedIrrationalityError "The error status of motor speed rationality, report failure when the motor speed is Irrational";
+CM_ SG_ 432 CurrentOffsetError "Pre-driver Circuit Failure Status";
+CM_ SG_ 432 Checksum_Error "Bus active state: Checksum error in command message data";
+CM_ SG_ 432 WatchdogError "The error status of watchdog, report failure when detecting the watchdog abnormal";
+CM_ SG_ 432 EOP_CheckSum "CRC8  Check_SAE_J1850_2001,the polynomial used X8+X4+X3+X2+1";
+CM_ SG_ 432 UnderVoltageDetn "The detection of under voltage error";
+CM_ SG_ 432 TemperatureSensorUnderVDetn "The detection of temperature sensor under voltage error";
+CM_ SG_ 432 TemperatureSensorOverVDetn "The detection of temperature sensor over voltage error";
+CM_ SG_ 432 ROM_FailureDetn "The detection of Rom failure error";
+CM_ SG_ 432 ResolverSensorUnderVFaultDetn "The detection of resolver sensor under voltage error";
+CM_ SG_ 432 ResolverSensorOverVDetn "The detection of resolver sensor over voltage error";
+CM_ SG_ 432 RAM_FailureDetn "The detection of RAM failure error";
+CM_ SG_ 432 PowerStageFailureDetn "The detection of power stage failure error(GDU Desaturation Error)";
+CM_ SG_ 432 PCB_OverTemperatureDetn "The detection of PCB over temperature error";
+CM_ SG_ 432 OverVoltageDetn "The detection of over voltage error";
+CM_ SG_ 432 E2PROM_FailureDetn "The detection of Zero position data OK or E2PROM error";
+CM_ SG_ 432 DryRunDetn "The detection of dry run error";
+CM_ SG_ 432 CommunicationFailureDetn "The detection of communication failure error";
+CM_ SG_ 432 MotorBlockedPermanentDetn "The detection of motor permanent blocked error";
+CM_ SG_ 432 De_ratingFlag "The e-Module works in the De-rating mode";
+CM_ SG_ 432 RollingCounter "Rolling counter";
+CM_ SG_ 432 MotorSpeed "The actual speed of motor";
+CM_ SG_ 432 eModuleOperationMode "The e-Module system status";
+CM_ SG_ 415 eModule_CheckSum_Cmd "CRC8  Check_SAE_J1850_2001,the polynomial used X8+X4+X3+X2+1";
+CM_ SG_ 415 eModule_SleepReq "The sleep request from the vehicle ECU
+0 -Disable
+1 -Enable
+";
+CM_ SG_ 415 eModule_OilTemperature "The oil temperature from the vehicle ECU";
+CM_ SG_ 415 eModule_RollingCounter "Rolling counter";
+CM_ SG_ 415 eModule_MotorEnable "The Motor Control enable command from vehicle ECU
+0 -Disable
+1 -Enable
+";
+CM_ SG_ 415 eModule_MotorSpeedReq "The reference speed from the vehicle ECU";
+BA_DEF_  "Baudrate" FLOAT 1000 1000000;
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "cyclic","spontaneous","cyclicIfActive","spontaneousWithDelay","cyclicAndSpontaneous","cyclicAndSpontaneousWithDelay","IfActive","NoMsgSendType";
+BA_DEF_ BO_  "GenMsgCycleTime" FLOAT 0 300000;
+BA_DEF_ BO_  "GenMsgStartDelayTime" FLOAT 0 300000;
+BA_DEF_ BO_  "GenMsgDelayTime" FLOAT 0 300000;
+BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType";
+BA_DEF_ SG_  "GenSigStartValue" FLOAT -1.79769313486232E+308 1.84467440737096E+019;
+BA_DEF_ BU_  "NmAsrNodeIdentifier" INT 1 60;
+BA_DEF_ BO_  "GenMsgNrOfRepetition" INT 0 100000;
+BA_DEF_ BO_  "GenMsgCycleTimeFast" FLOAT 0 300000;
+BA_DEF_  "DBName" STRING ;
+BA_DEF_  "BusType" STRING ;
+BA_DEF_  "ProtocolType" STRING ;
+BA_DEF_DEF_  "Baudrate" 1000;
+BA_DEF_DEF_  "GenMsgSendType" "";
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_DEF_DEF_  "GenMsgStartDelayTime" 0;
+BA_DEF_DEF_  "GenMsgDelayTime" 0;
+BA_DEF_DEF_  "GenSigSendType" "Cyclic";
+BA_DEF_DEF_  "GenSigStartValue" 0;
+BA_DEF_DEF_  "NmAsrNodeIdentifier" 1;
+BA_DEF_DEF_  "GenMsgNrOfRepetition" 0;
+BA_DEF_DEF_  "GenMsgCycleTimeFast" 0;
+BA_DEF_DEF_  "DBName" "";
+BA_DEF_DEF_  "BusType" "";
+BA_DEF_DEF_  "ProtocolType" "";
+BA_ "Baudrate" 500000;
+BA_ "ProtocolType" "CAN";
+BA_ "BusType" "CAN";
+BA_ "DBName" "eCoolingPlatform";
+BA_ "GenMsgStartDelayTime" BO_ 2015 0;
+BA_ "GenMsgStartDelayTime" BO_ 1932 0;
+BA_ "GenMsgStartDelayTime" BO_ 1996 0;
+BA_ "GenMsgCycleTime" BO_ 433 10;
+BA_ "GenMsgSendType" BO_ 433 0;
+BA_ "GenMsgStartDelayTime" BO_ 432 0;
+BA_ "GenMsgCycleTime" BO_ 432 10;
+BA_ "GenMsgSendType" BO_ 432 0;
+BA_ "GenMsgStartDelayTime" BO_ 415 0;
+BA_ "GenMsgCycleTime" BO_ 415 20;
+BA_ "GenMsgSendType" BO_ 415 0;
+BA_ "GenSigStartValue" SG_ 257 Data4 32767;
+BA_ "GenSigStartValue" SG_ 257 Data3 32767;
+BA_ "GenSigStartValue" SG_ 257 Data2 32767;
+BA_ "GenSigStartValue" SG_ 257 Data1 32767;
+BA_ "GenSigStartValue" SG_ 433 PCB_temperature 50;
+BA_ "GenSigStartValue" SG_ 433 DC_Voltage 0;
+BA_ "GenSigStartValue" SG_ 432 UnderVoltageDetn 0;
+BA_ "GenSigStartValue" SG_ 432 TemperatureSensorUnderVDetn 0;
+BA_ "GenSigStartValue" SG_ 432 TemperatureSensorOverVDetn 0;
+BA_ "GenSigStartValue" SG_ 432 ROM_FailureDetn 0;
+BA_ "GenSigStartValue" SG_ 432 ResolverSensorUnderVFaultDetn 0;
+BA_ "GenSigStartValue" SG_ 432 ResolverSensorOverVDetn 0;
+BA_ "GenSigStartValue" SG_ 432 RAM_FailureDetn 0;
+BA_ "GenSigStartValue" SG_ 432 PowerStageFailureDetn 0;
+BA_ "GenSigStartValue" SG_ 432 PCB_OverTemperatureDetn 0;
+BA_ "GenSigStartValue" SG_ 432 OverVoltageDetn 0;
+BA_ "GenSigStartValue" SG_ 432 E2PROM_FailureDetn 0;
+BA_ "GenSigStartValue" SG_ 432 DryRunDetn 0;
+BA_ "GenSigStartValue" SG_ 432 CommunicationFailureDetn 0;
+BA_ "GenSigStartValue" SG_ 432 MotorBlockedPermanentDetn 0;
+BA_ "GenSigStartValue" SG_ 432 De_ratingFlag 0;
+BA_ "GenSigStartValue" SG_ 432 RollingCounter 0;
+BA_ "GenSigStartValue" SG_ 432 MotorSpeed 8191;
+BA_ "GenSigStartValue" SG_ 432 eModuleOperationMode 0;
+BA_ "GenSigStartValue" SG_ 415 eModule_SleepReq 0;
+BA_ "GenSigStartValue" SG_ 415 eModule_OilTemperature 50;
+BA_ "GenSigStartValue" SG_ 415 eModule_RollingCounter 0;
+BA_ "GenSigStartValue" SG_ 415 eModule_MotorEnable 0;
+BA_ "GenSigStartValue" SG_ 415 eModule_MotorSpeedReq 8191;
+VAL_ 432 Error_Level 4 "Long Time Stop" 3 "Short Time Stop  " 2 "Derating Power Flag  " 1 "Warning " 0 "Normal" ;
+VAL_ 432 UnderVoltageDetn 1 "under voltage error" 0 "no error" ;
+VAL_ 432 TemperatureSensorUnderVDetn 1 "temperature sensor underV error" 0 "no error" ;
+VAL_ 432 TemperatureSensorOverVDetn 1 "Temperature sensor overV error" 0 "No error" ;
+VAL_ 432 ROM_FailureDetn 1 "ROM Failure error" 0 "no error" ;
+VAL_ 432 ResolverSensorUnderVFaultDetn 1 "reslover sensor underV error" 0 "No error" ;
+VAL_ 432 ResolverSensorOverVDetn 1 "reslover sensor overV error" 0 "No error" ;
+VAL_ 432 RAM_FailureDetn 1 "RAM Failure error" 0 "no error" ;
+VAL_ 432 PowerStageFailureDetn 1 "power stage erroe" 0 "no error" ;
+VAL_ 432 PCB_OverTemperatureDetn 1 "PCB over temperature error" 0 "No error" ;
+VAL_ 432 OverVoltageDetn 1 "Over Voltage error" 0 "No error" ;
+VAL_ 432 E2PROM_FailureDetn 1 "E2PROM Failure error" 0 "no error" ;
+VAL_ 432 DryRunDetn 1 "dry run error" 0 "no error" ;
+VAL_ 432 CommunicationFailureDetn 1 "Communication Failure error" 0 "no error" ;
+VAL_ 432 MotorBlockedPermanentDetn 1 "motor permanent blocked error" 0 "No error" ;
+VAL_ 432 De_ratingFlag 1 "De_rating  Flag" 0 "No De_rating Flag" ;
+VAL_ 432 eModuleOperationMode 3 "Failure" 2 "Failsafe Running" 1 "Speed Control Running" 0 "Idle" ;
+

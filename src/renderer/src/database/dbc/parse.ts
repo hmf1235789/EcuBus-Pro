@@ -68,7 +68,7 @@ const EV = createToken({ name: 'EV', pattern: /EV_/ })
 const NS_DESC = createToken({ name: 'NS_DESC', pattern: /NS_DESC_/ })
 
 // 基本tokens
-const StringLiteral = createToken({ name: 'StringLiteral', pattern: /"[^"]*"/ })
+const StringLiteral = createToken({ name: 'StringLiteral', pattern: /"([^"\\]|\\.)*"/ })
 const Identifier = createToken({ name: 'Identifier', pattern: /[a-zA-Z_][a-zA-Z0-9_]*/ })
 // 修改 Number token 以支持科学记数法
 const Number = createToken({
@@ -90,6 +90,7 @@ const Minus = createToken({ name: 'Minus', pattern: /-/ })
 const ENUM = createToken({ name: 'ENUM', pattern: /ENUM/ })
 const INT = createToken({ name: 'INT', pattern: /INT/ })
 const HEX = createToken({ name: 'HEX', pattern: /HEX/ })
+const FLOAT = createToken({ name: 'FLOAT', pattern: /FLOAT/ })
 
 const RangeList = createToken({
   name: 'RangeList',
@@ -138,7 +139,8 @@ const allTokens = [
   EV,
   ENUM,
   INT,
-  HEX, // 新增
+  HEX,
+  FLOAT,
   RangeList,
   Colon,
   Semicolon,
@@ -296,6 +298,12 @@ class DBCParser extends CstParser {
     this.CONSUME2(Number) // Max
   })
 
+  private floatType = this.RULE('floatType', () => {
+    this.CONSUME(FLOAT)
+    this.CONSUME1(Number) // Min
+    this.CONSUME2(Number) // Max
+  })
+
   private otherType = this.RULE('otherType', () => {
     this.CONSUME(Identifier)
   })
@@ -319,6 +327,7 @@ class DBCParser extends CstParser {
       { ALT: () => this.SUBRULE(this.enumType) },
       { ALT: () => this.SUBRULE(this.intType) },
       { ALT: () => this.SUBRULE(this.hexType) },
+      { ALT: () => this.SUBRULE(this.floatType) },
       { ALT: () => this.SUBRULE(this.otherType) }
     ])
 
@@ -398,6 +407,16 @@ class DBCParser extends CstParser {
       this.CONSUME2(StringLiteral) // Value description
     })
     this.OPTION(() => this.CONSUME1(Semicolon))
+  })
+
+  // Add signal value type rule for SIG_VALTYPE
+  private signalValueType = this.RULE('signalValueTypeClause', () => {
+    this.CONSUME(SIG_VALTYPE)
+    this.CONSUME1(Number) // Message ID
+    this.CONSUME1(Identifier) // Signal name
+    this.CONSUME1(Colon)
+    this.CONSUME2(Number) // Value type (0=signed, 1=double, 2=float)
+    this.OPTION(() => this.CONSUME(Semicolon))
   })
 
   // Add new subrules for comment alternatives
@@ -498,7 +517,8 @@ class DBCParser extends CstParser {
         { ALT: () => this.SUBRULE2(this.attributeAssignment) },
         { ALT: () => this.SUBRULE2(this.multiplexedValue) },
         { ALT: () => this.SUBRULE2(this.comment) },
-        { ALT: () => this.SUBRULE2(this.valueDefinition) } // 添加对信号值定义的处理
+        { ALT: () => this.SUBRULE2(this.valueDefinition) },
+        { ALT: () => this.SUBRULE2(this.signalValueType) }
       ])
     })
   })

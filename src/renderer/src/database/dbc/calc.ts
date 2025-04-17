@@ -67,20 +67,38 @@ export function updateSignalRaw(signal: Signal) {
     // For enum values, directly set the raw value as phys value
     signal.physValue = signal.value
   } else {
-    // Calculate new physical value
-    const newPhysValue = rawToPhys(signal.value!, signal)
-
-    // Check if this physical value would exceed limits
-    if (signal.minimum !== undefined && newPhysValue < signal.minimum) {
-      // Adjust raw value based on minimum physical value
-      signal.value = physToRaw(signal.minimum, signal)
-      signal.physValue = signal.minimum
-    } else if (signal.maximum !== undefined && newPhysValue > signal.maximum) {
-      // Adjust raw value based on maximum physical value
-      signal.value = physToRaw(signal.maximum, signal)
-      signal.physValue = signal.maximum
+    // Handle float value types
+    if (signal.valueType === 1) {
+      // IEEE Float (single precision)
+      // Create a buffer and view for the float value
+      const buffer = new ArrayBuffer(4)
+      const view = new DataView(buffer)
+      view.setUint32(0, signal.value, true) // true for little-endian
+      signal.physValue = view.getFloat32(0, true)
+    } else if (signal.valueType === 2) {
+      // IEEE Double (double precision)
+      const buffer = new ArrayBuffer(8)
+      const view = new DataView(buffer)
+      // For simplicity assuming the 64-bit value fits in 53 bits of JS number
+      view.setUint32(0, signal.value & 0xffffffff, true) // Lower 32 bits
+      view.setUint32(4, signal.value >> 32, true) // Upper 32 bits (might be 0 in JS)
+      signal.physValue = view.getFloat64(0, true)
     } else {
-      signal.physValue = newPhysValue
+      // Calculate new physical value for regular integer signals
+      const newPhysValue = rawToPhys(signal.value!, signal)
+
+      // Check if this physical value would exceed limits
+      if (signal.minimum !== undefined && newPhysValue < signal.minimum) {
+        // Adjust raw value based on minimum physical value
+        signal.value = physToRaw(signal.minimum, signal)
+        signal.physValue = signal.minimum
+      } else if (signal.maximum !== undefined && newPhysValue > signal.maximum) {
+        // Adjust raw value based on maximum physical value
+        signal.value = physToRaw(signal.maximum, signal)
+        signal.physValue = signal.maximum
+      } else {
+        signal.physValue = newPhysValue
+      }
     }
   }
 }
@@ -93,21 +111,38 @@ export function updateSignalPhys(row: Signal) {
   } else {
     const physValue = typeof row.physValue === 'number' ? row.physValue : 0
 
-    // Clamp physical value to min/max if defined
-    let clampedPhysValue = physValue
-    if (row.minimum !== undefined && physValue < row.minimum) {
-      clampedPhysValue = row.minimum
-    } else if (row.maximum !== undefined && physValue > row.maximum) {
-      clampedPhysValue = row.maximum
-    }
+    // Handle float value types
+    if (row.valueType === 1) {
+      // IEEE Float (single precision)
+      const buffer = new ArrayBuffer(4)
+      const view = new DataView(buffer)
+      view.setFloat32(0, physValue, true) // true for little-endian
+      row.value = view.getUint32(0, true)
+    } else if (row.valueType === 2) {
+      // IEEE Double (double precision)
+      const buffer = new ArrayBuffer(8)
+      const view = new DataView(buffer)
+      view.setFloat64(0, physValue, true)
+      // For simplicity, we're only using the lower 32 bits
+      // This is a limitation as JavaScript numbers can't fully represent 64-bit integers
+      row.value = view.getUint32(0, true)
+    } else {
+      // Clamp physical value to min/max if defined
+      let clampedPhysValue = physValue
+      if (row.minimum !== undefined && physValue < row.minimum) {
+        clampedPhysValue = row.minimum
+      } else if (row.maximum !== undefined && physValue > row.maximum) {
+        clampedPhysValue = row.maximum
+      }
 
-    // Update physical value if it was clamped
-    if (clampedPhysValue !== physValue) {
-      row.physValue = clampedPhysValue
-    }
+      // Update physical value if it was clamped
+      if (clampedPhysValue !== physValue) {
+        row.physValue = clampedPhysValue
+      }
 
-    // Calculate and set raw value
-    row.value = physToRaw(clampedPhysValue, row)
+      // Calculate and set raw value
+      row.value = physToRaw(clampedPhysValue, row)
+    }
   }
 }
 
@@ -197,6 +232,7 @@ function readSignalFromBuffer(signal: Signal, data: Buffer, db: DBC) {
       startBitInByte = 7
     }
   }
+  let physValue = rawValue
 
   // 检查原始值是否合法
   const maxValue = Math.pow(2, signal.length) - 1
@@ -222,9 +258,14 @@ function readSignalFromBuffer(signal: Signal, data: Buffer, db: DBC) {
     }
   } else {
     // 对于数值类型信号，检查是否在最小值和最大值范围内
-    let physValue = rawValue
 
-    if (signal.isSigned) {
+    if (signal.valueType == 1) {
+      //convert to IEEE Float
+      physValue = new Float32Array(new Uint32Array([physValue]).buffer)[0]
+    } else if (signal.valueType == 2) {
+      //convert to IEEE Double
+      physValue = new Float64Array(new Uint32Array([physValue]).buffer)[0]
+    } else if (signal.isSigned) {
       // 检查最高位是否为1（负数）
       const isNegative = (rawValue & (1 << (signal.length - 1))) !== 0
       if (isNegative) {
@@ -234,16 +275,17 @@ function readSignalFromBuffer(signal: Signal, data: Buffer, db: DBC) {
         physValue = -((~rawValue & valueMask) + 1)
       }
     }
-
     // 计算物理值
     physValue = physValue * (signal.factor || 1) + (signal.offset || 0)
 
-    // 检查物理值是否在有效范围内
-    if (signal.minimum !== undefined && physValue < signal.minimum) {
-      return // 如果物理值小于最小值，不更新信号
-    }
-    if (signal.maximum !== undefined && physValue > signal.maximum) {
-      return // 如果物理值大于最大值，不更新信号
+    if (signal.minimum != signal.maximum) {
+      // 检查物理值是否在有效范围内
+      if (signal.minimum !== undefined && physValue < signal.minimum) {
+        return // 如果物理值小于最小值，不更新信号
+      }
+      if (signal.maximum !== undefined && physValue > signal.maximum) {
+        return // 如果物理值大于最大值，不更新信号
+      }
     }
   }
 
@@ -262,19 +304,8 @@ function readSignalFromBuffer(signal: Signal, data: Buffer, db: DBC) {
       }
     }
   } else {
-    if (signal.isSigned) {
-      // 检查最高位是否为1（负数）
-      const isNegative = (rawValue & (1 << (signal.length - 1))) !== 0
-      if (isNegative) {
-        // 转换为有符号值
-        const signBit = 1 << (signal.length - 1)
-        const valueMask = signBit - 1
-        rawValue = -((~rawValue & valueMask) + 1)
-      }
-    }
-
     // 应用因子和偏移计算物理值
-    signal.physValue = rawValue * (signal.factor || 1) + (signal.offset || 0)
+    signal.physValue = physValue
   }
 }
 
