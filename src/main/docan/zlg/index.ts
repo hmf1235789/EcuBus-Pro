@@ -38,6 +38,7 @@ export class ZLG_CAN extends CanBase {
   cnt = 0
   id: string
   log: CanLOG
+  canMiniBug = false
   startTime = getTsUs()
   tsOffset: number | undefined
   private readAbort = new AbortController()
@@ -87,7 +88,9 @@ export class ZLG_CAN extends CanBase {
       deviceMap.set(`${this.deviceType}_${this.index}`, { device: this.handle, channel: [this] })
     }
     let ret
-    ZLG.ZCAN_SetValue(this.handle, `${this.deviceIndex}/canfd_standard`, '0')
+    if (this.info.handle.includes('FD')) {
+      ZLG.ZCAN_SetValue(this.handle, `${this.deviceIndex}/canfd_standard`, '0')
+    }
     // if (ret != 1) {
     //   throw new Error('Set canfd standard failed')
     // }
@@ -110,8 +113,9 @@ export class ZLG_CAN extends CanBase {
         throw new Error('Set custom baud rate failed')
       }
     } else {
-      const path1 = `${this.deviceIndex}/canfd_abit_baud_rate`
-      try {
+      if (this.info.handle.includes('FD')) {
+        const path1 = `${this.deviceIndex}/canfd_abit_baud_rate`
+
         ret = ZLG.ZCAN_SetValue(this.handle, path1, `${info.bitrate.freq}`)
         if (ret != 1) {
           //close device
@@ -131,7 +135,9 @@ export class ZLG_CAN extends CanBase {
             throw new Error('Set dbit baud rate failed')
           }
         }
-      } catch (err: any) {
+      } else {
+        //TIPS:ZLG CAN MINI device echo can't received, use some workarout to avoid it.
+        this.canMiniBug = true
         //can device not support canfd
         const path3 = `${this.deviceIndex}/baud_rate`
         ret = ZLG.ZCAN_SetValue(this.handle, path3, `${info.bitrate.freq}`)
@@ -141,7 +147,7 @@ export class ZLG_CAN extends CanBase {
       }
     }
     const cfg = new ZLG.ZCAN_CHANNEL_INIT_CONFIG()
-    cfg.can_type = 1
+    cfg.can_type = this.info.handle.includes('FD') ? 1 : 0
     cfg.info.can.mode = 0
 
     this.channel = ZLG.ZCAN_InitCAN(this.handle, this.deviceIndex, cfg)
@@ -180,10 +186,15 @@ export class ZLG_CAN extends CanBase {
     }
   }
   _read(frame: CANFrame, ts: number) {
-    if (this.tsOffset == undefined) {
-      this.tsOffset = ts - (getTsUs() - this.startTime)
+    if (this.canMiniBug) {
+      ts = getTsUs() - this.startTime
+    } else {
+      if (this.tsOffset == undefined) {
+        this.tsOffset = ts - (getTsUs() - this.startTime)
+      }
+      ts = ts - this.tsOffset
     }
-    ts = ts - this.tsOffset
+
     const cmdId = this.getReadBaseId(frame.canId, frame.msgType)
     if (frame.isEcho) {
       //tx confirm
@@ -366,7 +377,7 @@ export class ZLG_CAN extends CanBase {
 
   static override getLibVersion(): string {
     if (process.platform == 'win32') {
-      return '24.4.3.11'
+      return '25.3.17.16'
     }
     return 'only support windows'
   }
@@ -509,7 +520,10 @@ export class ZLG_CAN extends CanBase {
           }
           frame.frame.can_id = rid
           //TX_ECHO_FLAG
-          frame.frame.__pad |= 0x20
+          frame.frame.__pad = 0x20
+          if (this.canMiniBug) {
+            frame.frame.__pad = 0x00
+          }
           frame.frame.can_dlc = data.length
           const b = ZLG.ByteArray.frompointer(frame.frame.data)
 
@@ -523,6 +537,20 @@ export class ZLG_CAN extends CanBase {
             reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data))
             // this.close(true)
             // this.log.error((getTsUs() - this.startTime),'bus error')
+          } else {
+            if (this.canMiniBug) {
+              setTimeout(() => {
+                this._read(
+                  {
+                    canId: id,
+                    msgType: msgType,
+                    isEcho: true,
+                    data
+                  },
+                  getTsUs() - this.startTime
+                )
+              }, 0)
+            }
           }
         }
       }
