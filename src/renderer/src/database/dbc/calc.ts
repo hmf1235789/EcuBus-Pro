@@ -110,22 +110,21 @@ export function updateSignalPhys(row: Signal) {
     row.value = typeof row.physValue === 'number' ? row.physValue : 0
   } else {
     const physValue = typeof row.physValue === 'number' ? row.physValue : 0
-
     // Handle float value types
     if (row.valueType === 1) {
       // IEEE Float (single precision)
       const buffer = new ArrayBuffer(4)
       const view = new DataView(buffer)
-      view.setFloat32(0, physValue, true) // true for little-endian
-      row.value = view.getUint32(0, true)
+      view.setFloat32(0, physValue, row.isLittleEndian) // true for little-endian
+      row.value = view.getUint32(0, row.isLittleEndian)
     } else if (row.valueType === 2) {
       // IEEE Double (double precision)
       const buffer = new ArrayBuffer(8)
       const view = new DataView(buffer)
-      view.setFloat64(0, physValue, true)
+      view.setFloat64(0, physValue, row.isLittleEndian)
       // For simplicity, we're only using the lower 32 bits
       // This is a limitation as JavaScript numbers can't fully represent 64-bit integers
-      row.value = view.getUint32(0, true)
+      row.value = view.getUint32(0, row.isLittleEndian)
     } else {
       // Clamp physical value to min/max if defined
       let clampedPhysValue = physValue

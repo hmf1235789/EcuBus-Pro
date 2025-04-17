@@ -606,6 +606,9 @@ onBeforeMount(() => {
     const editData = devices.devices[editIndex.value]
     if (editData && editData.type == 'can' && editData.canDevice) {
       data.value = cloneDeep(editData.canDevice)
+      if (data.value.database && devices.database.can[data.value.database] == undefined) {
+        data.value.database = undefined
+      }
     } else {
       data.value.name = `${props.vendor.toLocaleUpperCase()}_${Object.keys(devices.devices).length}`
       editIndex.value = ''

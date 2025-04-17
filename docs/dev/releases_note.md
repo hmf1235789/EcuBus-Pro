@@ -1,5 +1,14 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.33
+Changes from v0.8.32 to v0.8.33:
+
+* [bug]:fix zlg can device echo
+* [feat]:add dbc float type support
+---
+
+# EcuBus-Pro Release Notes
+
 ## v0.8.32
 Changes from v0.8.31 to v0.8.32:
 

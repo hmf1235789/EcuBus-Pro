@@ -265,13 +265,16 @@ function editGenerator(row: Signal) {
 function handleRawValueChange(row: Signal) {
   updateSignalRaw(row)
   if (message.value) {
-    window.electron.ipcRenderer.send(
-      'ipc-update-can-signal',
-      props.database,
-      parseInt(props.messageId, 16),
-      row.name,
-      cloneDeep(row)
-    )
+    if (window.globalStart.value) {
+      window.electron.ipcRenderer.send(
+        'ipc-update-can-signal',
+        props.database,
+        parseInt(props.messageId, 16),
+        row.name,
+        cloneDeep(row)
+      )
+    }
+
     emits('change', getMessageData(message.value))
   }
 }
@@ -280,13 +283,15 @@ function handleRawValueChange(row: Signal) {
 function handlePhysValueChange(row: Signal) {
   updateSignalPhys(row)
   if (message.value) {
-    window.electron.ipcRenderer.send(
-      'ipc-update-can-signal',
-      props.database,
-      parseInt(props.messageId, 16),
-      row.name,
-      cloneDeep(row)
-    )
+    if (window.globalStart.value) {
+      window.electron.ipcRenderer.send(
+        'ipc-update-can-signal',
+        props.database,
+        parseInt(props.messageId, 16),
+        row.name,
+        cloneDeep(row)
+      )
+    }
     emits('change', getMessageData(message.value))
   }
 }
