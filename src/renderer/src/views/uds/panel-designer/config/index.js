@@ -45,7 +45,8 @@ const ruleList = [
     input,select,number,radio,checkbox,_switch,
     group, subForm,
     alert, button, text, html, divider, tag, image,
-    row, table, tabs, space, card, collapse,
+    card,
+    // row, table, tabs, space, card, collapse,
     col, tabPane, collapseItem,
   
 ];

@@ -13,7 +13,8 @@
       v-model="visible"
       destroy-on-close
       :close-on-click-modal="false"
-      append-to-body
+      :append-to="dialogId"
+      align-center
       width="800px"
     >
       <FnEditor
@@ -56,7 +57,7 @@ export default defineComponent({
     },
     validate: Function
   },
-  inject: ['designer'],
+  inject: ['designer', 'dialogId'],
   computed: {
     t() {
       return this.designer.setupState.t
