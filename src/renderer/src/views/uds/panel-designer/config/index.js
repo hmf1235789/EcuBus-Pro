@@ -42,7 +42,7 @@ import image from './rule/image';
 
 
 const ruleList = [
-    input,select,number,radio,checkbox,_switch,
+    input,select,number,radio,checkbox,_switch,date,
     group, subForm,
     alert, button, text, html, divider, tag, image,
     card,

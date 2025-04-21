@@ -426,12 +426,7 @@
                   </DragForm>
                 </div>
                 <div style="grid-area: props">
-                  <el-divider v-if="propsForm.isShow"
-                    >{{ t('designer.props') }}
-                    <PropsInput
-                      v-if="activeRule && getConfig('showCustomProps', true)"
-                    ></PropsInput>
-                  </el-divider>
+                  <el-divider v-if="propsForm.isShow">{{ t('designer.props') }} </el-divider>
                   <DragForm
                     v-show="propsForm.isShow"
                     v-model:api="propsForm.api"
@@ -667,6 +662,8 @@ export default defineComponent({
       if (!h) return '100%'
       return is.Number(h) ? `${h}px` : h
     })
+
+    provide('height', height)
     const diagMaxHeight = computed(() => {
       return height.value - 100 + 'px'
     })

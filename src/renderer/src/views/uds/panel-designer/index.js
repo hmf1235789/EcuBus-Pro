@@ -1,6 +1,7 @@
 import FcDesigner from './components/FcDesigner.vue';
 import DragTool from './components/DragTool.vue';
 import Struct from './components/Struct.vue';
+import Signal from './components/Signal.vue';
 import Row from './components/Row.vue';
 import HtmlEditor from './components/HtmlEditor.vue';
 import FnEditor from './components/FnEditor.vue';
@@ -55,6 +56,7 @@ designerForm.component('DragTool', DragTool);
 designerForm.component('DragBox', DragBox);
 designerForm.component('Validate', Validate);
 designerForm.component('Struct', Struct);
+designerForm.component('Signal', Signal);
 designerForm.component('HtmlEditor', HtmlEditor);
 designerForm.component('FetchConfig', FetchConfig);
 designerForm.component('FnEditor', FnEditor);

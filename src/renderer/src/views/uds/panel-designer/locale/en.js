@@ -1,3 +1,5 @@
+
+
 const En = {
     name: 'en',
     form: {
@@ -102,6 +104,12 @@ const En = {
         only: '[{label}] Only one allowed to be added',
         errorMsg: 'The input content is syntactically incorrect',
         configured: 'Configured',
+    },
+    signal:{
+        title: 'Signal',
+    },
+    variable:{
+        title: 'Variable',
     },
     event: {
         title: 'Edit',

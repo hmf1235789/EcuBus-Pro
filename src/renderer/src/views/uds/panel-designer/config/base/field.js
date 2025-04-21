@@ -22,5 +22,11 @@ export default function field({t}) {
             value: '',
             title: t('form.labelWidth'),
         },
+        {
+            type: 'Signal',
+            field: 'signal',
+            value: {},
+            title: t('signal.title'),
+        },
     ];
 }
