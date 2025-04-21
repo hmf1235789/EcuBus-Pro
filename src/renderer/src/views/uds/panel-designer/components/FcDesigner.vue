@@ -2457,21 +2457,21 @@ export default defineComponent({
       e.preventDefault()
       e.stopPropagation()
     }
-    window.onbeforeunload = (e) => {
-      if (this.unloadStatus) {
-        e.returnValue = this.t('designer.unload')
-      }
-    }
+    // window.onbeforeunload = (e) => {
+    //   if (this.unloadStatus) {
+    //     e.returnValue = this.t('designer.unload')
+    //   }
+    // }
   },
   mounted() {
-    if (this.config?.hotKey !== false) {
-      document.addEventListener('keydown', this.bindHotkey)
-      document.addEventListener('paste', this.bindPaste)
-    }
+    // if (this.config?.hotKey !== false) {
+    //   document.addEventListener('keydown', this.bindHotkey)
+    //   document.addEventListener('paste', this.bindPaste)
+    // }
   },
   unmounted() {
-    document.removeEventListener('keydown', this.bindHotkey)
-    document.removeEventListener('paste', this.bindPaste)
+    // document.removeEventListener('keydown', this.bindHotkey)
+    // document.removeEventListener('paste', this.bindPaste)
   }
 })
 </script>

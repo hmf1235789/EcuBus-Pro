@@ -5,7 +5,6 @@
         <slot>
           <el-button class="_fd-plain-button" plain size="small">
             {{ title || t('signal.title') }}
-            <template v-if="configured">({{ props.modelValue.name }})</template>
           </el-button>
         </slot>
       </div>
@@ -25,65 +24,52 @@
   </div>
 </template>
 
-<script setup>
-import { deepParseFn, toJSON } from '../utils/index'
-import { deepCopy } from '@form-create/utils/lib/deepextend'
-import { ref, computed, watch, nextTick, inject, defineProps, defineEmits } from 'vue'
+<script>
+import { defineComponent, markRaw } from 'vue'
 import is from '@form-create/utils/lib/type'
-import errorMessage from '../utils/message'
 import xignal from '../../components/signal.vue'
 
-const props = defineProps({
-  modelValue: {
-    type: [Object],
-    default: () => ({})
+export default defineComponent({
+  name: 'Struct',
+  emits: ['update:modelValue'],
+  props: {
+    modelValue: [String],
+    title: String,
+    defaultValue: {
+      require: false
+    },
+    validate: Function
   },
-  title: String,
-  defaultValue: {
-    required: false
+  components: {
+    xignal
   },
-  validate: Function
-})
+  inject: ['designer', 'dialogId', 'height'],
+  computed: {
+    t() {
+      return this.designer.setupState.t
+    },
+    configured() {
+      return !is.empty(this.modelValue) && Object.keys(this.modelValue).length > 0
+    }
+  },
+  watch: {
+    modelValue() {
+      console.log('modelValue', this.modelValue)
+    }
+  },
+  data() {
+    return {
+      editor: null,
+      visible: false,
+      oldVal: null
+    }
+  },
 
-const emit = defineEmits(['update:modelValue'])
-
-const designer = inject('designer')
-const dialogId = inject('dialogId')
-const height = inject('height')
-
-const visible = ref(false)
-const oldVal = ref(null)
-
-const t = computed(() => designer.setupState.t)
-const configured = computed(() => {
-  console.log(props.modelValue)
-  return !is.empty(props.modelValue) && Object.keys(props.modelValue).length > 0
-})
-
-const load = () => {
-  const val = toJSON(
-    deepParseFn(props.modelValue ? deepCopy(props.modelValue) : props.defaultValue)
-  )
-  oldVal.value = val
-  nextTick(() => {
-    // 原来这里是空的
-  })
-}
-const handleAddSignal = (node) => {
-  emit('update:modelValue', deepCopy(node))
-  visible.value = false
-}
-
-watch(
-  () => props.modelValue,
-  () => {
-    load()
-  }
-)
-
-watch(visible, (n) => {
-  if (n) {
-    load()
+  methods: {
+    handleAddSignal(node) {
+      this.visible = false
+      this.$emit('update:modelValue', node.id)
+    }
   }
 })
 </script>

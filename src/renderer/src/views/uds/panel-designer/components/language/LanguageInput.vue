@@ -21,7 +21,7 @@
         <template #reference>
           <i class="fc-icon icon-language"></i>
         </template>
-        <div class="_fd-language-list">
+        <div class="_fd-language-list" style="margin: 5px">
           <div class="_fd-language-header">
             <div class="_fd-language-title">
               {{ t('language.select') }}<i class="fc-icon icon-setting" @click="openConfig"></i>
