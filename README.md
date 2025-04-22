@@ -80,7 +80,7 @@ Take a visual journey through EcuBus-Pro's powerful features:
     <tr>
       <td style="width: 25%; text-align: center; padding: 20px; border: 1px solid #eee;">
         <a href="http://www.cdkhdz.com" target="_blank">
-          <img src="./docs/logo/KUNHONG-LOGO - re-E1.png" alt="KUNHONG" width="120"/>
+          <img src="./logo/KUNHONG-LOGO - re-E1.png" alt="KUNHONG" width="120"/>
         </a>
       </td>
       <td style="width: 25%; text-align: center; padding: 20px; border: 1px solid #eee;">
