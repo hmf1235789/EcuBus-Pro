@@ -56,6 +56,49 @@ Take a visual journey through EcuBus-Pro's powerful features:
 
 ## Support & Sponsorship
 
+<div align="center">
+  <h3 style="padding:20px;font-size:22px">Platinum Sponsors</h3>
+  <table style="width: 80%; margin: 0 auto; border-collapse: collapse;">
+    <tbody>
+    <tr>
+      <td style="width: 33.33%; text-align: center; padding: 20px; border: 1px solid #eee;">
+        <a href="./docs/about/sponsor">Become a Sponsor</a>
+      </td>
+      <td style="width: 33.33%; text-align: center; padding: 20px; border: 1px solid #eee;">
+        <a href="./docs/about/sponsor">Become a Sponsor</a>
+      </td>
+      <td style="width: 33.33%; text-align: center; padding: 20px; border: 1px solid #eee;">
+        <a href="./docs/about/sponsor">Become a Sponsor</a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+  <h3 style="padding:20px;font-size:20px">Gold Sponsors</h3>
+
+  <table style="width: 90%; margin: 0 auto; border-collapse: collapse;">
+    <tbody>
+    <tr>
+      <td style="width: 25%; text-align: center; padding: 20px; border: 1px solid #eee;">
+        <a href="http://www.cdkhdz.com" target="_blank">
+          <img src="./docs/logo/KUNHONG-LOGO - re-E1.png" alt="KUNHONG" width="120"/>
+        </a>
+      </td>
+      <td style="width: 25%; text-align: center; padding: 20px; border: 1px solid #eee;">
+        <a href="./docs/about/sponsor">Become a Sponsor</a>
+      </td>
+      <td style="width: 25%; text-align: center; padding: 20px; border: 1px solid #eee;">
+        <a href="./docs/about/sponsor">Become a Sponsor</a>
+      </td>
+      <td style="width: 25%; text-align: center; padding: 20px; border: 1px solid #eee;">
+        <a href="./docs/about/sponsor">Become a Sponsor</a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+---
+
 Consider [becoming a sponsor](./docs/about/sponsor) to support ongoing development. Sponsors receive prominent logo placement with website links. 🙏
 
 ### Professional Support
@@ -70,7 +113,7 @@ We offer premium technical support for sponsors, including access to the private
 
 Thanks to all the contributors who have helped shape EcuBus-Pro:
 
-<a href="https://github.com/ecubus/EcuBus-Pro/graphs/contributors"><img src="https://opencollective.com/ecubus/contributors.svg?width=890&amp;button=false"></a>
+<a href="https://github.com/ecubus/EcuBus-Pro/graphs/contributors" target="_blank"><img src="https://opencollective.com/ecubus/contributors.svg?width=890&amp;button=false"></a>
 
 We welcome contributions! Please review our [contribution guidelines](./.github/contributing.md) before getting started.
 

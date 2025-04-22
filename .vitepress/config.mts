@@ -114,6 +114,12 @@ export default withMermaid({
       
         container.addEventListener('click', function(e) {
           if (e.target.tagName === 'IMG') {
+            // Check if the image is inside an anchor tag
+            if (e.target.closest('a')) {
+              // If image is inside a link, let the default link behavior proceed
+              return;
+            }
+            
             e.preventDefault();
             
             const images = Array.from(document.querySelectorAll('.content-container img'));
