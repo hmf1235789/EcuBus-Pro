@@ -25,7 +25,6 @@ export default function field({t}) {
         {
             type: 'Signal',
             field: 'signal',
-            value: {},
             title: t('signal.title'),
         },
     ];

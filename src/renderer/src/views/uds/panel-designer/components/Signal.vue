@@ -30,10 +30,10 @@ import is from '@form-create/utils/lib/type'
 import xignal from '../../components/signal.vue'
 
 export default defineComponent({
-  name: 'Struct',
-  emits: ['update:modelValue'],
+  name: 'Signal',
+  emits: ['update:modelValue', 'change'],
   props: {
-    modelValue: [String],
+    modelValue: [Object],
     title: String,
     defaultValue: {
       require: false
@@ -68,7 +68,8 @@ export default defineComponent({
   methods: {
     handleAddSignal(node) {
       this.visible = false
-      this.$emit('update:modelValue', node.id)
+      this.$emit('update:modelValue', node)
+      this.$emit('change', node)
     }
   }
 })
