@@ -27,5 +27,10 @@ export default function field({t}) {
             field: 'signal',
             title: t('signal.title'),
         },
+        {
+            type: 'Variable',
+            field: 'variable',
+            title: t('variable.title'),
+        },
     ];
 }

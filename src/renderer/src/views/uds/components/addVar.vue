@@ -53,7 +53,7 @@
 </template>
 <script setup lang="ts">
 import { useDataStore } from '@r/stores/data'
-import { computed, h, ref, onMounted } from 'vue'
+import { computed, h, ref, onMounted, nextTick } from 'vue'
 import type { VxeGridProps } from 'vxe-table'
 import varIcon from '@iconify/icons-mdi/application-variable-outline'
 import userIcon from '@iconify/icons-material-symbols/person-outline'
@@ -87,6 +87,7 @@ interface TreeItem {
 const vxeRef = ref()
 const props = defineProps<{
   height: number
+  highlightId?: string
 }>()
 
 const database = useDataStore()
@@ -140,6 +141,7 @@ const gridOptions = computed<VxeGridProps<TreeItem>>(() => ({
     expandAll: false
   },
   rowConfig: {
+    keyField: 'id',
     isCurrent: true
   },
   toolbarConfig: {
@@ -322,7 +324,17 @@ function handleSearch() {
 
 // Initialize data
 onMounted(() => {
-  vxeRef.value?.insertAt(allVariables.value)
+  vxeRef.value?.insertAt(allVariables.value).then(() => {
+    if (props.highlightId) {
+      const row = vxeRef.value?.getRowById(props.highlightId)
+      if (row) {
+        vxeRef.value?.setCurrentRow(row)
+        nextTick(() => {
+          vxeRef.value?.scrollToRow(row, 'id')
+        })
+      }
+    }
+  })
 })
 </script>
 <style>
