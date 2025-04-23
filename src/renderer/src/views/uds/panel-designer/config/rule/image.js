@@ -1,7 +1,7 @@
 import {localeProps} from '../../utils';
 
 const label = '图片';
-const name = 'elImage';
+const name = 'LocalImage';
 
 export default {
     menu: 'aide',
@@ -17,14 +17,14 @@ export default {
                 height: '100px',
             },
             props: {
-                src: 'https://static.form-create.com/example.png',
+                src: 'https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png',
             }
         };
     },
     props(_, {t}) {
         return localeProps(t, name + '.props', [
             {
-                type: 'input',
+                type: 'ChooseFile',
                 field: 'src',
             }
         ]);

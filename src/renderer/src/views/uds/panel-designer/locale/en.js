@@ -575,6 +575,13 @@ const En = {
                 src: 'Image path'
             }
         },
+        LocalImage: {
+            name: 'Image',
+            onImageError: 'Image loading failed',
+            props: {
+                src: 'Image path'
+            }
+        },
         fcEditor: {
             name: 'Editor',
             props: {
