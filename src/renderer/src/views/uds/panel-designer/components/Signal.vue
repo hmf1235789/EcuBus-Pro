@@ -19,7 +19,7 @@
       :append-to="dialogId"
       width="800px"
     >
-      <xignal :height="height - 200" @add-signal="handleAddSignal" />
+      <xignal :height="height - 200" @add-signal="handleAddSignal" :highlight-id="modelValue?.id" />
     </el-dialog>
   </div>
 </template>
@@ -52,11 +52,7 @@ export default defineComponent({
       return !is.empty(this.modelValue) && Object.keys(this.modelValue).length > 0
     }
   },
-  watch: {
-    modelValue() {
-      console.log('modelValue', this.modelValue)
-    }
-  },
+
   data() {
     return {
       editor: null,
@@ -64,7 +60,6 @@ export default defineComponent({
       oldVal: null
     }
   },
-
   methods: {
     handleAddSignal(node) {
       this.visible = false

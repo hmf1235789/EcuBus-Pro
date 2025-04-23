@@ -76,6 +76,7 @@ import { v4 } from 'uuid'
 import { DBC, Signal as DbcSignal } from '@r/database/dbc/dbcVisitor'
 import searchIcon from '@iconify/icons-material-symbols/search'
 import { ElMessage } from 'element-plus'
+import { nextTick } from 'process'
 
 // 在 interface TreeItem 之前添加类型定义
 type ProtocolFilter = 'all' | 'can' | 'lin'
@@ -110,6 +111,7 @@ const props = defineProps<{
   protocolFilter?: ProtocolFilter // 协议过滤
   selectableLevel?: SelectableLevel // 可选择的层级
   speicalDb?: string[]
+  highlightId?: string
 }>()
 
 // 修改默认值
@@ -146,10 +148,11 @@ const gridOptions = computed<VxeGridProps<TreeItem>>(() => ({
   treeConfig: {
     rowField: 'id',
     childrenField: 'children',
-    expandAll: false
+    expandAll: props.highlightId ? true : false
   },
   rowConfig: {
-    isCurrent: true
+    isCurrent: true,
+    keyField: 'id'
   },
   toolbarConfig: {
     slots: {
@@ -533,7 +536,17 @@ function handleSearch() {
 
 // Initialize data
 onMounted(() => {
-  vxeRef.value?.insertAt(allSignals.value)
+  vxeRef.value?.insertAt(allSignals.value).then(() => {
+    if (props.highlightId) {
+      const row = vxeRef.value?.getRowById(props.highlightId)
+      if (row) {
+        vxeRef.value?.setCurrentRow(row)
+        nextTick(() => {
+          vxeRef.value?.scrollToRow(row, 'id')
+        })
+      }
+    }
+  })
 })
 </script>
 <style>
