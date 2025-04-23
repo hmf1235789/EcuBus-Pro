@@ -9,7 +9,7 @@ import './var'
 import { ipcMain, shell } from 'electron'
 import { getCanVersion } from '../docan/can'
 import { getLinVersion } from '../dolin'
-
+import { error } from 'electron-log'
 interface EcuBusPro {
   support: string[]
   vendor: Record<string, string[]>
@@ -31,16 +31,32 @@ ipcMain.handle('ipc-get-version', async (event, arg) => {
   })
   for (const v of input.support) {
     for (const vendor of input.vendor[v]) {
-      list.push({
-        name: `${vendor} can`,
-        version: getCanVersion(vendor)
-      })
+      try {
+        list.push({
+          name: `${vendor} can`,
+          version: getCanVersion(vendor)
+        })
+      } catch (e: any) {
+        error(e)
+        list.push({
+          name: `${vendor} can`,
+          version: 'Failed to get version'
+        })
+      }
     }
     for (const vendor of input.vendor[v]) {
-      list.push({
-        name: `${vendor} lin`,
-        version: getLinVersion(vendor)
-      })
+      try {
+        list.push({
+          name: `${vendor} lin`,
+          version: getLinVersion(vendor)
+        })
+      } catch (e: any) {
+        error(e)
+        list.push({
+          name: `${vendor} lin`,
+          version: 'Failed to get version'
+        })
+      }
     }
   }
   return list
