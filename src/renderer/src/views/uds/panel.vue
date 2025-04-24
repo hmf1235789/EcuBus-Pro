@@ -1,5 +1,5 @@
 <template>
-  <fc-designer ref="designer" :config="config" :locale="locale" :height="h" />
+  <fc-designer ref="designer" :config="config" :locale="locale" :height="h" @save="save" />
 </template>
 <script setup lang="ts">
 import fcDesigner from './panel-designer/index.js'
@@ -29,4 +29,7 @@ const config = computed(() => ({
 
 provide('dialogId', `#win${props.editIndex}`)
 provide('height', h)
+const save = (data) => {
+  console.log(data)
+}
 </script>
