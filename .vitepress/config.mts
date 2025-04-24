@@ -249,6 +249,10 @@ export default withMermaid({
              
               
             ]
+          },
+          {
+            text:'FAQ',
+            link:'/docs/faq/index'
           }
         ]
       },
