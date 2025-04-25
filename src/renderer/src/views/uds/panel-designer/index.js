@@ -32,6 +32,8 @@ import LocalImage from './components/LocalImage.vue';
 import formCreate, {designerForm} from './utils/form';
 // import FcEditor from '@form-create/component-wangeditor';
 import draggable from 'vuedraggable/src/vuedraggable';
+import Grid from './components/grid/Grid.vue';
+import GridView from './components/grid/GridView.vue';
 import {
     compareVersion,
     copyTextToClipboard,
@@ -84,6 +86,7 @@ designerForm.component('LocalImage', LocalImage);
 // addComponent('FcEditor', FcEditor);
 addComponent('TableForm', TableForm, TableFormView);
 addComponent('FcTable', Table, TableView);
+addComponent('Grid',Grid,GridView)
 
 const install = function (Vue) {
     Vue.component('FcDesigner', FcDesigner);

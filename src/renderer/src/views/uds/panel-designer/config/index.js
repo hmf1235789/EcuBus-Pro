@@ -39,15 +39,16 @@ import table from './rule/table';
 import tableForm from './rule/tableForm';
 import tableFormColumn from './rule/tableFormColumn';
 import image from './rule/image';
+import gird from './rule/grid'
 
 
 const ruleList = [
-    input,select,number,radio,checkbox,_switch,date,
-    group, subForm,
+    input,select,number,radio,checkbox,_switch,
+    subForm,
     alert, button, text, html, divider, tag, image,
-    card,
+    gird,
     // row, table, tabs, space, card, collapse,
-    col, tabPane, collapseItem,
+    // col, tabPane, collapseItem,
   
 ];
 /*
