@@ -5,6 +5,7 @@ import draggable from 'vuedraggable/src/vuedraggable'
 export default defineComponent({
   name: 'DragBox',
   props: ['rule', 'tag', 'formCreateInject', 'list'],
+  emits: ['click'],
   render(ctx) {
     const attrs = { ...ctx.$props.rule.props, ...ctx.$attrs }
     let _class = '_fd-' + ctx.$props.tag + '-drag _fd-drag-box'
@@ -38,7 +39,28 @@ export default defineComponent({
             vnode = keys[key + 'fc']
           }
           if (vnode) {
-            return h('div', { class: '_fc-' + ctx.$props.tag + '-item _fd-drag-item', key }, vnode)
+            const vnodeWithActive = {
+              ...vnode,
+              props: {
+                ...vnode.props,
+                onActive: () => {
+                  vnode.props?.onActive?.()
+
+                  ctx.$emit('click', {
+                    key,
+                    parentKey: ctx.$props.rule.props.parentKey
+                  })
+                }
+              }
+            }
+            return h(
+              'div',
+              {
+                class: '_fc-' + ctx.$props.tag + '-item _fd-drag-item',
+                key
+              },
+              vnodeWithActive
+            )
           }
         }
         return h(

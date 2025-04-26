@@ -1,7 +1,7 @@
 <template>
   <div class="_fd-style-config">
     <BoxSpaceInput v-model="space" @change="onInput" style="margin-bottom: 10px"></BoxSpaceInput>
-    <BoxSizeInput v-model="size" @change="onInput"></BoxSizeInput>
+    <BoxSizeInput v-if="sizeEnabled" v-model="size" @change="onInput"></BoxSizeInput>
     <ConfigItem :label="t('style.color')">
       <ColorInput v-model="color" @change="onInput"></ColorInput>
     </ConfigItem>
@@ -26,7 +26,7 @@
       ></el-slider>
       <span>{{ scale }}%</span>
     </ConfigItem>
-    <ConfigItem
+    <!-- <ConfigItem
       :label="t('props.custom')"
       :info="Object.keys(formData).length > 0 ? t('struct.configured') : ''"
     >
@@ -43,7 +43,7 @@
           }"
         ></TableOptions>
       </template>
-    </ConfigItem>
+    </ConfigItem> -->
   </div>
 </template>
 
@@ -148,12 +148,14 @@ export default defineComponent({
       color: '',
       boxShadow: '',
       opacity: 100,
-      scale: 100
+      scale: 100,
+      sizeEnabled: true
     }
   },
   methods: {
     tidyStyle() {
       const style = { ...(this.modelValue || {}) }
+      this.sizeEnabled = style.sizeEnabled != undefined ? style.sizeEnabled : true
       const space = {}
       Object.keys(style).forEach((k) => {
         if (['margin', 'padding'].indexOf(k) > -1) {

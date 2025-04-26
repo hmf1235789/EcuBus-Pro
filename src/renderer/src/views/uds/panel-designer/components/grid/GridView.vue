@@ -1,43 +1,44 @@
 <template>
   <div class="_fd-grid-view">
     <GridLayout
-      v-model:layout="gridLayout"
-      :col-num="rule.col"
-      :row-height="50"
+      v-model:layout="rule.layout"
+      :col-num="rule.row"
+      :row-height="rule.rowHeight"
       :is-draggable="true"
       :is-resizable="true"
       :vertical-compact="true"
       :use-css-transforms="true"
-      :margin="[10, 10]"
+      :margin="[rule.margin, rule.margin]"
       :auto-size="true"
     >
       <GridItem
-        v-for="(item, index) in gridLayout"
+        v-for="(item, index) in rule.layout"
         :key="item.i"
         :x="item.x"
         :y="item.y"
         :w="item.w"
         :h="item.h"
         :i="item.i"
-        :style="[tableColor, (style && style[item.i]) || {}]"
+        :style="[(style && style[item.i]) || {}]"
         :class="(rule.class && rule.class[item.i]) || ''"
         :static="activeId === item.i"
       >
         <div class="_fd-grid-view-cell">
-          <button
+          <!-- <button
             v-if="activeId === item.i"
             class="grid-item-delete-btn"
             @click.stop="deleteGridItem(item.i)"
           >
             ×
-          </button>
+          </button> -->
           <DragTool :drag-btn="false" :handle-btn="false" @active="active(item.i)" :unique="item.i">
             <DragBox
               v-bind="dragProp"
               @add="(e) => dragAdd(e, item.i)"
-              :ref="(el) => (dragRefs[item.i] = el)"
+              :ref="'drag' + item.i"
               @end="(e) => dragEnd(e, item.i)"
               @start="(e) => dragStart(e)"
+              @click="activex"
               @unchoose="(e) => dragUnchoose(e)"
               :list="getSlotChildren([item.i])"
             >
@@ -50,286 +51,206 @@
   </div>
 </template>
 
-<script setup>
+<script>
 /* eslint-disable vue/no-mutating-props */
 import DragTool from '../DragTool.vue'
 import DragBox from '../DragBox.vue'
-import { ref, computed, watch, onBeforeMount, inject, nextTick } from 'vue'
+import { defineComponent } from 'vue'
 import uniqueId from '@form-create/utils/lib/unique'
 import { GridLayout, GridItem } from 'vue-grid-layout-v3'
-import deepClone from 'lodash/cloneDeep'
+export default defineComponent({
+  name: 'GridView',
+  props: {
+    formCreateInject: Object,
 
-const props = defineProps({
-  label: String,
-  width: [Number, String],
-  formCreateInject: Object,
-  border: {
-    type: Boolean,
-    default: true
-  },
-  borderWidth: String,
-  borderColor: String,
-  rule: {
-    type: Object,
-    default: () => ({ row: 1, col: 1 })
-  }
-})
-
-const designer = inject('designer')
-
-const unique = ref({})
-const style = ref({})
-const gridLayout = ref([])
-const dragRefs = ref({})
-const dragProp = ref({
-  rule: {
-    props: {
-      tag: 'el-col',
-      group: 'default',
-      ghostClass: 'ghost',
-      animation: 150,
-      handle: '._fd-drag-btn',
-      emptyInsertThreshold: 0,
-      direction: 'vertical',
-      itemKey: 'type'
+    rule: {
+      type: Object
     }
   },
-  tag: 'tableCell'
-})
-
-const t = computed(() => designer.setupState.t)
-
-const tableColor = computed(() => {
-  const border = {}
-  if (props.border === false) {
-    border['border'] = '0 none'
-  } else {
-    if (props.borderColor) {
-      border['borderColor'] = props.borderColor
-    }
-    if (props.borderWidth) {
-      border['borderWidth'] = props.borderWidth
-    }
-  }
-  return border
-})
-
-const getSlotChildren = (slots) => {
-  const children = []
-  props.formCreateInject.children.forEach((child) => {
-    if (slots.indexOf(child.slot) > -1) {
-      children.push(child)
-    }
-  })
-  return children
-}
-
-const dragAdd = (e, key) => {
-  const designerState = designer.setupState
-  const children = props.formCreateInject.children
-  const slot = key
-  const rule = e.item._underlying_vm_
-  const flag = designerState.addRule && designerState.addRule.children === designerState.moveRule
-  if (flag) {
-    designerState.moveRule.splice(designerState.moveRule.indexOf(rule), 1)
-  }
-
-  let idx = 0
-  const dragBoxRef = dragRefs.value[key]
-  console.log(dragBoxRef, e)
-  if (dragBoxRef && dragBoxRef.list && dragBoxRef.list.length) {
-    let beforeRule = dragBoxRef.list[!e.newIndex ? 0 : e.newIndex - 1]
-    idx = children.indexOf(beforeRule) + (e.newIndex ? 1 : 0)
-  } else if (children.length) {
-    // Try to find a reasonable position by checking other refs
-    const dragRefKeys = Object.keys(dragRefs.value)
-    if (dragRefKeys.length > 0) {
-      for (let i = 0; i < dragRefKeys.length; i++) {
-        const currentRef = dragRefs.value[dragRefKeys[i]]
-        if (currentRef && currentRef.list && currentRef.list.length) {
-          idx = children.indexOf(currentRef.list[currentRef.list.length - 1]) + 1
-          break
-        }
-      }
-    }
-  }
-  console.log(idx)
-  e.newIndex = idx
-  if (flag) {
-    rule.slot = slot
-    children.splice(e.newIndex, 0, rule)
-    designerState.added = true
-    designerState.handleSortAfter({ rule })
-  } else {
-    designerState.dragAdd(children, e, slot)
-  }
-  nextTick(() => {
-    console.log(dragRefs.value)
-  })
-}
-
-const dragEnd = (e, key) => {
-  const designerState = designer.setupState
-  const children = props.formCreateInject.children
-  const rule = e.item._underlying_vm_
-  const oldIdx = children.indexOf(rule)
-  e.newIndex = oldIdx + (e.newIndex - e.oldIndex)
-  e.oldIndex = oldIdx
-  designerState.dragEnd(props.formCreateInject.children, e, key)
-}
-
-const dragStart = () => {
-  designer.setupState.dragStart(props.formCreateInject.children)
-}
-
-const dragUnchoose = (e) => {
-  designer.setupState.dragUnchoose(props.formCreateInject.children, e)
-}
-
-const initRule = () => {
-  const rule = props.rule
-  if (!rule.style) {
-    rule.style = {}
-  }
-  if (!rule.class) {
-    rule.class = {}
-  }
-  if (!rule.layout) {
-    rule.layout = []
-  }
-  if (!rule.row) {
-    rule.row = 1
-  }
-  if (!rule.col) {
-    rule.col = 1
-  }
-}
-
-const active = (key) => {
-  console.log(key)
-  activeId.value = key
-  designer.setupState.customActive({
-    name: 'GridItem',
-    onPaste: (rule) => {
-      rule.slot = key
-      props.formCreateInject.children.push(rule)
-    },
-    style: {
-      formData: {
-        style: props.rule.style[key] || {},
-        class: props.rule.class[key] || ''
+  inject: ['designer'],
+  components: {
+    DragTool,
+    DragBox,
+    GridLayout,
+    GridItem
+  },
+  watch: {
+    rule: {
+      handler() {
+        this.initRule()
+        this.style = this.rule.style
+        this.loadRule()
       },
-      change: (field, value) => {
-        props.rule[field][key] = value || {}
+      immediate: true
+    }
+  },
+  data() {
+    return {
+      style: {},
+      activeId: null,
+      dragProp: {
+        rule: {
+          props: {
+            tag: 'el-col',
+            group: 'default',
+            ghostClass: 'ghost',
+            animation: 150,
+            handle: '._fd-drag-btn',
+            emptyInsertThreshold: 0,
+            direction: 'vertical',
+            itemKey: 'type'
+          }
+        },
+        tag: 'tableCell'
       }
     }
-  })
-}
-
-const activeId = ref(null)
-const loadRule = () => {
-  const tmpGridLayout = []
-  const rule = props.rule || { row: 1, col: 1 }
-
-  // Create grid layout items
-  for (let y = 0; y < rule.row; y++) {
-    for (let x = 0; x < rule.col; x++) {
-      const id = uniqueId()
-
-      // Check if this cell is part of a merged cell (skip if it is)
-      let isPartOfMerged = false
-      for (const layout of rule.layout || []) {
-        if (!layout.row && !layout.col) continue
-
-        if (
-          y >= layout.top &&
-          y < layout.top + (layout.row || 1) &&
-          x >= layout.left &&
-          x < layout.left + (layout.col || 1)
-        ) {
-          // Skip if not the top-left cell of the merged area
-          if (y !== layout.top || x !== layout.left) {
-            isPartOfMerged = true
+  },
+  computed: {
+    t() {
+      return this.designer.setupState.t
+    }
+  },
+  methods: {
+    getSlotChildren(slots) {
+      const children = []
+      this.formCreateInject.children.forEach((child) => {
+        if (slots.indexOf(child.slot) > -1) {
+          children.push(child)
+        }
+      })
+      return children
+    },
+    dragAdd(e, key) {
+      this.activeId = key
+      this.dragProp.rule.props.parentKey = key
+      // console.log('dragAdd');
+      const designer = this.designer.setupState
+      const children = this.formCreateInject.children
+      const slot = key
+      const rule = e.item._underlying_vm_
+      const flag = designer.addRule && designer.addRule.children === designer.moveRule
+      if (flag) {
+        designer.moveRule.splice(designer.moveRule.indexOf(rule), 1)
+      }
+      let idx = 0
+      const refKey = 'drag' + key
+      if (this.$refs[refKey][0].list.length) {
+        let beforeRule = this.$refs[refKey][0].list[!e.newIndex ? 0 : e.newIndex - 1]
+        idx = children.indexOf(beforeRule) + (e.newIndex ? 1 : 0)
+      } else if (children.length) {
+        const dragSlotKeys = Object.keys(this.$refs)
+        for (let i = dragSlotKeys.indexOf(refKey) - 1; i >= 0; i--) {
+          if (!this.$refs[dragSlotKeys[i]] || !this.$refs[dragSlotKeys[i]].length) {
+            continue
+          }
+          const list = this.$refs[dragSlotKeys[i]][0].list || []
+          if (list.length) {
+            idx = children.indexOf(list[list.length - 1]) + 1
             break
           }
         }
       }
-
-      if (!isPartOfMerged) {
-        // Find if this is a merged cell
-        const mergedLayout = (rule.layout || []).find((l) => l.top === y && l.left === x)
-        const width = mergedLayout ? mergedLayout.col || 1 : 1
-        const height = mergedLayout ? mergedLayout.row || 1 : 1
-
-        tmpGridLayout.push({
-          x: x,
-          y: y,
-          w: width,
-          h: height,
-          i: id
-        })
+      e.newIndex = idx
+      if (flag) {
+        rule.slot = slot
+        children.splice(e.newIndex, 0, rule)
+        designer.added = true
+        designer.handleSortAfter({ rule })
+      } else {
+        designer.dragAdd(children, e, key)
       }
+    },
+    dragEnd(e, key) {
+      // console.log('dragEnd');
+      const designer = this.designer.setupState
+      const children = this.formCreateInject.children
+      const rule = e.item._underlying_vm_
+      const oldIdx = children.indexOf(rule)
+      e.newIndex = oldIdx + (e.newIndex - e.oldIndex)
+      e.oldIndex = oldIdx
+      designer.dragEnd(this.formCreateInject.children, e, key)
+    },
+    dragStart() {
+      // console.log('dragStart');
+      this.designer.setupState.dragStart(this.formCreateInject.children)
+    },
+    dragUnchoose(e) {
+      // console.log('dragUnchoose');
+      this.designer.setupState.dragUnchoose(this.formCreateInject.children, e)
+    },
+    initRule() {
+      const rule = this.rule
+      if (!rule.style) {
+        rule.style = {}
+      }
+      if (!rule.class) {
+        rule.class = {}
+      }
+      if (!rule.layout) {
+        rule.layout = []
+      }
+      if (!rule.row) {
+        rule.row = 1
+      }
+      if (!rule.col) {
+        rule.col = 1
+      }
+    },
+    activex(key) {
+      // console.log('activex',key)
+      this.activeId = key.parentKey
+    },
+    active(key) {
+      this.activeId = null
+      // this.activeId=key
+      this.designer.setupState.customActive({
+        name: 'Grid',
+        onPaste: (rule) => {
+          rule.slot = key
+          this.formCreateInject.children.push(rule)
+        },
+        style: {
+          formData: {
+            style: {
+              sizeEnabled: false,
+              ...this.rule.style[key]
+            } || {
+              sizeEnabled: false
+            },
+            class: this.rule.class[key] || ''
+          },
+          change: (field, value) => {
+            this.rule[field][key] = value || {}
+          }
+        }
+      })
+    },
+
+    loadRule() {
+      const rule = this.rule
+      if (rule.layout.length == 0) {
+        // 从rule.layout初始化布局
+
+        // 否则创建默认布局
+        for (let index = 0; index < 2; index++) {
+          for (let idx = 0; idx < rule.row / 8; idx++) {
+            rule.layout.push({
+              i: uniqueId(),
+              x: idx * 8,
+              y: index,
+              w: 8,
+              h: 1
+            })
+          }
+        }
+      }
+
+      this.formCreateInject.rule.props.rule = rule
     }
-  }
-
-  gridLayout.value = tmpGridLayout
-  props.formCreateInject.rule.props.rule = rule
-}
-
-const rmSlot = (key) => {
-  const children = props.formCreateInject.children
-  let del = 0
-  console.log(deepClone(children))
-  ;[...children].forEach((child, index) => {
-    if (!child.slot) {
-      return
-    }
-    if (child.slot === key) {
-      children.splice(index - del, 1)
-      del++
-    }
-  })
-}
-
-const deleteGridItem = (key) => {
-  console.log('Deleting grid item with key:', key)
-
-  // Find the corresponding item in the gridLayout
-  const layoutIndex = gridLayout.value.findIndex((item) => item.i === key)
-
-  if (layoutIndex > -1) {
-    // Remove children and styles using rmSlot
-    rmSlot(key)
-
-    // Find and remove from rule.layout if it exists
-    const ruleLayoutIndex = props.rule.layout.findIndex((layout) => layout.i === key)
-
-    if (ruleLayoutIndex > -1) {
-      props.rule.layout.splice(ruleLayoutIndex, 1)
-    }
-
-    // Remove the item from gridLayout
-    gridLayout.value.splice(layoutIndex, 1)
-
-    // Reset active item if it was the deleted one
-    if (activeId.value === key) {
-      activeId.value = null
-    }
-  }
-}
-
-watch(
-  () => props.rule,
-  () => {
-    initRule()
-    style.value = props.rule.style
-    loadRule()
   },
-  { immediate: true, deep: true }
-)
-
-onBeforeMount(() => {
-  loadRule()
+  beforeMount() {
+    this.loadRule()
+  }
 })
 </script>
 
@@ -342,8 +263,7 @@ onBeforeMount(() => {
 ._fd-grid-view-cell {
   height: 100%;
   width: 100%;
-  border: 1px dashed #dcdfe6;
-  background-color: white;
+  background-color: inherit;
   position: relative;
 }
 

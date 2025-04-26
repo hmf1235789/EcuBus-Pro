@@ -68559,7 +68559,10 @@
         }
       }
     },
-    "tests": {}
+    "tests": {},
+    "guages": {},
+    "vars": {},
+    "datas": {}
   },
   "project": {
     "wins": {
@@ -68576,7 +68579,8 @@
         "title": "message",
         "label": "Message",
         "id": "message",
-        "layoutType": "bottom"
+        "layoutType": "bottom",
+        "hide": true
       },
       "network": {
         "pos": {
@@ -68588,7 +68592,8 @@
         "title": "network",
         "label": "Network",
         "id": "network",
-        "options": {}
+        "options": {},
+        "hide": true
       },
       "trace": {
         "pos": {
@@ -68600,7 +68605,8 @@
         "title": "trace",
         "label": "Trace",
         "id": "trace",
-        "options": {}
+        "options": {},
+        "hide": true
       },
       "a6773bbd-db04-405f-9a23-af32b1c12e70_ia": {
         "pos": {
@@ -68617,7 +68623,8 @@
             "edit-index": "a6773bbd-db04-405f-9a23-af32b1c12e70"
           },
           "name": "Can IA"
-        }
+        },
+        "hide": true
       },
       "graph": {
         "pos": {
@@ -68629,7 +68636,32 @@
         "title": "graph",
         "label": "Graph",
         "id": "graph",
-        "options": {}
+        "options": {},
+        "hide": true
+      },
+      "panel": {
+        "pos": {
+          "x": 0,
+          "y": -28,
+          "w": 1707,
+          "h": 690
+        },
+        "title": "panel",
+        "label": "Panel",
+        "id": "panel",
+        "options": {
+          "params": {
+            "edit-index": "panel"
+          }
+        },
+        "hide": false,
+        "backupPos": {
+          "x": 453.5,
+          "y": 55,
+          "w": 800,
+          "h": 550
+        },
+        "isMax": true
       }
     },
     "example": {

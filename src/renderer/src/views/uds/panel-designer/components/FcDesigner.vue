@@ -66,13 +66,13 @@
               >
                 {{ t('menu.component') }}
               </div>
-              <div
+              <!-- <div
                 class="_fc-l-tab"
                 :class="{ active: activeMenuTab === 'tree' }"
                 @click="activeMenuTab = 'tree'"
               >
                 {{ t('menu.tree') }}
-              </div>
+              </div> -->
             </el-header>
             <el-main v-show="activeMenuTab === 'menu'">
               <template v-for="(item, index) in menuList">
@@ -107,7 +107,7 @@
                 </div>
               </template>
             </el-main>
-            <el-main v-if="activeMenuTab === 'tree'">
+            <!-- <el-main v-if="activeMenuTab === 'tree'">
               <el-tree
                 ref="treeRef"
                 :data="treeInfo"
@@ -167,7 +167,7 @@
                   </div>
                 </template>
               </el-tree>
-            </el-main>
+            </el-main> -->
           </el-container>
         </el-aside>
         <el-container class="_fc-m">

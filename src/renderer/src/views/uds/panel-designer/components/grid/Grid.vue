@@ -1,19 +1,19 @@
 <template>
   <el-col :span="24">
-    <div>
+    <div class="_fd-grid-view">
       <GridLayout
-        v-model:layout="layout"
-        :col-num="rule.col"
-        :row-height="50"
-        :is-draggable="false"
-        :is-resizable="false"
+        v-model:layout="rule.layout"
+        :col-num="rule.row"
+        :row-height="rule.rowHeight"
+        :is-draggable="true"
+        :is-resizable="true"
         :vertical-compact="true"
         :use-css-transforms="true"
-        :margin="[10, 10]"
+        :margin="[rule.margin, rule.margin]"
         :auto-size="true"
       >
         <GridItem
-          v-for="item in layout"
+          v-for="item in rule.layout"
           :key="item.i"
           :x="item.x"
           :y="item.y"
@@ -23,9 +23,10 @@
           :min-w="1"
           :min-h="1"
           :static="true"
-          style="overflow: hidden; border: 0px solid #ebeef5"
+          :style="[(style && style[item.i]) || {}, { border: '1px solid red', overflow: 'hidden' }]"
+          :class="(rule.class && rule.class[item.i]) || ''"
         >
-          <div>
+          <div class="_fd-grid-view-cell">
             <slot :name="item.i"></slot>
           </div>
         </GridItem>
@@ -43,32 +44,14 @@ export default {
     GridItem
   },
   props: {
-    label: String,
-    width: [Number, String],
-    border: {
-      type: Boolean,
-      default: true
-    },
-    borderWidth: String,
-    borderColor: String,
     rule: {
-      type: Object,
-      default: () => ({ row: 1, col: 1 })
+      type: Object
     }
   },
-  watch: {
-    rule: {
-      handler() {
-        this.initRule()
-        this.loadRule()
-      },
-      immediate: true,
-      deep: true
-    }
-  },
+
   data() {
     return {
-      layout: []
+      style: {}
     }
   },
   computed: {
@@ -82,72 +65,44 @@ export default {
       return style
     }
   },
-  methods: {
-    initRule() {
-      const rule = this.rule
-      if (!rule.style) {
-        rule.style = {}
-      }
-      if (!rule.layout) {
-        rule.layout = []
-      }
-      if (!rule.row) {
-        rule.row = 1
-      }
-      if (!rule.col) {
-        rule.col = 1
-      }
-    },
-    loadRule() {
-      const layout = []
-      const rule = this.rule
-      console.log(rule)
-      // Generate grid cells
-      for (let y = 0; y < rule.row; y++) {
-        for (let x = 0; x < rule.col; x++) {
-          const slotKey = `${y}:${x}`
-
-          // Check if this cell is part of a merged layout cell
-          let isPartOfMerged = false
-          for (const layoutItem of rule.layout || []) {
-            if (!layoutItem.row && !layoutItem.col) continue
-
-            if (
-              y >= layoutItem.top &&
-              y < layoutItem.top + (layoutItem.row || 1) &&
-              x >= layoutItem.left &&
-              x < layoutItem.left + (layoutItem.col || 1)
-            ) {
-              // Skip if not the top-left cell of the merged area
-              if (y !== layoutItem.top || x !== layoutItem.left) {
-                isPartOfMerged = true
-                break
-              }
-            }
-          }
-
-          if (!isPartOfMerged) {
-            // Find if this is a merged cell
-            const mergedCell = (rule.layout || []).find((l) => l.top === y && l.left === x)
-            const width = mergedCell ? mergedCell.col || 1 : 1
-            const height = mergedCell ? mergedCell.row || 1 : 1
-
-            layout.push({
-              x: x,
-              y: y,
-              w: width,
-              h: height,
-              i: slotKey,
-              static: false
-            })
-          }
-        }
-      }
-
-      this.layout = layout
+  methods: {},
+  watch: {
+    rule: {
+      handler() {
+        this.style = this.rule.style || {}
+      },
+      immediate: true
     }
   }
 }
 </script>
 
-<style></style>
+<style scoped>
+.vue-grid-layout {
+  background-color: transparent;
+  height: 100%;
+}
+
+._fd-grid-view-cell {
+  height: 100%;
+  width: 100%;
+  background-color: inherit;
+  position: relative;
+}
+
+.vue-grid-item {
+  margin-bottom: 10px;
+  transition: all 200ms ease;
+  box-sizing: border-box;
+}
+
+.vue-grid-item:not(.vue-grid-placeholder) {
+  background: #fff;
+  border: 1px solid #ebeef5;
+}
+
+.vue-grid-item.vue-grid-placeholder {
+  background: #f0f9eb;
+  opacity: 0.5;
+}
+</style>

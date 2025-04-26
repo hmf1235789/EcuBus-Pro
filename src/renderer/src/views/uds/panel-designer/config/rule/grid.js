@@ -1,7 +1,7 @@
-import {localeProps} from '../../utils';
+import { localeProps } from '../../utils';
 
 const label = 'Grid';
-const name = 'Grid';
+const name = 'grid';
 
 export default {
     menu: 'layout',
@@ -15,21 +15,23 @@ export default {
             type: name,
             props: {
                 rule: {
-                    row: 3,
-                    col: 4,
-                   
-                    layout: []
-                }
+                    
+                    layout: [],
+                    row: 24,
+                    rowHeight: 80,
+                    margin: 10,
+                },
+               
             },
             children: []
         };
     },
-    props(_, {t}) {
+    props(_, { t }) {
         return localeProps(t, name + '.props', [
-            {type: 'switch', field: 'border', value: true},
-            {type: 'ColorInput', field: 'borderColor'},
-            {type: 'input', field: 'borderWidth'},
-            {type: 'button',title:'Add' },
+            { title: 'Row Number', type: 'number', field: 'rule>row', value: 24 },
+            { title: 'Item Margin', type: 'number', field: 'rule>margin', value: 10 },
+            { title: 'Row Height', type: 'number', field: 'rule>rowHeight', value: 80 },
+
         ]);
     }
 };
