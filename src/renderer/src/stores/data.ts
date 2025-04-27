@@ -21,7 +21,8 @@ export const useDataStore = defineStore('useDataStore', {
     guages: {},
     tests: {},
     vars: {},
-    datas: {}
+    datas: {},
+    panels: {}
   }),
   actions: {
     globalRun(type: 'start' | 'stop') {
@@ -70,7 +71,8 @@ export const useDataStore = defineStore('useDataStore', {
         tests: this.tests,
         guages: this.guages,
         vars: this.vars,
-        datas: this.datas
+        datas: this.datas,
+        panels: this.panels
       }
     }
   }

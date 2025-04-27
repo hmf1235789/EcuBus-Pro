@@ -64,7 +64,8 @@ export default defineComponent({
     formCreateInject: Object,
 
     rule: {
-      type: Object
+      type: Object,
+      default: () => ({ layout: [], row: 24, rowHeight: 80, margin: 10 })
     }
   },
   inject: ['designer'],
@@ -122,7 +123,6 @@ export default defineComponent({
     },
     dragAdd(e, key) {
       this.activeId = key
-      this.dragProp.rule.props.parentKey = key
       // console.log('dragAdd');
       const designer = this.designer.setupState
       const children = this.formCreateInject.children
@@ -197,7 +197,6 @@ export default defineComponent({
       }
     },
     activex(key) {
-      // console.log('activex',key)
       this.activeId = key.parentKey
     },
     active(key) {

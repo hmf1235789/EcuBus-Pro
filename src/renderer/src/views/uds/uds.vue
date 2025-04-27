@@ -86,6 +86,37 @@
                 <template #dropdown>
                   <el-dropdown-menu size="small">
                     <el-dropdown-item command="panel" icon="Plus"> Add Panel</el-dropdown-item>
+
+                    <el-dropdown-item
+                      v-for="(item, index) in Object.values(dataBase.panels)"
+                      :key="item.id"
+                      divider
+                      :command="item.id"
+                      :divided="index == 0"
+                    >
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          justify-content: space-between;
+                          width: 100%;
+                        "
+                      >
+                        <div style="display: flex; align-items: center">
+                          <Icon :icon="panelIcon1" style="margin-right: 5px" />
+                          <span style="display: flex; align-items: center">{{ item.name }}</span>
+                          <el-divider direction="vertical" />
+                          <el-button-group>
+                            <el-button link type="warning">
+                              <el-icon @click.stop="editPanel(item.id)"><Edit /></el-icon>
+                            </el-button>
+                            <el-button link type="danger">
+                              <el-icon @click.stop="deletePanel(item.id)"><Delete /></el-icon>
+                            </el-button>
+                          </el-button-group>
+                        </div>
+                      </div>
+                    </el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
@@ -619,6 +650,7 @@ import packageIcon from '@iconify/icons-mdi/package-variant'
 import varIcon from '@iconify/icons-mdi/application-variable-outline'
 import dataIcon from '@iconify/icons-mdi/data-usage'
 import panelIcon1 from '@iconify/icons-mdi/solar-panel'
+import data from '@iconify/icons-ep/full-screen'
 
 const activeMenu = ref('')
 const pined = ref(true)
@@ -664,13 +696,30 @@ function openPanel(command: string) {
       }
     })
   } else {
-    layoutMaster.addWin('panel', 'panel', {
-      params: {
-        'edit-index': command
-      }
-    })
+    const item = dataBase.panels[command]
+    if (item) {
+      layoutMaster.addWin('panelPreview', `p${command}`, {
+        params: {
+          'edit-index': `p${command}`
+        },
+        name: item.name
+      })
+    }
   }
 }
+function editPanel(command: string) {
+  layoutMaster.addWin('panel', command, {
+    params: {
+      'edit-index': command
+    }
+  })
+}
+function deletePanel(command: string) {
+  layoutMaster.removeWin(`p${command}`)
+  layoutMaster.removeWin(command)
+  delete dataBase.panels[command]
+}
+
 function openService(testerIndex: string) {
   layoutMaster.addWin('testerService', `${testerIndex}_services`, {
     name: dataBase.tester[testerIndex].name,

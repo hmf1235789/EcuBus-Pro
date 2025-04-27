@@ -23,8 +23,9 @@
           :min-w="1"
           :min-h="1"
           :static="true"
-          :style="[(style && style[item.i]) || {}, { border: '1px solid red', overflow: 'hidden' }]"
+          :style="[(style && style[item.i]) || {}]"
           :class="(rule.class && rule.class[item.i]) || ''"
+          style="overflow: auto"
         >
           <div class="_fd-grid-view-cell">
             <slot :name="item.i"></slot>
@@ -45,7 +46,8 @@ export default {
   },
   props: {
     rule: {
-      type: Object
+      type: Object,
+      default: () => ({ layout: [], row: 24, rowHeight: 80, margin: 10 })
     }
   },
 
@@ -98,7 +100,6 @@ export default {
 
 .vue-grid-item:not(.vue-grid-placeholder) {
   background: #fff;
-  border: 1px solid #ebeef5;
 }
 
 .vue-grid-item.vue-grid-placeholder {

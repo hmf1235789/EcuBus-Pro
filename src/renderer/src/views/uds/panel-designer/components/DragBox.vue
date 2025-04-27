@@ -45,10 +45,9 @@ export default defineComponent({
                 ...vnode.props,
                 onActive: () => {
                   vnode.props?.onActive?.()
-
                   ctx.$emit('click', {
                     key,
-                    parentKey: ctx.$props.rule.props.parentKey
+                    parentKey: element.slot
                   })
                 }
               }

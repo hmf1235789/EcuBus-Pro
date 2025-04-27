@@ -22,18 +22,7 @@ export default function field({t}) {
             value: '',
             title: t('form.labelWidth'),
         },
-        {
-            type: 'Signal',
-            field: 'signal',
-            title: t('signal.title'),
-            warning: 'When both signal and variable are set, only variable will take effect',
-        },
-        {
-            type: 'Variable',
-            field: 'variable',
-            warning: 'When both signal and variable are set, only variable will take effect',
-            title: t('variable.title'),
-        },
+        
         // {
         //     type: 'Struct',
         //     field: '_control',

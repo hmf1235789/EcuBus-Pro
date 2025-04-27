@@ -79,6 +79,19 @@ const layoutMap: Record<string, LayoutItem> = {
     component: defineAsyncComponent(() => import('./panel.vue')),
     icon: panelIcon1
   },
+  panelPreview: {
+    i: 'PanelPreview',
+    x: 0,
+    y: 0,
+    w: 800,
+    h: 550,
+    minW: 600,
+    label: 'PanelPreview',
+    minH: 400,
+    key: 'panelPreview',
+    component: defineAsyncComponent(() => import('./panelView.vue')),
+    icon: panelIcon1
+  },
   package: {
     i: 'Package',
     x: 0,

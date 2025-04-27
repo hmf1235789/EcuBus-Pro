@@ -1809,9 +1809,7 @@ export default defineComponent({
         const rule = data.activeRule
         let formData = {
           formCreateChild: '' + rule.children[0],
-          'formCreateWrap>labelWidth': '',
-          signal: deepCopy(rule['signal']),
-          variable: deepCopy(rule['variable'])
+          'formCreateWrap>labelWidth': ''
         }
         const appendConfigData = configRef.value.appendConfigData
         if (is.Function(appendConfigData)) {

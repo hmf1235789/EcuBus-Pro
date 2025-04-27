@@ -108,6 +108,13 @@ export type TestConfig = {
   reportPath?: string
 }
 
+export type PanelItem = {
+  id: string
+  name: string
+  rule: string
+  options: string
+}
+
 export interface DataSet {
   devices: Record<string, UdsDevice>
   tester: Record<string, TesterInfo>
@@ -126,4 +133,5 @@ export interface DataSet {
   datas: Record<string, GraphNode<GraphBindSignalValue | GraphBindVariableValue>>
   tests: Record<string, TestConfig>
   vars: Record<string, VarItem>
+  panels: Record<string, PanelItem>
 }
