@@ -43,7 +43,7 @@ import gird from './rule/grid'
 
 
 const ruleList = [
-    input,select,number,radio,checkbox,_switch,
+    input,select,number,radio,_switch,
     subForm,
     alert, button, text, html, divider, tag, image,
     gird,

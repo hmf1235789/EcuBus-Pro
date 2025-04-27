@@ -292,7 +292,7 @@ export default defineComponent({
 ._fd-grid-view-cell {
   height: 100%;
   width: 100%;
-  background-color: inherit;
+  background-color: transparent;
   position: relative;
 }
 
@@ -327,7 +327,7 @@ export default defineComponent({
 }
 
 .vue-grid-item:not(.vue-grid-placeholder) {
-  background: #fff;
+  background: transparent;
   border: 1px solid #ebeef5;
 }
 

@@ -88,7 +88,7 @@ export default {
 ._fd-grid-view-cell {
   height: 100%;
   width: 100%;
-  background-color: inherit;
+  background-color: transparent;
   position: relative;
 }
 
@@ -99,7 +99,7 @@ export default {
 }
 
 .vue-grid-item:not(.vue-grid-placeholder) {
-  background: #fff;
+  background: transparent;
 }
 
 .vue-grid-item.vue-grid-placeholder {

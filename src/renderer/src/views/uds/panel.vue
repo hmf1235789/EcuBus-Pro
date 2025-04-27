@@ -29,7 +29,7 @@ import {
 } from 'vue'
 import { useDataStore } from '@r/stores/data'
 import { useProjectStore } from '@r/stores/project'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { v4 } from 'uuid'
 import { Layout } from '@r/views/uds/layout'
 import uniqueId from '@form-create/utils/lib/unique'
@@ -73,7 +73,24 @@ const config = computed(() => {
               type: 'Signal',
               field: 'signal',
               title: 'Signal',
-              warning: 'Please import a database before using this feature'
+              warning: 'Please import a database before using this feature',
+              props: {
+                onChange: (node) => {
+                  if (t.type == 'select' || t.type == 'checkbox' || t.type == 'radio') {
+                    if (node.yAxis.enums) {
+                      //confirm use enum to replace options
+                      ElMessageBox.confirm('Use signal value table as select options?', 'Confirm', {
+                        confirmButtonText: 'Yes',
+                        cancelButtonText: 'No',
+                        type: 'warning',
+                        appendTo: `#win${props.editIndex}`
+                      }).then(() => {
+                        t.options = node.yAxis.enums
+                      })
+                    }
+                  }
+                }
+              }
             },
             {
               type: 'Variable',
@@ -108,6 +125,7 @@ const config = computed(() => {
                   })
                 }
               },
+
               warning: 'Add new grid item'
             }
           ]
