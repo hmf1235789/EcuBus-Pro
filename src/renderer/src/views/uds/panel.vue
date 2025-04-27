@@ -14,7 +14,7 @@
   />
 </template>
 <script setup lang="ts">
-import fcDesigner from './panel-designer/index.js'
+// import fcDesigner from './panel-designer/index.js'
 import En from './panel-designer/locale/en.js' // 导入英文语言包
 import {
   ref,
@@ -32,7 +32,7 @@ import { useProjectStore } from '@r/stores/project'
 import { ElMessage } from 'element-plus'
 import { v4 } from 'uuid'
 import { Layout } from '@r/views/uds/layout'
-import { cloneDeep, result } from 'lodash'
+import uniqueId from '@form-create/utils/lib/unique'
 
 const panels = useDataStore().panels
 
@@ -80,6 +80,35 @@ const config = computed(() => {
               field: 'variable',
               warning: 'When both signal and variable are set, only variable will take effect',
               title: 'Variable'
+            }
+          ]
+        }
+      },
+      grid: {
+        prepend: true,
+        rule(t) {
+          return [
+            {
+              type: 'elButton',
+              field: 'button',
+              title: 'Button',
+              props: {
+                icon: 'Plus',
+                type: 'primary',
+                plain: true,
+                onClick: () => {
+                  console.log('click')
+                  const newId = uniqueId()
+                  t.props.rule.layout.push({
+                    i: newId,
+                    x: 0,
+                    y: Math.max(...t.props.rule.layout.map((item) => item.y + item.h), 0),
+                    w: 8,
+                    h: 1
+                  })
+                }
+              },
+              warning: 'Add new grid item'
             }
           ]
         }
@@ -165,9 +194,6 @@ onMounted(() => {
     if (item && designer.value) {
       designer.value.setOptions(item.options)
       designer.value.setRule(item.rule)
-      // result.formRule={
-      //   rule:()=>cloneDeep(item.rule)
-      // }
     }
   })
 })

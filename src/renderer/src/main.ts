@@ -24,8 +24,10 @@ import EventBus from './event'
 import '@vxe-ui/plugin-render-element/dist/style.css'
 import formCreate from '@form-create/element-ui' // 引入 FormCreate
 import DataParseWorker from './worker/dataParse.ts?worker'
+import fcDesigner from './views/uds/panel-designer/index.js'
 
 const dataParseWorker = new DataParseWorker()
+
 window.logBus = new EventBus()
 window.dataParseWorker = dataParseWorker
 dataParseWorker.onmessage = (event) => {
@@ -95,5 +97,6 @@ app.use(router)
 app.use(VxeTooltip)
 app.use(VxeLoading)
 app.use(formCreate)
+app.use(fcDesigner)
 
 app.mount('#app')

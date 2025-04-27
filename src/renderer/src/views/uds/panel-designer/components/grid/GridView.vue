@@ -1,5 +1,5 @@
 <template>
-  <div class="_fd-grid-view">
+  <div class="_fd-grid-view" v-if="formCreateInject">
     <GridLayout
       v-model:layout="rule.layout"
       :col-num="rule.row"
@@ -24,13 +24,13 @@
         :static="activeId === item.i"
       >
         <div class="_fd-grid-view-cell">
-          <!-- <button
-            v-if="activeId === item.i"
+          <button
+            v-if="deleteId === item.i"
             class="grid-item-delete-btn"
             @click.stop="deleteGridItem(item.i)"
           >
             ×
-          </button> -->
+          </button>
           <DragTool :drag-btn="false" :handle-btn="false" @active="active(item.i)" :unique="item.i">
             <DragBox
               v-bind="dragProp"
@@ -68,13 +68,22 @@ export default defineComponent({
       default: () => ({ layout: [], row: 24, rowHeight: 80, margin: 10 })
     }
   },
-  inject: ['designer'],
+  inject: {
+    designer: {
+      default: () => ({
+        setupState: {
+          t: () => ''
+        }
+      })
+    }
+  },
   components: {
     DragTool,
     DragBox,
     GridLayout,
     GridItem
   },
+
   watch: {
     rule: {
       handler() {
@@ -89,6 +98,7 @@ export default defineComponent({
     return {
       style: {},
       activeId: null,
+      deleteId: null,
       dragProp: {
         rule: {
           props: {
@@ -197,10 +207,12 @@ export default defineComponent({
       }
     },
     activex(key) {
+      this.deleteId = null
       this.activeId = key.parentKey
     },
     active(key) {
       this.activeId = null
+      this.deleteId = key
       // this.activeId=key
       this.designer.setupState.customActive({
         name: 'Grid',
@@ -224,32 +236,50 @@ export default defineComponent({
         }
       })
     },
+    deleteGridItem(key) {
+      const children = this.formCreateInject.children
+      let del = 0
+      ;[...children].forEach((child, index) => {
+        if (child.slot === key) {
+          children.splice(index - del, 1)
+          del++
+        }
+      })
 
+      delete this.style[key]
+      const layoutIndex = this.rule.layout.findIndex((item) => item.i === key)
+      if (layoutIndex > -1) {
+        this.rule.layout.splice(layoutIndex, 1)
+      }
+    },
     loadRule() {
-      const rule = this.rule
-      if (rule.layout.length == 0) {
-        // 从rule.layout初始化布局
+      if (this.formCreateInject) {
+        const rule = this.rule
+        if (rule.layout.length == 0) {
+          // 从rule.layout初始化布局
 
-        // 否则创建默认布局
-        for (let index = 0; index < 2; index++) {
-          for (let idx = 0; idx < rule.row / 8; idx++) {
-            rule.layout.push({
-              i: uniqueId(),
-              x: idx * 8,
-              y: index,
-              w: 8,
-              h: 1
-            })
+          // 否则创建默认布局
+          for (let index = 0; index < 2; index++) {
+            for (let idx = 0; idx < rule.row / 8; idx++) {
+              rule.layout.push({
+                i: uniqueId(),
+                x: idx * 8,
+                y: index,
+                w: 8,
+                h: 1
+              })
+            }
           }
         }
-      }
 
-      this.formCreateInject.rule.props.rule = rule
+        this.formCreateInject.rule.props.rule = rule
+      }
     }
   },
   beforeMount() {
     this.loadRule()
-  }
+  },
+  beforeUnmount() {}
 })
 </script>
 

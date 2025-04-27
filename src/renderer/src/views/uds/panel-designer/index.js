@@ -87,7 +87,7 @@ designerForm.component('LocalImage', LocalImage);
 addComponent('TableForm', TableForm, TableFormView);
 addComponent('FcTable', Table, TableView);
 addComponent('Grid',Grid,GridView)
-
+formCreate.component('LocalImage',LocalImage)
 const install = function (Vue) {
     Vue.component('FcDesigner', FcDesigner);
 };

@@ -1,11 +1,6 @@
 <template>
   <div style="margin: 20px">
-    <formCreate
-      v-model="formData"
-      v-model:api="fApi"
-      :rule="panel.rule"
-      :option="panel.options"
-    ></formCreate>
+    <formCreate v-model:api="fApi" :rule="panel.rule" :option="panel.options"></formCreate>
   </div>
 </template>
 <script setup lang="ts">
@@ -18,8 +13,8 @@ import LocalImage from './panel-designer/components/LocalImage.vue'
 import { cloneDeep } from 'lodash'
 
 const panels = useDataStore().panels
-formCreate.component('Grid', Grid)
-formCreate.component('LocalImage', LocalImage)
+// formCreate.component('Grid', Grid)
+// formCreate.component('LocalImage', LocalImage)
 
 const props = defineProps<{
   height: number
