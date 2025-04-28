@@ -40,13 +40,13 @@ import tableForm from './rule/tableForm';
 import tableFormColumn from './rule/tableFormColumn';
 import image from './rule/image';
 import gird from './rule/grid'
-
+import progress from './rule/progress'
 
 const ruleList = [
     input,select,number,radio,_switch,
     subForm,
     alert, button, text, html, divider, tag, image,
-    gird,
+    gird,tabs,tabPane,progress,slider
     // row, table, tabs, space, card, collapse,
     // col, tabPane, collapseItem,
   

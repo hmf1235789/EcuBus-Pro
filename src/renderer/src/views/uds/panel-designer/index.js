@@ -34,6 +34,7 @@ import formCreate, {designerForm} from './utils/form';
 import draggable from 'vuedraggable/src/vuedraggable';
 import Grid from './components/grid/Grid.vue';
 import GridView from './components/grid/GridView.vue';
+import BButton from './components/BButton.vue';
 import {
     compareVersion,
     copyTextToClipboard,
@@ -50,12 +51,13 @@ import globalUseLocale, {t} from './utils/locale';
 import './style/index.css';
 import './style/icon.css';
 import './utils/highlight/style.css';
+import {ElProgress} from 'element-plus'
 
 const addComponent = (id, component, previewComponent) => {
     designerForm.component(id, previewComponent || component);
     formCreate.component(id, component);
 }
-
+formCreate.component('elProgress',ElProgress)
 designerForm.component('draggable', draggable);
 designerForm.component('DragTool', DragTool);
 designerForm.component('DragBox', DragBox);
@@ -84,9 +86,11 @@ designerForm.component('FcRow', Row);
 designerForm.component('ValueInput', ValueInput);
 designerForm.component('LocalImage', LocalImage);
 // addComponent('FcEditor', FcEditor);
-addComponent('TableForm', TableForm, TableFormView);
-addComponent('FcTable', Table, TableView);
+// addComponent('TableForm', TableForm, TableFormView);
+// addComponent('FcTable', Table, TableView);
 addComponent('Grid',Grid,GridView)
+addComponent('BButton',BButton)
+
 formCreate.component('LocalImage',LocalImage)
 const install = function (Vue) {
     Vue.component('FcDesigner', FcDesigner);

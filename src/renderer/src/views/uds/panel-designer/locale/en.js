@@ -448,7 +448,7 @@ const En = {
                 effect: 'Select a provided theme'
             }
         },
-        elButton: {
+        BButton: {
             name: 'Button',
             props: {
                 formCreateChild: 'Content',

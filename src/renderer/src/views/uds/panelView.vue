@@ -1,6 +1,11 @@
 <template>
   <div style="margin: 20px">
-    <formCreate v-model:api="fApi" :rule="panel.rule" :option="panel.options"></formCreate>
+    <formCreate
+      v-model:api="fApi"
+      :rule="panel.rule"
+      :option="panel.options"
+      @change="dataChange"
+    ></formCreate>
   </div>
 </template>
 <script setup lang="ts">
@@ -23,6 +28,9 @@ const props = defineProps<{
 const fApi = ref({})
 const formData = ref({})
 
+function dataChange(field: string, value: any, rule: any, api: any, setFlag: boolean) {
+  console.log('data', field, value, rule, api, setFlag)
+}
 const panel = computed(() => {
   const index = props.editIndex.slice(1)
   return cloneDeep(panels[index] || {})

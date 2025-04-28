@@ -1,49 +1,64 @@
-import {localeOptions, localeProps} from '../../utils';
+import { localeOptions, localeProps } from '../../utils';
 
 const label = '按钮';
-const name = 'elButton';
+const name = 'BButton';
 
 export default {
     menu: 'aide',
     icon: 'icon-button',
     label,
     name,
-    mask: true,
-    event: ['click'],
-    rule({t}) {
+    input: true,
+    event: ['change'],
+    rule({ t }) {
         return {
             type: name,
-            props: {},
-            children: [t('com.elButton.name')],
+            props: {
+                releaseValue: 0,
+                pressValue: 1,
+            },
+            children: [t('com.BButton.name')],
         };
     },
-    props(_, {t}) {
+    props(_, { t }) {
         return localeProps(t, name + '.props', [{
             type: 'input',
             field: 'formCreateChild',
         }, {
             type: 'select',
             field: 'size',
-            options: localeOptions(t, [{label: 'large', value: 'large'}, {label: 'default', value: 'default'}, {
+            options: localeOptions(t, [{ label: 'large', value: 'large' }, { label: 'default', value: 'default' }, {
                 label: 'small',
                 value: 'small'
             }])
         }, {
+            type: 'ValueInput',
+            field: 'pressValue',
+            title: 'Pressed Value'
+        },
+        {
+            type: 'ValueInput',
+            field: 'releaseValue',
+            title: 'Released Value'
+        },
+
+
+        {
             type: 'select',
             field: 'type',
-            options: [{label: 'primary', value: 'primary'}, {
+            options: [{ label: 'primary', value: 'primary' }, {
                 label: 'success',
                 value: 'success'
-            }, {label: 'warning', value: 'warning'}, {label: 'danger', value: 'danger'}, {
+            }, { label: 'warning', value: 'warning' }, { label: 'danger', value: 'danger' }, {
                 label: 'info',
                 value: 'info'
             }]
-        }, {type: 'switch', field: 'plain'}, {
+        }, { type: 'switch', field: 'plain' }, {
             type: 'switch',
             field: 'round'
-        }, {type: 'switch', field: 'circle'}, {
+        }, { type: 'switch', field: 'circle' }, {
             type: 'switch',
             field: 'loading'
-        }, {type: 'switch', field: 'disabled'}]);
+        }, { type: 'switch', field: 'disabled' }]);
     }
 };
