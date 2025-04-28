@@ -1,7 +1,8 @@
 import { localeOptions, localeProps } from '../../utils';
+import uniqueId from '@form-create/utils/lib/unique';
 
 const label = 'Progress';
-const name = 'elProgress';
+const name = 'xProgress';
 
 export default {
     menu: 'aide',
@@ -11,14 +12,16 @@ export default {
     rule({ t }) {
         return {
             type: name,
+            field: uniqueId(),
             props: {
-                percentage: 15,
+                
                 strokeWidth: 20,
                 textInside: true,
                 status: '',
                 showText: true,
                 color: '#409EFF',
-            },
+            }
+           
         };
     },
     props(_, { t }) {

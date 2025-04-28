@@ -51,13 +51,14 @@ import globalUseLocale, {t} from './utils/locale';
 import './style/index.css';
 import './style/icon.css';
 import './utils/highlight/style.css';
-import {ElProgress} from 'element-plus'
+
+import PProgress from './components/PProgress.vue'
 
 const addComponent = (id, component, previewComponent) => {
     designerForm.component(id, previewComponent || component);
     formCreate.component(id, component);
 }
-formCreate.component('elProgress',ElProgress)
+addComponent('xProgress',PProgress)
 designerForm.component('draggable', draggable);
 designerForm.component('DragTool', DragTool);
 designerForm.component('DragBox', DragBox);

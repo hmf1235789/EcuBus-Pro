@@ -33,7 +33,8 @@
         "action": [
           {
             "trigger": {
-              "type": "periodic"
+              "type": "periodic",
+              "period": 1
             },
             "database": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13",
             "name": "ID142VCLEFT_liftgateStatus",
@@ -68562,7 +68563,165 @@
     "tests": {},
     "guages": {},
     "vars": {},
-    "datas": {}
+    "datas": {},
+    "panels": {
+      "7750b17b-8e48-47d7-ace5-6c0b31f6f1b5": {
+        "name": "test",
+        "id": "7750b17b-8e48-47d7-ace5-6c0b31f6f1b5",
+        "rule": [
+          {
+            "type": "input",
+            "field": "F9nnma114cxqadc",
+            "title": "Input",
+            "info": "",
+            "$required": false,
+            "_fc_id": "id_Fmf8ma114cxqaec",
+            "name": "ref_Fp8tma114cxqafc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "input"
+          },
+          {
+            "type": "grid",
+            "props": {
+              "rule": {
+                "layout": [
+                  {
+                    "i": "Fbj9ma14f4vcadc",
+                    "x": 0,
+                    "y": 0,
+                    "w": 8,
+                    "h": 1
+                  },
+                  {
+                    "i": "F3x4ma14f4vdaec",
+                    "x": 8,
+                    "y": 0,
+                    "w": 8,
+                    "h": 1
+                  },
+                  {
+                    "i": "Fghrma14f4vdafc",
+                    "x": 16,
+                    "y": 0,
+                    "w": 8,
+                    "h": 1
+                  },
+                  {
+                    "i": "Fylrma14f4vdagc",
+                    "x": 0,
+                    "y": 1,
+                    "w": 8,
+                    "h": 1
+                  },
+                  {
+                    "i": "Fejsma14f4vdahc",
+                    "x": 8,
+                    "y": 1,
+                    "w": 8,
+                    "h": 1
+                  },
+                  {
+                    "i": "Fcdmma14f4vdaic",
+                    "x": 16,
+                    "y": 1,
+                    "w": 8,
+                    "h": 1
+                  }
+                ],
+                "row": 24,
+                "rowHeight": 80,
+                "margin": 10,
+                "style": {},
+                "class": {},
+                "col": 1
+              }
+            },
+            "children": [
+              {
+                "type": "XProgress",
+                "field": "F37pma12srmeabc",
+                "props": {
+                  "percentage": 15,
+                  "strokeWidth": 20,
+                  "textInside": true,
+                  "showText": true,
+                  "color": "#409EFF",
+                  "signal": {
+                    "type": "signal",
+                    "enable": true,
+                    "id": "can.Model3CAN.signals.UI_audioActive",
+                    "name": "UI_audioActive",
+                    "color": "#947f0f",
+                    "yAxis": {
+                      "min": 0,
+                      "max": 1
+                    },
+                    "bindValue": {
+                      "signalName": "UI_audioActive",
+                      "startBit": 1,
+                      "bitLength": 1,
+                      "dbKey": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13",
+                      "dbName": "Model3CAN",
+                      "frameId": 12
+                    }
+                  },
+                  "variable": {
+                    "type": "variable",
+                    "enable": true,
+                    "id": "Statistics.30dc0575-1555-40e4-802a-150e76338671.BusLoad",
+                    "name": "BusLoad",
+                    "color": "#19132",
+                    "yAxis": {
+                      "min": 0,
+                      "max": 100,
+                      "unit": "%"
+                    },
+                    "bindValue": {
+                      "variableId": "Statistics.30dc0575-1555-40e4-802a-150e76338671.BusLoad",
+                      "variableType": "system",
+                      "variableName": "BusLoad",
+                      "variableFullName": "Statistics.SIMULATE_0.BusLoad"
+                    }
+                  }
+                },
+                "style": {
+                  "width": "100%"
+                },
+                "_fc_id": "id_Fqiama12srmeacc",
+                "name": "ref_Fmf9ma12srmeadc",
+                "display": true,
+                "hidden": false,
+                "slot": "Fbj9ma14f4vcadc"
+              }
+            ],
+            "_fc_id": "id_Fkoama14f4v4abc",
+            "name": "ref_Flgwma14f4v4acc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "grid"
+          }
+        ],
+        "options": {
+          "submitBtn": {
+            "show": false,
+            "innerText": "Submit"
+          },
+          "form": {
+            "inline": false,
+            "hideRequiredAsterisk": false,
+            "labelPosition": "right",
+            "size": "default",
+            "labelWidth": "125px"
+          },
+          "resetBtn": {
+            "show": false,
+            "innerText": "Reset"
+          },
+          "formName": "test"
+        }
+      }
+    }
   },
   "project": {
     "wins": {
@@ -68610,8 +68769,8 @@
       },
       "a6773bbd-db04-405f-9a23-af32b1c12e70_ia": {
         "pos": {
-          "x": 1105,
-          "y": 554,
+          "x": 733,
+          "y": 120.00003051757812,
           "w": 1358,
           "h": 406
         },
@@ -68624,11 +68783,11 @@
           },
           "name": "Can IA"
         },
-        "hide": true
+        "hide": false
       },
       "graph": {
         "pos": {
-          "x": 1011.5,
+          "x": 956,
           "y": 47,
           "w": 903,
           "h": 406
@@ -68639,29 +68798,38 @@
         "options": {},
         "hide": true
       },
-      "panel": {
+      "7750b17b-8e48-47d7-ace5-6c0b31f6f1b5": {
         "pos": {
-          "x": 0,
-          "y": -28,
-          "w": 1707,
-          "h": 690
+          "x": 459.5,
+          "y": 29,
+          "w": 1344,
+          "h": 550
         },
         "title": "panel",
         "label": "Panel",
-        "id": "panel",
+        "id": "7750b17b-8e48-47d7-ace5-6c0b31f6f1b5",
         "options": {
           "params": {
-            "edit-index": "panel"
+            "edit-index": "7750b17b-8e48-47d7-ace5-6c0b31f6f1b5"
           }
-        },
-        "hide": false,
-        "backupPos": {
-          "x": 453.5,
-          "y": 55,
+        }
+      },
+      "p7750b17b-8e48-47d7-ace5-6c0b31f6f1b5": {
+        "pos": {
+          "x": 121.5,
+          "y": 5,
           "w": 800,
           "h": 550
         },
-        "isMax": true
+        "title": "panelPreview",
+        "label": "PanelPreview",
+        "id": "p7750b17b-8e48-47d7-ace5-6c0b31f6f1b5",
+        "options": {
+          "params": {
+            "edit-index": "p7750b17b-8e48-47d7-ace5-6c0b31f6f1b5"
+          },
+          "name": "test"
+        }
       }
     },
     "example": {

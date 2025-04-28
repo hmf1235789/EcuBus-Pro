@@ -216,6 +216,7 @@
                   type="success"
                   plain
                   size="small"
+                  :disabled="globalStart"
                   @click="handleSave"
                   ><i class="fc-icon icon-save-online"></i> {{ t('props.save') }}
                 </el-button>
@@ -649,7 +650,7 @@ export default defineComponent({
     const fcx = reactive({ active: null })
     provide('fcx', fcx)
     provide('designer', vm)
-
+    const globalStart = toRef(window, 'globalStart')
     const configRef = toRef(props, 'config', {})
     const baseRule = toRef(configRef.value, 'baseRule', null)
     const componentRule = toRef(configRef.value, 'componentRule', {})
@@ -2449,7 +2450,8 @@ export default defineComponent({
       hiddenItem,
       hiddenDragMenu,
       hiddenDragBtn,
-      configFormOrderStyle
+      configFormOrderStyle,
+      globalStart
     }
   },
   created() {
