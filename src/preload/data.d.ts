@@ -111,8 +111,8 @@ export type TestConfig = {
 export type PanelItem = {
   id: string
   name: string
-  rule: string
-  options: string
+  rule: any[]
+  options: Object
 }
 
 export interface DataSet {

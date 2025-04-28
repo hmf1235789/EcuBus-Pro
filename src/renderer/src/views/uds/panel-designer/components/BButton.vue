@@ -33,6 +33,13 @@ export default {
       isPressed: false
     }
   },
+  watch: {
+    modelValue(newValue) {
+      if (newValue === this.pressValue) {
+        this.isPressed = true
+      }
+    }
+  },
   emits: ['update:modelValue', 'change'],
   methods: {
     handleMouseDown() {

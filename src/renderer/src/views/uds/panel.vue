@@ -114,7 +114,6 @@ const config = computed(() => {
                 type: 'primary',
                 plain: true,
                 onClick: () => {
-                  console.log('click')
                   const newId = uniqueId()
                   t.props.rule.layout.push({
                     i: newId,

@@ -8,8 +8,6 @@ export default {
     icon: 'icon-time-range',
     label,
     name,
-    mask: true,
-  
     rule({ t }) {
         return {
             type: name,
