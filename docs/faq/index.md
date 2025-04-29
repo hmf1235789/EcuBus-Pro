@@ -5,3 +5,7 @@ A: You can enable padding by going to UDS Tester -> Tp Base -> Padding Enable. Y
 ![1](./1.png)
 :::
 
+::: details Q: ZLG 打开设备提示 Set baud rate failed? {open}
+
+A: 这是一个已知问题，请将EcuBus-Pro安装在非C盘的其他磁盘分区上即可解决。
+:::
