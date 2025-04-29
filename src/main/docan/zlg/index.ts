@@ -88,7 +88,16 @@ export class ZLG_CAN extends CanBase {
       deviceMap.set(`${this.deviceType}_${this.index}`, { device: this.handle, channel: [this] })
     }
     let ret
-    if (this.info.handle.includes('FD')) {
+    let canFdAbility = false
+    const detailInfo = ZLG_CAN.getValidDevices().find((item) => item.handle === info.handle)
+    if (!detailInfo) {
+      throw new Error('Invalid device info')
+    }
+    if (detailInfo.label.includes('FD')) {
+      canFdAbility = true
+    }
+
+    if (canFdAbility) {
       ZLG.ZCAN_SetValue(this.handle, `${this.deviceIndex}/canfd_standard`, '0')
     }
     // if (ret != 1) {
@@ -113,7 +122,7 @@ export class ZLG_CAN extends CanBase {
         throw new Error('Set custom baud rate failed')
       }
     } else {
-      if (this.info.handle.includes('FD')) {
+      if (canFdAbility) {
         const path1 = `${this.deviceIndex}/canfd_abit_baud_rate`
 
         ret = ZLG.ZCAN_SetValue(this.handle, path1, `${info.bitrate.freq}`)
@@ -147,7 +156,7 @@ export class ZLG_CAN extends CanBase {
       }
     }
     const cfg = new ZLG.ZCAN_CHANNEL_INIT_CONFIG()
-    cfg.can_type = this.info.handle.includes('FD') ? 1 : 0
+    cfg.can_type = canFdAbility ? 1 : 0
     cfg.info.can.mode = 0
 
     this.channel = ZLG.ZCAN_InitCAN(this.handle, this.deviceIndex, cfg)
