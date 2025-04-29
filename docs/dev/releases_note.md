@@ -1,5 +1,15 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.34
+Changes from v0.8.33 to v0.8.34:
+
+ 
+* [bug]:fix zlg can-fd device init error 
+* [bug]:fix ipc get version bug, it will failed when driver not installed
+---
+
+# EcuBus-Pro Release Notes
+
 ## v0.8.33
 Changes from v0.8.32 to v0.8.33:
 
