@@ -50,6 +50,16 @@
               />
             </el-button>
           </el-tooltip>
+          <el-tooltip
+            v-if="props.highlightId"
+            effect="light"
+            content="Remove Attach Signal"
+            placement="bottom"
+          >
+            <el-button type="warning" link @click="removeSignal">
+              <Icon :icon="deleteIcon" style="font-size: 14px" />
+            </el-button>
+          </el-tooltip>
         </div>
       </template>
       <template #type="{ row }">
@@ -72,6 +82,7 @@ import { Icon } from '@iconify/vue'
 import tableExpandIcon from '@iconify/icons-material-symbols/expand-all'
 import tableCollapseIcon from '@iconify/icons-material-symbols/collapse-all'
 import { GraphBindFrameValue, GraphBindSignalValue, GraphNode } from 'src/preload/data'
+import deleteIcon from '@iconify/icons-material-symbols/leak-remove'
 import { v4 } from 'uuid'
 import { DBC, Signal as DbcSignal } from '@r/database/dbc/dbcVisitor'
 import searchIcon from '@iconify/icons-material-symbols/search'
@@ -361,7 +372,7 @@ function toggleExpand() {
 }
 
 const emits = defineEmits<{
-  addSignal: [value: GraphNode<GraphBindSignalValue>] // named tuple syntax
+  addSignal: [value: GraphNode<GraphBindSignalValue> | null] // named tuple syntax
   addFrame: [value: GraphNode<GraphBindFrameValue>] // named tuple syntax
 }>()
 function randomColor() {
@@ -425,7 +436,9 @@ function addSignal() {
     })
   }
 }
-
+function removeSignal() {
+  emits('addSignal', null)
+}
 // 添加一个辅助函数来处理ID匹配
 function matchesId(searchText: string, id?: number): boolean {
   if (!id) return false

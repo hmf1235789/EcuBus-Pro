@@ -65,40 +65,48 @@ const config = computed(() => {
         prepend: true,
         // append: true, // 添加到底部
         rule(t) {
-          if (t.type == 'grid' || t.type == 'fcRow') {
-            return []
-          }
-          return [
-            {
-              type: 'Signal',
-              field: 'signal',
-              title: 'Signal',
-              warning: 'Please import a database before using this feature',
-              props: {
-                onChange: (node) => {
-                  if (t.type == 'select' || t.type == 'checkbox' || t.type == 'radio') {
-                    if (node.yAxis.enums) {
-                      //confirm use enum to replace options
-                      ElMessageBox.confirm('Use signal value table as select options?', 'Confirm', {
-                        confirmButtonText: 'Yes',
-                        cancelButtonText: 'No',
-                        type: 'warning',
-                        appendTo: `#win${props.editIndex}`
-                      }).then(() => {
-                        t.options = node.yAxis.enums
-                      })
+          // if (t.type == 'grid' || t.type == 'fcRow') {
+          //   return []
+          // }
+          if (t.field) {
+            return [
+              {
+                type: 'Signal',
+                field: 'signal',
+                title: 'Signal',
+                warning: 'Please import a database before using this feature',
+                props: {
+                  onChange: (node) => {
+                    if (t.type == 'select' || t.type == 'checkbox' || t.type == 'radio') {
+                      if (node.yAxis.enums) {
+                        //confirm use enum to replace options
+                        ElMessageBox.confirm(
+                          'Use signal value table as select options?',
+                          'Confirm',
+                          {
+                            confirmButtonText: 'Yes',
+                            cancelButtonText: 'No',
+                            type: 'warning',
+                            appendTo: `#win${props.editIndex}`
+                          }
+                        ).then(() => {
+                          t.options = node.yAxis.enums
+                        })
+                      }
                     }
                   }
                 }
+              },
+              {
+                type: 'Variable',
+                field: 'variable',
+                warning: 'When both signal and variable are set, only variable will take effect',
+                title: 'Variable'
               }
-            },
-            {
-              type: 'Variable',
-              field: 'variable',
-              warning: 'When both signal and variable are set, only variable will take effect',
-              title: 'Variable'
-            }
-          ]
+            ]
+          } else {
+            return []
+          }
         }
       },
       grid: {

@@ -43,12 +43,16 @@ const options = ref<any>({})
 
 function dataChange(field: string, value: any, rule: any, api: any, setFlag: boolean) {
   console.log('data', field, value, rule, api, setFlag)
+  //check update here, 如果不相等，发送ipc
 }
 
 let filedBackMap: Record<string, string> = {}
+let dataStroe: Record<string, any> = {}
 function dataUpdate(key: string, values: [number, { value: number | string; rawValue: number }][]) {
   if (filedBackMap[key]) {
+    //TODO:select//
     fApi.value.setValue(filedBackMap[key], values[0][1].value)
+    dataStroe[key] = values[0][1].value
   }
 }
 
@@ -58,12 +62,12 @@ const panel = computed(() => {
 })
 
 function init() {
-  rule.value = []
-
   for (const key of Object.keys(filedBackMap)) {
     window.logBus.detach(key, dataUpdate)
   }
+  rule.value = []
   filedBackMap = {}
+  dataStroe = {}
 
   if (panel.value) {
     //递归变量rule，rule 有children 递归, 如果field存在，就写入filedMap
@@ -98,6 +102,15 @@ function init() {
 watch(panel, (val) => {
   init()
 })
+
+watch(
+  () => window.globalStart,
+  (val) => {
+    if (val) {
+      init()
+    }
+  }
+)
 let timer: any
 onMounted(() => {
   init()

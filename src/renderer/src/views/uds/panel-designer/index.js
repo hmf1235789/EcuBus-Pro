@@ -35,6 +35,7 @@ import draggable from 'vuedraggable/src/vuedraggable';
 import Grid from './components/grid/Grid.vue';
 import GridView from './components/grid/GridView.vue';
 import BButton from './components/BButton.vue';
+import TText from './components/TText.vue';
 import {
     compareVersion,
     copyTextToClipboard,
@@ -59,6 +60,7 @@ const addComponent = (id, component, previewComponent) => {
     formCreate.component(id, component);
 }
 addComponent('xProgress',PProgress)
+addComponent('TText',TText)
 designerForm.component('draggable', draggable);
 designerForm.component('DragTool', DragTool);
 designerForm.component('DragBox', DragBox);

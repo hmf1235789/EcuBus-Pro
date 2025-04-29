@@ -1,4 +1,5 @@
 import {localeProps} from '../../utils';
+import uniqueId from '@form-create/utils/lib/unique';
 
 const label = '文字';
 const name = 'text';
@@ -10,37 +11,24 @@ export default {
     name,
     rule({t}) {
         return {
-            type: 'div',
+            type: 'TText',
             title: '',
-            native: true,
+            field:uniqueId(),
             style: {
                 whiteSpace: 'pre-line',
                 width: '100%',
             },
-            children: [t('com.text.name')],
+            
         };
     },
-    watch: {
-        formCreateNative({value, rule}) {
-            if (value) {
-                rule.title = '';
-            }
-        }
-    },
+  
     props(_, {t}) {
         return localeProps(t, name + '.props', [
-            {
-                type: 'switch', field: 'formCreateNative', props: {
-                    activeValue: false,
-                    inactiveValue: true,
-                },
-                control: [{value: false, rule: ['formCreateTitle']}]
-            }, {
+             {
+                title:'Content',
                 type: 'input',
-                field: 'formCreateTitle',
-            }, {
-                type: 'input',
-                field: 'formCreateChild',
+                field: 'initValue',
+                value:'Text',
                 props: {
                     type: 'textarea'
                 }

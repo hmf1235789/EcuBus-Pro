@@ -43,6 +43,16 @@
               <Icon :icon="variableIcon" style="font-size: 14px" />
             </el-button>
           </el-tooltip>
+          <el-tooltip
+            v-if="props.highlightId"
+            effect="light"
+            content="Remove Attach Signal"
+            placement="bottom"
+          >
+            <el-button type="warning" link @click="removeSignal">
+              <Icon :icon="deleteIcon" style="font-size: 14px" />
+            </el-button>
+          </el-tooltip>
         </div>
       </template>
       <template #type="{ row }">
@@ -67,6 +77,7 @@ import { v4 } from 'uuid'
 import searchIcon from '@iconify/icons-material-symbols/search'
 import { ElMessage } from 'element-plus'
 import { getAllSysVar } from 'nodeCan/sysVar'
+import deleteIcon from '@iconify/icons-material-symbols/leak-remove'
 
 interface TreeItem {
   id: string
@@ -177,13 +188,15 @@ function toggleExpand() {
 }
 
 const emits = defineEmits<{
-  addVariable: [value: GraphNode<GraphBindVariableValue>] // named tuple syntax
+  addVariable: [value: GraphNode<GraphBindVariableValue> | null] // named tuple syntax
 }>()
 
 function randomColor() {
   return '#' + Math.floor(Math.random() * 16777215).toString(16)
 }
-
+function removeSignal() {
+  emits('addVariable', null)
+}
 function addVariable() {
   if (!highlightedRow.value) return
   const fullNameList: string[] = [highlightedRow.value.name]
