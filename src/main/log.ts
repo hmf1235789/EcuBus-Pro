@@ -8,7 +8,7 @@ import { Sequence, ServiceItem } from './share/uds'
 import { PayloadType } from './doip'
 import { LinMsg } from './share/lin'
 import { TestEvent } from 'node:test/reporters'
-import { setVar, setVarByKey } from './var'
+import { setVar as setVarMain, setVarByKey } from './var'
 import { VarItem } from 'src/preload/data'
 
 const isDev = process.env.NODE_ENV !== 'production'
@@ -465,7 +465,7 @@ export class VarLOG {
     if (found && target) {
       this.log.info({
         method: 'setVar',
-        data: { name: target.name, value, id: target.id, uuid: this.id },
+        data: [{ name: target.name, value, id: target.id, uuid: this.id }],
         ts
       })
       globalThis.varEvent?.emit('update', {
@@ -511,11 +511,11 @@ export class VarLOG {
     }
   }
   setVar(name: string, value: number | string | number[], ts: number) {
-    const { found, target } = setVar(name, value)
+    const { found, target } = setVarMain(name, value)
     if (found && target) {
       this.log.info({
         method: 'setVar',
-        data: { name: target.name, value, id: target.id, uuid: this.id },
+        data: [{ name: target.name, value, id: target.id, uuid: this.id }],
         ts
       })
       globalThis.varEvent?.emit('update', {

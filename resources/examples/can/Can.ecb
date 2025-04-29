@@ -68562,7 +68562,26 @@
     },
     "tests": {},
     "guages": {},
-    "vars": {},
+    "vars": {
+      "8d9d112d-66b3-4fd8-bdc9-a21491aaabc0": {
+        "type": "user",
+        "id": "8d9d112d-66b3-4fd8-bdc9-a21491aaabc0",
+        "name": "tests"
+      },
+      "d81ccdc1-fd91-4cb6-964b-15df0bd2e061": {
+        "name": "t1",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 100
+        },
+        "id": "d81ccdc1-fd91-4cb6-964b-15df0bd2e061",
+        "parentId": "8d9d112d-66b3-4fd8-bdc9-a21491aaabc0"
+      }
+    },
     "datas": {},
     "panels": {
       "7750b17b-8e48-47d7-ace5-6c0b31f6f1b5": {
@@ -68579,7 +68598,26 @@
             "name": "ref_Fp8tma114cxqafc",
             "display": true,
             "hidden": false,
-            "_fc_drag_tag": "input"
+            "_fc_drag_tag": "input",
+            "props": {
+              "variable": {
+                "type": "variable",
+                "enable": true,
+                "id": "d81ccdc1-fd91-4cb6-964b-15df0bd2e061",
+                "name": "t1",
+                "color": "#c7979f",
+                "yAxis": {
+                  "min": 0,
+                  "max": 100
+                },
+                "bindValue": {
+                  "variableId": "d81ccdc1-fd91-4cb6-964b-15df0bd2e061",
+                  "variableType": "user",
+                  "variableName": "t1",
+                  "variableFullName": "tests.t1"
+                }
+              }
+            }
           },
           {
             "type": "grid",
@@ -68700,6 +68738,39 @@
             "display": true,
             "hidden": false,
             "_fc_drag_tag": "grid"
+          },
+          {
+            "type": "TText",
+            "title": "",
+            "field": "F7chma2jjjt3abc",
+            "style": {
+              "whiteSpace": "pre-line",
+              "width": "100%"
+            },
+            "_fc_id": "id_F3ubma2jjjt3acc",
+            "name": "ref_Fw8vma2jjjt3adc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "text",
+            "props": {
+              "variable": {
+                "type": "variable",
+                "enable": true,
+                "id": "d81ccdc1-fd91-4cb6-964b-15df0bd2e061",
+                "name": "t1",
+                "color": "#768df",
+                "yAxis": {
+                  "min": 0,
+                  "max": 100
+                },
+                "bindValue": {
+                  "variableId": "d81ccdc1-fd91-4cb6-964b-15df0bd2e061",
+                  "variableType": "user",
+                  "variableName": "t1",
+                  "variableFullName": "tests.t1"
+                }
+              }
+            }
           }
         ],
         "options": {
@@ -68752,7 +68823,7 @@
         "label": "Network",
         "id": "network",
         "options": {},
-        "hide": true
+        "hide": false
       },
       "trace": {
         "pos": {
@@ -68769,8 +68840,8 @@
       },
       "a6773bbd-db04-405f-9a23-af32b1c12e70_ia": {
         "pos": {
-          "x": 733,
-          "y": 120.00003051757812,
+          "x": 522,
+          "y": 57,
           "w": 1358,
           "h": 406
         },
@@ -68798,26 +68869,10 @@
         "options": {},
         "hide": true
       },
-      "7750b17b-8e48-47d7-ace5-6c0b31f6f1b5": {
-        "pos": {
-          "x": 459.5,
-          "y": 29,
-          "w": 1344,
-          "h": 550
-        },
-        "title": "panel",
-        "label": "Panel",
-        "id": "7750b17b-8e48-47d7-ace5-6c0b31f6f1b5",
-        "options": {
-          "params": {
-            "edit-index": "7750b17b-8e48-47d7-ace5-6c0b31f6f1b5"
-          }
-        }
-      },
       "p7750b17b-8e48-47d7-ace5-6c0b31f6f1b5": {
         "pos": {
-          "x": 121.5,
-          "y": 5,
+          "x": 208.5,
+          "y": 0,
           "w": 800,
           "h": 550
         },
@@ -68829,6 +68884,22 @@
             "edit-index": "p7750b17b-8e48-47d7-ace5-6c0b31f6f1b5"
           },
           "name": "test"
+        }
+      },
+      "7750b17b-8e48-47d7-ace5-6c0b31f6f1b5": {
+        "pos": {
+          "x": 371.5,
+          "y": 59,
+          "w": 1174,
+          "h": 550
+        },
+        "title": "panel",
+        "label": "Panel",
+        "id": "7750b17b-8e48-47d7-ace5-6c0b31f6f1b5",
+        "options": {
+          "params": {
+            "edit-index": "7750b17b-8e48-47d7-ace5-6c0b31f6f1b5"
+          }
         }
       }
     },

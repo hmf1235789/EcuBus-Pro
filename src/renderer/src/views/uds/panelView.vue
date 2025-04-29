@@ -41,18 +41,40 @@ const fApi = ref<any>({})
 const rule = ref<any[]>([])
 const options = ref<any>({})
 
+let ruleBackMap: Record<string, any> = {}
+let filedBackMap: Record<string, string[]> = {}
+let dataStroe: Record<string, any> = {}
+
 function dataChange(field: string, value: any, rule: any, api: any, setFlag: boolean) {
-  console.log('data', field, value, rule, api, setFlag)
-  //check update here, 如果不相等，发送ipc
+  // console.log('data', field, value, rule, api, setFlag)
+  if (window.globalStart.value) {
+    //check update here, 如果不相等，发送ipc
+
+    if (dataStroe[field] !== value) {
+      dataStroe[field] = value
+      if (ruleBackMap[field].variable && ruleBackMap[field].variable.variableType == 'user') {
+        // window.logBus.emit(ruleBackMap[field].id, value)
+        window.electron.ipcRenderer.send('ipc-var-set', {
+          name: ruleBackMap[field].variable.variableFullName,
+          value: value
+        })
+      } else {
+        // window.logBus.emit(ruleBackMap[field].id, value)
+      }
+    }
+  }
 }
 
-let filedBackMap: Record<string, string> = {}
-let dataStroe: Record<string, any> = {}
 function dataUpdate(key: string, values: [number, { value: number | string; rawValue: number }][]) {
   if (filedBackMap[key]) {
-    //TODO:select//
-    fApi.value.setValue(filedBackMap[key], values[0][1].value)
-    dataStroe[key] = values[0][1].value
+    for (const field of filedBackMap[key]) {
+      //TODO:select//
+      const value = values[0][1].value
+      if (dataStroe[field] !== value) {
+        fApi.value.setValue(field, value)
+        dataStroe[field] = value
+      }
+    }
   }
 }
 
@@ -68,7 +90,7 @@ function init() {
   rule.value = []
   filedBackMap = {}
   dataStroe = {}
-
+  ruleBackMap = {}
   if (panel.value) {
     //递归变量rule，rule 有children 递归, 如果field存在，就写入filedMap
     const recursion = (rule: any) => {
@@ -77,7 +99,17 @@ function init() {
           rule.props.variable || rule.props.signal
 
         if (rule.field) {
-          filedBackMap[v.id] = rule.field
+          if (filedBackMap[v.id]) {
+            filedBackMap[v.id].push(rule.field)
+          } else {
+            filedBackMap[v.id] = [rule.field]
+          }
+          ruleBackMap[rule.field] = {
+            id: v.id,
+            rule: rule,
+            variable: rule.props.variable?.bindValue,
+            signal: rule.props.signal?.bindValue
+          }
         }
       }
       if (rule.children) {

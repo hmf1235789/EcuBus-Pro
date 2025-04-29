@@ -26,6 +26,7 @@ declare global {
     lin: Record<string, LDF>
     can: Record<string, DBC>
   }
+  var startTs: number
   var vars: Record<string, VarItem>
   var mainWindow: BrowserWindow
   var toomossDeviceHandles:
