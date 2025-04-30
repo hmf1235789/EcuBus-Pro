@@ -41,8 +41,11 @@ export default {
             field: 'releaseValue',
             title: 'Released Value'
         },
-
-
+        {
+            type:'switch',
+            field:'toggleMode',
+            title:'Toogle Mode',
+        },
         {
             type: 'select',
             field: 'type',

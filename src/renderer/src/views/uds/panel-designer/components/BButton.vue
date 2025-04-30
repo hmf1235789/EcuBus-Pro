@@ -1,6 +1,7 @@
 <template>
   <el-button
     v-bind="$attrs"
+    @click="toggleValue"
     @mousedown="handleMouseDown"
     @mouseup="handleMouseUp"
     @mouseleave="handleMouseLeave"
@@ -26,6 +27,10 @@ export default {
     releaseValue: {
       type: [String, Number, Boolean],
       default: 0
+    },
+    toggleMode: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -37,23 +42,37 @@ export default {
     modelValue(newValue) {
       if (newValue === this.pressValue) {
         this.isPressed = true
+      } else {
+        this.isPressed = false
       }
     }
   },
   emits: ['update:modelValue', 'change'],
   methods: {
+    toggleValue() {
+      if (this.toggleMode) {
+        this.isPressed = !this.isPressed
+        const newValue = this.isPressed ? this.pressValue : this.releaseValue
+        this.$emit('update:modelValue', newValue)
+        this.$emit('change', newValue)
+      }
+    },
     handleMouseDown() {
-      this.isPressed = true
-      this.$emit('update:modelValue', this.pressValue)
-      this.$emit('change', this.pressValue)
+      if (!this.toggleMode) {
+        this.isPressed = true
+        this.$emit('update:modelValue', this.pressValue)
+        this.$emit('change', this.pressValue)
+      }
     },
     handleMouseUp() {
-      this.isPressed = false
-      this.$emit('update:modelValue', this.releaseValue)
-      this.$emit('change', this.releaseValue)
+      if (!this.toggleMode) {
+        this.isPressed = false
+        this.$emit('update:modelValue', this.releaseValue)
+        this.$emit('change', this.releaseValue)
+      }
     },
     handleMouseLeave() {
-      if (this.isPressed) {
+      if (!this.toggleMode && this.isPressed) {
         this.isPressed = false
         this.$emit('update:modelValue', this.releaseValue)
         this.$emit('change', this.releaseValue)
