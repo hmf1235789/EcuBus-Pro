@@ -869,194 +869,6 @@
           "id": "gauge"
         }
       }
-    },
-    "vars": {
-      "cb0f9de1-1edf-40db-93f4-a9d33faa2ff8": {
-        "name": "test1",
-        "desc": "",
-        "type": "user",
-        "value": {
-          "type": "number",
-          "initValue": 0,
-          "min": 0,
-          "max": 100
-        },
-        "id": "cb0f9de1-1edf-40db-93f4-a9d33faa2ff8"
-      }
-    },
-    "datas": {},
-    "panels": {
-      "6fd35eca-32ab-4455-b50b-1e8a4782e4cb": {
-        "name": "test",
-        "id": "6fd35eca-32ab-4455-b50b-1e8a4782e4cb",
-        "rule": [
-          {
-            "type": "select",
-            "field": "Fd30ma3nw9iaaec",
-            "title": "Select",
-            "info": "",
-            "effect": {
-              "fetch": ""
-            },
-            "$required": false,
-            "props": {
-              "signal": {
-                "type": "signal",
-                "enable": true,
-                "id": "lin.lin.signals.MotorDirection",
-                "name": "MotorDirection",
-                "color": "#94ce79",
-                "yAxis": {
-                  "min": 0,
-                  "max": 3,
-                  "enums": [
-                    {
-                      "label": "open",
-                      "value": 0
-                    },
-                    {
-                      "label": "close",
-                      "value": 1
-                    }
-                  ]
-                },
-                "bindValue": {
-                  "signalName": "MotorDirection",
-                  "startBit": 0,
-                  "bitLength": 2,
-                  "dbKey": "655bf90d-b010-49b5-9cf8-a9787319b5b4",
-                  "dbName": "lin",
-                  "frameId": 45
-                }
-              }
-            },
-            "options": [
-              {
-                "label": "open",
-                "value": 0
-              },
-              {
-                "label": "close",
-                "value": 1
-              }
-            ],
-            "_fc_id": "id_Fj5pma3nw9ibafc",
-            "name": "ref_F1thma3nw9ibagc",
-            "display": true,
-            "hidden": false,
-            "_fc_drag_tag": "select"
-          }
-        ],
-        "options": {
-          "submitBtn": {
-            "show": false,
-            "innerText": "Submit"
-          },
-          "form": {
-            "inline": false,
-            "hideRequiredAsterisk": false,
-            "labelPosition": "right",
-            "size": "default",
-            "labelWidth": "125px"
-          },
-          "resetBtn": {
-            "show": false,
-            "innerText": "Reset"
-          },
-          "formName": "test"
-        }
-      },
-      "bef44fd5-839d-4288-8658-8456e09d410e": {
-        "name": "test1",
-        "id": "bef44fd5-839d-4288-8658-8456e09d410e",
-        "rule": [
-          {
-            "type": "BButton",
-            "props": {
-              "releaseValue": 0,
-              "pressValue": 1,
-              "toggleMode": false,
-              "variable": {
-                "type": "variable",
-                "enable": true,
-                "id": "cb0f9de1-1edf-40db-93f4-a9d33faa2ff8",
-                "name": "test1",
-                "color": "#ce9f3c",
-                "yAxis": {
-                  "min": 0,
-                  "max": 100
-                },
-                "bindValue": {
-                  "variableId": "cb0f9de1-1edf-40db-93f4-a9d33faa2ff8",
-                  "variableType": "user",
-                  "variableName": "test1",
-                  "variableFullName": "test1"
-                }
-              }
-            },
-            "children": [
-              "Button"
-            ],
-            "_fc_id": "id_Ffqmma3oe0voabc",
-            "name": "ref_F5xpma3oe0voacc",
-            "field": "Fgcyma3oe0voadc",
-            "display": true,
-            "hidden": false,
-            "_fc_drag_tag": "BButton"
-          },
-          {
-            "type": "TText",
-            "title": "",
-            "field": "Fel0ma3ofs1maec",
-            "style": {
-              "whiteSpace": "pre-line",
-              "width": "100%"
-            },
-            "_fc_id": "id_Fjo8ma3ofs1mafc",
-            "name": "ref_F6vdma3ofs1magc",
-            "display": true,
-            "hidden": false,
-            "_fc_drag_tag": "text",
-            "props": {
-              "variable": {
-                "type": "variable",
-                "enable": true,
-                "id": "cb0f9de1-1edf-40db-93f4-a9d33faa2ff8",
-                "name": "test1",
-                "color": "#7cb454",
-                "yAxis": {
-                  "min": 0,
-                  "max": 100
-                },
-                "bindValue": {
-                  "variableId": "cb0f9de1-1edf-40db-93f4-a9d33faa2ff8",
-                  "variableType": "user",
-                  "variableName": "test1",
-                  "variableFullName": "test1"
-                }
-              }
-            }
-          }
-        ],
-        "options": {
-          "submitBtn": {
-            "show": false,
-            "innerText": "Submit"
-          },
-          "form": {
-            "inline": false,
-            "hideRequiredAsterisk": false,
-            "labelPosition": "right",
-            "size": "default",
-            "labelWidth": "125px"
-          },
-          "resetBtn": {
-            "show": false,
-            "innerText": "Reset"
-          },
-          "formName": "test1"
-        }
-      }
     }
   },
   "project": {
@@ -1088,7 +900,7 @@
         "label": "Network",
         "id": "network",
         "options": {},
-        "hide": true
+        "hide": false
       },
       "25cec12a-572d-4221-b85e-2728628134f7_ia": {
         "pos": {
@@ -1106,7 +918,7 @@
           },
           "name": "Lin IA"
         },
-        "hide": true
+        "hide": false
       },
       "5459ce47-1751-4a82-94a0-9bd33ae289ab_sequence": {
         "pos": {
@@ -1181,20 +993,19 @@
           },
           "name": "Node 1"
         },
-        "hide": true
+        "hide": false
       },
       "trace": {
         "pos": {
-          "x": 1133.5,
-          "y": 122,
+          "x": 898.5,
+          "y": 46,
           "w": 700,
           "h": 400
         },
         "title": "trace",
         "label": "Trace",
         "id": "trace",
-        "options": {},
-        "hide": true
+        "options": {}
       },
       "655bf90d-b010-49b5-9cf8-a9787319b5b4": {
         "pos": {
@@ -1216,8 +1027,8 @@
       },
       "gauge": {
         "pos": {
-          "x": 78.5,
-          "y": 102,
+          "x": 22.5,
+          "y": 49,
           "w": 924,
           "h": 400
         },
@@ -1228,48 +1039,6 @@
           "params": {
             "edit-index": "gauge"
           }
-        },
-        "hide": false
-      },
-      "panel": {
-        "pos": {
-          "x": 1147.5,
-          "y": 124,
-          "w": 1315,
-          "h": 652
-        },
-        "title": "panel",
-        "label": "Panel",
-        "id": "panel",
-        "options": {
-          "params": {
-            "edit-index": "panel"
-          }
-        },
-        "hide": false,
-        "backupPos": {
-          "x": 1153.5,
-          "y": 142,
-          "w": 800,
-          "h": 550
-        },
-        "isMax": false
-      },
-      "pbef44fd5-839d-4288-8658-8456e09d410e": {
-        "pos": {
-          "x": 943.5,
-          "y": 206,
-          "w": 800,
-          "h": 550
-        },
-        "title": "panelPreview",
-        "label": "PanelPreview",
-        "id": "pbef44fd5-839d-4288-8658-8456e09d410e",
-        "options": {
-          "params": {
-            "edit-index": "pbef44fd5-839d-4288-8658-8456e09d410e"
-          },
-          "name": "test1"
         }
       }
     },
