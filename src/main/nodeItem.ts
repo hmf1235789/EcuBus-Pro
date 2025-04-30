@@ -166,7 +166,7 @@ export class NodeClass {
         }
         this.pool.registerHandler('output', this.sendFrame.bind(this))
         this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
-        this.pool.registerHandler('setSignal', this.setSignal.bind(this))
+        this.pool.registerHandler('setSignal', NodeClass.setSignal)
         this.pool.registerHandler('setVar', this.setVar.bind(this))
         if (this.ethBaseId.length > 0) {
           this.pool.registerHandler(
@@ -736,11 +736,12 @@ export class NodeClass {
   ) {
     this.varLog.setVar(data.name, data.value, getTsUs() - this.startTs)
   }
-  setSignal(
+  //only update raw value
+  static setSignal(
     pool: UdsTester,
     data: {
       signal: string
-      value: number | string | number[]
+      value: number | number[]
     }
   ) {
     if (Array.isArray(data.value)) {
@@ -767,18 +768,18 @@ export class NodeClass {
         throw new Error(`Signal ${signalName} not found`)
       }
       ss.physValue = data.value
-      if (typeof data.value === 'string' && (ss.values || ss.valueTable)) {
-        const value: {
-          label: string
-          value: number
-        }[] = ss.values ? ss.values : db.valueTables[ss.valueTable!].values
-        if (value) {
-          const v = value.find((v) => v.label === data.value)
-          if (v) {
-            ss.physValue = v.value
-          }
-        }
-      }
+      // if (typeof data.value === 'string' && (ss.values || ss.valueTable)) {
+      //   const value: {
+      //     label: string
+      //     value: number
+      //   }[] = ss.values ? ss.values : db.valueTables[ss.valueTable!].values
+      //   if (value) {
+      //     const v = value.find((v) => v.label === data.value)
+      //     if (v) {
+      //       ss.physValue = v.value
+      //     }
+      //   }
+      // }
       updateSignalPhys(ss)
     } else {
       const linDb = Object.values(global.database.lin).find((db) => db.name == s[0])

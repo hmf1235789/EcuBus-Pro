@@ -28,7 +28,7 @@ type HandlerMap = {
     pool: UdsTester,
     data: {
       signal: string
-      value: number | number[] | string
+      value: number | number[]
     }
   ) => void
   registerEthVirtualEntity: (

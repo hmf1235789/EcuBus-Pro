@@ -375,8 +375,17 @@ const emits = defineEmits<{
   addSignal: [value: GraphNode<GraphBindSignalValue> | null] // named tuple syntax
   addFrame: [value: GraphNode<GraphBindFrameValue>] // named tuple syntax
 }>()
+
 function randomColor() {
-  return '#' + Math.floor(Math.random() * 16777215).toString(16)
+  let color
+  do {
+    color =
+      '#' +
+      Math.floor(Math.random() * 16777215)
+        .toString(16)
+        .padStart(6, '0')
+  } while (color === '#ffffff' || color === '#FFFFFF')
+  return color
 }
 function getMaxByBitLength(bitLength: number) {
   return Math.pow(2, bitLength) - 1

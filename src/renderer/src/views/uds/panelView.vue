@@ -59,7 +59,10 @@ function dataChange(field: string, value: any, rule: any, api: any, setFlag: boo
           value: value
         })
       } else {
-        // window.logBus.emit(ruleBackMap[field].id, value)
+        window.electron.ipcRenderer.send('ipc-signal-set', {
+          name: `${ruleBackMap[field].signal.dbName}.${ruleBackMap[field].signal.signalName}`,
+          value: value
+        })
       }
     }
   }
@@ -68,8 +71,7 @@ function dataChange(field: string, value: any, rule: any, api: any, setFlag: boo
 function dataUpdate(key: string, values: [number, { value: number | string; rawValue: number }][]) {
   if (filedBackMap[key]) {
     for (const field of filedBackMap[key]) {
-      //TODO:select//
-      const value = values[0][1].value
+      const value = values[0][1].rawValue
       if (dataStroe[field] !== value) {
         fApi.value.setValue(field, value)
         dataStroe[field] = value
