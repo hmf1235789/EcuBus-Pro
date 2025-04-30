@@ -239,6 +239,11 @@ function handleCheckChange(
       node.enable = checked
     }
   })
+  if (checked) {
+    window.logBus.on(data.id, dataUpdate)
+  } else {
+    window.logBus.detach(data.id, dataUpdate)
+  }
 }
 
 const addNode = () => {

@@ -302,7 +302,6 @@ const tableData = computed(() => {
     tables.push(t)
     i++
   }
-  console.log(foundMasterReq, foundSlaveResp)
   if (!foundMasterReq || !foundSlaveResp) {
     const bytes = 8
     const baseTime = (bytes * 10 + 44) * (1 / db.global.LIN_speed)
