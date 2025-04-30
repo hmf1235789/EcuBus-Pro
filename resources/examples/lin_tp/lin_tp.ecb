@@ -870,6 +870,7 @@
           "id": "gauge"
         }
       }
+<<<<<<< HEAD
     },
 <<<<<<< HEAD
     "vars": {},
@@ -1062,6 +1063,8 @@
           "formName": "test1"
         }
       }
+=======
+>>>>>>> 47074b5 (restore examples)
     }
 >>>>>>> c265f15 (toogle button ok)
   },
@@ -1094,7 +1097,7 @@
         "label": "Network",
         "id": "network",
         "options": {},
-        "hide": true
+        "hide": false
       },
       "25cec12a-572d-4221-b85e-2728628134f7_ia": {
         "pos": {
@@ -1112,7 +1115,7 @@
           },
           "name": "Lin IA"
         },
-        "hide": true
+        "hide": false
       },
       "5459ce47-1751-4a82-94a0-9bd33ae289ab_sequence": {
         "pos": {
@@ -1187,20 +1190,19 @@
           },
           "name": "Node 1"
         },
-        "hide": true
+        "hide": false
       },
       "trace": {
         "pos": {
-          "x": 1133.5,
-          "y": 122,
+          "x": 898.5,
+          "y": 46,
           "w": 700,
           "h": 400
         },
         "title": "trace",
         "label": "Trace",
         "id": "trace",
-        "options": {},
-        "hide": true
+        "options": {}
       },
       "655bf90d-b010-49b5-9cf8-a9787319b5b4": {
         "pos": {
@@ -1222,8 +1224,8 @@
       },
       "gauge": {
         "pos": {
-          "x": 78.5,
-          "y": 102,
+          "x": 22.5,
+          "y": 49,
           "w": 924,
           "h": 400
         },
@@ -1234,48 +1236,6 @@
           "params": {
             "edit-index": "gauge"
           }
-        },
-        "hide": false
-      },
-      "panel": {
-        "pos": {
-          "x": 1147.5,
-          "y": 124,
-          "w": 1315,
-          "h": 652
-        },
-        "title": "panel",
-        "label": "Panel",
-        "id": "panel",
-        "options": {
-          "params": {
-            "edit-index": "panel"
-          }
-        },
-        "hide": false,
-        "backupPos": {
-          "x": 1153.5,
-          "y": 142,
-          "w": 800,
-          "h": 550
-        },
-        "isMax": false
-      },
-      "pbef44fd5-839d-4288-8658-8456e09d410e": {
-        "pos": {
-          "x": 943.5,
-          "y": 206,
-          "w": 800,
-          "h": 550
-        },
-        "title": "panelPreview",
-        "label": "PanelPreview",
-        "id": "pbef44fd5-839d-4288-8658-8456e09d410e",
-        "options": {
-          "params": {
-            "edit-index": "pbef44fd5-839d-4288-8658-8456e09d410e"
-          },
-          "name": "test1"
         }
       }
     },
