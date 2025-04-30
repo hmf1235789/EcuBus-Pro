@@ -89,9 +89,8 @@ function parseCanData(raw: any) {
     const db = findDb(msg.database)
     if (db) {
       const frame = db.messages[msg.id]
-      msg.name = frame.name
-
       if (frame) {
+        msg.name = frame.name
         msg.children = []
         writeMessageData(frame, msg.data, db)
         for (const signal of Object.values(frame.signals)) {
