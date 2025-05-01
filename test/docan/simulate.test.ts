@@ -487,7 +487,7 @@ describe('simulate can-tp test', () => {
         const servers = server as CAN_TP
         setTimeout(() => {
           if (addr.bs > 0) {
-            servers.sendFC(swapAddr(addr), 0)
+            servers.sendFC(swapAddr(addr), 0, false)
           }
         }, 100)
 
@@ -1090,7 +1090,7 @@ describe('simulate canfd can-tp test', () => {
       try {
         const servers = server as CAN_TP
         setTimeout(() => {
-          servers.sendFC(swapAddr(addr), 0)
+          servers.sendFC(swapAddr(addr), 0, false)
         }, 100)
 
         await client.writeTp(addr, data)

@@ -151,7 +151,8 @@
               "autoSubfunc": true
             }
           ]
-        }
+        },
+        "simulateBy": "9505c05a-4fe5-42e1-a45d-b1cbc14854ba"
       }
     },
     "subFunction": {},
@@ -869,7 +870,9 @@
           "id": "gauge"
         }
       }
-    }
+    },
+    "vars": {},
+    "datas": {}
   },
   "project": {
     "wins": {
@@ -953,8 +956,8 @@
       },
       "tester": {
         "pos": {
-          "x": 842,
-          "y": 171,
+          "x": 404,
+          "y": 166,
           "w": 1095,
           "h": 400
         },
@@ -962,7 +965,7 @@
         "label": "UDS Tester",
         "id": "tester",
         "options": {},
-        "hide": true
+        "hide": false
       },
       "hardware": {
         "pos": {
