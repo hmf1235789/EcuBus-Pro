@@ -435,14 +435,16 @@ function logDisplay(method: string, vals: LogItem[]) {
     if (val.message.id != props.id) {
       continue
     }
-    excuseResults.value[val.message.data.index].status = val.message.data.action
-    if (val.message.data.action == 'start') {
-      excuseResults.value[val.message.data.index].msg = 'Running'
-    } else if (val.message.data.action == 'finished') {
-      excuseResults.value[val.message.data.index].msg = 'Success'
-    }
-    if (val.message.data.percent) {
-      excuseResults.value[val.message.data.index].msg = val.message.data.percent.toFixed(2) + '%'
+    if (excuseResults.value[val.message.data.index]) {
+      excuseResults.value[val.message.data.index].status = val.message.data.action
+      if (val.message.data.action == 'start') {
+        excuseResults.value[val.message.data.index].msg = 'Running'
+      } else if (val.message.data.action == 'finished') {
+        excuseResults.value[val.message.data.index].msg = 'Success'
+      }
+      if (val.message.data.percent) {
+        excuseResults.value[val.message.data.index].msg = val.message.data.percent.toFixed(2) + '%'
+      }
     }
   }
 }

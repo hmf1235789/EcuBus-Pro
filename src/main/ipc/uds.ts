@@ -328,10 +328,10 @@ async function globalStart(
     const tester = testers[key]
     if (tester.type == 'can') {
       for (const val of canBaseMap.values()) {
-        const cantp = new CAN_TP(val, true)
+        const cantp = new CAN_TP(val)
         for (const addr of tester.address) {
           if (addr.type == 'can' && addr.canAddr) {
-            const id = cantp.getReadId(addr.canAddr)
+            const id = cantp.getReadId(addr.canAddr, true)
             cantp.event.on(id, (data) => {
               if (!(data instanceof TpError)) {
                 const log = new UdsLOG(tester.name)
@@ -343,7 +343,7 @@ async function globalStart(
                 log.close()
               }
             })
-            const idR = cantp.getReadId(swapAddr(addr.canAddr))
+            const idR = cantp.getReadId(swapAddr(addr.canAddr), true)
             cantp.event.on(idR, (data) => {
               if (!(data instanceof TpError)) {
                 const log = new UdsLOG(tester.name)

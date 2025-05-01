@@ -177,7 +177,8 @@ export class NodeClass {
 
         //cantp
         for (const tester of Object.values(this.testers)) {
-          if (tester && tester.address.length > 0) {
+          console.log(tester.simulateBy, nodeItem.id)
+          if (tester.simulateBy == nodeItem.id && tester.address.length > 0) {
             for (const c of nodeItem.channel) {
               const canBaseItem = this.canBaseMap.get(c)
               if (canBaseItem && tester.type == 'can') {
@@ -204,7 +205,7 @@ export class NodeClass {
                         }
                       }
                     })
-                    const idR = tp.getReadId(swapAddr(addr.canAddr))
+                    const idR = tp.getReadId(swapAddr(addr.canAddr), true)
                     tp.event.on(idR, (data) => {
                       if (data instanceof CanTpError) {
                         //TODO:
