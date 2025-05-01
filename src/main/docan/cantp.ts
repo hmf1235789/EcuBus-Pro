@@ -172,10 +172,7 @@ export class CAN_TP implements CanTp {
     }
   > = {}
   lastWriteError?: TpError
-  constructor(
-    base: CanBase,
-    private listenOnly = false
-  ) {
+  constructor(base: CanBase) {
     this.base = base
     //close peak tp default handle
 
@@ -283,7 +280,7 @@ export class CAN_TP implements CanTp {
       }
     })
   }
-  async sendFC(addr: CanAddr, fs: number) {
+  async sendFC(addr: CanAddr, fs: number, listenOnly: boolean) {
     return new Promise<{ ts: number; bs: number; stMin: number }>((resolve, reject) => {
       const extAddr = []
       if (addr.addrFormat == CAN_ADDR_FORMAT.EXTENDED || addr.addrFormat == CAN_ADDR_FORMAT.MIXED) {
@@ -298,7 +295,7 @@ export class CAN_TP implements CanTp {
         stMin = 127
       }
       const bs = addr.bs
-      if (this.listenOnly) {
+      if (listenOnly) {
         resolve({
           ts: 0,
           bs,
@@ -575,11 +572,11 @@ export class CAN_TP implements CanTp {
     }
   }
 
-  getReadId(addr: CanAddr): string {
+  getReadId(addr: CanAddr, listenOnly = false): string {
     const id = addrToId(addr)
     const tpIdStr = `tp-${id}-${addrToStr(addr)}`
     if (!this.rxBaseHandleExist.has(tpIdStr)) {
-      const cb = baseHandle.bind({ addr, id, inst: this })
+      const cb = baseHandle.bind({ addr, id, inst: this, listenOnly })
       const baseId = this.base.getReadBaseId(id, addr)
       this.rxBaseHandleExist.set(tpIdStr, {
         baseId,
@@ -625,7 +622,7 @@ export class CAN_TP implements CanTp {
 function baseHandle(val: CanMessage) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //@ts-ignore
-  const _this = this as { addr: CanAddr; id: number; inst: CAN_TP }
+  const _this = this as { addr: CanAddr; id: number; inst: CAN_TP; listenOnly: boolean }
   const tpCmdId = _this.inst.getReadId(_this.addr)
   const status = _this.inst.tpStatus[tpCmdId] || 0
   let index = 0
@@ -728,11 +725,10 @@ shall ignore the received FF N_PDU and not transmit a FC N_PDU.*/
           // this.inst.event.emit(tpCmdId,{data,ts:val.ts})
           _this.inst.tpDataBuffer[tpCmdId] = data
           _this.inst.tpStatus[tpCmdId] = 2
-
           const nbrTImer = setTimeout(() => {
             //write flow control
             _this.inst
-              .sendFC(swapAddr(_this.addr), 0)
+              .sendFC(swapAddr(_this.addr), 0, _this.listenOnly)
               .then((val) => {
                 _this.inst.tpStatus[tpCmdId] = 1
                 _this.inst.tpDataFc[tpCmdId] = {
@@ -826,7 +822,7 @@ shall ignore the received FF N_PDU and not transmit a FC N_PDU.*/
                 _this.inst.tpStatus[tpCmdId] = 2
                 //TODO:add delay here?
                 _this.inst
-                  .sendFC(swapAddr(_this.addr), 0)
+                  .sendFC(swapAddr(_this.addr), 0, _this.listenOnly)
                   .then((val) => {
                     _this.inst.tpStatus[tpCmdId] = 1
                     fcInfo.stMin = val.stMin

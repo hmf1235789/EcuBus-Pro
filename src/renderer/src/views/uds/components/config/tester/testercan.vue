@@ -6,11 +6,16 @@
       label-width="150px"
       :rules="rules"
       size="small"
-      :disabled="globalStart"
       hide-required-asterisk
     >
       <el-form-item label="Tester Name" prop="name">
-        <el-input v-model="data.name" placeholder="Name" />
+        <el-input v-model="data.name" :disabled="globalStart" placeholder="Name" />
+      </el-form-item>
+      <el-form-item label="Simulate By" prop="simulateBy">
+        <el-select v-model="data.simulateBy" :disabled="globalStart" clearable>
+          <el-option v-for="item in nodesName" :key="item.id" :label="item.name" :value="item.id">
+          </el-option>
+        </el-select>
       </el-form-item>
       <!-- <el-form-item label="Target Device" prop="targetDeviceId">
         <el-select v-model="data.targetDeviceId" placeholder="Device" clearable>
@@ -27,10 +32,10 @@
         </el-select>
       </el-form-item> -->
       <el-form-item label="Tester Script File" prop="script">
-        <el-input v-model="data.script" clearable> </el-input>
+        <el-input v-model="data.script" :disabled="globalStart" clearable> </el-input>
         <div class="lr">
           <el-button-group v-loading="buildLoading" style="margin-top: 5px">
-            <el-button size="small" plain @click="editScript('open')">
+            <el-button size="small" plain :disabled="globalStart" @click="editScript('open')">
               <Icon :icon="newIcon" class="icon" style="margin-right: 5px" /> Choose
             </el-button>
 
@@ -96,26 +101,26 @@
       <el-form-item label-width="0">
         <el-col :span="12">
           <el-form-item label="P2 timeout" prop="udsTime.pTime">
-            <el-input v-model.number="data.udsTime.pTime" />
+            <el-input v-model.number="data.udsTime.pTime" :disabled="globalStart" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="P2 max (0x78)" prop="udsTime.pExtTime">
-            <el-input v-model.number="data.udsTime.pExtTime" />
+            <el-input v-model.number="data.udsTime.pExtTime" :disabled="globalStart" />
           </el-form-item>
         </el-col>
       </el-form-item>
       <el-form-item label-width="0">
         <el-col :span="12">
           <el-form-item label="S3 Time" prop="data.udsTime.s3Time">
-            <el-input v-model.number="data.udsTime.s3Time" disabled />
+            <el-input v-model.number="data.udsTime.s3Time" :disabled="globalStart" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="Tester Present Enable" prop="udsTime.testerPresentEnable">
             <el-checkbox
               v-model="data.udsTime.testerPresentEnable"
-              :disabled="props.type != 'can'"
+              :disabled="props.type != 'can' || globalStart"
             />
           </el-form-item>
         </el-col>
@@ -123,7 +128,7 @@
       <el-form-item v-if="data.udsTime.testerPresentEnable" label-width="0">
         <el-col :span="12">
           <el-form-item label="Tester Present Address" prop="udsTime.testerPresentAddrIndex">
-            <el-select v-model.number="data.udsTime.testerPresentAddrIndex">
+            <el-select v-model.number="data.udsTime.testerPresentAddrIndex" :disabled="globalStart">
               <el-option
                 v-for="(item, index) in data.address"
                 :key="index"
@@ -135,7 +140,7 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="From Special Service" prop="udsTime.testerPresentSpecialService">
-            <el-select v-model="data.udsTime.testerPresentSpecialService">
+            <el-select v-model="data.udsTime.testerPresentSpecialService" :disabled="globalStart">
               <el-option
                 v-for="(item, index) in all3EServices"
                 :key="index"
@@ -147,11 +152,11 @@
         </el-col>
       </el-form-item>
       <el-divider content-position="left">
-        <el-button icon="Plus" link type="primary" @click="addCanAddress">
+        <el-button icon="Plus" link type="primary" :disabled="globalStart" @click="addCanAddress">
           Add
           {{ props.type.toLocaleUpperCase() }} Address
         </el-button>
-        <el-button icon="Switch" link type="success" @click="addAddrFromDb">
+        <el-button icon="Switch" link type="success" :disabled="globalStart" @click="addAddrFromDb">
           Load From Database
         </el-button>
       </el-divider>
@@ -287,6 +292,9 @@ import dbchoose from './dbchoose.vue'
 const globalStart = toRef(window, 'globalStart')
 const ruleFormRef = ref<FormInstance>()
 const dataBase = useDataStore()
+const nodesName = computed(() => {
+  return Object.values(dataBase.nodes)
+})
 const props = defineProps<{
   index: string
   height: number
@@ -628,6 +636,7 @@ const onSubmit = async () => {
     dataBase.tester[editIndex.value].name = data.value.name
     dataBase.tester[editIndex.value].script = data.value.script
     dataBase.tester[editIndex.value].udsTime = cloneDeep(data.value.udsTime)
+    dataBase.tester[editIndex.value].simulateBy = data.value.simulateBy
 
     emits('change', editIndex.value, data.value.name)
     return true
@@ -646,6 +655,14 @@ onBeforeMount(() => {
     if (editData) {
       data.value = cloneDeep(editData)
       if (data.value.address.length > 0) activeTabName.value = `index${0}`
+
+      //check simulateBy exist
+      if (data.value.simulateBy) {
+        const node = dataBase.nodes[data.value.simulateBy]
+        if (!node) {
+          data.value.simulateBy = undefined
+        }
+      }
     } else {
       editIndex.value = ''
       data.value.name = `Tester ${props.type}_${Object.keys(dataBase.tester).length}`

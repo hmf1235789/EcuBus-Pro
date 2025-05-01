@@ -392,7 +392,8 @@
               "autoSubfunc": true
             }
           ]
-        }
+        },
+        "simulateBy": "5c043bd6-ddca-449a-b535-1ae865085123"
       }
     },
     "subFunction": {},
@@ -414,7 +415,10 @@
       "can": {}
     },
     "graphs": {},
-    "tests": {}
+    "tests": {},
+    "guages": {},
+    "vars": {},
+    "datas": {}
   },
   "project": {
     "wins": {
@@ -452,8 +456,8 @@
       },
       "f304259b-dc7d-460b-9729-4eee2d1156de_sequence": {
         "pos": {
-          "x": 219,
-          "y": 63,
+          "x": 462,
+          "y": 39,
           "w": 984,
           "h": 400
         },
@@ -481,8 +485,8 @@
       },
       "tester": {
         "pos": {
-          "x": 425,
-          "y": 14,
+          "x": 46,
+          "y": 284,
           "w": 1067,
           "h": 444
         },

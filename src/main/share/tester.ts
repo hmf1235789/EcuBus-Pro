@@ -10,5 +10,6 @@ export interface TesterInfo {
   targetDeviceId?: string
   seqList: Sequence[]
   address: UdsAddress[]
+  simulateBy?: string
   allServiceList: Partial<Record<ServiceId, ServiceItem[]>>
 }
