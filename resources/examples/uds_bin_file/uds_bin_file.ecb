@@ -657,6 +657,19 @@
         "id": "variable",
         "options": {}
       },
+      "tester": {
+        "pos": {
+          "x": 46,
+          "y": 284,
+          "w": 1067,
+          "h": 444
+        },
+        "title": "tester",
+        "label": "UDS Tester",
+        "id": "tester",
+        "options": {},
+        "hide": false
+      },
       "network": {
         "pos": {
           "x": 673.5,
