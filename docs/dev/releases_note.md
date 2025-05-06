@@ -1,5 +1,16 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.35
+Changes from v0.8.34 to v0.8.35:
+
+* [feat]:panel feature 
+* [feat]:add uds tester simulate by 
+* [bug]:fix graph/gauge dynamic enable 
+* [bug]:fix can dbc parse error 
+---
+
+# EcuBus-Pro Release Notes
+
 ## v0.8.34
 Changes from v0.8.33 to v0.8.34:
 
