@@ -1,5 +1,6 @@
 import { VarItem } from 'src/preload/data'
 import { UdsDevice } from './uds'
+import { TesterInfo } from './tester'
 
 export const MonitorVar: VarItem[] = [
   {
@@ -40,7 +41,10 @@ export const MonitorVar: VarItem[] = [
   }
 ]
 
-export function getAllSysVar(devices: Record<string, UdsDevice>): Record<string, VarItem> {
+export function getAllSysVar(
+  devices: Record<string, UdsDevice>,
+  testers: Record<string, TesterInfo>
+): Record<string, VarItem> {
   const list: Record<string, VarItem> = {
     Statistics: {
       type: 'system',
@@ -81,6 +85,34 @@ export function getAllSysVar(devices: Record<string, UdsDevice>): Record<string,
             max: isFrameFreq ? 10000 : 100,
             unit: isFrameFreq ? 'f/s' : '%'
           }
+        }
+      }
+    }
+  }
+
+  for (const tester of Object.values(testers)) {
+    list[`Statistics.${tester.id}`] = {
+      type: 'system',
+      id: `Statistics.${tester.id}`,
+      name: tester.name,
+      parentId: 'Statistics',
+      desc: 'UDS Tester'
+    }
+    if (tester.seqList.length > 0) {
+      for (const [index, seq] of tester.seqList.entries()) {
+        list[`Statistics.${tester.id}.${index}`] = {
+          type: 'system',
+          id: `Statistics.${tester.id}.${index}`,
+          name: `Seq #${index}`,
+          parentId: `Statistics.${tester.id}`,
+          value: {
+            type: 'number',
+            initValue: 0,
+            min: 0,
+            max: 100,
+            unit: '%'
+          },
+          desc: `UDS sequence download progress`
         }
       }
     }

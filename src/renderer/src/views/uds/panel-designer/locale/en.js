@@ -106,10 +106,10 @@ const En = {
         configured: 'Configured',
     },
     signal:{
-        title: 'Signal',
+        title: 'Attach Signal',
     },
     variable:{
-        title: 'Variable',
+        title: 'Attach Variable',
     },
     event: {
         title: 'Edit',

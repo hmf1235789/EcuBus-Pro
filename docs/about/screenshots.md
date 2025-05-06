@@ -12,6 +12,10 @@
 
 ![base1](./graph.gif)
 
+## Panel
+![base1](./../um//panel/base.gif)
+![base1](./../um/panel/base1.gif)
+
 ## Scripting Engine
 
 Built on Node.js, our scripting engine enables:

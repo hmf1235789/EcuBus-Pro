@@ -525,7 +525,7 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   global.database = arg[i++]
   global.vars = {}
   const vars: Record<string, VarItem> = arg[i++] || {}
-  const sysVars = getAllSysVar(devices)
+  const sysVars = getAllSysVar(devices, testers)
 
   for (const v of Object.values(sysVars)) {
     vars[v.id] = cloneDeep(v)
@@ -693,41 +693,45 @@ ipcMain.handle('ipc-run-sequence', async (event, ...arg) => {
       tester,
       device
     )
-    if (device.type == 'can' && device.canDevice) {
-      const canBase = canBaseMap.get(device.canDevice.id)
-      if (canBase) {
-        uds.setCanBase(canBaseMap.get(device.canDevice.id))
-        udsTesterMap.set(tester.id, uds)
-        await uds.runSequence(seqIndex, cycle)
-      } else {
-        throw new Error(
-          `can device ${device.canDevice.vendor}-${device.canDevice.handle} not found`
-        )
+    if (device) {
+      if (device.type == 'can' && device.canDevice) {
+        const canBase = canBaseMap.get(device.canDevice.id)
+        if (canBase) {
+          uds.setCanBase(canBaseMap.get(device.canDevice.id))
+          udsTesterMap.set(tester.id, uds)
+          await uds.runSequence(seqIndex, cycle)
+        } else {
+          throw new Error(
+            `can device ${device.canDevice.vendor}-${device.canDevice.handle} not found`
+          )
+        }
+      } else if (device.type == 'eth' && device.ethDevice) {
+        const id = device.ethDevice.id
+        const ethBase = doips.find((e) => e.base.id == id)
+        if (ethBase) {
+          uds.setDoip(ethBase)
+          udsTesterMap.set(tester.id, uds)
+          await uds.runSequence(seqIndex, cycle)
+        } else {
+          throw new Error(
+            `eth device ${device.ethDevice.vendor}-${device.ethDevice.device.handle} not found`
+          )
+        }
+      } else if (device.type == 'lin' && device.linDevice) {
+        const id = device.linDevice.id
+        const linBase = linBaseMap.get(id)
+        if (linBase) {
+          uds.setLinBase(linBase)
+          udsTesterMap.set(tester.id, uds)
+          await uds.runSequence(seqIndex, cycle)
+        } else {
+          throw new Error(
+            `lin device ${device.linDevice.vendor}-${device.linDevice.device.handle} not found`
+          )
+        }
       }
-    } else if (device.type == 'eth' && device.ethDevice) {
-      const id = device.ethDevice.id
-      const ethBase = doips.find((e) => e.base.id == id)
-      if (ethBase) {
-        uds.setDoip(ethBase)
-        udsTesterMap.set(tester.id, uds)
-        await uds.runSequence(seqIndex, cycle)
-      } else {
-        throw new Error(
-          `eth device ${device.ethDevice.vendor}-${device.ethDevice.device.handle} not found`
-        )
-      }
-    } else if (device.type == 'lin' && device.linDevice) {
-      const id = device.linDevice.id
-      const linBase = linBaseMap.get(id)
-      if (linBase) {
-        uds.setLinBase(linBase)
-        udsTesterMap.set(tester.id, uds)
-        await uds.runSequence(seqIndex, cycle)
-      } else {
-        throw new Error(
-          `lin device ${device.linDevice.vendor}-${device.linDevice.device.handle} not found`
-        )
-      }
+    } else {
+      throw new Error('device not found')
     }
   } catch (err: any) {
     uds?.close()
@@ -744,6 +748,7 @@ ipcMain.handle('ipc-stop-sequence', async (event, ...arg) => {
 
   if (uds) {
     uds.cancel()
+    udsTesterMap.delete(id)
   }
 })
 

@@ -13,6 +13,10 @@ export default {
         return {
             type: name,
             field: uniqueId(),
+            style: {
+                width: '100%',
+               
+            },
             props: {
                 
                 strokeWidth: 20,

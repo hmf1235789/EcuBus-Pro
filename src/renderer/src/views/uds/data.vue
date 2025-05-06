@@ -449,40 +449,42 @@ const deleteSignal = () => {
     })
 }
 
-const handleAddSignal = (node: GraphNode<GraphBindSignalValue | GraphBindVariableValue>) => {
+const handleAddSignal = (node: GraphNode<GraphBindSignalValue | GraphBindVariableValue> | null) => {
   signalDialogVisible.value = false
   variableDialogVisible.value = false
 
-  // 检查是否已存在
-  const existed = userTableData.value.find((v) => v.id == node.id)
-  if (existed) {
-    ElNotification({
-      offset: 50,
-      message: 'Signal already exists',
-      type: 'warning',
-      appendTo: appendId.value
-    })
-    return
-  }
-
-  if (props.editIndex) {
-    node.graph = {
-      id: props.editIndex
+  if (node) {
+    // 检查是否已存在
+    const existed = userTableData.value.find((v) => v.id == node.id)
+    if (existed) {
+      ElNotification({
+        offset: 50,
+        message: 'Signal already exists',
+        type: 'warning',
+        appendTo: appendId.value
+      })
+      return
     }
+
+    if (props.editIndex) {
+      node.graph = {
+        id: props.editIndex
+      }
+    }
+
+    userTableData.value.push({
+      id: node.id,
+      name: node.name,
+      fullName: getFullName(node),
+      value: '--',
+      unit: getUnit(node),
+      rawValue: '--',
+      lastUpdate: 0
+    })
+
+    window.logBus.on(node.id, dataUpdate)
+    datas[node.id] = node
   }
-
-  userTableData.value.push({
-    id: node.id,
-    name: node.name,
-    fullName: getFullName(node),
-    value: '--',
-    unit: getUnit(node),
-    rawValue: '--',
-    lastUpdate: 0
-  })
-
-  window.logBus.on(node.id, dataUpdate)
-  datas[node.id] = node
 }
 </script>
 <style scoped>

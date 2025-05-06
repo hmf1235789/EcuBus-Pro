@@ -45,6 +45,7 @@ EcuBus-Pro is an open-source alternative to commercial automotive diagnostic too
 - 📊 **Database Support**: LIN LDF (edit & export), CAN DBC (view) - [Details](./docs/um/database.md)
 - 📈 **Data Visualization**: Real-time signal graphing and analysis - [Details](./docs/um/graph/graph.md)
 - ⌨️ **Command Line**: Full-featured CLI for automation and integration - [Details](./docs/um/cli.md)
+- 🎨 **Panel**: Drag-and-drop interface builder for custom UI - [Details](./docs/um/panel/index.md)
 
 [Read the Docs to Learn More.](https://app.whyengineer.com)
 

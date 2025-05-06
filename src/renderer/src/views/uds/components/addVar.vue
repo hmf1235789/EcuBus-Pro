@@ -110,7 +110,7 @@ const searchText = ref('')
 const allVariables = computed(() => {
   const variables: TreeItem[] = []
   const variableMap = new Map<string, TreeItem>()
-  const sysVars = Object.values(getAllSysVar(database.devices))
+  const sysVars = Object.values(getAllSysVar(database.devices, database.tester))
   const allList = [...Object.values(database.vars), ...sysVars]
   // 先创建所有用户变量节点
   for (const varItem of allList) {
@@ -167,7 +167,8 @@ const gridOptions = computed<VxeGridProps<TreeItem>>(() => ({
     { field: 'value.initValue', title: 'Init Value', width: 100 },
     { field: 'value.min', title: 'Min', width: 100 },
     { field: 'value.max', title: 'Max', width: 100 },
-    { field: 'value.unit', title: 'Unit', width: 100 }
+    { field: 'value.unit', title: 'Unit', width: 100 },
+    { field: 'desc', title: 'Description', width: 200 }
   ],
   data: allVariables.value
 }))
@@ -215,7 +216,7 @@ function addVariable() {
       fullNameList.unshift(parentInfo.name)
       parent = parentInfo.parentId
     } else {
-      const sysVarInfo = getAllSysVar(database.devices)[parent]
+      const sysVarInfo = getAllSysVar(database.devices, database.tester)[parent]
       if (sysVarInfo) {
         fullNameList.unshift(sysVarInfo.name)
         parent = sysVarInfo.parentId
