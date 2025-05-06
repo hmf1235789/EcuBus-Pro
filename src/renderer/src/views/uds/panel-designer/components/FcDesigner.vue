@@ -96,7 +96,16 @@
                         @click="clickMenu(element)"
                       >
                         <div class="_fc-l-icon">
-                          <i class="fc-icon" :class="element.icon || 'icon-input'"></i>
+                          <i
+                            class="fc-icon"
+                            :class="element.icon || 'icon-input'"
+                            v-if="typeof element.icon === 'string'"
+                          ></i>
+                          <Icon
+                            :icon="element.icon"
+                            style="font-size: 24px; margin-bottom: -5px"
+                            v-else
+                          />
                         </div>
                         <span class="_fc-l-name">{{
                           t('com.' + element.name + '.name') || element.label
@@ -568,6 +577,7 @@ import {
   upper,
   useLocale
 } from '../utils/index'
+import { Icon } from '@iconify/vue'
 import viewForm, { designerForm } from '../utils/form'
 import { t as globalT } from '../utils/locale'
 import EventConfig from './EventConfig.vue'
@@ -612,7 +622,8 @@ export default defineComponent({
     fcDraggable,
     DragForm: designerForm.$form(),
     ViewForm: viewForm.$form(),
-    EventConfig
+    EventConfig,
+    Icon
   },
   props: {
     menu: Array,

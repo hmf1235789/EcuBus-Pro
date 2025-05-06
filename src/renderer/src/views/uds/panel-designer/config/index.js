@@ -41,12 +41,13 @@ import tableFormColumn from './rule/tableFormColumn';
 import image from './rule/image';
 import gird from './rule/grid'
 import progress from './rule/progress'
+import message from './rule/message'
 
 const ruleList = [
     input,select,number,radio,_switch,
     subForm,
     alert, button, text, html, divider, tag, image,
-    gird,tabs,tabPane,progress,slider
+    gird,tabs,tabPane,progress,slider,message
     // row, table, tabs, space, card, collapse,
     // col, tabPane, collapseItem,
   
