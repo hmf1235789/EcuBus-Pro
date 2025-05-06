@@ -151,7 +151,7 @@ const varInfo = computed(() => {
         var: varInfo
       }
     }
-    const sysVar = getAllSysVar(database.devices)
+    const sysVar = getAllSysVar(database.devices, database.tester)
     const sysVarInfo = sysVar[(props.node.bindValue as any).variableId]
     if (sysVarInfo) {
       return {

@@ -89,7 +89,7 @@ import { CAN_TP, CAN_TP_SOCKET, CanTp, TpError } from './cantp'
 import { SIMULATE_CAN } from './simulate'
 import { SupportServiceId, serviceDetail } from '../uds/service'
 import { ServiceId, checkServiceId } from '../share/uds'
-import { UdsLOG } from '../log'
+import { UdsLOG, VarLOG } from '../log'
 import tsconfig from './ts.json'
 import json5 from 'json5'
 import { v4 } from 'uuid'
@@ -221,6 +221,12 @@ export function updateUdsDts(data: DataSet) {
     }
   }
   //lib
+  const udsSeqName: string[] = []
+  for (const tester of Object.values(data.tester)) {
+    for (const seq of tester.seqList) {
+      udsSeqName.push(`${tester.name}.${seq.name}`)
+    }
+  }
 
   const libTmpl = Handlebars.compile(udsHeaderStr)
   const libResult = libTmpl({
@@ -228,7 +234,8 @@ export function updateUdsDts(data: DataSet) {
     services: [...new Set(nameString)],
     jobs: jobs,
     signals: signals,
-    variables: variables
+    variables: variables,
+    udsSeqName: udsSeqName
   })
   return libResult
 }
@@ -243,6 +250,7 @@ export class UDSTesterMain {
   runningCanBase?: CanBase
   runningDoip?: DOIP
   runningLinBase?: LinBase
+  varLog: VarLOG
   services: Record<string, ServiceItem> = {}
   constructor(
     project: ProjectConfig,
@@ -256,6 +264,7 @@ export class UDSTesterMain {
         this.services[item.id] = item
       }
     }
+    this.varLog = new VarLOG(this.tester.id)
   }
   ac: AbortController = new AbortController()
   pool?: UdsTester
@@ -270,6 +279,7 @@ export class UDSTesterMain {
     this.cancel()
     this.pool?.stop()
     this.switchPool?.stop()
+    this.varLog.close()
   }
   private async delay(ms: number): Promise<void> {
     return new Promise((resolve) => {
@@ -559,6 +569,7 @@ export class UDSTesterMain {
         log.systemMsg(`====== Running cycle #${i}, delay 1000ms ======`, this.lastActiveTs)
         await this.delay(1000)
       }
+      const processStep = 100 / targetSeq.services.length
       for (const [serviceIndex, service] of targetSeq.services.entries()) {
         if (this.ac.signal.aborted) {
           break
@@ -573,6 +584,8 @@ export class UDSTesterMain {
           // log.systemMsg('aborted',this.lastActiveTs)
           canTp.close(this.closeBase)
         }
+        const curProcess = Number((processStep * serviceIndex).toFixed(2))
+
         if (service.enable && addrItem && targetService) {
           const serviceRun = async function (tester: UDSTesterMain, s: ServiceItem) {
             if (tester.ac.signal.aborted) {
@@ -763,6 +776,15 @@ export class UDSTesterMain {
               }
             }
             let services: ServiceItem[] | undefined
+
+            const cb = (parentPercent: number, percent: number) => {
+              const p = Number((parentPercent + (percent / 100) * processStep).toFixed(2))
+              tester.varLog.setVarByKey(
+                `Statistics.${tester.tester.id}.${seqIndex}`,
+                p,
+                tester.lastActiveTs
+              )
+            }
             // eslint-disable-next-line no-useless-catch
             try {
               services = await tester.execJob(s.name, params)
@@ -816,6 +838,7 @@ export class UDSTesterMain {
 
                 percent += step
                 log.udsIndex(tester.tester.id, serviceIndex, ser.name, 'progress', percent)
+                cb(curProcess, percent)
               }
             }
             if (tester.switchPool) {
@@ -841,9 +864,15 @@ export class UDSTesterMain {
             await tester.delay(service.delay)
           }
           log.udsIndex(this.tester.id, serviceIndex, targetService.name, 'start')
+          this.varLog.setVarByKey(
+            `Statistics.${this.tester.id}.${seqIndex}`,
+            curProcess,
+            this.lastActiveTs
+          )
           await baseRun(this, targetService)
           log.udsIndex(this.tester.id, serviceIndex, targetService.name, 'finished')
         }
+        this.varLog.setVarByKey(`Statistics.${this.tester.id}.${seqIndex}`, 100, this.lastActiveTs)
       }
     }
   }

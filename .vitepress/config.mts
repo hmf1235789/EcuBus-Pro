@@ -111,7 +111,7 @@ export default withMermaid({
         const container = document.querySelector('.content-container');
         if (!container) return;
        
-      
+
         container.addEventListener('click', function(e) {
           if (e.target.tagName === 'IMG') {
             // Check if the image is inside an anchor tag
@@ -240,6 +240,9 @@ export default withMermaid({
               { text: 'LIN LDF', link: '/docs/um/ldf' },
               { text: 'CAN DBC', link: '/docs/um/dbc' }
             ]
+          },
+          {
+            text:'Panel',link:'/docs/um/panel/index.md'
           },
           {
             text: 'Setting',

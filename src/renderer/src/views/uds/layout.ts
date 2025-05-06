@@ -24,6 +24,7 @@ import gaugeIcon from '@iconify/icons-mdi/gauge'
 import packageIcon from '@iconify/icons-mdi/package-variant'
 import varIcon from '@iconify/icons-mdi/application-variable-outline'
 import dataIcon from '@iconify/icons-mdi/data-usage'
+import panelIcon1 from '@iconify/icons-mdi/solar-panel'
 
 type WinsType = ProjectState['project']['wins']
 type WinValueType = WinsType[keyof WinsType]
@@ -64,6 +65,32 @@ const layoutMap: Record<string, LayoutItem> = {
     key: 'datas',
     component: defineAsyncComponent(() => import('./data.vue')),
     icon: dataIcon
+  },
+  panel: {
+    i: 'Panel',
+    x: 0,
+    y: 0,
+    w: 800,
+    h: 550,
+    minW: 800,
+    label: 'Panel',
+    minH: 550,
+    key: 'panel',
+    component: defineAsyncComponent(() => import('./panel.vue')),
+    icon: panelIcon1
+  },
+  panelPreview: {
+    i: 'PanelPreview',
+    x: 0,
+    y: 0,
+    w: 800,
+    h: 550,
+    minW: 600,
+    label: 'PanelPreview',
+    minH: 400,
+    key: 'panelPreview',
+    component: defineAsyncComponent(() => import('./panelView.vue')),
+    icon: panelIcon1
   },
   package: {
     i: 'Package',

@@ -10,8 +10,8 @@ export function setVar(name: string, value: number | string | number[]) {
       return { found: false, target }
     }
     //type check
-    if (target.value.type == 'number' && typeof value === 'number') {
-      target.value.value = value
+    if (target.value.type == 'number' && !Number.isNaN(Number(value))) {
+      target.value.value = Number(value)
       found = true
     } else if (target.value.type == 'string' && typeof value === 'string') {
       target.value.value = value

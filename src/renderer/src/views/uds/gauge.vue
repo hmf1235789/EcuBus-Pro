@@ -620,33 +620,34 @@ const addSignal = () => {
   signalDialogVisible.value = true
 }
 
-const handleAddSignal = (node: GraphNode<GraphBindSignalValue | GraphBindVariableValue>) => {
+const handleAddSignal = (node: GraphNode<GraphBindSignalValue | GraphBindVariableValue> | null) => {
   signalDialogVisible.value = false
   variableDialogVisible.value = false
-
-  //check existing graph
-  const existed = filteredTreeData.value.find((v) => v.id == node.id)
-  if (existed) {
-    ElNotification({
-      offset: 50,
-      message: 'Signal already exists',
-      type: 'warning',
-      appendTo: appendId.value
-    })
-    return
-  }
-
-  if (props.editIndex) {
-    node.graph = {
-      id: props.editIndex
+  if (node) {
+    //check existing graph
+    const existed = filteredTreeData.value.find((v) => v.id == node.id)
+    if (existed) {
+      ElNotification({
+        offset: 50,
+        message: 'Signal already exists',
+        type: 'warning',
+        appendTo: appendId.value
+      })
+      return
     }
+
+    if (props.editIndex) {
+      node.graph = {
+        id: props.editIndex
+      }
+    }
+    filteredTreeData.value.push(node)
+    window.logBus.on(node.id, dataUpdate)
+    graphs[node.id] = node
+    nextTick(() => {
+      treeRef.value.setChecked(node.id, true)
+    })
   }
-  filteredTreeData.value.push(node)
-  window.logBus.on(node.id, dataUpdate)
-  graphs[node.id] = node
-  nextTick(() => {
-    treeRef.value.setChecked(node.id, true)
-  })
 }
 
 // 在删除图表时也要清理对应的缓存

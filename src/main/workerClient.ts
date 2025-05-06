@@ -28,7 +28,7 @@ type HandlerMap = {
     pool: UdsTester,
     data: {
       signal: string
-      value: number | number[] | string
+      value: number | number[]
     }
   ) => void
   registerEthVirtualEntity: (
@@ -43,6 +43,20 @@ type HandlerMap = {
     data: {
       name: string
       value: number | number[] | string
+    }
+  ) => void
+  runUdsSeq: (
+    pool: UdsTester,
+    data: {
+      name: string
+      device?: string
+    }
+  ) => void
+  stopUdsSeq: (
+    pool: UdsTester,
+    data: {
+      name: string
+      device?: string
     }
   ) => void
 }
@@ -190,9 +204,11 @@ export default class UdsTester {
     }
   }
   varHandle(data: { name: string; value: number | string | number[]; id: string }) {
-    this.workerEmit('__varUpdate', data).catch((e: any) => {
-      this.log.systemMsg(e.toString(), this.ts, 'error')
-    })
+    if (!this.selfStop) {
+      this.workerEmit('__varUpdate', data).catch((e: any) => {
+        this.log.systemMsg(e.toString(), this.ts, 'error')
+      })
+    }
   }
   private async workerEmit(method: string, data: any): Promise<boolean> {
     return new Promise((resolve, reject) => {
@@ -359,18 +375,27 @@ export default class UdsTester {
 
   async exec(name: string, method: string, param: any[]): Promise<ServiceItem[]> {
     return new Promise((resolve, reject) => {
-      if (Object.keys(this.worker.processing).length > 0) {
-        reject(new Error(`function ${method} not finished, async function need call with await`))
-        return
+      const pendingProcess = Object.values(this.worker.processing)
+      const promiseList = []
+      if (pendingProcess.length > 0) {
+        // reject(new Error(`function ${method} not finished, async function need call with await`))
+        // return
+        promiseList.push(...pendingProcess.map((p: any) => p.resolver))
       }
-      this.pool
-        .exec(`${name}.${method}`, param, {
-          on: (payload: any) => {
-            this.eventHandler(payload, resolve, reject)
-          }
-        })
-        .then((value: any) => {
-          resolve(value)
+      Promise.all(promiseList)
+        .then(() => {
+          this.pool
+            .exec(`${name}.${method}`, param, {
+              on: (payload: any) => {
+                this.eventHandler(payload, resolve, reject)
+              }
+            })
+            .then((value: any) => {
+              resolve(value)
+            })
+            .catch((e: any) => {
+              reject(formatError(e))
+            })
         })
         .catch((e: any) => {
           reject(formatError(e))

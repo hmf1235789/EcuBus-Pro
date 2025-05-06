@@ -78,6 +78,7 @@ const serviceList = ['{{{serviceName}}}'] as const
 const allServicesSend = ['{{{serviceName}}}.send'] as const
 const allServicesRecv = ['{{{serviceName}}}.recv'] as const
 const allSignal = ['{{{signalName}}}'] as const
+const allUdsSeq = ['{{{udsSeqName}}}'] as const
 
 interface Jobs {
   string: (data: Buffer) => string
@@ -102,6 +103,12 @@ export type ServiceNameSend = (typeof allServicesSend)[number]
  * @category UDS
  */
 export type ServiceNameRecv = (typeof allServicesRecv)[number]
+
+/**
+ * All UDS sequence names configured in Diagnostic Service.
+ * @category UDS
+ */
+export type UdsSeqName = (typeof allUdsSeq)[number]
 
 /**
  * All signals name config in Diagnostic Service.
@@ -1466,6 +1473,71 @@ export async function setVar<T extends keyof VariableMap>(
       data: {
         name,
         value
+      }
+    })
+    emitMap.set(id, { resolve, reject })
+    id++
+  })
+
+  return await p
+}
+
+/**
+ * Run a UDS sequence
+ *
+ * @category UDS
+ * @param {UdsSeqName} seqName - The name of the UDS sequence to run
+ * @param {string} [device] - The optional device name to run the sequence on when multiple devices are connected
+ * @returns {Promise<void>} - Returns a promise that resolves when sequence completes
+ *
+ * @example
+ * ```ts
+ * // Run a UDS sequence
+ * await runUdsSeq('MySequence');
+ *
+ * // Run sequence on specific device
+ * await runUdsSeq('MySequence', 'Device1');
+ * ```
+ */
+export async function runUdsSeq(seqName: UdsSeqName, device?: string): Promise<void> {
+  const p: Promise<void> = new Promise((resolve, reject) => {
+    workerpool.workerEmit({
+      id: id,
+      event: 'runUdsSeq',
+      data: {
+        device,
+        name: seqName
+      }
+    })
+    emitMap.set(id, { resolve, reject })
+    id++
+  })
+
+  return await p
+}
+
+/**
+ * Stop a running UDS sequence
+ *
+ * @category UDS
+ * @param {UdsSeqName} seqName - The name of the UDS sequence to stop
+ * @param {string} [device] - The optional device name when multiple devices are connected
+ * @returns {Promise<void>} - Returns a promise that resolves when sequence is stopped
+ *
+ * @example
+ * ```ts
+ * // Stop a UDS sequence
+ * await stopUdsSeq('MySequence');
+ * ```
+ */
+export async function stopUdsSeq(seqName: UdsSeqName, device?: string): Promise<void> {
+  const p: Promise<void> = new Promise((resolve, reject) => {
+    workerpool.workerEmit({
+      id: id,
+      event: 'stopUdsSeq',
+      data: {
+        device,
+        name: seqName
       }
     })
     emitMap.set(id, { resolve, reject })

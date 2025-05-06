@@ -197,7 +197,7 @@ const userTableData = computed(() => {
   return list
 })
 const systemTableData = computed(() => {
-  return Object.values(getAllSysVar(dataStore.devices))
+  return Object.values(getAllSysVar(dataStore.devices, dataStore.tester))
 })
 // Define popoverIndex to track the selected variable
 const popoverIndex = ref('')
@@ -293,6 +293,11 @@ const userGridOptions = computed<VxeGridProps>(() => ({
       width: 150,
       editRender: {},
       slots: { default: 'default_max' }
+    },
+    {
+      field: 'desc',
+      title: 'Description',
+      width: 200
     }
   ]
 }))

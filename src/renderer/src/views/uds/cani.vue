@@ -69,7 +69,7 @@
             v-for="key in dataBase.ia[editIndex].devices"
             :key="key"
             :value="key"
-            :label="devices[key].name"
+            :label="devices[key]?.name"
           ></el-option>
         </el-select>
       </template>
@@ -228,7 +228,7 @@
                 v-for="key in dataBase.ia[editIndex].devices"
                 :key="key"
                 :value="key"
-                :label="devices[key].name"
+                :label="devices[key]?.name"
               ></el-option>
             </el-select>
           </el-form-item>

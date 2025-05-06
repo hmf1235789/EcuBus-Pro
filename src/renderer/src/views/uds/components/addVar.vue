@@ -43,6 +43,16 @@
               <Icon :icon="variableIcon" style="font-size: 14px" />
             </el-button>
           </el-tooltip>
+          <el-tooltip
+            v-if="props.highlightId"
+            effect="light"
+            content="Remove Attach Signal"
+            placement="bottom"
+          >
+            <el-button type="warning" link @click="removeSignal">
+              <Icon :icon="deleteIcon" style="font-size: 14px" />
+            </el-button>
+          </el-tooltip>
         </div>
       </template>
       <template #type="{ row }">
@@ -53,7 +63,7 @@
 </template>
 <script setup lang="ts">
 import { useDataStore } from '@r/stores/data'
-import { computed, h, ref, onMounted } from 'vue'
+import { computed, h, ref, onMounted, nextTick } from 'vue'
 import type { VxeGridProps } from 'vxe-table'
 import varIcon from '@iconify/icons-mdi/application-variable-outline'
 import userIcon from '@iconify/icons-material-symbols/person-outline'
@@ -67,6 +77,7 @@ import { v4 } from 'uuid'
 import searchIcon from '@iconify/icons-material-symbols/search'
 import { ElMessage } from 'element-plus'
 import { getAllSysVar } from 'nodeCan/sysVar'
+import deleteIcon from '@iconify/icons-material-symbols/leak-remove'
 
 interface TreeItem {
   id: string
@@ -87,6 +98,7 @@ interface TreeItem {
 const vxeRef = ref()
 const props = defineProps<{
   height: number
+  highlightId?: string
 }>()
 
 const database = useDataStore()
@@ -98,7 +110,7 @@ const searchText = ref('')
 const allVariables = computed(() => {
   const variables: TreeItem[] = []
   const variableMap = new Map<string, TreeItem>()
-  const sysVars = Object.values(getAllSysVar(database.devices))
+  const sysVars = Object.values(getAllSysVar(database.devices, database.tester))
   const allList = [...Object.values(database.vars), ...sysVars]
   // 先创建所有用户变量节点
   for (const varItem of allList) {
@@ -140,6 +152,7 @@ const gridOptions = computed<VxeGridProps<TreeItem>>(() => ({
     expandAll: false
   },
   rowConfig: {
+    keyField: 'id',
     isCurrent: true
   },
   toolbarConfig: {
@@ -154,7 +167,8 @@ const gridOptions = computed<VxeGridProps<TreeItem>>(() => ({
     { field: 'value.initValue', title: 'Init Value', width: 100 },
     { field: 'value.min', title: 'Min', width: 100 },
     { field: 'value.max', title: 'Max', width: 100 },
-    { field: 'value.unit', title: 'Unit', width: 100 }
+    { field: 'value.unit', title: 'Unit', width: 100 },
+    { field: 'desc', title: 'Description', width: 200 }
   ],
   data: allVariables.value
 }))
@@ -175,13 +189,23 @@ function toggleExpand() {
 }
 
 const emits = defineEmits<{
-  addVariable: [value: GraphNode<GraphBindVariableValue>] // named tuple syntax
+  addVariable: [value: GraphNode<GraphBindVariableValue> | null] // named tuple syntax
 }>()
 
 function randomColor() {
-  return '#' + Math.floor(Math.random() * 16777215).toString(16)
+  let color
+  do {
+    color =
+      '#' +
+      Math.floor(Math.random() * 16777215)
+        .toString(16)
+        .padStart(6, '0')
+  } while (color === '#ffffff' || color === '#FFFFFF')
+  return color
 }
-
+function removeSignal() {
+  emits('addVariable', null)
+}
 function addVariable() {
   if (!highlightedRow.value) return
   const fullNameList: string[] = [highlightedRow.value.name]
@@ -192,7 +216,7 @@ function addVariable() {
       fullNameList.unshift(parentInfo.name)
       parent = parentInfo.parentId
     } else {
-      const sysVarInfo = getAllSysVar(database.devices)[parent]
+      const sysVarInfo = getAllSysVar(database.devices, database.tester)[parent]
       if (sysVarInfo) {
         fullNameList.unshift(sysVarInfo.name)
         parent = sysVarInfo.parentId
@@ -322,7 +346,17 @@ function handleSearch() {
 
 // Initialize data
 onMounted(() => {
-  vxeRef.value?.insertAt(allVariables.value)
+  vxeRef.value?.insertAt(allVariables.value).then(() => {
+    if (props.highlightId) {
+      const row = vxeRef.value?.getRowById(props.highlightId)
+      if (row) {
+        vxeRef.value?.setCurrentRow(row)
+        nextTick(() => {
+          vxeRef.value?.scrollToRow(row, 'id')
+        })
+      }
+    }
+  })
 })
 </script>
 <style>

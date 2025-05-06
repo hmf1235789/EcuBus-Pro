@@ -119,6 +119,13 @@ class MyCustomPlugin {
     {{/each}}
 };`)
 
+    content=content.replace('declare const allUdsSeq: readonly ["{{{udsSeqName}}}"];',
+`declare const allUdsSeq: readonly [
+    {{#each this.udsSeqName}}
+        "{{this}}",
+    {{/each}}
+];`)
+
         //write 
         fs.writeFileSync(path.resolve(__dirname,'src','main','share','uds.d.ts.html'),content)
         //bundle cryptoExt.d.ts

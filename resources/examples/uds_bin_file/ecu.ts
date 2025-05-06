@@ -1,4 +1,4 @@
-import { DiagResponse, describe } from 'ECB'
+import { DiagResponse, describe, runUdsSeq, stopUdsSeq } from 'ECB'
 
 Util.Init(() => {})
 
@@ -16,4 +16,15 @@ Util.On('Tester.RequestTransferExit550.send', async (req) => {
   const resp = DiagResponse.fromDiagRequest(req)
   resp.diagSetRaw(Buffer.from([0x77]))
   await resp.outputDiag()
+})
+
+Util.OnVar('UDS.start', (val) => {
+  console.log('var', val)
+  if (val.value) {
+    //start
+    runUdsSeq('Tester.Seq0')
+  } else {
+    //stop
+    stopUdsSeq('Tester.Seq0')
+  }
 })

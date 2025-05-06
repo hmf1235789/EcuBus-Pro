@@ -5,8 +5,8 @@ import { TesterInfo } from './share/tester'
 import UdsTester from './workerClient'
 import { CAN_TP, TpError as CanTpError } from './docan/cantp'
 import { UdsLOG, VarLOG } from './log'
-import { applyBuffer, getRxPdu, getTxPdu, ServiceItem } from './share/uds'
-import { findService } from './docan/uds'
+import { applyBuffer, getRxPdu, getTxPdu, ServiceItem, UdsDevice } from './share/uds'
+import { findService, UDSTesterMain } from './docan/uds'
 import { cloneDeep } from 'lodash'
 import type { Message, Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
 import { updateSignalPhys, updateSignalRaw } from 'src/renderer/src/database/dbc/calc'
@@ -74,7 +74,7 @@ export class NodeClass {
   private ethBaseId: string[] = []
   private startTs = 0
   private boundCb: (frame: CanMessage | LinMsg) => void
-
+  private udsTesterMap = new Map<string, UDSTesterMain>()
   freeEvent: {
     doip: DOIP
     id: string
@@ -166,8 +166,10 @@ export class NodeClass {
         }
         this.pool.registerHandler('output', this.sendFrame.bind(this))
         this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
-        this.pool.registerHandler('setSignal', this.setSignal.bind(this))
+        this.pool.registerHandler('setSignal', NodeClass.setSignal)
         this.pool.registerHandler('setVar', this.setVar.bind(this))
+        this.pool.registerHandler('runUdsSeq', this.runUdsSeq.bind(this))
+        this.pool.registerHandler('stopUdsSeq', this.stopUdsSeq.bind(this))
         if (this.ethBaseId.length > 0) {
           this.pool.registerHandler(
             'registerEthVirtualEntity',
@@ -177,7 +179,6 @@ export class NodeClass {
 
         //cantp
         for (const tester of Object.values(this.testers)) {
-          console.log(tester.simulateBy, nodeItem.id)
           if (tester.simulateBy == nodeItem.id && tester.address.length > 0) {
             for (const c of nodeItem.channel) {
               const canBaseItem = this.canBaseMap.get(c)
@@ -737,11 +738,12 @@ export class NodeClass {
   ) {
     this.varLog.setVar(data.name, data.value, getTsUs() - this.startTs)
   }
-  setSignal(
+  //only update raw value
+  static setSignal(
     pool: UdsTester,
     data: {
       signal: string
-      value: number | string | number[]
+      value: number | number[]
     }
   ) {
     if (Array.isArray(data.value)) {
@@ -768,18 +770,18 @@ export class NodeClass {
         throw new Error(`Signal ${signalName} not found`)
       }
       ss.physValue = data.value
-      if (typeof data.value === 'string' && (ss.values || ss.valueTable)) {
-        const value: {
-          label: string
-          value: number
-        }[] = ss.values ? ss.values : db.valueTables[ss.valueTable!].values
-        if (value) {
-          const v = value.find((v) => v.label === data.value)
-          if (v) {
-            ss.physValue = v.value
-          }
-        }
-      }
+      // if (typeof data.value === 'string' && (ss.values || ss.valueTable)) {
+      //   const value: {
+      //     label: string
+      //     value: number
+      //   }[] = ss.values ? ss.values : db.valueTables[ss.valueTable!].values
+      //   if (value) {
+      //     const v = value.find((v) => v.label === data.value)
+      //     if (v) {
+      //       ss.physValue = v.value
+      //     }
+      //   }
+      // }
       updateSignalPhys(ss)
     } else {
       const linDb = Object.values(global.database.lin).find((db) => db.name == s[0])
@@ -1081,6 +1083,109 @@ export class NodeClass {
       throw new Error(`Does't found attached tester`)
     }
     return 0
+  }
+  async runUdsSeq(
+    pool: UdsTester,
+    data: {
+      name: string
+      device?: string
+    }
+  ) {
+    let targetDevice: UdsDevice | undefined
+    if (this.nodeItem.channel.length > 0) {
+      for (const id of this.nodeItem.channel) {
+        const canBase = this.canBaseMap.get(id)
+        if (canBase && (this.nodeItem.channel.length == 1 || canBase.info.name == data.device)) {
+          targetDevice = {
+            type: 'can',
+            canDevice: canBase.info
+          }
+          break
+        }
+        const linBase = this.linBaseMap.get(id)
+        if (linBase && (this.nodeItem.channel.length == 1 || linBase.info.name == data.device)) {
+          targetDevice = {
+            type: 'lin',
+            linDevice: linBase.info
+          }
+          break
+        }
+        const ethBase = this.ethBaseMap.get(id)
+        if (ethBase && (this.nodeItem.channel.length == 1 || ethBase.name == data.device)) {
+          targetDevice = {
+            type: 'eth',
+            ethDevice: ethBase
+          }
+          break
+        }
+      }
+
+      const testerName = data.name.split('.')[0]
+      const seqName = data.name.split('.')[1]
+      const targetTester = Object.values(this.testers).find((t) => t.name == testerName)
+      if (targetDevice && targetTester) {
+        const cycle = 1
+        const seqIndex = targetTester.seqList.findIndex((t) => (t.name = seqName))
+
+        const uds = new UDSTesterMain(
+          {
+            projectPath: this.projectPath,
+            projectName: this.nodeItem.name
+          },
+          targetTester,
+          targetDevice
+        )
+        if (targetDevice.type == 'can' && targetDevice.canDevice) {
+          const canBase = this.canBaseMap.get(targetDevice.canDevice.id)
+          if (canBase) {
+            uds.setCanBase(this.canBaseMap.get(targetDevice.canDevice.id))
+            this.udsTesterMap.set(data.name, uds)
+            await uds.runSequence(seqIndex, cycle)
+          } else {
+            throw new Error(
+              `can device ${targetDevice.canDevice.vendor}-${targetDevice.canDevice.handle} not found`
+            )
+          }
+        } else if (targetDevice.type == 'eth' && targetDevice.ethDevice) {
+          const id = targetDevice.ethDevice.id
+          const ethBase = this.doips.find((e) => e.base.id == id)
+          if (ethBase) {
+            uds.setDoip(ethBase)
+            this.udsTesterMap.set(data.name, uds)
+            await uds.runSequence(seqIndex, cycle)
+          } else {
+            throw new Error(
+              `eth device ${targetDevice.ethDevice.vendor}-${targetDevice.ethDevice.device.handle} not found`
+            )
+          }
+        } else if (targetDevice.type == 'lin' && targetDevice.linDevice) {
+          const id = targetDevice.linDevice.id
+          const linBase = this.linBaseMap.get(id)
+          if (linBase) {
+            uds.setLinBase(linBase)
+            this.udsTesterMap.set(data.name, uds)
+            await uds.runSequence(seqIndex, cycle)
+          } else {
+            throw new Error(
+              `lin device ${targetDevice.linDevice.vendor}-${targetDevice.linDevice.device.handle} not found`
+            )
+          }
+        }
+      }
+    }
+  }
+  stopUdsSeq(
+    pool: UdsTester,
+    data: {
+      name: string
+      device?: string
+    }
+  ) {
+    const uds = this.udsTesterMap.get(data.name)
+    if (uds) {
+      uds.cancel()
+      this.udsTesterMap.delete(data.name)
+    }
   }
   close() {
     for (const c of this.nodeItem.channel) {
