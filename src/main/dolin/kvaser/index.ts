@@ -10,7 +10,7 @@ import {
   LinMode,
   LinMsg
 } from '../../share/lin'
-import LIN from '../build/Release/peakLin.node'
+import LIN from '../build/Release/kvaserLin.node'
 import { v4 } from 'uuid'
 import { queue, QueueObject } from 'async'
 import { LinLOG } from 'src/main/log'
@@ -18,11 +18,10 @@ import EventEmitter from 'events'
 import LinBase, { LinWriteOpt, QueueItem } from '../base'
 import { getTsUs } from 'src/main/share/can'
 import { LDF } from 'src/renderer/src/database/ldfParse'
+import { KVASER_CAN } from 'src/main/docan/kvaser'
 
 function err2Str(result: number): string {
-  const buffer = Buffer.alloc(256)
-  LIN.LIN_GetErrorText(result, 9, buffer)
-  return buffer.toString()
+  return `Error Code:${result}`
 }
 
 function buf2str(buf: Buffer) {
@@ -33,7 +32,7 @@ function buf2str(buf: Buffer) {
   return buf.toString('utf8', 0, nullCharIndex)
 }
 
-export class PeakLin extends LinBase {
+export class KvaserLin extends LinBase {
   queue = queue((task: QueueItem, cb) => {
     if (task.discard) {
       cb()
@@ -52,14 +51,19 @@ export class PeakLin extends LinBase {
   static loadDllPath(dllPath: string) {
     if (process.platform == 'win32') {
       LIN.LoadDll(dllPath)
+      LIN.linUnloadLibrary()
+      LIN.linInitializeLibrary()
     }
   }
   static getLibVersion() {
     if (process.platform == 'win32') {
-      const v = new LIN.TLINVersion()
-      const result = LIN.LIN_GetVersion(v)
+      const major = new LIN.IntPointer()
+      const minor = new LIN.IntPointer()
+      const build = new LIN.IntPointer()
+
+      const result = LIN.linGetVersion(major.cast(), minor.cast(), build.cast())
       if (result == 0) {
-        return `${v.Major}.${v.Minor}.${v.Revision}.${v.Build}`
+        return `${major.value()}.${minor.value()}.${build.value()}`
       } else {
         throw new Error(err2Str(result))
       }
@@ -386,25 +390,7 @@ export class PeakLin extends LinBase {
   static getValidDevices(): LinDevice[] {
     const devices: LinDevice[] = []
     if (process.platform == 'win32') {
-      const dd = new LIN.HLINHW_JS(100)
-      const count = new LIN.INT_JS()
-      const result = LIN.LIN_GetAvailableHardware(dd.cast(), 100, count.cast())
-
-      if (result == 0) {
-        for (let i = 0; i < count.value(); i++) {
-          const handle = dd.getitem(i)
-          const labelBuffer = Buffer.alloc(256)
-          LIN.LIN_GetHardwareParam(handle, LIN.hwpName, labelBuffer)
-          devices.push({
-            label: `${buf2str(labelBuffer)} (${handle})`,
-            id: handle.toString(),
-            handle
-          })
-        }
-        return devices
-      } else {
-        throw new Error(err2Str(result))
-      }
+      return KVASER_CAN.getLinDevices()
     } else {
       return devices
     }

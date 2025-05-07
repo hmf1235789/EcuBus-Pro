@@ -15,6 +15,7 @@ import { CanLOG } from '../../log'
 import KV from './../build/Release/kvaser.node'
 import { v4 } from 'uuid'
 import { CanBase } from '../base'
+import { LinDevice } from 'nodeCan/lin'
 
 function buf2str(buf: Buffer) {
   const nullCharIndex = buf.indexOf(0) // 0 是 '\0' 的 ASCII 码
@@ -291,6 +292,36 @@ export class KVASER_CAN extends CanBase {
           handle: i,
           label: `${serial}`
         })
+      }
+      return devices
+    }
+    return []
+  }
+  static getLinDevices(): LinDevice[] {
+    if (process.platform == 'win32') {
+      KV.canUnloadLibrary()
+      KV.canInitializeLibrary()
+      const tsClass = new KV.JSINT32()
+      const status = KV.canGetNumberOfChannels(tsClass.cast())
+      if (status != 0) {
+        throw new Error(err2str(status))
+      }
+      const num = tsClass.value()
+      const devices: CanDevice[] = []
+      for (let i = 0; i < num; i++) {
+        const buf = Buffer.alloc(1024)
+        //canCHANNEL_CAP_xxx
+        KV.canGetChannelData(i, 1, buf)
+        const flags = buf.readUInt32LE(0)
+        if (flags & KV.canCHANNEL_CAP_LIN_HYBRID) {
+          KV.canGetChannelData(i, 13, buf)
+          const serial = buf2str(buf)
+          devices.push({
+            id: `kvaser-${i}`,
+            handle: i,
+            label: `${serial}`
+          })
+        }
       }
       return devices
     }

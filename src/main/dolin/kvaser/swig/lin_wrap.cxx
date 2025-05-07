@@ -1252,36 +1252,32 @@ Napi::Value SWIG_NAPI_AppendOutput(Napi::Env env, Napi::Value result, Napi::Valu
 
 /* -------- TYPES TABLE (BEGIN) -------- */
 
-#define SWIGTYPE_p_ByteArray swig_types[0]
-#define SWIGTYPE_p_HLINCLIENT_JS swig_types[1]
-#define SWIGTYPE_p_HLINHW_JS swig_types[2]
-#define SWIGTYPE_p_INT64_JS swig_types[3]
-#define SWIGTYPE_p_INT_JS swig_types[4]
-#define SWIGTYPE_p_TLINFrameEntry swig_types[5]
-#define SWIGTYPE_p_TLINHardwareStatus swig_types[6]
-#define SWIGTYPE_p_TLINMsg swig_types[7]
-#define SWIGTYPE_p_TLINRcvMsg swig_types[8]
-#define SWIGTYPE_p_TLINScheduleSlot swig_types[9]
-#define SWIGTYPE_p_TLINVersion swig_types[10]
-#define SWIGTYPE_p___int64 swig_types[11]
-#define SWIGTYPE_p_char swig_types[12]
-#define SWIGTYPE_p_float swig_types[13]
-#define SWIGTYPE_p_int swig_types[14]
-#define SWIGTYPE_p_long swig_types[15]
-#define SWIGTYPE_p_long_long swig_types[16]
-#define SWIGTYPE_p_p_char swig_types[17]
-#define SWIGTYPE_p_p_unsigned_long swig_types[18]
-#define SWIGTYPE_p_short swig_types[19]
-#define SWIGTYPE_p_signed___int64 swig_types[20]
-#define SWIGTYPE_p_signed_char swig_types[21]
-#define SWIGTYPE_p_unsigned___int64 swig_types[22]
-#define SWIGTYPE_p_unsigned_char swig_types[23]
-#define SWIGTYPE_p_unsigned_int swig_types[24]
-#define SWIGTYPE_p_unsigned_long swig_types[25]
-#define SWIGTYPE_p_unsigned_long_long swig_types[26]
-#define SWIGTYPE_p_unsigned_short swig_types[27]
-static swig_type_info *swig_types[29];
-static swig_module_info swig_module = {swig_types, 28, 0, 0, 0, 0};
+#define SWIGTYPE_p_CharArray swig_types[0]
+#define SWIGTYPE_p_CharPointer swig_types[1]
+#define SWIGTYPE_p_IntPointer swig_types[2]
+#define SWIGTYPE_p_LinMessageInfo swig_types[3]
+#define SWIGTYPE_p_LinStatus swig_types[4]
+#define SWIGTYPE_p_LongArray swig_types[5]
+#define SWIGTYPE_p___int64 swig_types[6]
+#define SWIGTYPE_p_char swig_types[7]
+#define SWIGTYPE_p_float swig_types[8]
+#define SWIGTYPE_p_int swig_types[9]
+#define SWIGTYPE_p_long swig_types[10]
+#define SWIGTYPE_p_long_long swig_types[11]
+#define SWIGTYPE_p_p_LongArray swig_types[12]
+#define SWIGTYPE_p_p_char swig_types[13]
+#define SWIGTYPE_p_p_unsigned_long swig_types[14]
+#define SWIGTYPE_p_short swig_types[15]
+#define SWIGTYPE_p_signed___int64 swig_types[16]
+#define SWIGTYPE_p_signed_char swig_types[17]
+#define SWIGTYPE_p_unsigned___int64 swig_types[18]
+#define SWIGTYPE_p_unsigned_char swig_types[19]
+#define SWIGTYPE_p_unsigned_int swig_types[20]
+#define SWIGTYPE_p_unsigned_long swig_types[21]
+#define SWIGTYPE_p_unsigned_long_long swig_types[22]
+#define SWIGTYPE_p_unsigned_short swig_types[23]
+static swig_type_info *swig_types[25];
+static swig_module_info swig_module = {swig_types, 24, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -1349,17 +1345,27 @@ template <typename T> T SwigValueInit() {
 
 #include <windows.h>
 #include <stdlib.h>
-#include "PLinApi.h"
+#include "linlib.h"
 
 
 #include <stdint.h>		// Use the C99 official header
 
 
-typedef __int64 INT64_JS;
+typedef unsigned char CharPointer;
 
-SWIGINTERN INT64_JS *new_INT64_JS(){
-  return new __int64();
+SWIGINTERN CharPointer *new_CharPointer(){
+  return new unsigned char();
 }
+
+#include <limits.h>
+#if !defined(SWIG_NO_LLONG_MAX)
+# if !defined(LLONG_MAX) && defined(__GNUC__) && defined (__LONG_LONG_MAX__)
+#   define LLONG_MAX __LONG_LONG_MAX__
+#   define LLONG_MIN (-LLONG_MAX - 1LL)
+#   define ULLONG_MAX (LLONG_MAX * 2ULL + 1ULL)
+# endif
+#endif
+
 
 SWIGINTERN
 int SWIG_AsVal_double (Napi::Value obj, double *val)
@@ -1420,132 +1426,6 @@ SWIG_CanCastAsInteger(double *d, double min, double max) {
 
 
 SWIGINTERN
-int SWIG_AsVal_long (Napi::Value obj, long* val)
-{
-  if (!obj.IsNumber()) {
-    return SWIG_TypeError;
-  }
-  if (val) {
-    Napi::Number num;
-    NAPI_CHECK_RESULT(obj.ToNumber(), num);
-    *val = static_cast<long>(num.Int64Value());
-  }
-
-  return SWIG_OK;
-  goto fail;
-fail:
-  return SWIG_ERROR;
-}
-
-
-#include <limits.h>
-#if !defined(SWIG_NO_LLONG_MAX)
-# if !defined(LLONG_MAX) && defined(__GNUC__) && defined (__LONG_LONG_MAX__)
-#   define LLONG_MAX __LONG_LONG_MAX__
-#   define LLONG_MIN (-LLONG_MAX - 1LL)
-#   define ULLONG_MAX (LLONG_MAX * 2ULL + 1ULL)
-# endif
-#endif
-
-
-#if defined(LLONG_MAX) && !defined(SWIG_LONG_LONG_AVAILABLE)
-#  define SWIG_LONG_LONG_AVAILABLE
-#endif
-
-
-#ifdef SWIG_LONG_LONG_AVAILABLE
-SWIGINTERN
-int SWIG_AsVal_long_SS_long (Napi::Value obj, long long* val)
-{
-  if(!obj.IsNumber()) {
-    return SWIG_TypeError;
-  }
-
-  if (val) {
-    Napi::Number num;
-    NAPI_CHECK_RESULT(obj.ToNumber(), num);
-    *val = static_cast<long long>(num.Int64Value());
-  }
-  return SWIG_OK;
-  goto fail;
-fail:
-  return SWIG_ERROR;
-}
-#endif
-
-SWIGINTERN void INT64_JS_assign(INT64_JS *self,__int64 value){
-  *self = value;
-}
-SWIGINTERN __int64 INT64_JS_value(INT64_JS *self){
-  return *self;
-}
-
-#ifdef SWIG_LONG_LONG_AVAILABLE
-SWIGINTERN
-Napi::Value SWIG_From_long_SS_long(Napi::Env env, long long val)
-{
-  return Napi::Number::New(env, val);
-}
-#endif
-
-SWIGINTERN __int64 *INT64_JS_cast(INT64_JS *self){
-  return self;
-}
-SWIGINTERN INT64_JS *INT64_JS_frompointer(__int64 *t){
-  return (INT64_JS *) t;
-}
-
-typedef int INT_JS;
-
-SWIGINTERN INT_JS *new_INT_JS(){
-  return new int();
-}
-
-SWIGINTERN
-int SWIG_AsVal_int (Napi::Value valRef, int* val)
-{
-  if (!valRef.IsNumber()) {
-    return SWIG_TypeError;
-  }
-  if (val) {
-    Napi::Number num;
-    NAPI_CHECK_RESULT(valRef.ToNumber(), num);
-    *val = static_cast<int>(num.Int32Value());
-  }
-
-  return SWIG_OK;
-  goto fail;
-fail:
-  return SWIG_ERROR;
-}
-
-SWIGINTERN void INT_JS_assign(INT_JS *self,int value){
-  *self = value;
-}
-SWIGINTERN int INT_JS_value(INT_JS *self){
-  return *self;
-}
-
-SWIGINTERN
-Napi::Value SWIG_From_int(Napi::Env env, int val)
-{
-  return Napi::Number::New(env, val);
-}
-
-SWIGINTERN int *INT_JS_cast(INT_JS *self){
-  return self;
-}
-SWIGINTERN INT_JS *INT_JS_frompointer(int *t){
-  return (INT_JS *) t;
-}
-
-typedef HLINCLIENT HLINCLIENT_JS;
-
-SWIGINTERN HLINCLIENT_JS *new_HLINCLIENT_JS(){
-  return new HLINCLIENT();
-}
-
-SWIGINTERN
 int SWIG_AsVal_unsigned_SS_long (Napi::Value obj, unsigned long *val)
 {
   if(!obj.IsNumber()) {
@@ -1581,10 +1461,10 @@ SWIG_AsVal_unsigned_SS_char (Napi::Value obj, unsigned char *val)
   return res;
 }
 
-SWIGINTERN void HLINCLIENT_JS_assign(HLINCLIENT_JS *self,HLINCLIENT value){
+SWIGINTERN void CharPointer_assign(CharPointer *self,unsigned char value){
   *self = value;
 }
-SWIGINTERN HLINCLIENT HLINCLIENT_JS_value(HLINCLIENT_JS *self){
+SWIGINTERN unsigned char CharPointer_value(CharPointer *self){
   return *self;
 }
 
@@ -1594,14 +1474,63 @@ SWIG_From_unsigned_SS_char(Napi::Env env, unsigned char c)
   return Napi::Number::New(env, static_cast<double>(c));
 }
 
-SWIGINTERN HLINCLIENT *HLINCLIENT_JS_cast(HLINCLIENT_JS *self){
+SWIGINTERN unsigned char *CharPointer_cast(CharPointer *self){
   return self;
 }
-SWIGINTERN HLINCLIENT_JS *HLINCLIENT_JS_frompointer(HLINCLIENT *t){
-  return (HLINCLIENT_JS *) t;
+SWIGINTERN CharPointer *CharPointer_frompointer(unsigned char *t){
+  return (CharPointer *) t;
 }
 
-typedef BYTE ByteArray;
+typedef int IntPointer;
+
+SWIGINTERN IntPointer *new_IntPointer(){
+  return new int();
+}
+
+SWIGINTERN
+int SWIG_AsVal_int (Napi::Value valRef, int* val)
+{
+  if (!valRef.IsNumber()) {
+    return SWIG_TypeError;
+  }
+  if (val) {
+    Napi::Number num;
+    NAPI_CHECK_RESULT(valRef.ToNumber(), num);
+    *val = static_cast<int>(num.Int32Value());
+  }
+
+  return SWIG_OK;
+  goto fail;
+fail:
+  return SWIG_ERROR;
+}
+
+SWIGINTERN void IntPointer_assign(IntPointer *self,int value){
+  *self = value;
+}
+SWIGINTERN int IntPointer_value(IntPointer *self){
+  return *self;
+}
+
+SWIGINTERN
+Napi::Value SWIG_From_int(Napi::Env env, int val)
+{
+  return Napi::Number::New(env, val);
+}
+
+SWIGINTERN int *IntPointer_cast(IntPointer *self){
+  return self;
+}
+SWIGINTERN IntPointer *IntPointer_frompointer(int *t){
+  return (IntPointer *) t;
+}
+
+typedef unsigned long LongArray;
+
+
+#if defined(LLONG_MAX) && !defined(SWIG_LONG_LONG_AVAILABLE)
+#  define SWIG_LONG_LONG_AVAILABLE
+#endif
 
 
 #ifdef SWIG_LONG_LONG_AVAILABLE
@@ -1647,37 +1576,46 @@ SWIG_AsVal_size_t (Napi::Value obj, size_t *val)
   return res;
 }
 
-SWIGINTERN ByteArray *new_ByteArray(size_t nelements){
-  return new BYTE[nelements]();
+SWIGINTERN LongArray *new_LongArray(size_t nelements){
+  return new unsigned long[nelements]();
 }
-SWIGINTERN BYTE ByteArray_getitem(ByteArray *self,size_t index){
-  return self[index];
-}
-SWIGINTERN void ByteArray_setitem(ByteArray *self,size_t index,BYTE value){
-  self[index] = value;
-}
-SWIGINTERN BYTE *ByteArray_cast(ByteArray *self){
-  return self;
-}
-SWIGINTERN ByteArray *ByteArray_frompointer(BYTE *t){
-  return (ByteArray *) t;
-}
-
-typedef HLINHW HLINHW_JS;
-
-SWIGINTERN HLINHW_JS *new_HLINHW_JS(size_t nelements){
-  return new HLINHW[nelements]();
-}
-SWIGINTERN HLINHW HLINHW_JS_getitem(HLINHW_JS *self,size_t index){
+SWIGINTERN unsigned long LongArray_getitem(LongArray *self,size_t index){
   return self[index];
 }
 
 SWIGINTERN
-Napi::Value SWIG_From_unsigned_SS_short(Napi::Env env, unsigned short val)
+Napi::Value SWIG_From_unsigned_SS_long(Napi::Env env, unsigned long val)
 {
   return Napi::Number::New(env, val);
 }
 
+SWIGINTERN void LongArray_setitem(LongArray *self,size_t index,unsigned long value){
+  self[index] = value;
+}
+SWIGINTERN unsigned long *LongArray_cast(LongArray *self){
+  return self;
+}
+SWIGINTERN LongArray *LongArray_frompointer(unsigned long *t){
+  return (LongArray *) t;
+}
+
+typedef unsigned char CharArray;
+
+SWIGINTERN CharArray *new_CharArray(size_t nelements){
+  return new unsigned char[nelements]();
+}
+SWIGINTERN unsigned char CharArray_getitem(CharArray *self,size_t index){
+  return self[index];
+}
+SWIGINTERN void CharArray_setitem(CharArray *self,size_t index,unsigned char value){
+  self[index] = value;
+}
+SWIGINTERN unsigned char *CharArray_cast(CharArray *self){
+  return self;
+}
+SWIGINTERN CharArray *CharArray_frompointer(unsigned char *t){
+  return (CharArray *) t;
+}
 
 SWIGINTERN
 int SWIG_AsVal_unsigned_SS_short (Napi::Value valRef, unsigned short* val)
@@ -1700,25 +1638,16 @@ fail:
   return SWIG_ERROR;
 }
 
-SWIGINTERN void HLINHW_JS_setitem(HLINHW_JS *self,size_t index,HLINHW value){
-  self[index] = value;
-}
-SWIGINTERN HLINHW *HLINHW_JS_cast(HLINHW_JS *self){
-  return self;
-}
-SWIGINTERN HLINHW_JS *HLINHW_JS_frompointer(HLINHW *t){
-  return (HLINHW_JS *) t;
-}
 
 SWIGINTERN
-Napi::Value SWIG_From_unsigned_SS_int(Napi::Env env, unsigned int val)
+Napi::Value SWIG_From_unsigned_SS_short(Napi::Env env, unsigned short val)
 {
   return Napi::Number::New(env, val);
 }
 
 
 SWIGINTERN
-int SWIG_AsVal_short (Napi::Value valRef, short* val)
+int SWIG_AsVal_unsigned_SS_int (Napi::Value valRef, unsigned int* val)
 {
   if (!valRef.IsNumber()) {
     return SWIG_TypeError;
@@ -1726,7 +1655,10 @@ int SWIG_AsVal_short (Napi::Value valRef, short* val)
   if (val) {
     Napi::Number num;
     NAPI_CHECK_RESULT(valRef.ToNumber(), num);
-    *val = static_cast<short>(num.Int32Value());
+    if (num.Int64Value() < 0) {
+      return SWIG_TypeError;
+    }
+    *val = static_cast<unsigned int>(num.Uint32Value());
   }
 
   return SWIG_OK;
@@ -1736,33 +1668,8 @@ fail:
 }
 
 
-SWIGINTERN
-Napi::Value SWIG_From_long(Napi::Env env, long val)
-{
-  return Napi::Number::New(env, val);
-}
-
-
-SWIGINTERNINLINE Napi::Value
-SWIG_From_short  SWIG_NAPI_FROM_DECL_ARGS(short value)
-{    
-  return SWIG_From_long  SWIG_NAPI_FROM_CALL_ARGS(value);
-}
-
-
-#ifdef SWIG_LONG_LONG_AVAILABLE
-SWIGINTERN
-Napi::Value SWIG_From_unsigned_SS_long_SS_long(Napi::Env env, unsigned long long val)
-{
-  return Napi::Number::New(env, val);
-}
-#endif
-
-
-SWIGINTERN
-Napi::Value SWIG_From_unsigned_SS_long(Napi::Env env, unsigned long val)
-{
-  return Napi::Number::New(env, val);
+void LoadDll(const char* path) {
+  SetDllDirectory(path);
 }
 
 
@@ -1822,78 +1729,73 @@ fail:
 
 
 
-void LoadDll(const char* path) {
-  SetDllDirectory(path);
-}
-
-
 #define SWIG_NAPI_INIT xmlpp_initialize
 
 
 // jsnapi_class_prologue_template
 template <typename SWIG_OBJ_WRAP>
-class _exports_INT64_JS_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
+class _exports_CharPointer_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
 public:
-  _exports_INT64_JS_templ(const Napi::CallbackInfo &);
-_exports_INT64_JS_templ(bool, const Napi::CallbackInfo &);
+  _exports_CharPointer_templ(const Napi::CallbackInfo &);
+_exports_CharPointer_templ(bool, const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_new_INT64_JS(const Napi::CallbackInfo &);
-virtual ~_exports_INT64_JS_templ();
+Napi::Value _wrap_new_CharPointer(const Napi::CallbackInfo &);
+virtual ~_exports_CharPointer_templ();
 // jsnapi_class_method_declaration
-Napi::Value _wrap_INT64_JS_assign(const Napi::CallbackInfo &);
+Napi::Value _wrap_CharPointer_assign(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_INT64_JS_value(const Napi::CallbackInfo &);
+Napi::Value _wrap_CharPointer_value(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_INT64_JS_cast(const Napi::CallbackInfo &);
+Napi::Value _wrap_CharPointer_cast(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-static Napi::Value _wrap_INT64_JS_frompointer(const Napi::CallbackInfo &);
+static Napi::Value _wrap_CharPointer_frompointer(const Napi::CallbackInfo &);
 // jsnapi_class_epilogue_template
 static void JS_veto_set_static_variable(const Napi::CallbackInfo &, const Napi::Value &);
 void JS_veto_set_variable(const Napi::CallbackInfo &, const Napi::Value &);
 };
 
 template <typename SWIG_OBJ_WRAP>
-void _exports_INT64_JS_templ<SWIG_OBJ_WRAP>::JS_veto_set_static_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
+void _exports_CharPointer_templ<SWIG_OBJ_WRAP>::JS_veto_set_static_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
 SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
 }
 
 template <typename SWIG_OBJ_WRAP>
-void _exports_INT64_JS_templ<SWIG_OBJ_WRAP>::JS_veto_set_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
+void _exports_CharPointer_templ<SWIG_OBJ_WRAP>::JS_veto_set_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
 SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
 }
 // jsnapi_class_instance
-class _exports_INT64_JS_inst : public _exports_INT64_JS_templ<_exports_INT64_JS_inst> {
+class _exports_CharPointer_inst : public _exports_CharPointer_templ<_exports_CharPointer_inst> {
 public:
-  using _exports_INT64_JS_templ::_exports_INT64_JS_templ;
-  virtual ~_exports_INT64_JS_inst() {
+  using _exports_CharPointer_templ::_exports_CharPointer_templ;
+  virtual ~_exports_CharPointer_inst() {
     
   };
   static void GetMembers(
     Napi::Env,
-    std::map<std::string, _exports_INT64_JS_templ::PropertyDescriptor> &,
-    std::map<std::string, _exports_INT64_JS_templ::PropertyDescriptor> &
+    std::map<std::string, _exports_CharPointer_templ::PropertyDescriptor> &,
+    std::map<std::string, _exports_CharPointer_templ::PropertyDescriptor> &
     );
   static Napi::Function GetClass(Napi::Env);
 };
-/* Class: INT64_JS (_exports_INT64_JS) */
+/* Class: CharPointer (_exports_CharPointer) */
 // jsnapi_getclass
-Napi::Function _exports_INT64_JS_inst::GetClass(Napi::Env env) {
-  std::map<std::string, _exports_INT64_JS_templ::PropertyDescriptor> members, staticMembers;
+Napi::Function _exports_CharPointer_inst::GetClass(Napi::Env env) {
+  std::map<std::string, _exports_CharPointer_templ::PropertyDescriptor> members, staticMembers;
   GetMembers(env, members, staticMembers);
   
-  std::vector<_exports_INT64_JS_inst::PropertyDescriptor> symbolTable;
+  std::vector<_exports_CharPointer_inst::PropertyDescriptor> symbolTable;
   for (auto it = members.begin(); it != members.end(); it++)
   symbolTable.push_back(it->second);
   for (auto it = staticMembers.begin(); it != staticMembers.end(); it++)
   symbolTable.push_back(it->second);
   
-  return Napi::ObjectWrap<_exports_INT64_JS_inst>::DefineClass(env, "INT64_JS", symbolTable);
+  return Napi::ObjectWrap<_exports_CharPointer_inst>::DefineClass(env, "CharPointer", symbolTable);
 }
 
-void _exports_INT64_JS_inst::GetMembers(
+void _exports_CharPointer_inst::GetMembers(
   Napi::Env env,
-  std::map<std::string, _exports_INT64_JS_templ::PropertyDescriptor> &members,
-  std::map<std::string, _exports_INT64_JS_templ::PropertyDescriptor> &staticMembers
+  std::map<std::string, _exports_CharPointer_templ::PropertyDescriptor> &members,
+  std::map<std::string, _exports_CharPointer_templ::PropertyDescriptor> &staticMembers
   ) {
   std::map<std::string, SWIG_NAPI_ObjectWrap_templ<SWIG_NAPI_ObjectWrap_inst>::PropertyDescriptor> baseMembers, baseStaticMembers;
   SWIG_NAPI_ObjectWrap_inst::GetMembers(env, baseMembers, baseStaticMembers);
@@ -1905,24 +1807,24 @@ void _exports_INT64_JS_inst::GetMembers(
   members.erase("assign");
   members.insert({
     "assign",
-      _exports_INT64_JS_templ::InstanceMethod("assign",
-        &_exports_INT64_JS_templ::_wrap_INT64_JS_assign,
+      _exports_CharPointer_templ::InstanceMethod("assign",
+        &_exports_CharPointer_templ::_wrap_CharPointer_assign,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   // jsnapi_member_function_descriptor
   members.erase("value");
   members.insert({
     "value",
-      _exports_INT64_JS_templ::InstanceMethod("value",
-        &_exports_INT64_JS_templ::_wrap_INT64_JS_value,
+      _exports_CharPointer_templ::InstanceMethod("value",
+        &_exports_CharPointer_templ::_wrap_CharPointer_value,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   // jsnapi_member_function_descriptor
   members.erase("cast");
   members.insert({
     "cast",
-      _exports_INT64_JS_templ::InstanceMethod("cast",
-        &_exports_INT64_JS_templ::_wrap_INT64_JS_cast,
+      _exports_CharPointer_templ::InstanceMethod("cast",
+        &_exports_CharPointer_templ::_wrap_CharPointer_cast,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   
@@ -1932,75 +1834,75 @@ void _exports_INT64_JS_inst::GetMembers(
   staticMembers.insert({
     "frompointer",
       StaticMethod("frompointer",
-        &_exports_INT64_JS_templ::_wrap_INT64_JS_frompointer,
+        &_exports_CharPointer_templ::_wrap_CharPointer_frompointer,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   
 }
 // jsnapi_class_prologue_template
 template <typename SWIG_OBJ_WRAP>
-class _exports_INT_JS_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
+class _exports_IntPointer_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
 public:
-  _exports_INT_JS_templ(const Napi::CallbackInfo &);
-_exports_INT_JS_templ(bool, const Napi::CallbackInfo &);
+  _exports_IntPointer_templ(const Napi::CallbackInfo &);
+_exports_IntPointer_templ(bool, const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_new_INT_JS(const Napi::CallbackInfo &);
-virtual ~_exports_INT_JS_templ();
+Napi::Value _wrap_new_IntPointer(const Napi::CallbackInfo &);
+virtual ~_exports_IntPointer_templ();
 // jsnapi_class_method_declaration
-Napi::Value _wrap_INT_JS_assign(const Napi::CallbackInfo &);
+Napi::Value _wrap_IntPointer_assign(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_INT_JS_value(const Napi::CallbackInfo &);
+Napi::Value _wrap_IntPointer_value(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_INT_JS_cast(const Napi::CallbackInfo &);
+Napi::Value _wrap_IntPointer_cast(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-static Napi::Value _wrap_INT_JS_frompointer(const Napi::CallbackInfo &);
+static Napi::Value _wrap_IntPointer_frompointer(const Napi::CallbackInfo &);
 // jsnapi_class_epilogue_template
 static void JS_veto_set_static_variable(const Napi::CallbackInfo &, const Napi::Value &);
 void JS_veto_set_variable(const Napi::CallbackInfo &, const Napi::Value &);
 };
 
 template <typename SWIG_OBJ_WRAP>
-void _exports_INT_JS_templ<SWIG_OBJ_WRAP>::JS_veto_set_static_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
+void _exports_IntPointer_templ<SWIG_OBJ_WRAP>::JS_veto_set_static_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
 SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
 }
 
 template <typename SWIG_OBJ_WRAP>
-void _exports_INT_JS_templ<SWIG_OBJ_WRAP>::JS_veto_set_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
+void _exports_IntPointer_templ<SWIG_OBJ_WRAP>::JS_veto_set_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
 SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
 }
 // jsnapi_class_instance
-class _exports_INT_JS_inst : public _exports_INT_JS_templ<_exports_INT_JS_inst> {
+class _exports_IntPointer_inst : public _exports_IntPointer_templ<_exports_IntPointer_inst> {
 public:
-  using _exports_INT_JS_templ::_exports_INT_JS_templ;
-  virtual ~_exports_INT_JS_inst() {
+  using _exports_IntPointer_templ::_exports_IntPointer_templ;
+  virtual ~_exports_IntPointer_inst() {
     
   };
   static void GetMembers(
     Napi::Env,
-    std::map<std::string, _exports_INT_JS_templ::PropertyDescriptor> &,
-    std::map<std::string, _exports_INT_JS_templ::PropertyDescriptor> &
+    std::map<std::string, _exports_IntPointer_templ::PropertyDescriptor> &,
+    std::map<std::string, _exports_IntPointer_templ::PropertyDescriptor> &
     );
   static Napi::Function GetClass(Napi::Env);
 };
-/* Class: INT_JS (_exports_INT_JS) */
+/* Class: IntPointer (_exports_IntPointer) */
 // jsnapi_getclass
-Napi::Function _exports_INT_JS_inst::GetClass(Napi::Env env) {
-  std::map<std::string, _exports_INT_JS_templ::PropertyDescriptor> members, staticMembers;
+Napi::Function _exports_IntPointer_inst::GetClass(Napi::Env env) {
+  std::map<std::string, _exports_IntPointer_templ::PropertyDescriptor> members, staticMembers;
   GetMembers(env, members, staticMembers);
   
-  std::vector<_exports_INT_JS_inst::PropertyDescriptor> symbolTable;
+  std::vector<_exports_IntPointer_inst::PropertyDescriptor> symbolTable;
   for (auto it = members.begin(); it != members.end(); it++)
   symbolTable.push_back(it->second);
   for (auto it = staticMembers.begin(); it != staticMembers.end(); it++)
   symbolTable.push_back(it->second);
   
-  return Napi::ObjectWrap<_exports_INT_JS_inst>::DefineClass(env, "INT_JS", symbolTable);
+  return Napi::ObjectWrap<_exports_IntPointer_inst>::DefineClass(env, "IntPointer", symbolTable);
 }
 
-void _exports_INT_JS_inst::GetMembers(
+void _exports_IntPointer_inst::GetMembers(
   Napi::Env env,
-  std::map<std::string, _exports_INT_JS_templ::PropertyDescriptor> &members,
-  std::map<std::string, _exports_INT_JS_templ::PropertyDescriptor> &staticMembers
+  std::map<std::string, _exports_IntPointer_templ::PropertyDescriptor> &members,
+  std::map<std::string, _exports_IntPointer_templ::PropertyDescriptor> &staticMembers
   ) {
   std::map<std::string, SWIG_NAPI_ObjectWrap_templ<SWIG_NAPI_ObjectWrap_inst>::PropertyDescriptor> baseMembers, baseStaticMembers;
   SWIG_NAPI_ObjectWrap_inst::GetMembers(env, baseMembers, baseStaticMembers);
@@ -2012,24 +1914,24 @@ void _exports_INT_JS_inst::GetMembers(
   members.erase("assign");
   members.insert({
     "assign",
-      _exports_INT_JS_templ::InstanceMethod("assign",
-        &_exports_INT_JS_templ::_wrap_INT_JS_assign,
+      _exports_IntPointer_templ::InstanceMethod("assign",
+        &_exports_IntPointer_templ::_wrap_IntPointer_assign,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   // jsnapi_member_function_descriptor
   members.erase("value");
   members.insert({
     "value",
-      _exports_INT_JS_templ::InstanceMethod("value",
-        &_exports_INT_JS_templ::_wrap_INT_JS_value,
+      _exports_IntPointer_templ::InstanceMethod("value",
+        &_exports_IntPointer_templ::_wrap_IntPointer_value,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   // jsnapi_member_function_descriptor
   members.erase("cast");
   members.insert({
     "cast",
-      _exports_INT_JS_templ::InstanceMethod("cast",
-        &_exports_INT_JS_templ::_wrap_INT_JS_cast,
+      _exports_IntPointer_templ::InstanceMethod("cast",
+        &_exports_IntPointer_templ::_wrap_IntPointer_cast,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   
@@ -2039,182 +1941,75 @@ void _exports_INT_JS_inst::GetMembers(
   staticMembers.insert({
     "frompointer",
       StaticMethod("frompointer",
-        &_exports_INT_JS_templ::_wrap_INT_JS_frompointer,
+        &_exports_IntPointer_templ::_wrap_IntPointer_frompointer,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   
 }
 // jsnapi_class_prologue_template
 template <typename SWIG_OBJ_WRAP>
-class _exports_HLINCLIENT_JS_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
+class _exports_LongArray_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
 public:
-  _exports_HLINCLIENT_JS_templ(const Napi::CallbackInfo &);
-_exports_HLINCLIENT_JS_templ(bool, const Napi::CallbackInfo &);
+  _exports_LongArray_templ(const Napi::CallbackInfo &);
+_exports_LongArray_templ(bool, const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_new_HLINCLIENT_JS(const Napi::CallbackInfo &);
-virtual ~_exports_HLINCLIENT_JS_templ();
+Napi::Value _wrap_new_LongArray(const Napi::CallbackInfo &);
+virtual ~_exports_LongArray_templ();
 // jsnapi_class_method_declaration
-Napi::Value _wrap_HLINCLIENT_JS_assign(const Napi::CallbackInfo &);
+Napi::Value _wrap_LongArray_getitem(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_HLINCLIENT_JS_value(const Napi::CallbackInfo &);
+Napi::Value _wrap_LongArray_setitem(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_HLINCLIENT_JS_cast(const Napi::CallbackInfo &);
+Napi::Value _wrap_LongArray_cast(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-static Napi::Value _wrap_HLINCLIENT_JS_frompointer(const Napi::CallbackInfo &);
+static Napi::Value _wrap_LongArray_frompointer(const Napi::CallbackInfo &);
 // jsnapi_class_epilogue_template
 static void JS_veto_set_static_variable(const Napi::CallbackInfo &, const Napi::Value &);
 void JS_veto_set_variable(const Napi::CallbackInfo &, const Napi::Value &);
 };
 
 template <typename SWIG_OBJ_WRAP>
-void _exports_HLINCLIENT_JS_templ<SWIG_OBJ_WRAP>::JS_veto_set_static_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
+void _exports_LongArray_templ<SWIG_OBJ_WRAP>::JS_veto_set_static_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
 SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
 }
 
 template <typename SWIG_OBJ_WRAP>
-void _exports_HLINCLIENT_JS_templ<SWIG_OBJ_WRAP>::JS_veto_set_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
+void _exports_LongArray_templ<SWIG_OBJ_WRAP>::JS_veto_set_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
 SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
 }
 // jsnapi_class_instance
-class _exports_HLINCLIENT_JS_inst : public _exports_HLINCLIENT_JS_templ<_exports_HLINCLIENT_JS_inst> {
+class _exports_LongArray_inst : public _exports_LongArray_templ<_exports_LongArray_inst> {
 public:
-  using _exports_HLINCLIENT_JS_templ::_exports_HLINCLIENT_JS_templ;
-  virtual ~_exports_HLINCLIENT_JS_inst() {
+  using _exports_LongArray_templ::_exports_LongArray_templ;
+  virtual ~_exports_LongArray_inst() {
     
   };
   static void GetMembers(
     Napi::Env,
-    std::map<std::string, _exports_HLINCLIENT_JS_templ::PropertyDescriptor> &,
-    std::map<std::string, _exports_HLINCLIENT_JS_templ::PropertyDescriptor> &
+    std::map<std::string, _exports_LongArray_templ::PropertyDescriptor> &,
+    std::map<std::string, _exports_LongArray_templ::PropertyDescriptor> &
     );
   static Napi::Function GetClass(Napi::Env);
 };
-/* Class: HLINCLIENT_JS (_exports_HLINCLIENT_JS) */
+/* Class: LongArray (_exports_LongArray) */
 // jsnapi_getclass
-Napi::Function _exports_HLINCLIENT_JS_inst::GetClass(Napi::Env env) {
-  std::map<std::string, _exports_HLINCLIENT_JS_templ::PropertyDescriptor> members, staticMembers;
+Napi::Function _exports_LongArray_inst::GetClass(Napi::Env env) {
+  std::map<std::string, _exports_LongArray_templ::PropertyDescriptor> members, staticMembers;
   GetMembers(env, members, staticMembers);
   
-  std::vector<_exports_HLINCLIENT_JS_inst::PropertyDescriptor> symbolTable;
+  std::vector<_exports_LongArray_inst::PropertyDescriptor> symbolTable;
   for (auto it = members.begin(); it != members.end(); it++)
   symbolTable.push_back(it->second);
   for (auto it = staticMembers.begin(); it != staticMembers.end(); it++)
   symbolTable.push_back(it->second);
   
-  return Napi::ObjectWrap<_exports_HLINCLIENT_JS_inst>::DefineClass(env, "HLINCLIENT_JS", symbolTable);
+  return Napi::ObjectWrap<_exports_LongArray_inst>::DefineClass(env, "LongArray", symbolTable);
 }
 
-void _exports_HLINCLIENT_JS_inst::GetMembers(
+void _exports_LongArray_inst::GetMembers(
   Napi::Env env,
-  std::map<std::string, _exports_HLINCLIENT_JS_templ::PropertyDescriptor> &members,
-  std::map<std::string, _exports_HLINCLIENT_JS_templ::PropertyDescriptor> &staticMembers
-  ) {
-  std::map<std::string, SWIG_NAPI_ObjectWrap_templ<SWIG_NAPI_ObjectWrap_inst>::PropertyDescriptor> baseMembers, baseStaticMembers;
-  SWIG_NAPI_ObjectWrap_inst::GetMembers(env, baseMembers, baseStaticMembers);
-  members.insert(baseMembers.begin(), baseMembers.end());
-  staticMembers.insert(staticMembers.begin(), staticMembers.end());
-  
-  /* register wrapper functions */
-  // jsnapi_member_function_descriptor
-  members.erase("assign");
-  members.insert({
-    "assign",
-      _exports_HLINCLIENT_JS_templ::InstanceMethod("assign",
-        &_exports_HLINCLIENT_JS_templ::_wrap_HLINCLIENT_JS_assign,
-        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
-    });
-  // jsnapi_member_function_descriptor
-  members.erase("value");
-  members.insert({
-    "value",
-      _exports_HLINCLIENT_JS_templ::InstanceMethod("value",
-        &_exports_HLINCLIENT_JS_templ::_wrap_HLINCLIENT_JS_value,
-        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
-    });
-  // jsnapi_member_function_descriptor
-  members.erase("cast");
-  members.insert({
-    "cast",
-      _exports_HLINCLIENT_JS_templ::InstanceMethod("cast",
-        &_exports_HLINCLIENT_JS_templ::_wrap_HLINCLIENT_JS_cast,
-        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
-    });
-  
-  /* add static class functions and variables */
-  // jsnapi_register_static_function
-  staticMembers.erase("frompointer");
-  staticMembers.insert({
-    "frompointer",
-      StaticMethod("frompointer",
-        &_exports_HLINCLIENT_JS_templ::_wrap_HLINCLIENT_JS_frompointer,
-        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
-    });
-  
-}
-// jsnapi_class_prologue_template
-template <typename SWIG_OBJ_WRAP>
-class _exports_ByteArray_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
-public:
-  _exports_ByteArray_templ(const Napi::CallbackInfo &);
-_exports_ByteArray_templ(bool, const Napi::CallbackInfo &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_new_ByteArray(const Napi::CallbackInfo &);
-virtual ~_exports_ByteArray_templ();
-// jsnapi_class_method_declaration
-Napi::Value _wrap_ByteArray_getitem(const Napi::CallbackInfo &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_ByteArray_setitem(const Napi::CallbackInfo &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_ByteArray_cast(const Napi::CallbackInfo &);
-// jsnapi_class_method_declaration
-static Napi::Value _wrap_ByteArray_frompointer(const Napi::CallbackInfo &);
-// jsnapi_class_epilogue_template
-static void JS_veto_set_static_variable(const Napi::CallbackInfo &, const Napi::Value &);
-void JS_veto_set_variable(const Napi::CallbackInfo &, const Napi::Value &);
-};
-
-template <typename SWIG_OBJ_WRAP>
-void _exports_ByteArray_templ<SWIG_OBJ_WRAP>::JS_veto_set_static_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
-SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
-}
-
-template <typename SWIG_OBJ_WRAP>
-void _exports_ByteArray_templ<SWIG_OBJ_WRAP>::JS_veto_set_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
-SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
-}
-// jsnapi_class_instance
-class _exports_ByteArray_inst : public _exports_ByteArray_templ<_exports_ByteArray_inst> {
-public:
-  using _exports_ByteArray_templ::_exports_ByteArray_templ;
-  virtual ~_exports_ByteArray_inst() {
-    
-  };
-  static void GetMembers(
-    Napi::Env,
-    std::map<std::string, _exports_ByteArray_templ::PropertyDescriptor> &,
-    std::map<std::string, _exports_ByteArray_templ::PropertyDescriptor> &
-    );
-  static Napi::Function GetClass(Napi::Env);
-};
-/* Class: ByteArray (_exports_ByteArray) */
-// jsnapi_getclass
-Napi::Function _exports_ByteArray_inst::GetClass(Napi::Env env) {
-  std::map<std::string, _exports_ByteArray_templ::PropertyDescriptor> members, staticMembers;
-  GetMembers(env, members, staticMembers);
-  
-  std::vector<_exports_ByteArray_inst::PropertyDescriptor> symbolTable;
-  for (auto it = members.begin(); it != members.end(); it++)
-  symbolTable.push_back(it->second);
-  for (auto it = staticMembers.begin(); it != staticMembers.end(); it++)
-  symbolTable.push_back(it->second);
-  
-  return Napi::ObjectWrap<_exports_ByteArray_inst>::DefineClass(env, "ByteArray", symbolTable);
-}
-
-void _exports_ByteArray_inst::GetMembers(
-  Napi::Env env,
-  std::map<std::string, _exports_ByteArray_templ::PropertyDescriptor> &members,
-  std::map<std::string, _exports_ByteArray_templ::PropertyDescriptor> &staticMembers
+  std::map<std::string, _exports_LongArray_templ::PropertyDescriptor> &members,
+  std::map<std::string, _exports_LongArray_templ::PropertyDescriptor> &staticMembers
   ) {
   std::map<std::string, SWIG_NAPI_ObjectWrap_templ<SWIG_NAPI_ObjectWrap_inst>::PropertyDescriptor> baseMembers, baseStaticMembers;
   SWIG_NAPI_ObjectWrap_inst::GetMembers(env, baseMembers, baseStaticMembers);
@@ -2226,24 +2021,24 @@ void _exports_ByteArray_inst::GetMembers(
   members.erase("getitem");
   members.insert({
     "getitem",
-      _exports_ByteArray_templ::InstanceMethod("getitem",
-        &_exports_ByteArray_templ::_wrap_ByteArray_getitem,
+      _exports_LongArray_templ::InstanceMethod("getitem",
+        &_exports_LongArray_templ::_wrap_LongArray_getitem,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   // jsnapi_member_function_descriptor
   members.erase("setitem");
   members.insert({
     "setitem",
-      _exports_ByteArray_templ::InstanceMethod("setitem",
-        &_exports_ByteArray_templ::_wrap_ByteArray_setitem,
+      _exports_LongArray_templ::InstanceMethod("setitem",
+        &_exports_LongArray_templ::_wrap_LongArray_setitem,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   // jsnapi_member_function_descriptor
   members.erase("cast");
   members.insert({
     "cast",
-      _exports_ByteArray_templ::InstanceMethod("cast",
-        &_exports_ByteArray_templ::_wrap_ByteArray_cast,
+      _exports_LongArray_templ::InstanceMethod("cast",
+        &_exports_LongArray_templ::_wrap_LongArray_cast,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   
@@ -2253,75 +2048,75 @@ void _exports_ByteArray_inst::GetMembers(
   staticMembers.insert({
     "frompointer",
       StaticMethod("frompointer",
-        &_exports_ByteArray_templ::_wrap_ByteArray_frompointer,
+        &_exports_LongArray_templ::_wrap_LongArray_frompointer,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   
 }
 // jsnapi_class_prologue_template
 template <typename SWIG_OBJ_WRAP>
-class _exports_HLINHW_JS_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
+class _exports_CharArray_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
 public:
-  _exports_HLINHW_JS_templ(const Napi::CallbackInfo &);
-_exports_HLINHW_JS_templ(bool, const Napi::CallbackInfo &);
+  _exports_CharArray_templ(const Napi::CallbackInfo &);
+_exports_CharArray_templ(bool, const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_new_HLINHW_JS(const Napi::CallbackInfo &);
-virtual ~_exports_HLINHW_JS_templ();
+Napi::Value _wrap_new_CharArray(const Napi::CallbackInfo &);
+virtual ~_exports_CharArray_templ();
 // jsnapi_class_method_declaration
-Napi::Value _wrap_HLINHW_JS_getitem(const Napi::CallbackInfo &);
+Napi::Value _wrap_CharArray_getitem(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_HLINHW_JS_setitem(const Napi::CallbackInfo &);
+Napi::Value _wrap_CharArray_setitem(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_HLINHW_JS_cast(const Napi::CallbackInfo &);
+Napi::Value _wrap_CharArray_cast(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-static Napi::Value _wrap_HLINHW_JS_frompointer(const Napi::CallbackInfo &);
+static Napi::Value _wrap_CharArray_frompointer(const Napi::CallbackInfo &);
 // jsnapi_class_epilogue_template
 static void JS_veto_set_static_variable(const Napi::CallbackInfo &, const Napi::Value &);
 void JS_veto_set_variable(const Napi::CallbackInfo &, const Napi::Value &);
 };
 
 template <typename SWIG_OBJ_WRAP>
-void _exports_HLINHW_JS_templ<SWIG_OBJ_WRAP>::JS_veto_set_static_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
+void _exports_CharArray_templ<SWIG_OBJ_WRAP>::JS_veto_set_static_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
 SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
 }
 
 template <typename SWIG_OBJ_WRAP>
-void _exports_HLINHW_JS_templ<SWIG_OBJ_WRAP>::JS_veto_set_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
+void _exports_CharArray_templ<SWIG_OBJ_WRAP>::JS_veto_set_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
 SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
 }
 // jsnapi_class_instance
-class _exports_HLINHW_JS_inst : public _exports_HLINHW_JS_templ<_exports_HLINHW_JS_inst> {
+class _exports_CharArray_inst : public _exports_CharArray_templ<_exports_CharArray_inst> {
 public:
-  using _exports_HLINHW_JS_templ::_exports_HLINHW_JS_templ;
-  virtual ~_exports_HLINHW_JS_inst() {
+  using _exports_CharArray_templ::_exports_CharArray_templ;
+  virtual ~_exports_CharArray_inst() {
     
   };
   static void GetMembers(
     Napi::Env,
-    std::map<std::string, _exports_HLINHW_JS_templ::PropertyDescriptor> &,
-    std::map<std::string, _exports_HLINHW_JS_templ::PropertyDescriptor> &
+    std::map<std::string, _exports_CharArray_templ::PropertyDescriptor> &,
+    std::map<std::string, _exports_CharArray_templ::PropertyDescriptor> &
     );
   static Napi::Function GetClass(Napi::Env);
 };
-/* Class: HLINHW_JS (_exports_HLINHW_JS) */
+/* Class: CharArray (_exports_CharArray) */
 // jsnapi_getclass
-Napi::Function _exports_HLINHW_JS_inst::GetClass(Napi::Env env) {
-  std::map<std::string, _exports_HLINHW_JS_templ::PropertyDescriptor> members, staticMembers;
+Napi::Function _exports_CharArray_inst::GetClass(Napi::Env env) {
+  std::map<std::string, _exports_CharArray_templ::PropertyDescriptor> members, staticMembers;
   GetMembers(env, members, staticMembers);
   
-  std::vector<_exports_HLINHW_JS_inst::PropertyDescriptor> symbolTable;
+  std::vector<_exports_CharArray_inst::PropertyDescriptor> symbolTable;
   for (auto it = members.begin(); it != members.end(); it++)
   symbolTable.push_back(it->second);
   for (auto it = staticMembers.begin(); it != staticMembers.end(); it++)
   symbolTable.push_back(it->second);
   
-  return Napi::ObjectWrap<_exports_HLINHW_JS_inst>::DefineClass(env, "HLINHW_JS", symbolTable);
+  return Napi::ObjectWrap<_exports_CharArray_inst>::DefineClass(env, "CharArray", symbolTable);
 }
 
-void _exports_HLINHW_JS_inst::GetMembers(
+void _exports_CharArray_inst::GetMembers(
   Napi::Env env,
-  std::map<std::string, _exports_HLINHW_JS_templ::PropertyDescriptor> &members,
-  std::map<std::string, _exports_HLINHW_JS_templ::PropertyDescriptor> &staticMembers
+  std::map<std::string, _exports_CharArray_templ::PropertyDescriptor> &members,
+  std::map<std::string, _exports_CharArray_templ::PropertyDescriptor> &staticMembers
   ) {
   std::map<std::string, SWIG_NAPI_ObjectWrap_templ<SWIG_NAPI_ObjectWrap_inst>::PropertyDescriptor> baseMembers, baseStaticMembers;
   SWIG_NAPI_ObjectWrap_inst::GetMembers(env, baseMembers, baseStaticMembers);
@@ -2333,24 +2128,24 @@ void _exports_HLINHW_JS_inst::GetMembers(
   members.erase("getitem");
   members.insert({
     "getitem",
-      _exports_HLINHW_JS_templ::InstanceMethod("getitem",
-        &_exports_HLINHW_JS_templ::_wrap_HLINHW_JS_getitem,
+      _exports_CharArray_templ::InstanceMethod("getitem",
+        &_exports_CharArray_templ::_wrap_CharArray_getitem,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   // jsnapi_member_function_descriptor
   members.erase("setitem");
   members.insert({
     "setitem",
-      _exports_HLINHW_JS_templ::InstanceMethod("setitem",
-        &_exports_HLINHW_JS_templ::_wrap_HLINHW_JS_setitem,
+      _exports_CharArray_templ::InstanceMethod("setitem",
+        &_exports_CharArray_templ::_wrap_CharArray_setitem,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   // jsnapi_member_function_descriptor
   members.erase("cast");
   members.insert({
     "cast",
-      _exports_HLINHW_JS_templ::InstanceMethod("cast",
-        &_exports_HLINHW_JS_templ::_wrap_HLINHW_JS_cast,
+      _exports_CharArray_templ::InstanceMethod("cast",
+        &_exports_CharArray_templ::_wrap_CharArray_cast,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   
@@ -2360,83 +2155,103 @@ void _exports_HLINHW_JS_inst::GetMembers(
   staticMembers.insert({
     "frompointer",
       StaticMethod("frompointer",
-        &_exports_HLINHW_JS_templ::_wrap_HLINHW_JS_frompointer,
+        &_exports_CharArray_templ::_wrap_CharArray_frompointer,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   
 }
 // jsnapi_class_prologue_template
 template <typename SWIG_OBJ_WRAP>
-class _exports_TLINVersion_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
+class _exports_LinMessageInfo_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
 public:
-  _exports_TLINVersion_templ(const Napi::CallbackInfo &);
-_exports_TLINVersion_templ(bool, const Napi::CallbackInfo &);
+  _exports_LinMessageInfo_templ(const Napi::CallbackInfo &);
+_exports_LinMessageInfo_templ(bool, const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_TLINVersion_Major_get(const Napi::CallbackInfo &);
+Napi::Value _wrap_LinMessageInfo_timestamp_get(const Napi::CallbackInfo &);
 // jsnapi_class_setter_declaration
-void _wrap_TLINVersion_Major_set(const Napi::CallbackInfo &, const Napi::Value &);
+void _wrap_LinMessageInfo_timestamp_set(const Napi::CallbackInfo &, const Napi::Value &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_TLINVersion_Minor_get(const Napi::CallbackInfo &);
+Napi::Value _wrap_LinMessageInfo_synchBreakLength_get(const Napi::CallbackInfo &);
 // jsnapi_class_setter_declaration
-void _wrap_TLINVersion_Minor_set(const Napi::CallbackInfo &, const Napi::Value &);
+void _wrap_LinMessageInfo_synchBreakLength_set(const Napi::CallbackInfo &, const Napi::Value &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_TLINVersion_Revision_get(const Napi::CallbackInfo &);
+Napi::Value _wrap_LinMessageInfo_frameLength_get(const Napi::CallbackInfo &);
 // jsnapi_class_setter_declaration
-void _wrap_TLINVersion_Revision_set(const Napi::CallbackInfo &, const Napi::Value &);
+void _wrap_LinMessageInfo_frameLength_set(const Napi::CallbackInfo &, const Napi::Value &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_TLINVersion_Build_get(const Napi::CallbackInfo &);
+Napi::Value _wrap_LinMessageInfo_bitrate_get(const Napi::CallbackInfo &);
 // jsnapi_class_setter_declaration
-void _wrap_TLINVersion_Build_set(const Napi::CallbackInfo &, const Napi::Value &);
+void _wrap_LinMessageInfo_bitrate_set(const Napi::CallbackInfo &, const Napi::Value &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_new_TLINVersion(const Napi::CallbackInfo &);
-virtual ~_exports_TLINVersion_templ();
+Napi::Value _wrap_LinMessageInfo_checkSum_get(const Napi::CallbackInfo &);
+// jsnapi_class_setter_declaration
+void _wrap_LinMessageInfo_checkSum_set(const Napi::CallbackInfo &, const Napi::Value &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_LinMessageInfo_idPar_get(const Napi::CallbackInfo &);
+// jsnapi_class_setter_declaration
+void _wrap_LinMessageInfo_idPar_set(const Napi::CallbackInfo &, const Napi::Value &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_LinMessageInfo_z_get(const Napi::CallbackInfo &);
+// jsnapi_class_setter_declaration
+void _wrap_LinMessageInfo_z_set(const Napi::CallbackInfo &, const Napi::Value &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_LinMessageInfo_synchEdgeTime_get(const Napi::CallbackInfo &);
+// jsnapi_class_setter_declaration
+void _wrap_LinMessageInfo_synchEdgeTime_set(const Napi::CallbackInfo &, const Napi::Value &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_LinMessageInfo_byteTime_get(const Napi::CallbackInfo &);
+// jsnapi_class_setter_declaration
+void _wrap_LinMessageInfo_byteTime_set(const Napi::CallbackInfo &, const Napi::Value &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_new_LinMessageInfo(const Napi::CallbackInfo &);
+virtual ~_exports_LinMessageInfo_templ();
 // jsnapi_class_epilogue_template
 static void JS_veto_set_static_variable(const Napi::CallbackInfo &, const Napi::Value &);
 void JS_veto_set_variable(const Napi::CallbackInfo &, const Napi::Value &);
 };
 
 template <typename SWIG_OBJ_WRAP>
-void _exports_TLINVersion_templ<SWIG_OBJ_WRAP>::JS_veto_set_static_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
+void _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::JS_veto_set_static_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
 SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
 }
 
 template <typename SWIG_OBJ_WRAP>
-void _exports_TLINVersion_templ<SWIG_OBJ_WRAP>::JS_veto_set_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
+void _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::JS_veto_set_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
 SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
 }
 // jsnapi_class_instance
-class _exports_TLINVersion_inst : public _exports_TLINVersion_templ<_exports_TLINVersion_inst> {
+class _exports_LinMessageInfo_inst : public _exports_LinMessageInfo_templ<_exports_LinMessageInfo_inst> {
 public:
-  using _exports_TLINVersion_templ::_exports_TLINVersion_templ;
-  virtual ~_exports_TLINVersion_inst() {
+  using _exports_LinMessageInfo_templ::_exports_LinMessageInfo_templ;
+  virtual ~_exports_LinMessageInfo_inst() {
     
   };
   static void GetMembers(
     Napi::Env,
-    std::map<std::string, _exports_TLINVersion_templ::PropertyDescriptor> &,
-    std::map<std::string, _exports_TLINVersion_templ::PropertyDescriptor> &
+    std::map<std::string, _exports_LinMessageInfo_templ::PropertyDescriptor> &,
+    std::map<std::string, _exports_LinMessageInfo_templ::PropertyDescriptor> &
     );
   static Napi::Function GetClass(Napi::Env);
 };
-/* Class: TLINVersion (_exports_TLINVersion) */
+/* Class: LinMessageInfo (_exports_LinMessageInfo) */
 // jsnapi_getclass
-Napi::Function _exports_TLINVersion_inst::GetClass(Napi::Env env) {
-  std::map<std::string, _exports_TLINVersion_templ::PropertyDescriptor> members, staticMembers;
+Napi::Function _exports_LinMessageInfo_inst::GetClass(Napi::Env env) {
+  std::map<std::string, _exports_LinMessageInfo_templ::PropertyDescriptor> members, staticMembers;
   GetMembers(env, members, staticMembers);
   
-  std::vector<_exports_TLINVersion_inst::PropertyDescriptor> symbolTable;
+  std::vector<_exports_LinMessageInfo_inst::PropertyDescriptor> symbolTable;
   for (auto it = members.begin(); it != members.end(); it++)
   symbolTable.push_back(it->second);
   for (auto it = staticMembers.begin(); it != staticMembers.end(); it++)
   symbolTable.push_back(it->second);
   
-  return Napi::ObjectWrap<_exports_TLINVersion_inst>::DefineClass(env, "TLINVersion", symbolTable);
+  return Napi::ObjectWrap<_exports_LinMessageInfo_inst>::DefineClass(env, "LinMessageInfo", symbolTable);
 }
 
-void _exports_TLINVersion_inst::GetMembers(
+void _exports_LinMessageInfo_inst::GetMembers(
   Napi::Env env,
-  std::map<std::string, _exports_TLINVersion_templ::PropertyDescriptor> &members,
-  std::map<std::string, _exports_TLINVersion_templ::PropertyDescriptor> &staticMembers
+  std::map<std::string, _exports_LinMessageInfo_templ::PropertyDescriptor> &members,
+  std::map<std::string, _exports_LinMessageInfo_templ::PropertyDescriptor> &staticMembers
   ) {
   std::map<std::string, SWIG_NAPI_ObjectWrap_templ<SWIG_NAPI_ObjectWrap_inst>::PropertyDescriptor> baseMembers, baseStaticMembers;
   SWIG_NAPI_ObjectWrap_inst::GetMembers(env, baseMembers, baseStaticMembers);
@@ -2445,790 +2260,84 @@ void _exports_TLINVersion_inst::GetMembers(
   
   /* register wrapper functions */
   // jsnapi_register_member_variable
-  members.erase("Major");
+  members.erase("timestamp");
   members.insert({
-    "Major",
-      _exports_TLINVersion_templ::InstanceAccessor("Major",
-        &_exports_TLINVersion_templ::_wrap_TLINVersion_Major_get,
-        &_exports_TLINVersion_templ::_wrap_TLINVersion_Major_set,
+    "timestamp",
+      _exports_LinMessageInfo_templ::InstanceAccessor("timestamp",
+        &_exports_LinMessageInfo_templ::_wrap_LinMessageInfo_timestamp_get,
+        &_exports_LinMessageInfo_templ::_wrap_LinMessageInfo_timestamp_set,
         static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
     });
   // jsnapi_register_member_variable
-  members.erase("Minor");
+  members.erase("synchBreakLength");
   members.insert({
-    "Minor",
-      _exports_TLINVersion_templ::InstanceAccessor("Minor",
-        &_exports_TLINVersion_templ::_wrap_TLINVersion_Minor_get,
-        &_exports_TLINVersion_templ::_wrap_TLINVersion_Minor_set,
+    "synchBreakLength",
+      _exports_LinMessageInfo_templ::InstanceAccessor("synchBreakLength",
+        &_exports_LinMessageInfo_templ::_wrap_LinMessageInfo_synchBreakLength_get,
+        &_exports_LinMessageInfo_templ::_wrap_LinMessageInfo_synchBreakLength_set,
         static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
     });
   // jsnapi_register_member_variable
-  members.erase("Revision");
+  members.erase("frameLength");
   members.insert({
-    "Revision",
-      _exports_TLINVersion_templ::InstanceAccessor("Revision",
-        &_exports_TLINVersion_templ::_wrap_TLINVersion_Revision_get,
-        &_exports_TLINVersion_templ::_wrap_TLINVersion_Revision_set,
+    "frameLength",
+      _exports_LinMessageInfo_templ::InstanceAccessor("frameLength",
+        &_exports_LinMessageInfo_templ::_wrap_LinMessageInfo_frameLength_get,
+        &_exports_LinMessageInfo_templ::_wrap_LinMessageInfo_frameLength_set,
         static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
     });
   // jsnapi_register_member_variable
-  members.erase("Build");
+  members.erase("bitrate");
   members.insert({
-    "Build",
-      _exports_TLINVersion_templ::InstanceAccessor("Build",
-        &_exports_TLINVersion_templ::_wrap_TLINVersion_Build_get,
-        &_exports_TLINVersion_templ::_wrap_TLINVersion_Build_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  
-  /* add static class functions and variables */
-  
-}
-// jsnapi_class_prologue_template
-template <typename SWIG_OBJ_WRAP>
-class _exports_TLINMsg_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
-public:
-  _exports_TLINMsg_templ(const Napi::CallbackInfo &);
-_exports_TLINMsg_templ(bool, const Napi::CallbackInfo &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINMsg_FrameId_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINMsg_FrameId_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINMsg_Length_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINMsg_Length_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINMsg_Direction_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINMsg_Direction_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINMsg_ChecksumType_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINMsg_ChecksumType_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINMsg_Data_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINMsg_Data_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINMsg_Checksum_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINMsg_Checksum_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_new_TLINMsg(const Napi::CallbackInfo &);
-virtual ~_exports_TLINMsg_templ();
-// jsnapi_class_epilogue_template
-static void JS_veto_set_static_variable(const Napi::CallbackInfo &, const Napi::Value &);
-void JS_veto_set_variable(const Napi::CallbackInfo &, const Napi::Value &);
-};
-
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINMsg_templ<SWIG_OBJ_WRAP>::JS_veto_set_static_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
-SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
-}
-
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINMsg_templ<SWIG_OBJ_WRAP>::JS_veto_set_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
-SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
-}
-// jsnapi_class_instance
-class _exports_TLINMsg_inst : public _exports_TLINMsg_templ<_exports_TLINMsg_inst> {
-public:
-  using _exports_TLINMsg_templ::_exports_TLINMsg_templ;
-  virtual ~_exports_TLINMsg_inst() {
-    
-  };
-  static void GetMembers(
-    Napi::Env,
-    std::map<std::string, _exports_TLINMsg_templ::PropertyDescriptor> &,
-    std::map<std::string, _exports_TLINMsg_templ::PropertyDescriptor> &
-    );
-  static Napi::Function GetClass(Napi::Env);
-};
-/* Class: TLINMsg (_exports_TLINMsg) */
-// jsnapi_getclass
-Napi::Function _exports_TLINMsg_inst::GetClass(Napi::Env env) {
-  std::map<std::string, _exports_TLINMsg_templ::PropertyDescriptor> members, staticMembers;
-  GetMembers(env, members, staticMembers);
-  
-  std::vector<_exports_TLINMsg_inst::PropertyDescriptor> symbolTable;
-  for (auto it = members.begin(); it != members.end(); it++)
-  symbolTable.push_back(it->second);
-  for (auto it = staticMembers.begin(); it != staticMembers.end(); it++)
-  symbolTable.push_back(it->second);
-  
-  return Napi::ObjectWrap<_exports_TLINMsg_inst>::DefineClass(env, "TLINMsg", symbolTable);
-}
-
-void _exports_TLINMsg_inst::GetMembers(
-  Napi::Env env,
-  std::map<std::string, _exports_TLINMsg_templ::PropertyDescriptor> &members,
-  std::map<std::string, _exports_TLINMsg_templ::PropertyDescriptor> &staticMembers
-  ) {
-  std::map<std::string, SWIG_NAPI_ObjectWrap_templ<SWIG_NAPI_ObjectWrap_inst>::PropertyDescriptor> baseMembers, baseStaticMembers;
-  SWIG_NAPI_ObjectWrap_inst::GetMembers(env, baseMembers, baseStaticMembers);
-  members.insert(baseMembers.begin(), baseMembers.end());
-  staticMembers.insert(staticMembers.begin(), staticMembers.end());
-  
-  /* register wrapper functions */
-  // jsnapi_register_member_variable
-  members.erase("FrameId");
-  members.insert({
-    "FrameId",
-      _exports_TLINMsg_templ::InstanceAccessor("FrameId",
-        &_exports_TLINMsg_templ::_wrap_TLINMsg_FrameId_get,
-        &_exports_TLINMsg_templ::_wrap_TLINMsg_FrameId_set,
+    "bitrate",
+      _exports_LinMessageInfo_templ::InstanceAccessor("bitrate",
+        &_exports_LinMessageInfo_templ::_wrap_LinMessageInfo_bitrate_get,
+        &_exports_LinMessageInfo_templ::_wrap_LinMessageInfo_bitrate_set,
         static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
     });
   // jsnapi_register_member_variable
-  members.erase("Length");
+  members.erase("checkSum");
   members.insert({
-    "Length",
-      _exports_TLINMsg_templ::InstanceAccessor("Length",
-        &_exports_TLINMsg_templ::_wrap_TLINMsg_Length_get,
-        &_exports_TLINMsg_templ::_wrap_TLINMsg_Length_set,
+    "checkSum",
+      _exports_LinMessageInfo_templ::InstanceAccessor("checkSum",
+        &_exports_LinMessageInfo_templ::_wrap_LinMessageInfo_checkSum_get,
+        &_exports_LinMessageInfo_templ::_wrap_LinMessageInfo_checkSum_set,
         static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
     });
   // jsnapi_register_member_variable
-  members.erase("Direction");
+  members.erase("idPar");
   members.insert({
-    "Direction",
-      _exports_TLINMsg_templ::InstanceAccessor("Direction",
-        &_exports_TLINMsg_templ::_wrap_TLINMsg_Direction_get,
-        &_exports_TLINMsg_templ::_wrap_TLINMsg_Direction_set,
+    "idPar",
+      _exports_LinMessageInfo_templ::InstanceAccessor("idPar",
+        &_exports_LinMessageInfo_templ::_wrap_LinMessageInfo_idPar_get,
+        &_exports_LinMessageInfo_templ::_wrap_LinMessageInfo_idPar_set,
         static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
     });
   // jsnapi_register_member_variable
-  members.erase("ChecksumType");
+  members.erase("z");
   members.insert({
-    "ChecksumType",
-      _exports_TLINMsg_templ::InstanceAccessor("ChecksumType",
-        &_exports_TLINMsg_templ::_wrap_TLINMsg_ChecksumType_get,
-        &_exports_TLINMsg_templ::_wrap_TLINMsg_ChecksumType_set,
+    "z",
+      _exports_LinMessageInfo_templ::InstanceAccessor("z",
+        &_exports_LinMessageInfo_templ::_wrap_LinMessageInfo_z_get,
+        &_exports_LinMessageInfo_templ::_wrap_LinMessageInfo_z_set,
         static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
     });
   // jsnapi_register_member_variable
-  members.erase("Data");
+  members.erase("synchEdgeTime");
   members.insert({
-    "Data",
-      _exports_TLINMsg_templ::InstanceAccessor("Data",
-        &_exports_TLINMsg_templ::_wrap_TLINMsg_Data_get,
-        &_exports_TLINMsg_templ::_wrap_TLINMsg_Data_set,
+    "synchEdgeTime",
+      _exports_LinMessageInfo_templ::InstanceAccessor("synchEdgeTime",
+        &_exports_LinMessageInfo_templ::_wrap_LinMessageInfo_synchEdgeTime_get,
+        &_exports_LinMessageInfo_templ::_wrap_LinMessageInfo_synchEdgeTime_set,
         static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
     });
   // jsnapi_register_member_variable
-  members.erase("Checksum");
+  members.erase("byteTime");
   members.insert({
-    "Checksum",
-      _exports_TLINMsg_templ::InstanceAccessor("Checksum",
-        &_exports_TLINMsg_templ::_wrap_TLINMsg_Checksum_get,
-        &_exports_TLINMsg_templ::_wrap_TLINMsg_Checksum_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  
-  /* add static class functions and variables */
-  
-}
-// jsnapi_class_prologue_template
-template <typename SWIG_OBJ_WRAP>
-class _exports_TLINRcvMsg_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
-public:
-  _exports_TLINRcvMsg_templ(const Napi::CallbackInfo &);
-_exports_TLINRcvMsg_templ(bool, const Napi::CallbackInfo &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINRcvMsg_Type_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINRcvMsg_Type_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINRcvMsg_FrameId_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINRcvMsg_FrameId_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINRcvMsg_Length_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINRcvMsg_Length_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINRcvMsg_Direction_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINRcvMsg_Direction_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINRcvMsg_ChecksumType_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINRcvMsg_ChecksumType_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINRcvMsg_Data_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINRcvMsg_Data_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINRcvMsg_Checksum_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINRcvMsg_Checksum_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINRcvMsg_ErrorFlags_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINRcvMsg_ErrorFlags_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINRcvMsg_TimeStamp_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINRcvMsg_TimeStamp_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINRcvMsg_hHw_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINRcvMsg_hHw_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_new_TLINRcvMsg(const Napi::CallbackInfo &);
-virtual ~_exports_TLINRcvMsg_templ();
-// jsnapi_class_epilogue_template
-static void JS_veto_set_static_variable(const Napi::CallbackInfo &, const Napi::Value &);
-void JS_veto_set_variable(const Napi::CallbackInfo &, const Napi::Value &);
-};
-
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::JS_veto_set_static_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
-SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
-}
-
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::JS_veto_set_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
-SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
-}
-// jsnapi_class_instance
-class _exports_TLINRcvMsg_inst : public _exports_TLINRcvMsg_templ<_exports_TLINRcvMsg_inst> {
-public:
-  using _exports_TLINRcvMsg_templ::_exports_TLINRcvMsg_templ;
-  virtual ~_exports_TLINRcvMsg_inst() {
-    
-  };
-  static void GetMembers(
-    Napi::Env,
-    std::map<std::string, _exports_TLINRcvMsg_templ::PropertyDescriptor> &,
-    std::map<std::string, _exports_TLINRcvMsg_templ::PropertyDescriptor> &
-    );
-  static Napi::Function GetClass(Napi::Env);
-};
-/* Class: TLINRcvMsg (_exports_TLINRcvMsg) */
-// jsnapi_getclass
-Napi::Function _exports_TLINRcvMsg_inst::GetClass(Napi::Env env) {
-  std::map<std::string, _exports_TLINRcvMsg_templ::PropertyDescriptor> members, staticMembers;
-  GetMembers(env, members, staticMembers);
-  
-  std::vector<_exports_TLINRcvMsg_inst::PropertyDescriptor> symbolTable;
-  for (auto it = members.begin(); it != members.end(); it++)
-  symbolTable.push_back(it->second);
-  for (auto it = staticMembers.begin(); it != staticMembers.end(); it++)
-  symbolTable.push_back(it->second);
-  
-  return Napi::ObjectWrap<_exports_TLINRcvMsg_inst>::DefineClass(env, "TLINRcvMsg", symbolTable);
-}
-
-void _exports_TLINRcvMsg_inst::GetMembers(
-  Napi::Env env,
-  std::map<std::string, _exports_TLINRcvMsg_templ::PropertyDescriptor> &members,
-  std::map<std::string, _exports_TLINRcvMsg_templ::PropertyDescriptor> &staticMembers
-  ) {
-  std::map<std::string, SWIG_NAPI_ObjectWrap_templ<SWIG_NAPI_ObjectWrap_inst>::PropertyDescriptor> baseMembers, baseStaticMembers;
-  SWIG_NAPI_ObjectWrap_inst::GetMembers(env, baseMembers, baseStaticMembers);
-  members.insert(baseMembers.begin(), baseMembers.end());
-  staticMembers.insert(staticMembers.begin(), staticMembers.end());
-  
-  /* register wrapper functions */
-  // jsnapi_register_member_variable
-  members.erase("Type");
-  members.insert({
-    "Type",
-      _exports_TLINRcvMsg_templ::InstanceAccessor("Type",
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_Type_get,
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_Type_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("FrameId");
-  members.insert({
-    "FrameId",
-      _exports_TLINRcvMsg_templ::InstanceAccessor("FrameId",
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_FrameId_get,
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_FrameId_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("Length");
-  members.insert({
-    "Length",
-      _exports_TLINRcvMsg_templ::InstanceAccessor("Length",
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_Length_get,
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_Length_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("Direction");
-  members.insert({
-    "Direction",
-      _exports_TLINRcvMsg_templ::InstanceAccessor("Direction",
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_Direction_get,
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_Direction_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("ChecksumType");
-  members.insert({
-    "ChecksumType",
-      _exports_TLINRcvMsg_templ::InstanceAccessor("ChecksumType",
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_ChecksumType_get,
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_ChecksumType_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("Data");
-  members.insert({
-    "Data",
-      _exports_TLINRcvMsg_templ::InstanceAccessor("Data",
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_Data_get,
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_Data_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("Checksum");
-  members.insert({
-    "Checksum",
-      _exports_TLINRcvMsg_templ::InstanceAccessor("Checksum",
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_Checksum_get,
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_Checksum_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("ErrorFlags");
-  members.insert({
-    "ErrorFlags",
-      _exports_TLINRcvMsg_templ::InstanceAccessor("ErrorFlags",
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_ErrorFlags_get,
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_ErrorFlags_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("TimeStamp");
-  members.insert({
-    "TimeStamp",
-      _exports_TLINRcvMsg_templ::InstanceAccessor("TimeStamp",
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_TimeStamp_get,
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_TimeStamp_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("hHw");
-  members.insert({
-    "hHw",
-      _exports_TLINRcvMsg_templ::InstanceAccessor("hHw",
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_hHw_get,
-        &_exports_TLINRcvMsg_templ::_wrap_TLINRcvMsg_hHw_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  
-  /* add static class functions and variables */
-  
-}
-// jsnapi_class_prologue_template
-template <typename SWIG_OBJ_WRAP>
-class _exports_TLINFrameEntry_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
-public:
-  _exports_TLINFrameEntry_templ(const Napi::CallbackInfo &);
-_exports_TLINFrameEntry_templ(bool, const Napi::CallbackInfo &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINFrameEntry_FrameId_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINFrameEntry_FrameId_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINFrameEntry_Length_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINFrameEntry_Length_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINFrameEntry_Direction_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINFrameEntry_Direction_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINFrameEntry_ChecksumType_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINFrameEntry_ChecksumType_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINFrameEntry_Flags_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINFrameEntry_Flags_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINFrameEntry_InitialData_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINFrameEntry_InitialData_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_new_TLINFrameEntry(const Napi::CallbackInfo &);
-virtual ~_exports_TLINFrameEntry_templ();
-// jsnapi_class_epilogue_template
-static void JS_veto_set_static_variable(const Napi::CallbackInfo &, const Napi::Value &);
-void JS_veto_set_variable(const Napi::CallbackInfo &, const Napi::Value &);
-};
-
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINFrameEntry_templ<SWIG_OBJ_WRAP>::JS_veto_set_static_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
-SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
-}
-
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINFrameEntry_templ<SWIG_OBJ_WRAP>::JS_veto_set_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
-SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
-}
-// jsnapi_class_instance
-class _exports_TLINFrameEntry_inst : public _exports_TLINFrameEntry_templ<_exports_TLINFrameEntry_inst> {
-public:
-  using _exports_TLINFrameEntry_templ::_exports_TLINFrameEntry_templ;
-  virtual ~_exports_TLINFrameEntry_inst() {
-    
-  };
-  static void GetMembers(
-    Napi::Env,
-    std::map<std::string, _exports_TLINFrameEntry_templ::PropertyDescriptor> &,
-    std::map<std::string, _exports_TLINFrameEntry_templ::PropertyDescriptor> &
-    );
-  static Napi::Function GetClass(Napi::Env);
-};
-/* Class: TLINFrameEntry (_exports_TLINFrameEntry) */
-// jsnapi_getclass
-Napi::Function _exports_TLINFrameEntry_inst::GetClass(Napi::Env env) {
-  std::map<std::string, _exports_TLINFrameEntry_templ::PropertyDescriptor> members, staticMembers;
-  GetMembers(env, members, staticMembers);
-  
-  std::vector<_exports_TLINFrameEntry_inst::PropertyDescriptor> symbolTable;
-  for (auto it = members.begin(); it != members.end(); it++)
-  symbolTable.push_back(it->second);
-  for (auto it = staticMembers.begin(); it != staticMembers.end(); it++)
-  symbolTable.push_back(it->second);
-  
-  return Napi::ObjectWrap<_exports_TLINFrameEntry_inst>::DefineClass(env, "TLINFrameEntry", symbolTable);
-}
-
-void _exports_TLINFrameEntry_inst::GetMembers(
-  Napi::Env env,
-  std::map<std::string, _exports_TLINFrameEntry_templ::PropertyDescriptor> &members,
-  std::map<std::string, _exports_TLINFrameEntry_templ::PropertyDescriptor> &staticMembers
-  ) {
-  std::map<std::string, SWIG_NAPI_ObjectWrap_templ<SWIG_NAPI_ObjectWrap_inst>::PropertyDescriptor> baseMembers, baseStaticMembers;
-  SWIG_NAPI_ObjectWrap_inst::GetMembers(env, baseMembers, baseStaticMembers);
-  members.insert(baseMembers.begin(), baseMembers.end());
-  staticMembers.insert(staticMembers.begin(), staticMembers.end());
-  
-  /* register wrapper functions */
-  // jsnapi_register_member_variable
-  members.erase("FrameId");
-  members.insert({
-    "FrameId",
-      _exports_TLINFrameEntry_templ::InstanceAccessor("FrameId",
-        &_exports_TLINFrameEntry_templ::_wrap_TLINFrameEntry_FrameId_get,
-        &_exports_TLINFrameEntry_templ::_wrap_TLINFrameEntry_FrameId_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("Length");
-  members.insert({
-    "Length",
-      _exports_TLINFrameEntry_templ::InstanceAccessor("Length",
-        &_exports_TLINFrameEntry_templ::_wrap_TLINFrameEntry_Length_get,
-        &_exports_TLINFrameEntry_templ::_wrap_TLINFrameEntry_Length_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("Direction");
-  members.insert({
-    "Direction",
-      _exports_TLINFrameEntry_templ::InstanceAccessor("Direction",
-        &_exports_TLINFrameEntry_templ::_wrap_TLINFrameEntry_Direction_get,
-        &_exports_TLINFrameEntry_templ::_wrap_TLINFrameEntry_Direction_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("ChecksumType");
-  members.insert({
-    "ChecksumType",
-      _exports_TLINFrameEntry_templ::InstanceAccessor("ChecksumType",
-        &_exports_TLINFrameEntry_templ::_wrap_TLINFrameEntry_ChecksumType_get,
-        &_exports_TLINFrameEntry_templ::_wrap_TLINFrameEntry_ChecksumType_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("Flags");
-  members.insert({
-    "Flags",
-      _exports_TLINFrameEntry_templ::InstanceAccessor("Flags",
-        &_exports_TLINFrameEntry_templ::_wrap_TLINFrameEntry_Flags_get,
-        &_exports_TLINFrameEntry_templ::_wrap_TLINFrameEntry_Flags_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("InitialData");
-  members.insert({
-    "InitialData",
-      _exports_TLINFrameEntry_templ::InstanceAccessor("InitialData",
-        &_exports_TLINFrameEntry_templ::_wrap_TLINFrameEntry_InitialData_get,
-        &_exports_TLINFrameEntry_templ::_wrap_TLINFrameEntry_InitialData_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  
-  /* add static class functions and variables */
-  
-}
-// jsnapi_class_prologue_template
-template <typename SWIG_OBJ_WRAP>
-class _exports_TLINScheduleSlot_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
-public:
-  _exports_TLINScheduleSlot_templ(const Napi::CallbackInfo &);
-_exports_TLINScheduleSlot_templ(bool, const Napi::CallbackInfo &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINScheduleSlot_Type_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINScheduleSlot_Type_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINScheduleSlot_Delay_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINScheduleSlot_Delay_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINScheduleSlot_FrameId_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINScheduleSlot_FrameId_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINScheduleSlot_CountResolve_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINScheduleSlot_CountResolve_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINScheduleSlot_Handle_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINScheduleSlot_Handle_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_new_TLINScheduleSlot(const Napi::CallbackInfo &);
-virtual ~_exports_TLINScheduleSlot_templ();
-// jsnapi_class_epilogue_template
-static void JS_veto_set_static_variable(const Napi::CallbackInfo &, const Napi::Value &);
-void JS_veto_set_variable(const Napi::CallbackInfo &, const Napi::Value &);
-};
-
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINScheduleSlot_templ<SWIG_OBJ_WRAP>::JS_veto_set_static_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
-SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
-}
-
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINScheduleSlot_templ<SWIG_OBJ_WRAP>::JS_veto_set_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
-SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
-}
-// jsnapi_class_instance
-class _exports_TLINScheduleSlot_inst : public _exports_TLINScheduleSlot_templ<_exports_TLINScheduleSlot_inst> {
-public:
-  using _exports_TLINScheduleSlot_templ::_exports_TLINScheduleSlot_templ;
-  virtual ~_exports_TLINScheduleSlot_inst() {
-    
-  };
-  static void GetMembers(
-    Napi::Env,
-    std::map<std::string, _exports_TLINScheduleSlot_templ::PropertyDescriptor> &,
-    std::map<std::string, _exports_TLINScheduleSlot_templ::PropertyDescriptor> &
-    );
-  static Napi::Function GetClass(Napi::Env);
-};
-/* Class: TLINScheduleSlot (_exports_TLINScheduleSlot) */
-// jsnapi_getclass
-Napi::Function _exports_TLINScheduleSlot_inst::GetClass(Napi::Env env) {
-  std::map<std::string, _exports_TLINScheduleSlot_templ::PropertyDescriptor> members, staticMembers;
-  GetMembers(env, members, staticMembers);
-  
-  std::vector<_exports_TLINScheduleSlot_inst::PropertyDescriptor> symbolTable;
-  for (auto it = members.begin(); it != members.end(); it++)
-  symbolTable.push_back(it->second);
-  for (auto it = staticMembers.begin(); it != staticMembers.end(); it++)
-  symbolTable.push_back(it->second);
-  
-  return Napi::ObjectWrap<_exports_TLINScheduleSlot_inst>::DefineClass(env, "TLINScheduleSlot", symbolTable);
-}
-
-void _exports_TLINScheduleSlot_inst::GetMembers(
-  Napi::Env env,
-  std::map<std::string, _exports_TLINScheduleSlot_templ::PropertyDescriptor> &members,
-  std::map<std::string, _exports_TLINScheduleSlot_templ::PropertyDescriptor> &staticMembers
-  ) {
-  std::map<std::string, SWIG_NAPI_ObjectWrap_templ<SWIG_NAPI_ObjectWrap_inst>::PropertyDescriptor> baseMembers, baseStaticMembers;
-  SWIG_NAPI_ObjectWrap_inst::GetMembers(env, baseMembers, baseStaticMembers);
-  members.insert(baseMembers.begin(), baseMembers.end());
-  staticMembers.insert(staticMembers.begin(), staticMembers.end());
-  
-  /* register wrapper functions */
-  // jsnapi_register_member_variable
-  members.erase("Type");
-  members.insert({
-    "Type",
-      _exports_TLINScheduleSlot_templ::InstanceAccessor("Type",
-        &_exports_TLINScheduleSlot_templ::_wrap_TLINScheduleSlot_Type_get,
-        &_exports_TLINScheduleSlot_templ::_wrap_TLINScheduleSlot_Type_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("Delay");
-  members.insert({
-    "Delay",
-      _exports_TLINScheduleSlot_templ::InstanceAccessor("Delay",
-        &_exports_TLINScheduleSlot_templ::_wrap_TLINScheduleSlot_Delay_get,
-        &_exports_TLINScheduleSlot_templ::_wrap_TLINScheduleSlot_Delay_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("FrameId");
-  members.insert({
-    "FrameId",
-      _exports_TLINScheduleSlot_templ::InstanceAccessor("FrameId",
-        &_exports_TLINScheduleSlot_templ::_wrap_TLINScheduleSlot_FrameId_get,
-        &_exports_TLINScheduleSlot_templ::_wrap_TLINScheduleSlot_FrameId_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("CountResolve");
-  members.insert({
-    "CountResolve",
-      _exports_TLINScheduleSlot_templ::InstanceAccessor("CountResolve",
-        &_exports_TLINScheduleSlot_templ::_wrap_TLINScheduleSlot_CountResolve_get,
-        &_exports_TLINScheduleSlot_templ::_wrap_TLINScheduleSlot_CountResolve_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("Handle");
-  members.insert({
-    "Handle",
-      _exports_TLINScheduleSlot_templ::InstanceAccessor("Handle",
-        &_exports_TLINScheduleSlot_templ::_wrap_TLINScheduleSlot_Handle_get,
-        &_exports_TLINScheduleSlot_templ::_wrap_TLINScheduleSlot_Handle_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  
-  /* add static class functions and variables */
-  
-}
-// jsnapi_class_prologue_template
-template <typename SWIG_OBJ_WRAP>
-class _exports_TLINHardwareStatus_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
-public:
-  _exports_TLINHardwareStatus_templ(const Napi::CallbackInfo &);
-_exports_TLINHardwareStatus_templ(bool, const Napi::CallbackInfo &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINHardwareStatus_Mode_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINHardwareStatus_Mode_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINHardwareStatus_Status_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINHardwareStatus_Status_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINHardwareStatus_FreeOnSendQueue_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINHardwareStatus_FreeOnSendQueue_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINHardwareStatus_FreeOnSchedulePool_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINHardwareStatus_FreeOnSchedulePool_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_TLINHardwareStatus_ReceiveBufferOverrun_get(const Napi::CallbackInfo &);
-// jsnapi_class_setter_declaration
-void _wrap_TLINHardwareStatus_ReceiveBufferOverrun_set(const Napi::CallbackInfo &, const Napi::Value &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_new_TLINHardwareStatus(const Napi::CallbackInfo &);
-virtual ~_exports_TLINHardwareStatus_templ();
-// jsnapi_class_epilogue_template
-static void JS_veto_set_static_variable(const Napi::CallbackInfo &, const Napi::Value &);
-void JS_veto_set_variable(const Napi::CallbackInfo &, const Napi::Value &);
-};
-
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINHardwareStatus_templ<SWIG_OBJ_WRAP>::JS_veto_set_static_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
-SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
-}
-
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINHardwareStatus_templ<SWIG_OBJ_WRAP>::JS_veto_set_variable(const Napi::CallbackInfo &info, const Napi::Value &value) {
-SWIG_NAPI_Raise(info.Env(), "Tried to write read-only variable.");
-}
-// jsnapi_class_instance
-class _exports_TLINHardwareStatus_inst : public _exports_TLINHardwareStatus_templ<_exports_TLINHardwareStatus_inst> {
-public:
-  using _exports_TLINHardwareStatus_templ::_exports_TLINHardwareStatus_templ;
-  virtual ~_exports_TLINHardwareStatus_inst() {
-    
-  };
-  static void GetMembers(
-    Napi::Env,
-    std::map<std::string, _exports_TLINHardwareStatus_templ::PropertyDescriptor> &,
-    std::map<std::string, _exports_TLINHardwareStatus_templ::PropertyDescriptor> &
-    );
-  static Napi::Function GetClass(Napi::Env);
-};
-/* Class: TLINHardwareStatus (_exports_TLINHardwareStatus) */
-// jsnapi_getclass
-Napi::Function _exports_TLINHardwareStatus_inst::GetClass(Napi::Env env) {
-  std::map<std::string, _exports_TLINHardwareStatus_templ::PropertyDescriptor> members, staticMembers;
-  GetMembers(env, members, staticMembers);
-  
-  std::vector<_exports_TLINHardwareStatus_inst::PropertyDescriptor> symbolTable;
-  for (auto it = members.begin(); it != members.end(); it++)
-  symbolTable.push_back(it->second);
-  for (auto it = staticMembers.begin(); it != staticMembers.end(); it++)
-  symbolTable.push_back(it->second);
-  
-  return Napi::ObjectWrap<_exports_TLINHardwareStatus_inst>::DefineClass(env, "TLINHardwareStatus", symbolTable);
-}
-
-void _exports_TLINHardwareStatus_inst::GetMembers(
-  Napi::Env env,
-  std::map<std::string, _exports_TLINHardwareStatus_templ::PropertyDescriptor> &members,
-  std::map<std::string, _exports_TLINHardwareStatus_templ::PropertyDescriptor> &staticMembers
-  ) {
-  std::map<std::string, SWIG_NAPI_ObjectWrap_templ<SWIG_NAPI_ObjectWrap_inst>::PropertyDescriptor> baseMembers, baseStaticMembers;
-  SWIG_NAPI_ObjectWrap_inst::GetMembers(env, baseMembers, baseStaticMembers);
-  members.insert(baseMembers.begin(), baseMembers.end());
-  staticMembers.insert(staticMembers.begin(), staticMembers.end());
-  
-  /* register wrapper functions */
-  // jsnapi_register_member_variable
-  members.erase("Mode");
-  members.insert({
-    "Mode",
-      _exports_TLINHardwareStatus_templ::InstanceAccessor("Mode",
-        &_exports_TLINHardwareStatus_templ::_wrap_TLINHardwareStatus_Mode_get,
-        &_exports_TLINHardwareStatus_templ::_wrap_TLINHardwareStatus_Mode_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("Status");
-  members.insert({
-    "Status",
-      _exports_TLINHardwareStatus_templ::InstanceAccessor("Status",
-        &_exports_TLINHardwareStatus_templ::_wrap_TLINHardwareStatus_Status_get,
-        &_exports_TLINHardwareStatus_templ::_wrap_TLINHardwareStatus_Status_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("FreeOnSendQueue");
-  members.insert({
-    "FreeOnSendQueue",
-      _exports_TLINHardwareStatus_templ::InstanceAccessor("FreeOnSendQueue",
-        &_exports_TLINHardwareStatus_templ::_wrap_TLINHardwareStatus_FreeOnSendQueue_get,
-        &_exports_TLINHardwareStatus_templ::_wrap_TLINHardwareStatus_FreeOnSendQueue_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("FreeOnSchedulePool");
-  members.insert({
-    "FreeOnSchedulePool",
-      _exports_TLINHardwareStatus_templ::InstanceAccessor("FreeOnSchedulePool",
-        &_exports_TLINHardwareStatus_templ::_wrap_TLINHardwareStatus_FreeOnSchedulePool_get,
-        &_exports_TLINHardwareStatus_templ::_wrap_TLINHardwareStatus_FreeOnSchedulePool_set,
-        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
-    });
-  // jsnapi_register_member_variable
-  members.erase("ReceiveBufferOverrun");
-  members.insert({
-    "ReceiveBufferOverrun",
-      _exports_TLINHardwareStatus_templ::InstanceAccessor("ReceiveBufferOverrun",
-        &_exports_TLINHardwareStatus_templ::_wrap_TLINHardwareStatus_ReceiveBufferOverrun_get,
-        &_exports_TLINHardwareStatus_templ::_wrap_TLINHardwareStatus_ReceiveBufferOverrun_set,
+    "byteTime",
+      _exports_LinMessageInfo_templ::InstanceAccessor("byteTime",
+        &_exports_LinMessageInfo_templ::_wrap_LinMessageInfo_byteTime_get,
+        &_exports_LinMessageInfo_templ::_wrap_LinMessageInfo_byteTime_set,
         static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
     });
   
@@ -3243,11 +2352,11 @@ void _exports_TLINHardwareStatus_inst::GetMembers(
 template <typename SWIG_OBJ_WRAP>
 // js_ctor
 // This is the main constructor
-_exports_INT64_JS_templ<SWIG_OBJ_WRAP>::_exports_INT64_JS_templ(const Napi::CallbackInfo &info)
+_exports_CharPointer_templ<SWIG_OBJ_WRAP>::_exports_CharPointer_templ(const Napi::CallbackInfo &info)
 :SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
   Napi::Env env = info.Env();
   
-  this->info = SWIGTYPE_p_INT64_JS;
+  this->info = SWIGTYPE_p_CharPointer;
   if (info.Length() == 1 && info[0].IsExternal()) {
     // This constructor has been called internally from C++/SWIG
     // to wrap an already existing C++ object in JS
@@ -3257,11 +2366,11 @@ _exports_INT64_JS_templ<SWIG_OBJ_WRAP>::_exports_INT64_JS_templ(const Napi::Call
   }
   this->owned = true;
   
-  INT64_JS *result;
+  CharPointer *result;
   if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_INT64_JS.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_CharPointer.");
   }
-  result = (INT64_JS *)new_INT64_JS();
+  result = (CharPointer *)new_CharPointer();
   
   
   this->self = result;
@@ -3273,21 +2382,21 @@ fail:
 
 // This is the bypass constructor to be used from child classes
 template <typename SWIG_OBJ_WRAP>
-_exports_INT64_JS_templ<SWIG_OBJ_WRAP>::_exports_INT64_JS_templ(bool, const Napi::CallbackInfo &info)
+_exports_CharPointer_templ<SWIG_OBJ_WRAP>::_exports_CharPointer_templ(bool, const Napi::CallbackInfo &info)
 :SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
   
 }
 
-SWIGINTERN void delete_INT64_JS(INT64_JS *self){
+SWIGINTERN void delete_CharPointer(CharPointer *self){
   delete self;
 }
 
 // js_dtoroverride
 template <typename SWIG_OBJ_WRAP>
-_exports_INT64_JS_templ<SWIG_OBJ_WRAP>::~_exports_INT64_JS_templ() {
-  auto arg1 = reinterpret_cast<INT64_JS *>(this->self);
+_exports_CharPointer_templ<SWIG_OBJ_WRAP>::~_exports_CharPointer_templ() {
+  auto arg1 = reinterpret_cast<CharPointer *>(this->self);
   if (this->owned && arg1) {
-    delete_INT64_JS(arg1);
+    delete_CharPointer(arg1);
     this->self = nullptr;
   }
 }
@@ -3295,29 +2404,29 @@ _exports_INT64_JS_templ<SWIG_OBJ_WRAP>::~_exports_INT64_JS_templ() {
 
 // js_function
 template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_INT64_JS_templ<SWIG_OBJ_WRAP>::_wrap_INT64_JS_assign(const Napi::CallbackInfo &info) {
+Napi::Value _exports_CharPointer_templ<SWIG_OBJ_WRAP>::_wrap_CharPointer_assign(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  INT64_JS *arg1 = (INT64_JS *) 0 ;
-  __int64 arg2 ;
+  CharPointer *arg1 = (CharPointer *) 0 ;
+  unsigned char arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  long long val2 ;
+  unsigned char val2 ;
   int ecode2 = 0 ;
   
   if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_INT64_JS_assign.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_CharPointer_assign.");
   }
   
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_INT64_JS, 0 |  0 );
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_CharPointer, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INT64_JS_assign" "', argument " "1"" of type '" "INT64_JS *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CharPointer_assign" "', argument " "1"" of type '" "CharPointer *""'"); 
   }
-  arg1 = reinterpret_cast< INT64_JS * >(argp1);ecode2 = SWIG_AsVal_long_SS_long(info[0], &val2);
+  arg1 = reinterpret_cast< CharPointer * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(info[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "INT64_JS_assign" "', argument " "2"" of type '" "__int64""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "CharPointer_assign" "', argument " "2"" of type '" "unsigned char""'");
   } 
-  arg2 = static_cast< __int64 >(val2);INT64_JS_assign(arg1,SWIG_STD_MOVE(arg2));
+  arg2 = static_cast< unsigned char >(val2);CharPointer_assign(arg1,arg2);
   jsresult = env.Undefined();
   
   
@@ -3332,24 +2441,24 @@ fail:
 
 // js_function
 template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_INT64_JS_templ<SWIG_OBJ_WRAP>::_wrap_INT64_JS_value(const Napi::CallbackInfo &info) {
+Napi::Value _exports_CharPointer_templ<SWIG_OBJ_WRAP>::_wrap_CharPointer_value(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  INT64_JS *arg1 = (INT64_JS *) 0 ;
+  CharPointer *arg1 = (CharPointer *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  __int64 result;
+  unsigned char result;
   
   if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_INT64_JS_value.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_CharPointer_value.");
   }
   
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_INT64_JS, 0 |  0 );
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_CharPointer, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INT64_JS_value" "', argument " "1"" of type '" "INT64_JS *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CharPointer_value" "', argument " "1"" of type '" "CharPointer *""'"); 
   }
-  arg1 = reinterpret_cast< INT64_JS * >(argp1);result = INT64_JS_value(arg1);
-  jsresult = SWIG_From_long_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< long long >(result));
+  arg1 = reinterpret_cast< CharPointer * >(argp1);result = (unsigned char)CharPointer_value(arg1);
+  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
   
   
   return jsresult;
@@ -3362,24 +2471,24 @@ fail:
 
 // js_function
 template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_INT64_JS_templ<SWIG_OBJ_WRAP>::_wrap_INT64_JS_cast(const Napi::CallbackInfo &info) {
+Napi::Value _exports_CharPointer_templ<SWIG_OBJ_WRAP>::_wrap_CharPointer_cast(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  INT64_JS *arg1 = (INT64_JS *) 0 ;
+  CharPointer *arg1 = (CharPointer *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  __int64 *result = 0 ;
+  unsigned char *result = 0 ;
   
   if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_INT64_JS_cast.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_CharPointer_cast.");
   }
   
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_INT64_JS, 0 |  0 );
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_CharPointer, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INT64_JS_cast" "', argument " "1"" of type '" "INT64_JS *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CharPointer_cast" "', argument " "1"" of type '" "CharPointer *""'"); 
   }
-  arg1 = reinterpret_cast< INT64_JS * >(argp1);result = (__int64 *)INT64_JS_cast(arg1);
-  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p___int64, 0 |  0 );
+  arg1 = reinterpret_cast< CharPointer * >(argp1);result = (unsigned char *)CharPointer_cast(arg1);
+  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_char, 0 |  0 );
   
   
   return jsresult;
@@ -3392,24 +2501,24 @@ fail:
 
 // js_function
 template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_INT64_JS_templ<SWIG_OBJ_WRAP>::_wrap_INT64_JS_frompointer(const Napi::CallbackInfo &info) {
+Napi::Value _exports_CharPointer_templ<SWIG_OBJ_WRAP>::_wrap_CharPointer_frompointer(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  __int64 *arg1 = (__int64 *) 0 ;
+  unsigned char *arg1 = (unsigned char *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  INT64_JS *result = 0 ;
+  CharPointer *result = 0 ;
   
   if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_INT64_JS_frompointer.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_CharPointer_frompointer.");
   }
   
-  res1 = SWIG_ConvertPtr(info[0], &argp1,SWIGTYPE_p___int64, 0 |  0 );
+  res1 = SWIG_ConvertPtr(info[0], &argp1,SWIGTYPE_p_unsigned_char, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INT64_JS_frompointer" "', argument " "1"" of type '" "__int64 *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CharPointer_frompointer" "', argument " "1"" of type '" "unsigned char *""'"); 
   }
-  arg1 = reinterpret_cast< __int64 * >(argp1);result = (INT64_JS *)INT64_JS_frompointer(arg1);
-  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_INT64_JS, 0 |  0 );
+  arg1 = reinterpret_cast< unsigned char * >(argp1);result = (CharPointer *)CharPointer_frompointer(arg1);
+  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_CharPointer, 0 |  0 );
   
   
   return jsresult;
@@ -3423,11 +2532,11 @@ fail:
 template <typename SWIG_OBJ_WRAP>
 // js_ctor
 // This is the main constructor
-_exports_INT_JS_templ<SWIG_OBJ_WRAP>::_exports_INT_JS_templ(const Napi::CallbackInfo &info)
+_exports_IntPointer_templ<SWIG_OBJ_WRAP>::_exports_IntPointer_templ(const Napi::CallbackInfo &info)
 :SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
   Napi::Env env = info.Env();
   
-  this->info = SWIGTYPE_p_INT_JS;
+  this->info = SWIGTYPE_p_IntPointer;
   if (info.Length() == 1 && info[0].IsExternal()) {
     // This constructor has been called internally from C++/SWIG
     // to wrap an already existing C++ object in JS
@@ -3437,11 +2546,11 @@ _exports_INT_JS_templ<SWIG_OBJ_WRAP>::_exports_INT_JS_templ(const Napi::Callback
   }
   this->owned = true;
   
-  INT_JS *result;
+  IntPointer *result;
   if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_INT_JS.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_IntPointer.");
   }
-  result = (INT_JS *)new_INT_JS();
+  result = (IntPointer *)new_IntPointer();
   
   
   this->self = result;
@@ -3453,21 +2562,21 @@ fail:
 
 // This is the bypass constructor to be used from child classes
 template <typename SWIG_OBJ_WRAP>
-_exports_INT_JS_templ<SWIG_OBJ_WRAP>::_exports_INT_JS_templ(bool, const Napi::CallbackInfo &info)
+_exports_IntPointer_templ<SWIG_OBJ_WRAP>::_exports_IntPointer_templ(bool, const Napi::CallbackInfo &info)
 :SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
   
 }
 
-SWIGINTERN void delete_INT_JS(INT_JS *self){
+SWIGINTERN void delete_IntPointer(IntPointer *self){
   delete self;
 }
 
 // js_dtoroverride
 template <typename SWIG_OBJ_WRAP>
-_exports_INT_JS_templ<SWIG_OBJ_WRAP>::~_exports_INT_JS_templ() {
-  auto arg1 = reinterpret_cast<INT_JS *>(this->self);
+_exports_IntPointer_templ<SWIG_OBJ_WRAP>::~_exports_IntPointer_templ() {
+  auto arg1 = reinterpret_cast<IntPointer *>(this->self);
   if (this->owned && arg1) {
-    delete_INT_JS(arg1);
+    delete_IntPointer(arg1);
     this->self = nullptr;
   }
 }
@@ -3475,10 +2584,10 @@ _exports_INT_JS_templ<SWIG_OBJ_WRAP>::~_exports_INT_JS_templ() {
 
 // js_function
 template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_INT_JS_templ<SWIG_OBJ_WRAP>::_wrap_INT_JS_assign(const Napi::CallbackInfo &info) {
+Napi::Value _exports_IntPointer_templ<SWIG_OBJ_WRAP>::_wrap_IntPointer_assign(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  INT_JS *arg1 = (INT_JS *) 0 ;
+  IntPointer *arg1 = (IntPointer *) 0 ;
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -3486,18 +2595,18 @@ Napi::Value _exports_INT_JS_templ<SWIG_OBJ_WRAP>::_wrap_INT_JS_assign(const Napi
   int ecode2 = 0 ;
   
   if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_INT_JS_assign.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_IntPointer_assign.");
   }
   
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_INT_JS, 0 |  0 );
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_IntPointer, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INT_JS_assign" "', argument " "1"" of type '" "INT_JS *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntPointer_assign" "', argument " "1"" of type '" "IntPointer *""'"); 
   }
-  arg1 = reinterpret_cast< INT_JS * >(argp1);ecode2 = SWIG_AsVal_int(info[0], &val2);
+  arg1 = reinterpret_cast< IntPointer * >(argp1);ecode2 = SWIG_AsVal_int(info[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "INT_JS_assign" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IntPointer_assign" "', argument " "2"" of type '" "int""'");
   } 
-  arg2 = static_cast< int >(val2);INT_JS_assign(arg1,arg2);
+  arg2 = static_cast< int >(val2);IntPointer_assign(arg1,arg2);
   jsresult = env.Undefined();
   
   
@@ -3512,23 +2621,23 @@ fail:
 
 // js_function
 template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_INT_JS_templ<SWIG_OBJ_WRAP>::_wrap_INT_JS_value(const Napi::CallbackInfo &info) {
+Napi::Value _exports_IntPointer_templ<SWIG_OBJ_WRAP>::_wrap_IntPointer_value(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  INT_JS *arg1 = (INT_JS *) 0 ;
+  IntPointer *arg1 = (IntPointer *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int result;
   
   if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_INT_JS_value.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_IntPointer_value.");
   }
   
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_INT_JS, 0 |  0 );
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_IntPointer, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INT_JS_value" "', argument " "1"" of type '" "INT_JS *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntPointer_value" "', argument " "1"" of type '" "IntPointer *""'"); 
   }
-  arg1 = reinterpret_cast< INT_JS * >(argp1);result = (int)INT_JS_value(arg1);
+  arg1 = reinterpret_cast< IntPointer * >(argp1);result = (int)IntPointer_value(arg1);
   jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
   
   
@@ -3542,23 +2651,23 @@ fail:
 
 // js_function
 template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_INT_JS_templ<SWIG_OBJ_WRAP>::_wrap_INT_JS_cast(const Napi::CallbackInfo &info) {
+Napi::Value _exports_IntPointer_templ<SWIG_OBJ_WRAP>::_wrap_IntPointer_cast(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  INT_JS *arg1 = (INT_JS *) 0 ;
+  IntPointer *arg1 = (IntPointer *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int *result = 0 ;
   
   if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_INT_JS_cast.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_IntPointer_cast.");
   }
   
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_INT_JS, 0 |  0 );
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_IntPointer, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INT_JS_cast" "', argument " "1"" of type '" "INT_JS *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntPointer_cast" "', argument " "1"" of type '" "IntPointer *""'"); 
   }
-  arg1 = reinterpret_cast< INT_JS * >(argp1);result = (int *)INT_JS_cast(arg1);
+  arg1 = reinterpret_cast< IntPointer * >(argp1);result = (int *)IntPointer_cast(arg1);
   jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_int, 0 |  0 );
   
   
@@ -3572,24 +2681,24 @@ fail:
 
 // js_function
 template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_INT_JS_templ<SWIG_OBJ_WRAP>::_wrap_INT_JS_frompointer(const Napi::CallbackInfo &info) {
+Napi::Value _exports_IntPointer_templ<SWIG_OBJ_WRAP>::_wrap_IntPointer_frompointer(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
   int *arg1 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  INT_JS *result = 0 ;
+  IntPointer *result = 0 ;
   
   if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_INT_JS_frompointer.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_IntPointer_frompointer.");
   }
   
   res1 = SWIG_ConvertPtr(info[0], &argp1,SWIGTYPE_p_int, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "INT_JS_frompointer" "', argument " "1"" of type '" "int *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IntPointer_frompointer" "', argument " "1"" of type '" "int *""'"); 
   }
-  arg1 = reinterpret_cast< int * >(argp1);result = (INT_JS *)INT_JS_frompointer(arg1);
-  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_INT_JS, 0 |  0 );
+  arg1 = reinterpret_cast< int * >(argp1);result = (IntPointer *)IntPointer_frompointer(arg1);
+  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_IntPointer, 0 |  0 );
   
   
   return jsresult;
@@ -3603,191 +2712,11 @@ fail:
 template <typename SWIG_OBJ_WRAP>
 // js_ctor
 // This is the main constructor
-_exports_HLINCLIENT_JS_templ<SWIG_OBJ_WRAP>::_exports_HLINCLIENT_JS_templ(const Napi::CallbackInfo &info)
+_exports_LongArray_templ<SWIG_OBJ_WRAP>::_exports_LongArray_templ(const Napi::CallbackInfo &info)
 :SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
   Napi::Env env = info.Env();
   
-  this->info = SWIGTYPE_p_HLINCLIENT_JS;
-  if (info.Length() == 1 && info[0].IsExternal()) {
-    // This constructor has been called internally from C++/SWIG
-    // to wrap an already existing C++ object in JS
-    this->self = info[0].As<Napi::External<void>>().Data();
-    this->owned = false;
-    return;
-  }
-  this->owned = true;
-  
-  HLINCLIENT_JS *result;
-  if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_HLINCLIENT_JS.");
-  }
-  result = (HLINCLIENT_JS *)new_HLINCLIENT_JS();
-  
-  
-  this->self = result;
-  return;
-  goto fail;
-fail:
-  return;
-}
-
-// This is the bypass constructor to be used from child classes
-template <typename SWIG_OBJ_WRAP>
-_exports_HLINCLIENT_JS_templ<SWIG_OBJ_WRAP>::_exports_HLINCLIENT_JS_templ(bool, const Napi::CallbackInfo &info)
-:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
-  
-}
-
-SWIGINTERN void delete_HLINCLIENT_JS(HLINCLIENT_JS *self){
-  delete self;
-}
-
-// js_dtoroverride
-template <typename SWIG_OBJ_WRAP>
-_exports_HLINCLIENT_JS_templ<SWIG_OBJ_WRAP>::~_exports_HLINCLIENT_JS_templ() {
-  auto arg1 = reinterpret_cast<HLINCLIENT_JS *>(this->self);
-  if (this->owned && arg1) {
-    delete_HLINCLIENT_JS(arg1);
-    this->self = nullptr;
-  }
-}
-
-
-// js_function
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_HLINCLIENT_JS_templ<SWIG_OBJ_WRAP>::_wrap_HLINCLIENT_JS_assign(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT_JS *arg1 = (HLINCLIENT_JS *) 0 ;
-  HLINCLIENT arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_HLINCLIENT_JS_assign.");
-  }
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_HLINCLIENT_JS, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HLINCLIENT_JS_assign" "', argument " "1"" of type '" "HLINCLIENT_JS *""'"); 
-  }
-  arg1 = reinterpret_cast< HLINCLIENT_JS * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(info[0], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "HLINCLIENT_JS_assign" "', argument " "2"" of type '" "HLINCLIENT""'");
-  } 
-  arg2 = static_cast< HLINCLIENT >(val2);HLINCLIENT_JS_assign(arg1,arg2);
-  jsresult = env.Undefined();
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_function
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_HLINCLIENT_JS_templ<SWIG_OBJ_WRAP>::_wrap_HLINCLIENT_JS_value(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT_JS *arg1 = (HLINCLIENT_JS *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  HLINCLIENT result;
-  
-  if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_HLINCLIENT_JS_value.");
-  }
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_HLINCLIENT_JS, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HLINCLIENT_JS_value" "', argument " "1"" of type '" "HLINCLIENT_JS *""'"); 
-  }
-  arg1 = reinterpret_cast< HLINCLIENT_JS * >(argp1);result = (HLINCLIENT)HLINCLIENT_JS_value(arg1);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_function
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_HLINCLIENT_JS_templ<SWIG_OBJ_WRAP>::_wrap_HLINCLIENT_JS_cast(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT_JS *arg1 = (HLINCLIENT_JS *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  HLINCLIENT *result = 0 ;
-  
-  if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_HLINCLIENT_JS_cast.");
-  }
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_HLINCLIENT_JS, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HLINCLIENT_JS_cast" "', argument " "1"" of type '" "HLINCLIENT_JS *""'"); 
-  }
-  arg1 = reinterpret_cast< HLINCLIENT_JS * >(argp1);result = (HLINCLIENT *)HLINCLIENT_JS_cast(arg1);
-  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_char, 0 |  0 );
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_function
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_HLINCLIENT_JS_templ<SWIG_OBJ_WRAP>::_wrap_HLINCLIENT_JS_frompointer(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT *arg1 = (HLINCLIENT *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  HLINCLIENT_JS *result = 0 ;
-  
-  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_HLINCLIENT_JS_frompointer.");
-  }
-  
-  res1 = SWIG_ConvertPtr(info[0], &argp1,SWIGTYPE_p_unsigned_char, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HLINCLIENT_JS_frompointer" "', argument " "1"" of type '" "HLINCLIENT *""'"); 
-  }
-  arg1 = reinterpret_cast< HLINCLIENT * >(argp1);result = (HLINCLIENT_JS *)HLINCLIENT_JS_frompointer(arg1);
-  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_HLINCLIENT_JS, 0 |  0 );
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-template <typename SWIG_OBJ_WRAP>
-// js_ctor
-// This is the main constructor
-_exports_ByteArray_templ<SWIG_OBJ_WRAP>::_exports_ByteArray_templ(const Napi::CallbackInfo &info)
-:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
-  Napi::Env env = info.Env();
-  
-  this->info = SWIGTYPE_p_ByteArray;
+  this->info = SWIGTYPE_p_LongArray;
   if (info.Length() == 1 && info[0].IsExternal()) {
     // This constructor has been called internally from C++/SWIG
     // to wrap an already existing C++ object in JS
@@ -3800,15 +2729,15 @@ _exports_ByteArray_templ<SWIG_OBJ_WRAP>::_exports_ByteArray_templ(const Napi::Ca
   size_t arg1 ;
   size_t val1 ;
   int ecode1 = 0 ;
-  ByteArray *result;
+  LongArray *result;
   if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_ByteArray.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_LongArray.");
   }
   ecode1 = SWIG_AsVal_size_t(info[0], &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_ByteArray" "', argument " "1"" of type '" "size_t""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_LongArray" "', argument " "1"" of type '" "size_t""'");
   } 
-  arg1 = static_cast< size_t >(val1);result = (ByteArray *)new_ByteArray(SWIG_STD_MOVE(arg1));
+  arg1 = static_cast< size_t >(val1);result = (LongArray *)new_LongArray(SWIG_STD_MOVE(arg1));
   
   
   
@@ -3821,21 +2750,21 @@ fail:
 
 // This is the bypass constructor to be used from child classes
 template <typename SWIG_OBJ_WRAP>
-_exports_ByteArray_templ<SWIG_OBJ_WRAP>::_exports_ByteArray_templ(bool, const Napi::CallbackInfo &info)
+_exports_LongArray_templ<SWIG_OBJ_WRAP>::_exports_LongArray_templ(bool, const Napi::CallbackInfo &info)
 :SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
   
 }
 
-SWIGINTERN void delete_ByteArray(ByteArray *self){
+SWIGINTERN void delete_LongArray(LongArray *self){
   delete [] self;
 }
 
 // js_dtoroverride
 template <typename SWIG_OBJ_WRAP>
-_exports_ByteArray_templ<SWIG_OBJ_WRAP>::~_exports_ByteArray_templ() {
-  auto arg1 = reinterpret_cast<ByteArray *>(this->self);
+_exports_LongArray_templ<SWIG_OBJ_WRAP>::~_exports_LongArray_templ() {
+  auto arg1 = reinterpret_cast<LongArray *>(this->self);
   if (this->owned && arg1) {
-    delete_ByteArray(arg1);
+    delete_LongArray(arg1);
     this->self = nullptr;
   }
 }
@@ -3843,30 +2772,234 @@ _exports_ByteArray_templ<SWIG_OBJ_WRAP>::~_exports_ByteArray_templ() {
 
 // js_function
 template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_ByteArray_templ<SWIG_OBJ_WRAP>::_wrap_ByteArray_getitem(const Napi::CallbackInfo &info) {
+Napi::Value _exports_LongArray_templ<SWIG_OBJ_WRAP>::_wrap_LongArray_getitem(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  ByteArray *arg1 = (ByteArray *) 0 ;
+  LongArray *arg1 = (LongArray *) 0 ;
   size_t arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   size_t val2 ;
   int ecode2 = 0 ;
-  BYTE result;
+  unsigned long result;
   
   if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_ByteArray_getitem.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LongArray_getitem.");
   }
   
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_ByteArray, 0 |  0 );
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LongArray, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ByteArray_getitem" "', argument " "1"" of type '" "ByteArray *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LongArray_getitem" "', argument " "1"" of type '" "LongArray *""'"); 
   }
-  arg1 = reinterpret_cast< ByteArray * >(argp1);ecode2 = SWIG_AsVal_size_t(info[0], &val2);
+  arg1 = reinterpret_cast< LongArray * >(argp1);ecode2 = SWIG_AsVal_size_t(info[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ByteArray_getitem" "', argument " "2"" of type '" "size_t""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LongArray_getitem" "', argument " "2"" of type '" "size_t""'");
   } 
-  arg2 = static_cast< size_t >(val2);result = (BYTE)ByteArray_getitem(arg1,SWIG_STD_MOVE(arg2));
+  arg2 = static_cast< size_t >(val2);result = (unsigned long)LongArray_getitem(arg1,SWIG_STD_MOVE(arg2));
+  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
+  
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_LongArray_templ<SWIG_OBJ_WRAP>::_wrap_LongArray_setitem(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LongArray *arg1 = (LongArray *) 0 ;
+  size_t arg2 ;
+  unsigned long arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  size_t val2 ;
+  int ecode2 = 0 ;
+  unsigned long val3 ;
+  int ecode3 = 0 ;
+  
+  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LongArray_setitem.");
+  }
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LongArray, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LongArray_setitem" "', argument " "1"" of type '" "LongArray *""'"); 
+  }
+  arg1 = reinterpret_cast< LongArray * >(argp1);ecode2 = SWIG_AsVal_size_t(info[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LongArray_setitem" "', argument " "2"" of type '" "size_t""'");
+  } 
+  arg2 = static_cast< size_t >(val2);ecode3 = SWIG_AsVal_unsigned_SS_long(info[1], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "LongArray_setitem" "', argument " "3"" of type '" "unsigned long""'");
+  } 
+  arg3 = static_cast< unsigned long >(val3);LongArray_setitem(arg1,SWIG_STD_MOVE(arg2),arg3);
+  jsresult = env.Undefined();
+  
+  
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_LongArray_templ<SWIG_OBJ_WRAP>::_wrap_LongArray_cast(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LongArray *arg1 = (LongArray *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned long *result = 0 ;
+  
+  if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LongArray_cast.");
+  }
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LongArray, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LongArray_cast" "', argument " "1"" of type '" "LongArray *""'"); 
+  }
+  arg1 = reinterpret_cast< LongArray * >(argp1);result = (unsigned long *)LongArray_cast(arg1);
+  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_long, 0 |  0 );
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_LongArray_templ<SWIG_OBJ_WRAP>::_wrap_LongArray_frompointer(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  unsigned long *arg1 = (unsigned long *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  LongArray *result = 0 ;
+  
+  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LongArray_frompointer.");
+  }
+  
+  res1 = SWIG_ConvertPtr(info[0], &argp1,SWIGTYPE_p_unsigned_long, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LongArray_frompointer" "', argument " "1"" of type '" "unsigned long *""'"); 
+  }
+  arg1 = reinterpret_cast< unsigned long * >(argp1);result = (LongArray *)LongArray_frompointer(arg1);
+  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_LongArray, 0 |  0 );
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+template <typename SWIG_OBJ_WRAP>
+// js_ctor
+// This is the main constructor
+_exports_CharArray_templ<SWIG_OBJ_WRAP>::_exports_CharArray_templ(const Napi::CallbackInfo &info)
+:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
+  Napi::Env env = info.Env();
+  
+  this->info = SWIGTYPE_p_CharArray;
+  if (info.Length() == 1 && info[0].IsExternal()) {
+    // This constructor has been called internally from C++/SWIG
+    // to wrap an already existing C++ object in JS
+    this->self = info[0].As<Napi::External<void>>().Data();
+    this->owned = false;
+    return;
+  }
+  this->owned = true;
+  
+  size_t arg1 ;
+  size_t val1 ;
+  int ecode1 = 0 ;
+  CharArray *result;
+  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_CharArray.");
+  }
+  ecode1 = SWIG_AsVal_size_t(info[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_CharArray" "', argument " "1"" of type '" "size_t""'");
+  } 
+  arg1 = static_cast< size_t >(val1);result = (CharArray *)new_CharArray(SWIG_STD_MOVE(arg1));
+  
+  
+  
+  this->self = result;
+  return;
+  goto fail;
+fail:
+  return;
+}
+
+// This is the bypass constructor to be used from child classes
+template <typename SWIG_OBJ_WRAP>
+_exports_CharArray_templ<SWIG_OBJ_WRAP>::_exports_CharArray_templ(bool, const Napi::CallbackInfo &info)
+:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
+  
+}
+
+SWIGINTERN void delete_CharArray(CharArray *self){
+  delete [] self;
+}
+
+// js_dtoroverride
+template <typename SWIG_OBJ_WRAP>
+_exports_CharArray_templ<SWIG_OBJ_WRAP>::~_exports_CharArray_templ() {
+  auto arg1 = reinterpret_cast<CharArray *>(this->self);
+  if (this->owned && arg1) {
+    delete_CharArray(arg1);
+    this->self = nullptr;
+  }
+}
+
+
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_CharArray_templ<SWIG_OBJ_WRAP>::_wrap_CharArray_getitem(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  CharArray *arg1 = (CharArray *) 0 ;
+  size_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  size_t val2 ;
+  int ecode2 = 0 ;
+  unsigned char result;
+  
+  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_CharArray_getitem.");
+  }
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_CharArray, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CharArray_getitem" "', argument " "1"" of type '" "CharArray *""'"); 
+  }
+  arg1 = reinterpret_cast< CharArray * >(argp1);ecode2 = SWIG_AsVal_size_t(info[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "CharArray_getitem" "', argument " "2"" of type '" "size_t""'");
+  } 
+  arg2 = static_cast< size_t >(val2);result = (unsigned char)CharArray_getitem(arg1,SWIG_STD_MOVE(arg2));
   jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
   
   
@@ -3881,12 +3014,12 @@ fail:
 
 // js_function
 template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_ByteArray_templ<SWIG_OBJ_WRAP>::_wrap_ByteArray_setitem(const Napi::CallbackInfo &info) {
+Napi::Value _exports_CharArray_templ<SWIG_OBJ_WRAP>::_wrap_CharArray_setitem(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  ByteArray *arg1 = (ByteArray *) 0 ;
+  CharArray *arg1 = (CharArray *) 0 ;
   size_t arg2 ;
-  BYTE arg3 ;
+  unsigned char arg3 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   size_t val2 ;
@@ -3895,22 +3028,22 @@ Napi::Value _exports_ByteArray_templ<SWIG_OBJ_WRAP>::_wrap_ByteArray_setitem(con
   int ecode3 = 0 ;
   
   if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_ByteArray_setitem.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_CharArray_setitem.");
   }
   
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_ByteArray, 0 |  0 );
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_CharArray, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ByteArray_setitem" "', argument " "1"" of type '" "ByteArray *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CharArray_setitem" "', argument " "1"" of type '" "CharArray *""'"); 
   }
-  arg1 = reinterpret_cast< ByteArray * >(argp1);ecode2 = SWIG_AsVal_size_t(info[0], &val2);
+  arg1 = reinterpret_cast< CharArray * >(argp1);ecode2 = SWIG_AsVal_size_t(info[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ByteArray_setitem" "', argument " "2"" of type '" "size_t""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "CharArray_setitem" "', argument " "2"" of type '" "size_t""'");
   } 
   arg2 = static_cast< size_t >(val2);ecode3 = SWIG_AsVal_unsigned_SS_char(info[1], &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "ByteArray_setitem" "', argument " "3"" of type '" "BYTE""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "CharArray_setitem" "', argument " "3"" of type '" "unsigned char""'");
   } 
-  arg3 = static_cast< BYTE >(val3);ByteArray_setitem(arg1,SWIG_STD_MOVE(arg2),arg3);
+  arg3 = static_cast< unsigned char >(val3);CharArray_setitem(arg1,SWIG_STD_MOVE(arg2),arg3);
   jsresult = env.Undefined();
   
   
@@ -3926,23 +3059,23 @@ fail:
 
 // js_function
 template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_ByteArray_templ<SWIG_OBJ_WRAP>::_wrap_ByteArray_cast(const Napi::CallbackInfo &info) {
+Napi::Value _exports_CharArray_templ<SWIG_OBJ_WRAP>::_wrap_CharArray_cast(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  ByteArray *arg1 = (ByteArray *) 0 ;
+  CharArray *arg1 = (CharArray *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  BYTE *result = 0 ;
+  unsigned char *result = 0 ;
   
   if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_ByteArray_cast.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_CharArray_cast.");
   }
   
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_ByteArray, 0 |  0 );
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_CharArray, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ByteArray_cast" "', argument " "1"" of type '" "ByteArray *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CharArray_cast" "', argument " "1"" of type '" "CharArray *""'"); 
   }
-  arg1 = reinterpret_cast< ByteArray * >(argp1);result = (BYTE *)ByteArray_cast(arg1);
+  arg1 = reinterpret_cast< CharArray * >(argp1);result = (unsigned char *)CharArray_cast(arg1);
   jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_char, 0 |  0 );
   
   
@@ -3956,24 +3089,950 @@ fail:
 
 // js_function
 template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_ByteArray_templ<SWIG_OBJ_WRAP>::_wrap_ByteArray_frompointer(const Napi::CallbackInfo &info) {
+Napi::Value _exports_CharArray_templ<SWIG_OBJ_WRAP>::_wrap_CharArray_frompointer(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  BYTE *arg1 = (BYTE *) 0 ;
+  unsigned char *arg1 = (unsigned char *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  ByteArray *result = 0 ;
+  CharArray *result = 0 ;
   
   if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_ByteArray_frompointer.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_CharArray_frompointer.");
   }
   
   res1 = SWIG_ConvertPtr(info[0], &argp1,SWIGTYPE_p_unsigned_char, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ByteArray_frompointer" "', argument " "1"" of type '" "BYTE *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CharArray_frompointer" "', argument " "1"" of type '" "unsigned char *""'"); 
   }
-  arg1 = reinterpret_cast< BYTE * >(argp1);result = (ByteArray *)ByteArray_frompointer(arg1);
-  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_ByteArray, 0 |  0 );
+  arg1 = reinterpret_cast< unsigned char * >(argp1);result = (CharArray *)CharArray_frompointer(arg1);
+  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_CharArray, 0 |  0 );
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linOK_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linOK));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_NOMSG_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_NOMSG));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_NOTRUNNING_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_NOTRUNNING));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_RUNNING_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_RUNNING));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_MASTERONLY_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_MASTERONLY));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_SLAVEONLY_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_SLAVEONLY));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_PARAM_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_PARAM));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_NOTFOUND_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_NOTFOUND));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_NOMEM_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_NOMEM));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_NOCHANNELS_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_NOCHANNELS));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_TIMEOUT_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_TIMEOUT));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_NOTINITIALIZED_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_NOTINITIALIZED));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_NOHANDLES_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_NOHANDLES));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_INVHANDLE_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_INVHANDLE));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_CANERROR_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_CANERROR));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_ERRRESP_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_ERRRESP));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_WRONGRESP_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_WRONGRESP));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_DRIVER_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_DRIVER));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_DRIVERFAILED_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_DRIVERFAILED));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_NOCARD_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_NOCARD));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_LICENSE_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_LICENSE));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_INTERNAL_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_INTERNAL));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_NO_ACCESS_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_NO_ACCESS));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_VERSION_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_VERSION));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_NO_REF_POWER_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_NO_REF_POWER));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_linERR_NOT_IMPLEMENTED_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(linERR_NOT_IMPLEMENTED));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_wrap_LinMessageInfo_timestamp_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinMessageInfo *arg1 = (LinMessageInfo *) 0 ;
+  unsigned long arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned long val2 ;
+  int ecode2 = 0 ;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LinMessageInfo_timestamp_set" "', argument " "1"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< LinMessageInfo * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_long(value, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LinMessageInfo_timestamp_set" "', argument " "2"" of type '" "unsigned long""'");
+  } 
+  arg2 = static_cast< unsigned long >(val2);if (arg1) (arg1)->timestamp = arg2;
+  
+  
+  
+  return;
+  
+  goto fail;
+fail:
+  return;
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_wrap_LinMessageInfo_timestamp_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinMessageInfo *arg1 = (LinMessageInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned long result;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LinMessageInfo_timestamp_get" "', argument " "1"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< LinMessageInfo * >(argp1);result = (unsigned long) ((arg1)->timestamp);
+  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_wrap_LinMessageInfo_synchBreakLength_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinMessageInfo *arg1 = (LinMessageInfo *) 0 ;
+  unsigned long arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned long val2 ;
+  int ecode2 = 0 ;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LinMessageInfo_synchBreakLength_set" "', argument " "1"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< LinMessageInfo * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_long(value, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LinMessageInfo_synchBreakLength_set" "', argument " "2"" of type '" "unsigned long""'");
+  } 
+  arg2 = static_cast< unsigned long >(val2);if (arg1) (arg1)->synchBreakLength = arg2;
+  
+  
+  
+  return;
+  
+  goto fail;
+fail:
+  return;
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_wrap_LinMessageInfo_synchBreakLength_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinMessageInfo *arg1 = (LinMessageInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned long result;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LinMessageInfo_synchBreakLength_get" "', argument " "1"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< LinMessageInfo * >(argp1);result = (unsigned long) ((arg1)->synchBreakLength);
+  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_wrap_LinMessageInfo_frameLength_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinMessageInfo *arg1 = (LinMessageInfo *) 0 ;
+  unsigned long arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned long val2 ;
+  int ecode2 = 0 ;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LinMessageInfo_frameLength_set" "', argument " "1"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< LinMessageInfo * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_long(value, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LinMessageInfo_frameLength_set" "', argument " "2"" of type '" "unsigned long""'");
+  } 
+  arg2 = static_cast< unsigned long >(val2);if (arg1) (arg1)->frameLength = arg2;
+  
+  
+  
+  return;
+  
+  goto fail;
+fail:
+  return;
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_wrap_LinMessageInfo_frameLength_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinMessageInfo *arg1 = (LinMessageInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned long result;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LinMessageInfo_frameLength_get" "', argument " "1"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< LinMessageInfo * >(argp1);result = (unsigned long) ((arg1)->frameLength);
+  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_wrap_LinMessageInfo_bitrate_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinMessageInfo *arg1 = (LinMessageInfo *) 0 ;
+  unsigned long arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned long val2 ;
+  int ecode2 = 0 ;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LinMessageInfo_bitrate_set" "', argument " "1"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< LinMessageInfo * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_long(value, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LinMessageInfo_bitrate_set" "', argument " "2"" of type '" "unsigned long""'");
+  } 
+  arg2 = static_cast< unsigned long >(val2);if (arg1) (arg1)->bitrate = arg2;
+  
+  
+  
+  return;
+  
+  goto fail;
+fail:
+  return;
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_wrap_LinMessageInfo_bitrate_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinMessageInfo *arg1 = (LinMessageInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned long result;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LinMessageInfo_bitrate_get" "', argument " "1"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< LinMessageInfo * >(argp1);result = (unsigned long) ((arg1)->bitrate);
+  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_wrap_LinMessageInfo_checkSum_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinMessageInfo *arg1 = (LinMessageInfo *) 0 ;
+  unsigned char arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned char val2 ;
+  int ecode2 = 0 ;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LinMessageInfo_checkSum_set" "', argument " "1"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< LinMessageInfo * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LinMessageInfo_checkSum_set" "', argument " "2"" of type '" "unsigned char""'");
+  } 
+  arg2 = static_cast< unsigned char >(val2);if (arg1) (arg1)->checkSum = arg2;
+  
+  
+  
+  return;
+  
+  goto fail;
+fail:
+  return;
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_wrap_LinMessageInfo_checkSum_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinMessageInfo *arg1 = (LinMessageInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned char result;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LinMessageInfo_checkSum_get" "', argument " "1"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< LinMessageInfo * >(argp1);result = (unsigned char) ((arg1)->checkSum);
+  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_wrap_LinMessageInfo_idPar_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinMessageInfo *arg1 = (LinMessageInfo *) 0 ;
+  unsigned char arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned char val2 ;
+  int ecode2 = 0 ;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LinMessageInfo_idPar_set" "', argument " "1"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< LinMessageInfo * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LinMessageInfo_idPar_set" "', argument " "2"" of type '" "unsigned char""'");
+  } 
+  arg2 = static_cast< unsigned char >(val2);if (arg1) (arg1)->idPar = arg2;
+  
+  
+  
+  return;
+  
+  goto fail;
+fail:
+  return;
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_wrap_LinMessageInfo_idPar_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinMessageInfo *arg1 = (LinMessageInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned char result;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LinMessageInfo_idPar_get" "', argument " "1"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< LinMessageInfo * >(argp1);result = (unsigned char) ((arg1)->idPar);
+  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_wrap_LinMessageInfo_z_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinMessageInfo *arg1 = (LinMessageInfo *) 0 ;
+  unsigned short arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned short val2 ;
+  int ecode2 = 0 ;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LinMessageInfo_z_set" "', argument " "1"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< LinMessageInfo * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(value, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LinMessageInfo_z_set" "', argument " "2"" of type '" "unsigned short""'");
+  } 
+  arg2 = static_cast< unsigned short >(val2);if (arg1) (arg1)->z = arg2;
+  
+  
+  
+  return;
+  
+  goto fail;
+fail:
+  return;
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_wrap_LinMessageInfo_z_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinMessageInfo *arg1 = (LinMessageInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned short result;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LinMessageInfo_z_get" "', argument " "1"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< LinMessageInfo * >(argp1);result = (unsigned short) ((arg1)->z);
+  jsresult = SWIG_From_unsigned_SS_short  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned short >(result));
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_wrap_LinMessageInfo_synchEdgeTime_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinMessageInfo *arg1 = (LinMessageInfo *) 0 ;
+  unsigned long *arg2 = (unsigned long *) (unsigned long *)0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LinMessageInfo_synchEdgeTime_set" "', argument " "1"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< LinMessageInfo * >(argp1);res2 = SWIG_ConvertPtr(value, &argp2,SWIGTYPE_p_unsigned_long, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "LinMessageInfo_synchEdgeTime_set" "', argument " "2"" of type '" "unsigned long [4]""'"); 
+  } 
+  arg2 = reinterpret_cast< unsigned long * >(argp2);{
+    if (arg2) {
+      size_t ii = 0;
+      for (; ii < (size_t)4; ++ii) *(unsigned long *)&arg1->synchEdgeTime[ii] = *((unsigned long *)arg2 + ii);
+    } else {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in variable '""synchEdgeTime""' of type '""unsigned long [4]""'");
+    }
+  }
+  
+  
+  
+  return;
+  
+  goto fail;
+fail:
+  return;
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_wrap_LinMessageInfo_synchEdgeTime_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinMessageInfo *arg1 = (LinMessageInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned long *result = 0 ;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LinMessageInfo_synchEdgeTime_get" "', argument " "1"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< LinMessageInfo * >(argp1);result = (unsigned long *)(unsigned long *) ((arg1)->synchEdgeTime);
+  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_long, 0 |  0 );
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_wrap_LinMessageInfo_byteTime_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinMessageInfo *arg1 = (LinMessageInfo *) 0 ;
+  unsigned long *arg2 = (unsigned long *) (unsigned long *)0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LinMessageInfo_byteTime_set" "', argument " "1"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< LinMessageInfo * >(argp1);res2 = SWIG_ConvertPtr(value, &argp2,SWIGTYPE_p_unsigned_long, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "LinMessageInfo_byteTime_set" "', argument " "2"" of type '" "unsigned long [8]""'"); 
+  } 
+  arg2 = reinterpret_cast< unsigned long * >(argp2);{
+    if (arg2) {
+      size_t ii = 0;
+      for (; ii < (size_t)8; ++ii) *(unsigned long *)&arg1->byteTime[ii] = *((unsigned long *)arg2 + ii);
+    } else {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in variable '""byteTime""' of type '""unsigned long [8]""'");
+    }
+  }
+  
+  
+  
+  return;
+  
+  goto fail;
+fail:
+  return;
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_wrap_LinMessageInfo_byteTime_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinMessageInfo *arg1 = (LinMessageInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned long *result = 0 ;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LinMessageInfo_byteTime_get" "', argument " "1"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< LinMessageInfo * >(argp1);result = (unsigned long *)(unsigned long *) ((arg1)->byteTime);
+  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_long, 0 |  0 );
   
   
   return jsresult;
@@ -3987,11 +4046,11 @@ fail:
 template <typename SWIG_OBJ_WRAP>
 // js_ctor
 // This is the main constructor
-_exports_HLINHW_JS_templ<SWIG_OBJ_WRAP>::_exports_HLINHW_JS_templ(const Napi::CallbackInfo &info)
+_exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_exports_LinMessageInfo_templ(const Napi::CallbackInfo &info)
 :SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
   Napi::Env env = info.Env();
   
-  this->info = SWIGTYPE_p_HLINHW_JS;
+  this->info = SWIGTYPE_p_LinMessageInfo;
   if (info.Length() == 1 && info[0].IsExternal()) {
     // This constructor has been called internally from C++/SWIG
     // to wrap an already existing C++ object in JS
@@ -4001,19 +4060,11 @@ _exports_HLINHW_JS_templ<SWIG_OBJ_WRAP>::_exports_HLINHW_JS_templ(const Napi::Ca
   }
   this->owned = true;
   
-  size_t arg1 ;
-  size_t val1 ;
-  int ecode1 = 0 ;
-  HLINHW_JS *result;
-  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_HLINHW_JS.");
+  LinMessageInfo *result;
+  if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_LinMessageInfo.");
   }
-  ecode1 = SWIG_AsVal_size_t(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_HLINHW_JS" "', argument " "1"" of type '" "size_t""'");
-  } 
-  arg1 = static_cast< size_t >(val1);result = (HLINHW_JS *)new_HLINHW_JS(SWIG_STD_MOVE(arg1));
-  
+  result = (LinMessageInfo *)new LinMessageInfo();
   
   
   this->self = result;
@@ -4025,186 +4076,25 @@ fail:
 
 // This is the bypass constructor to be used from child classes
 template <typename SWIG_OBJ_WRAP>
-_exports_HLINHW_JS_templ<SWIG_OBJ_WRAP>::_exports_HLINHW_JS_templ(bool, const Napi::CallbackInfo &info)
+_exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::_exports_LinMessageInfo_templ(bool, const Napi::CallbackInfo &info)
 :SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
   
 }
 
-SWIGINTERN void delete_HLINHW_JS(HLINHW_JS *self){
-  delete [] self;
-}
 
 // js_dtoroverride
 template <typename SWIG_OBJ_WRAP>
-_exports_HLINHW_JS_templ<SWIG_OBJ_WRAP>::~_exports_HLINHW_JS_templ() {
-  auto arg1 = reinterpret_cast<HLINHW_JS *>(this->self);
+_exports_LinMessageInfo_templ<SWIG_OBJ_WRAP>::~_exports_LinMessageInfo_templ() {
+  auto arg1 = reinterpret_cast<LinMessageInfo *>(this->self);
   if (this->owned && arg1) {
-    delete_HLINHW_JS(arg1);
+    delete arg1;
     this->self = nullptr;
   }
 }
 
 
-// js_function
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_HLINHW_JS_templ<SWIG_OBJ_WRAP>::_wrap_HLINHW_JS_getitem(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINHW_JS *arg1 = (HLINHW_JS *) 0 ;
-  size_t arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  size_t val2 ;
-  int ecode2 = 0 ;
-  HLINHW result;
-  
-  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_HLINHW_JS_getitem.");
-  }
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_HLINHW_JS, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HLINHW_JS_getitem" "', argument " "1"" of type '" "HLINHW_JS *""'"); 
-  }
-  arg1 = reinterpret_cast< HLINHW_JS * >(argp1);ecode2 = SWIG_AsVal_size_t(info[0], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "HLINHW_JS_getitem" "', argument " "2"" of type '" "size_t""'");
-  } 
-  arg2 = static_cast< size_t >(val2);result = (HLINHW)HLINHW_JS_getitem(arg1,SWIG_STD_MOVE(arg2));
-  jsresult = SWIG_From_unsigned_SS_short  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned short >(result));
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_function
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_HLINHW_JS_templ<SWIG_OBJ_WRAP>::_wrap_HLINHW_JS_setitem(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINHW_JS *arg1 = (HLINHW_JS *) 0 ;
-  size_t arg2 ;
-  HLINHW arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  size_t val2 ;
-  int ecode2 = 0 ;
-  unsigned short val3 ;
-  int ecode3 = 0 ;
-  
-  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_HLINHW_JS_setitem.");
-  }
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_HLINHW_JS, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HLINHW_JS_setitem" "', argument " "1"" of type '" "HLINHW_JS *""'"); 
-  }
-  arg1 = reinterpret_cast< HLINHW_JS * >(argp1);ecode2 = SWIG_AsVal_size_t(info[0], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "HLINHW_JS_setitem" "', argument " "2"" of type '" "size_t""'");
-  } 
-  arg2 = static_cast< size_t >(val2);ecode3 = SWIG_AsVal_unsigned_SS_short(info[1], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "HLINHW_JS_setitem" "', argument " "3"" of type '" "HLINHW""'");
-  } 
-  arg3 = static_cast< HLINHW >(val3);HLINHW_JS_setitem(arg1,SWIG_STD_MOVE(arg2),arg3);
-  jsresult = env.Undefined();
-  
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_function
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_HLINHW_JS_templ<SWIG_OBJ_WRAP>::_wrap_HLINHW_JS_cast(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINHW_JS *arg1 = (HLINHW_JS *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  HLINHW *result = 0 ;
-  
-  if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_HLINHW_JS_cast.");
-  }
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_HLINHW_JS, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HLINHW_JS_cast" "', argument " "1"" of type '" "HLINHW_JS *""'"); 
-  }
-  arg1 = reinterpret_cast< HLINHW_JS * >(argp1);result = (HLINHW *)HLINHW_JS_cast(arg1);
-  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_short, 0 |  0 );
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_function
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_HLINHW_JS_templ<SWIG_OBJ_WRAP>::_wrap_HLINHW_JS_frompointer(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINHW *arg1 = (HLINHW *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  HLINHW_JS *result = 0 ;
-  
-  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_HLINHW_JS_frompointer.");
-  }
-  
-  res1 = SWIG_ConvertPtr(info[0], &argp1,SWIGTYPE_p_unsigned_short, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "HLINHW_JS_frompointer" "', argument " "1"" of type '" "HLINHW *""'"); 
-  }
-  arg1 = reinterpret_cast< HLINHW * >(argp1);result = (HLINHW_JS *)HLINHW_JS_frompointer(arg1);
-  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_HLINHW_JS, 0 |  0 );
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
 // js_global_getter
-Napi::Value exports_INVALID_LIN_HANDLE_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_LIN_HW_TYPE_USB_get(const Napi::CallbackInfo &info) {
+Napi::Value exports_LIN_TX_get(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
   
@@ -4219,22 +4109,7 @@ fail:
 
 
 // js_global_getter
-Napi::Value exports_LIN_HW_TYPE_USB_PRO_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_LIN_HW_TYPE_USB_PRO_FD_get(const Napi::CallbackInfo &info) {
+Napi::Value exports_LIN_RX_get(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
   
@@ -4249,11 +4124,11 @@ fail:
 
 
 // js_global_getter
-Napi::Value exports_LIN_HW_TYPE_PLIN_USB_get(const Napi::CallbackInfo &info) {
+Napi::Value exports_LIN_WAKEUP_FRAME_get(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
   
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(3));
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(4));
   
   return jsresult;
   
@@ -4264,22 +4139,7 @@ fail:
 
 
 // js_global_getter
-Napi::Value exports_LIN_MAX_FRAME_ID_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(63));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_LIN_MAX_SCHEDULES_get(const Napi::CallbackInfo &info) {
+Napi::Value exports_LIN_NODATA_get(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
   
@@ -4294,11 +4154,11 @@ fail:
 
 
 // js_global_getter
-Napi::Value exports_LIN_MIN_SCHEDULE_NUMBER_get(const Napi::CallbackInfo &info) {
+Napi::Value exports_LIN_CSUM_ERROR_get(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
   
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0));
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(16));
   
   return jsresult;
   
@@ -4309,112 +4169,7 @@ fail:
 
 
 // js_global_getter
-Napi::Value exports_LIN_MAX_SCHEDULE_NUMBER_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(7));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_LIN_MAX_SCHEDULE_SLOTS_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(256));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_LIN_MIN_BAUDRATE_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1000));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_LIN_MAX_BAUDRATE_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(20000));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_LIN_MAX_NAME_LENGTH_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(48));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_LIN_MAX_USER_DATA_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(24));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_LIN_MIN_BREAK_LENGTH_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(13));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_LIN_MAX_BREAK_LENGTH_get(const Napi::CallbackInfo &info) {
+Napi::Value exports_LIN_PARITY_ERROR_get(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
   
@@ -4429,11 +4184,11 @@ fail:
 
 
 // js_global_getter
-Napi::Value exports_LIN_MAX_RCV_QUEUE_COUNT_get(const Napi::CallbackInfo &info) {
+Napi::Value exports_LIN_SYNCH_ERROR_get(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
   
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(65535));
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(64));
   
   return jsresult;
   
@@ -4444,11 +4199,11 @@ fail:
 
 
 // js_global_getter
-Napi::Value exports_FRAME_FLAG_RESPONSE_ENABLE_get(const Napi::CallbackInfo &info) {
+Napi::Value exports_LIN_BIT_ERROR_get(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
   
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0x1));
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(128));
   
   return jsresult;
   
@@ -4459,412 +4214,7 @@ fail:
 
 
 // js_global_getter
-Napi::Value exports_FRAME_FLAG_SINGLE_SHOT_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0x2));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_FRAME_FLAG_IGNORE_INIT_DATA_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0x4));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_LOG_FLAG_DEFAULT_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_unsigned_SS_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned int >(0x00U));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_LOG_FLAG_ENTRY_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_unsigned_SS_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned int >(0x01U));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_LOG_FLAG_PARAMETERS_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_unsigned_SS_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned int >(0x02U));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_LOG_FLAG_LEAVE_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_unsigned_SS_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned int >(0x04U));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_LOG_FLAG_WRITE_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_unsigned_SS_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned int >(0x08U));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_LOG_FLAG_READ_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_unsigned_SS_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned int >(0x10U));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_LOG_FLAG_ALL_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_unsigned_SS_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned int >(0xFFFFU));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_MSG_ERR_INCONSISTENT_SYNC_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0x1));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_MSG_ERR_ID_PARITY_BIT0_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0x2));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_MSG_ERR_ID_PARITY_BIT1_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0x4));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_MSG_ERR_SLAVE_NOT_RESPONDING_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0x8));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_MSG_ERR_TIMEOUT_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0x10));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_MSG_ERR_CHECKSUM_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0x20));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_MSG_ERR_GND_SHORT_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0x40));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_MSG_ERR_VBAT_SHORT_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0x80));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_MSG_ERR_SLOT_DELAY_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0x100));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_MSG_ERR_OTHER_RESPONSE_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0x200));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_clpName_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_clpMessagesOnQueue_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(2));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_clpWindowHandle_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(3));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_clpConnectedHardware_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(4));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_clpTransmittedMessages_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(5));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_clpReceivedMessages_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(6));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_clpReceiveStatusFrames_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(7));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_clpOnReceiveEventHandle_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(8));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_clpOnPluginEventHandle_get(const Napi::CallbackInfo &info) {
+Napi::Value exports_linCHANNELDATA_CARD_FIRMWARE_REV_get(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
   
@@ -4878,1642 +4228,17 @@ fail:
 }
 
 
-// js_global_getter
-Napi::Value exports_clpLogStatus_get(const Napi::CallbackInfo &info) {
+// js_global_function
+Napi::Value _wrap_linInitializeLibrary(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
   
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(10));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_clpLogConfiguration_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(11));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpName_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpDeviceNumber_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(2));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpChannelNumber_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(3));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpConnectedClients_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(4));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpMessageFilter_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(5));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpBaudrate_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(6));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpMode_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(7));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpFirmwareVersion_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(8));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpBufferOverrunCount_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(9));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpBossClient_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(10));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpSerialNumber_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(11));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpVersion_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(12));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpType_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(13));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpQueueOverrunCount_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(14));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpIdNumber_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(15));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpUserData_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(16));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpBreakLength_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(17));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpLinTermination_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(18));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpFlashMode_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(19));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpScheduleActive_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(20));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpScheduleState_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(21));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwpScheduleSuspendedSlot_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(22));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_mstStandard_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_mstBusSleep_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_mstBusWakeUp_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(2));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_mstAutobaudrateTimeOut_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(3));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_mstAutobaudrateReply_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(4));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_mstOverrun_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(5));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_mstQueueOverrun_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(6));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_mstClientQueueOverrun_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(7));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_sltUnconditional_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_sltEvent_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_sltSporadic_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(2));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_sltMasterRequest_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(3));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_sltSlaveResponse_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(4));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_dirDisabled_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_dirPublisher_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_dirSubscriber_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(2));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_dirSubscriberAutoLength_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(3));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_cstCustom_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_cstClassic_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_cstEnhanced_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(2));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_cstAuto_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(3));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_modNone_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_modSlave_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_modMaster_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(2));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwsNotInitialized_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwsAutobaudrate_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwsActive_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(2));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwsSleep_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(3));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwsShortGround_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(6));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_hwsVBatMissing_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(7));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_schNotRunning_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_schSuspended_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_schRunning_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(2));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errOK_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errXmtQueueFull_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errIllegalPeriod_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(2));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errRcvQueueEmpty_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(3));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errIllegalChecksumType_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(4));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errIllegalHardware_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(5));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errIllegalClient_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(6));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errWrongParameterType_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(7));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errWrongParameterValue_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(8));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errIllegalDirection_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(9));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errIllegalLength_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(10));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errIllegalBaudrate_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(11));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errIllegalFrameID_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(12));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errBufferInsufficient_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(13));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errIllegalScheduleNo_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(14));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errIllegalSlotCount_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(15));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errIllegalIndex_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(16));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errIllegalRange_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(17));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errIllegalHardwareState_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(18));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errIllegalSchedulerState_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(19));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errIllegalFrameConfiguration_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(20));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errScheduleSlotPoolFull_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(21));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errIllegalSchedule_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(22));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errIllegalHardwareMode_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(23));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errOutOfResource_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1001));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errManagerNotLoaded_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1002));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errManagerNotResponding_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1003));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errMemoryAccess_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1004));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errNotImplemented_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0xFFFE));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_getter
-Napi::Value exports_errUnknown_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0xFFFF));
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINVersion_templ<SWIG_OBJ_WRAP>::_wrap_TLINVersion_Major_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINVersion *arg1 = (TLINVersion *) 0 ;
-  short arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  short val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINVersion, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINVersion_Major_set" "', argument " "1"" of type '" "TLINVersion *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINVersion * >(argp1);ecode2 = SWIG_AsVal_short(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINVersion_Major_set" "', argument " "2"" of type '" "short""'");
-  } 
-  arg2 = static_cast< short >(val2);if (arg1) (arg1)->Major = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINVersion_templ<SWIG_OBJ_WRAP>::_wrap_TLINVersion_Major_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINVersion *arg1 = (TLINVersion *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  short result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINVersion, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINVersion_Major_get" "', argument " "1"" of type '" "TLINVersion *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINVersion * >(argp1);result = (short) ((arg1)->Major);
-  jsresult = SWIG_From_short  SWIG_NAPI_FROM_CALL_ARGS(static_cast< short >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINVersion_templ<SWIG_OBJ_WRAP>::_wrap_TLINVersion_Minor_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINVersion *arg1 = (TLINVersion *) 0 ;
-  short arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  short val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINVersion, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINVersion_Minor_set" "', argument " "1"" of type '" "TLINVersion *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINVersion * >(argp1);ecode2 = SWIG_AsVal_short(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINVersion_Minor_set" "', argument " "2"" of type '" "short""'");
-  } 
-  arg2 = static_cast< short >(val2);if (arg1) (arg1)->Minor = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINVersion_templ<SWIG_OBJ_WRAP>::_wrap_TLINVersion_Minor_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINVersion *arg1 = (TLINVersion *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  short result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINVersion, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINVersion_Minor_get" "', argument " "1"" of type '" "TLINVersion *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINVersion * >(argp1);result = (short) ((arg1)->Minor);
-  jsresult = SWIG_From_short  SWIG_NAPI_FROM_CALL_ARGS(static_cast< short >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINVersion_templ<SWIG_OBJ_WRAP>::_wrap_TLINVersion_Revision_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINVersion *arg1 = (TLINVersion *) 0 ;
-  short arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  short val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINVersion, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINVersion_Revision_set" "', argument " "1"" of type '" "TLINVersion *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINVersion * >(argp1);ecode2 = SWIG_AsVal_short(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINVersion_Revision_set" "', argument " "2"" of type '" "short""'");
-  } 
-  arg2 = static_cast< short >(val2);if (arg1) (arg1)->Revision = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINVersion_templ<SWIG_OBJ_WRAP>::_wrap_TLINVersion_Revision_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINVersion *arg1 = (TLINVersion *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  short result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINVersion, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINVersion_Revision_get" "', argument " "1"" of type '" "TLINVersion *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINVersion * >(argp1);result = (short) ((arg1)->Revision);
-  jsresult = SWIG_From_short  SWIG_NAPI_FROM_CALL_ARGS(static_cast< short >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINVersion_templ<SWIG_OBJ_WRAP>::_wrap_TLINVersion_Build_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINVersion *arg1 = (TLINVersion *) 0 ;
-  short arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  short val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINVersion, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINVersion_Build_set" "', argument " "1"" of type '" "TLINVersion *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINVersion * >(argp1);ecode2 = SWIG_AsVal_short(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINVersion_Build_set" "', argument " "2"" of type '" "short""'");
-  } 
-  arg2 = static_cast< short >(val2);if (arg1) (arg1)->Build = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINVersion_templ<SWIG_OBJ_WRAP>::_wrap_TLINVersion_Build_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINVersion *arg1 = (TLINVersion *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  short result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINVersion, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINVersion_Build_get" "', argument " "1"" of type '" "TLINVersion *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINVersion * >(argp1);result = (short) ((arg1)->Build);
-  jsresult = SWIG_From_short  SWIG_NAPI_FROM_CALL_ARGS(static_cast< short >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-template <typename SWIG_OBJ_WRAP>
-// js_ctor
-// This is the main constructor
-_exports_TLINVersion_templ<SWIG_OBJ_WRAP>::_exports_TLINVersion_templ(const Napi::CallbackInfo &info)
-:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
-  Napi::Env env = info.Env();
-  
-  this->info = SWIGTYPE_p_TLINVersion;
-  if (info.Length() == 1 && info[0].IsExternal()) {
-    // This constructor has been called internally from C++/SWIG
-    // to wrap an already existing C++ object in JS
-    this->self = info[0].As<Napi::External<void>>().Data();
-    this->owned = false;
-    return;
-  }
-  this->owned = true;
-  
-  TLINVersion *result;
   if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_TLINVersion.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linInitializeLibrary.");
   }
-  result = (TLINVersion *)new TLINVersion();
   
-  
-  this->self = result;
-  return;
-  goto fail;
-fail:
-  return;
-}
-
-// This is the bypass constructor to be used from child classes
-template <typename SWIG_OBJ_WRAP>
-_exports_TLINVersion_templ<SWIG_OBJ_WRAP>::_exports_TLINVersion_templ(bool, const Napi::CallbackInfo &info)
-:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
-  
-}
-
-
-// js_dtoroverride
-template <typename SWIG_OBJ_WRAP>
-_exports_TLINVersion_templ<SWIG_OBJ_WRAP>::~_exports_TLINVersion_templ() {
-  auto arg1 = reinterpret_cast<TLINVersion *>(this->self);
-  if (this->owned && arg1) {
-    delete arg1;
-    this->self = nullptr;
-  }
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINMsg_FrameId_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINMsg *arg1 = (TLINMsg *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINMsg_FrameId_set" "', argument " "1"" of type '" "TLINMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINMsg * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINMsg_FrameId_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->FrameId = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINMsg_FrameId_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINMsg *arg1 = (TLINMsg *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINMsg_FrameId_get" "', argument " "1"" of type '" "TLINMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINMsg * >(argp1);result = (BYTE) ((arg1)->FrameId);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
+  linInitializeLibrary();
+  jsresult = env.Undefined();
   
   return jsresult;
   
@@ -6523,55 +4248,17 @@ fail:
 }
 
 
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINMsg_Length_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+// js_global_function
+Napi::Value _wrap_linUnloadLibrary(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  TLINMsg *arg1 = (TLINMsg *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
   
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINMsg_Length_set" "', argument " "1"" of type '" "TLINMsg *""'"); 
+  if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linUnloadLibrary.");
   }
-  arg1 = reinterpret_cast< TLINMsg * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINMsg_Length_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->Length = arg2;
   
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINMsg_Length_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINMsg *arg1 = (TLINMsg *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINMsg_Length_get" "', argument " "1"" of type '" "TLINMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINMsg * >(argp1);result = (BYTE) ((arg1)->Length);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
+  linUnloadLibrary();
+  jsresult = env.Undefined();
   
   return jsresult;
   
@@ -6581,177 +4268,49 @@ fail:
 }
 
 
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINMsg_Direction_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+// js_global_function
+Napi::Value _wrap_linGetTransceiverData(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  TLINMsg *arg1 = (TLINMsg *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINMsg_Direction_set" "', argument " "1"" of type '" "TLINMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINMsg * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINMsg_Direction_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->Direction = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINMsg_Direction_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINMsg *arg1 = (TLINMsg *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINMsg_Direction_get" "', argument " "1"" of type '" "TLINMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINMsg * >(argp1);result = (BYTE) ((arg1)->Direction);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINMsg_ChecksumType_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINMsg *arg1 = (TLINMsg *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINMsg_ChecksumType_set" "', argument " "1"" of type '" "TLINMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINMsg * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINMsg_ChecksumType_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->ChecksumType = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINMsg_ChecksumType_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINMsg *arg1 = (TLINMsg *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINMsg_ChecksumType_get" "', argument " "1"" of type '" "TLINMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINMsg * >(argp1);result = (BYTE) ((arg1)->ChecksumType);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINMsg_Data_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINMsg *arg1 = (TLINMsg *) 0 ;
-  BYTE *arg2 = (BYTE *) (BYTE *)0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
+  int arg1 ;
+  unsigned char *arg2 = (unsigned char *) (unsigned char *)0 ;
+  unsigned char *arg3 = (unsigned char *) (unsigned char *)0 ;
+  int *arg4 = (int *) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
   void *argp2 = 0 ;
   int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  LinStatus result;
   
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINMsg_Data_set" "', argument " "1"" of type '" "TLINMsg *""'"); 
+  if(static_cast<int>(info.Length()) < 4 || static_cast<int>(info.Length()) > 4) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linGetTransceiverData.");
   }
-  arg1 = reinterpret_cast< TLINMsg * >(argp1);res2 = SWIG_ConvertPtr(value, &argp2,SWIGTYPE_p_unsigned_char, 0 |  0 );
+  
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linGetTransceiverData" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = static_cast< int >(val1);res2 = SWIG_ConvertPtr(info[1], &argp2,SWIGTYPE_p_unsigned_char, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "TLINMsg_Data_set" "', argument " "2"" of type '" "BYTE [8]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "linGetTransceiverData" "', argument " "2"" of type '" "unsigned char [8]""'"); 
   } 
-  arg2 = reinterpret_cast< BYTE * >(argp2);{
-    if (arg2) {
-      size_t ii = 0;
-      for (; ii < (size_t)8; ++ii) *(BYTE *)&arg1->Data[ii] = *((BYTE *)arg2 + ii);
-    } else {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in variable '""Data""' of type '""BYTE [8]""'");
-    }
+  arg2 = reinterpret_cast< unsigned char * >(argp2);res3 = SWIG_ConvertPtr(info[2], &argp3,SWIGTYPE_p_unsigned_char, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "linGetTransceiverData" "', argument " "3"" of type '" "unsigned char [8]""'"); 
+  } 
+  arg3 = reinterpret_cast< unsigned char * >(argp3);res4 = SWIG_ConvertPtr(info[3], &argp4,SWIGTYPE_p_int, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "linGetTransceiverData" "', argument " "4"" of type '" "int *""'"); 
   }
+  arg4 = reinterpret_cast< int * >(argp4);result = (LinStatus)linGetTransceiverData(arg1,arg2,arg3,arg4);
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
   
   
   
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINMsg_Data_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINMsg *arg1 = (TLINMsg *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE *result = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINMsg_Data_get" "', argument " "1"" of type '" "TLINMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINMsg * >(argp1);result = (BYTE *)(BYTE *) ((arg1)->Data);
-  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_char, 0 |  0 );
   
   
   return jsresult;
@@ -6762,574 +4321,91 @@ fail:
 }
 
 
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINMsg_Checksum_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+// js_global_function
+Napi::Value _wrap_linOpenChannel(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  TLINMsg *arg1 = (TLINMsg *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINMsg_Checksum_set" "', argument " "1"" of type '" "TLINMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINMsg * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINMsg_Checksum_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->Checksum = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINMsg_Checksum_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINMsg *arg1 = (TLINMsg *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINMsg_Checksum_get" "', argument " "1"" of type '" "TLINMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINMsg * >(argp1);result = (BYTE) ((arg1)->Checksum);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-template <typename SWIG_OBJ_WRAP>
-// js_ctor
-// This is the main constructor
-_exports_TLINMsg_templ<SWIG_OBJ_WRAP>::_exports_TLINMsg_templ(const Napi::CallbackInfo &info)
-:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
-  Napi::Env env = info.Env();
-  
-  this->info = SWIGTYPE_p_TLINMsg;
-  if (info.Length() == 1 && info[0].IsExternal()) {
-    // This constructor has been called internally from C++/SWIG
-    // to wrap an already existing C++ object in JS
-    this->self = info[0].As<Napi::External<void>>().Data();
-    this->owned = false;
-    return;
-  }
-  this->owned = true;
-  
-  TLINMsg *result;
-  if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_TLINMsg.");
-  }
-  result = (TLINMsg *)new TLINMsg();
-  
-  
-  this->self = result;
-  return;
-  goto fail;
-fail:
-  return;
-}
-
-// This is the bypass constructor to be used from child classes
-template <typename SWIG_OBJ_WRAP>
-_exports_TLINMsg_templ<SWIG_OBJ_WRAP>::_exports_TLINMsg_templ(bool, const Napi::CallbackInfo &info)
-:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
-  
-}
-
-
-// js_dtoroverride
-template <typename SWIG_OBJ_WRAP>
-_exports_TLINMsg_templ<SWIG_OBJ_WRAP>::~_exports_TLINMsg_templ() {
-  auto arg1 = reinterpret_cast<TLINMsg *>(this->self);
-  if (this->owned && arg1) {
-    delete arg1;
-    this->self = nullptr;
-  }
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_Type_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_Type_set" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINRcvMsg_Type_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->Type = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_Type_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_Type_get" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);result = (BYTE) ((arg1)->Type);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_FrameId_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_FrameId_set" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINRcvMsg_FrameId_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->FrameId = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_FrameId_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_FrameId_get" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);result = (BYTE) ((arg1)->FrameId);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_Length_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_Length_set" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINRcvMsg_Length_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->Length = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_Length_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_Length_get" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);result = (BYTE) ((arg1)->Length);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_Direction_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_Direction_set" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINRcvMsg_Direction_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->Direction = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_Direction_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_Direction_get" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);result = (BYTE) ((arg1)->Direction);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_ChecksumType_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_ChecksumType_set" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINRcvMsg_ChecksumType_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->ChecksumType = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_ChecksumType_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_ChecksumType_get" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);result = (BYTE) ((arg1)->ChecksumType);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_Data_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  BYTE *arg2 = (BYTE *) (BYTE *)0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_Data_set" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);res2 = SWIG_ConvertPtr(value, &argp2,SWIGTYPE_p_unsigned_char, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "TLINRcvMsg_Data_set" "', argument " "2"" of type '" "BYTE [8]""'"); 
-  } 
-  arg2 = reinterpret_cast< BYTE * >(argp2);{
-    if (arg2) {
-      size_t ii = 0;
-      for (; ii < (size_t)8; ++ii) *(BYTE *)&arg1->Data[ii] = *((BYTE *)arg2 + ii);
-    } else {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in variable '""Data""' of type '""BYTE [8]""'");
-    }
-  }
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_Data_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE *result = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_Data_get" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);result = (BYTE *)(BYTE *) ((arg1)->Data);
-  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_char, 0 |  0 );
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_Checksum_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_Checksum_set" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINRcvMsg_Checksum_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->Checksum = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_Checksum_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_Checksum_get" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);result = (BYTE) ((arg1)->Checksum);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_ErrorFlags_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  INT32 arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
+  int arg1 ;
+  int arg2 ;
+  int val1 ;
+  int ecode1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
+  LinHandle result;
   
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_ErrorFlags_set" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
+  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linOpenChannel.");
   }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);ecode2 = SWIG_AsVal_int(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINRcvMsg_ErrorFlags_set" "', argument " "2"" of type '" "INT32""'");
+  
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linOpenChannel" "', argument " "1"" of type '" "int""'");
   } 
-  arg2 = static_cast< INT32 >(val2);if (arg1) (arg1)->ErrorFlags = arg2;
+  arg1 = static_cast< int >(val1);ecode2 = SWIG_AsVal_int(info[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "linOpenChannel" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);result = (LinHandle)linOpenChannel(arg1,arg2);
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
   
   
   
-  return;
+  return jsresult;
   
   goto fail;
 fail:
-  return;
+  return Napi::Value();
 }
 
 
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_ErrorFlags_get(const Napi::CallbackInfo &info) {
+// js_global_getter
+Napi::Value exports_LIN_MASTER_get(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  INT32 result;
   
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_ErrorFlags_get" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_LIN_SLAVE_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(2));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_function
+Napi::Value _wrap_linClose(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinHandle arg1 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  LinStatus result;
+  
+  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linClose.");
   }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);result = (INT32) ((arg1)->ErrorFlags);
+  
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linClose" "', argument " "1"" of type '" "LinHandle""'");
+  } 
+  arg1 = static_cast< LinHandle >(val1);result = (LinStatus)linClose(arg1);
   jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
   
   
@@ -7341,1849 +4417,39 @@ fail:
 }
 
 
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_TimeStamp_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  unsigned __int64 arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned long long val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_TimeStamp_set" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_long_SS_long(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINRcvMsg_TimeStamp_set" "', argument " "2"" of type '" "unsigned __int64""'");
-  } 
-  arg2 = static_cast< unsigned __int64 >(val2);if (arg1) (arg1)->TimeStamp = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_TimeStamp_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned __int64 result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_TimeStamp_get" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);result =  ((arg1)->TimeStamp);
-  jsresult = SWIG_From_unsigned_SS_long_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long long >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_hHw_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  HLINHW arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_hHw_set" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINRcvMsg_hHw_set" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);if (arg1) (arg1)->hHw = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_wrap_TLINRcvMsg_hHw_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINRcvMsg *arg1 = (TLINRcvMsg *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  HLINHW result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINRcvMsg_hHw_get" "', argument " "1"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINRcvMsg * >(argp1);result = (HLINHW) ((arg1)->hHw);
-  jsresult = SWIG_From_unsigned_SS_short  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned short >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-template <typename SWIG_OBJ_WRAP>
-// js_ctor
-// This is the main constructor
-_exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_exports_TLINRcvMsg_templ(const Napi::CallbackInfo &info)
-:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
-  Napi::Env env = info.Env();
-  
-  this->info = SWIGTYPE_p_TLINRcvMsg;
-  if (info.Length() == 1 && info[0].IsExternal()) {
-    // This constructor has been called internally from C++/SWIG
-    // to wrap an already existing C++ object in JS
-    this->self = info[0].As<Napi::External<void>>().Data();
-    this->owned = false;
-    return;
-  }
-  this->owned = true;
-  
-  TLINRcvMsg *result;
-  if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_TLINRcvMsg.");
-  }
-  result = (TLINRcvMsg *)new TLINRcvMsg();
-  
-  
-  this->self = result;
-  return;
-  goto fail;
-fail:
-  return;
-}
-
-// This is the bypass constructor to be used from child classes
-template <typename SWIG_OBJ_WRAP>
-_exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::_exports_TLINRcvMsg_templ(bool, const Napi::CallbackInfo &info)
-:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
-  
-}
-
-
-// js_dtoroverride
-template <typename SWIG_OBJ_WRAP>
-_exports_TLINRcvMsg_templ<SWIG_OBJ_WRAP>::~_exports_TLINRcvMsg_templ() {
-  auto arg1 = reinterpret_cast<TLINRcvMsg *>(this->self);
-  if (this->owned && arg1) {
-    delete arg1;
-    this->self = nullptr;
-  }
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINFrameEntry_templ<SWIG_OBJ_WRAP>::_wrap_TLINFrameEntry_FrameId_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINFrameEntry *arg1 = (TLINFrameEntry *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINFrameEntry, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINFrameEntry_FrameId_set" "', argument " "1"" of type '" "TLINFrameEntry *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINFrameEntry * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINFrameEntry_FrameId_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->FrameId = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINFrameEntry_templ<SWIG_OBJ_WRAP>::_wrap_TLINFrameEntry_FrameId_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINFrameEntry *arg1 = (TLINFrameEntry *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINFrameEntry, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINFrameEntry_FrameId_get" "', argument " "1"" of type '" "TLINFrameEntry *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINFrameEntry * >(argp1);result = (BYTE) ((arg1)->FrameId);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINFrameEntry_templ<SWIG_OBJ_WRAP>::_wrap_TLINFrameEntry_Length_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINFrameEntry *arg1 = (TLINFrameEntry *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINFrameEntry, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINFrameEntry_Length_set" "', argument " "1"" of type '" "TLINFrameEntry *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINFrameEntry * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINFrameEntry_Length_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->Length = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINFrameEntry_templ<SWIG_OBJ_WRAP>::_wrap_TLINFrameEntry_Length_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINFrameEntry *arg1 = (TLINFrameEntry *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINFrameEntry, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINFrameEntry_Length_get" "', argument " "1"" of type '" "TLINFrameEntry *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINFrameEntry * >(argp1);result = (BYTE) ((arg1)->Length);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINFrameEntry_templ<SWIG_OBJ_WRAP>::_wrap_TLINFrameEntry_Direction_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINFrameEntry *arg1 = (TLINFrameEntry *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINFrameEntry, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINFrameEntry_Direction_set" "', argument " "1"" of type '" "TLINFrameEntry *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINFrameEntry * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINFrameEntry_Direction_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->Direction = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINFrameEntry_templ<SWIG_OBJ_WRAP>::_wrap_TLINFrameEntry_Direction_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINFrameEntry *arg1 = (TLINFrameEntry *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINFrameEntry, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINFrameEntry_Direction_get" "', argument " "1"" of type '" "TLINFrameEntry *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINFrameEntry * >(argp1);result = (BYTE) ((arg1)->Direction);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINFrameEntry_templ<SWIG_OBJ_WRAP>::_wrap_TLINFrameEntry_ChecksumType_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINFrameEntry *arg1 = (TLINFrameEntry *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINFrameEntry, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINFrameEntry_ChecksumType_set" "', argument " "1"" of type '" "TLINFrameEntry *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINFrameEntry * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINFrameEntry_ChecksumType_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->ChecksumType = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINFrameEntry_templ<SWIG_OBJ_WRAP>::_wrap_TLINFrameEntry_ChecksumType_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINFrameEntry *arg1 = (TLINFrameEntry *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINFrameEntry, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINFrameEntry_ChecksumType_get" "', argument " "1"" of type '" "TLINFrameEntry *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINFrameEntry * >(argp1);result = (BYTE) ((arg1)->ChecksumType);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINFrameEntry_templ<SWIG_OBJ_WRAP>::_wrap_TLINFrameEntry_Flags_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINFrameEntry *arg1 = (TLINFrameEntry *) 0 ;
-  WORD arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINFrameEntry, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINFrameEntry_Flags_set" "', argument " "1"" of type '" "TLINFrameEntry *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINFrameEntry * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINFrameEntry_Flags_set" "', argument " "2"" of type '" "WORD""'");
-  } 
-  arg2 = static_cast< WORD >(val2);if (arg1) (arg1)->Flags = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINFrameEntry_templ<SWIG_OBJ_WRAP>::_wrap_TLINFrameEntry_Flags_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINFrameEntry *arg1 = (TLINFrameEntry *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  WORD result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINFrameEntry, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINFrameEntry_Flags_get" "', argument " "1"" of type '" "TLINFrameEntry *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINFrameEntry * >(argp1);result = (WORD) ((arg1)->Flags);
-  jsresult = SWIG_From_unsigned_SS_short  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned short >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINFrameEntry_templ<SWIG_OBJ_WRAP>::_wrap_TLINFrameEntry_InitialData_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINFrameEntry *arg1 = (TLINFrameEntry *) 0 ;
-  BYTE *arg2 = (BYTE *) (BYTE *)0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINFrameEntry, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINFrameEntry_InitialData_set" "', argument " "1"" of type '" "TLINFrameEntry *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINFrameEntry * >(argp1);res2 = SWIG_ConvertPtr(value, &argp2,SWIGTYPE_p_unsigned_char, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "TLINFrameEntry_InitialData_set" "', argument " "2"" of type '" "BYTE [8]""'"); 
-  } 
-  arg2 = reinterpret_cast< BYTE * >(argp2);{
-    if (arg2) {
-      size_t ii = 0;
-      for (; ii < (size_t)8; ++ii) *(BYTE *)&arg1->InitialData[ii] = *((BYTE *)arg2 + ii);
-    } else {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in variable '""InitialData""' of type '""BYTE [8]""'");
-    }
-  }
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINFrameEntry_templ<SWIG_OBJ_WRAP>::_wrap_TLINFrameEntry_InitialData_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINFrameEntry *arg1 = (TLINFrameEntry *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE *result = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINFrameEntry, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINFrameEntry_InitialData_get" "', argument " "1"" of type '" "TLINFrameEntry *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINFrameEntry * >(argp1);result = (BYTE *)(BYTE *) ((arg1)->InitialData);
-  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_char, 0 |  0 );
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-template <typename SWIG_OBJ_WRAP>
-// js_ctor
-// This is the main constructor
-_exports_TLINFrameEntry_templ<SWIG_OBJ_WRAP>::_exports_TLINFrameEntry_templ(const Napi::CallbackInfo &info)
-:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
-  Napi::Env env = info.Env();
-  
-  this->info = SWIGTYPE_p_TLINFrameEntry;
-  if (info.Length() == 1 && info[0].IsExternal()) {
-    // This constructor has been called internally from C++/SWIG
-    // to wrap an already existing C++ object in JS
-    this->self = info[0].As<Napi::External<void>>().Data();
-    this->owned = false;
-    return;
-  }
-  this->owned = true;
-  
-  TLINFrameEntry *result;
-  if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_TLINFrameEntry.");
-  }
-  result = (TLINFrameEntry *)new TLINFrameEntry();
-  
-  
-  this->self = result;
-  return;
-  goto fail;
-fail:
-  return;
-}
-
-// This is the bypass constructor to be used from child classes
-template <typename SWIG_OBJ_WRAP>
-_exports_TLINFrameEntry_templ<SWIG_OBJ_WRAP>::_exports_TLINFrameEntry_templ(bool, const Napi::CallbackInfo &info)
-:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
-  
-}
-
-
-// js_dtoroverride
-template <typename SWIG_OBJ_WRAP>
-_exports_TLINFrameEntry_templ<SWIG_OBJ_WRAP>::~_exports_TLINFrameEntry_templ() {
-  auto arg1 = reinterpret_cast<TLINFrameEntry *>(this->self);
-  if (this->owned && arg1) {
-    delete arg1;
-    this->self = nullptr;
-  }
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINScheduleSlot_templ<SWIG_OBJ_WRAP>::_wrap_TLINScheduleSlot_Type_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINScheduleSlot *arg1 = (TLINScheduleSlot *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINScheduleSlot, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINScheduleSlot_Type_set" "', argument " "1"" of type '" "TLINScheduleSlot *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINScheduleSlot * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINScheduleSlot_Type_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->Type = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINScheduleSlot_templ<SWIG_OBJ_WRAP>::_wrap_TLINScheduleSlot_Type_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINScheduleSlot *arg1 = (TLINScheduleSlot *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINScheduleSlot, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINScheduleSlot_Type_get" "', argument " "1"" of type '" "TLINScheduleSlot *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINScheduleSlot * >(argp1);result = (BYTE) ((arg1)->Type);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINScheduleSlot_templ<SWIG_OBJ_WRAP>::_wrap_TLINScheduleSlot_Delay_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINScheduleSlot *arg1 = (TLINScheduleSlot *) 0 ;
-  WORD arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINScheduleSlot, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINScheduleSlot_Delay_set" "', argument " "1"" of type '" "TLINScheduleSlot *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINScheduleSlot * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINScheduleSlot_Delay_set" "', argument " "2"" of type '" "WORD""'");
-  } 
-  arg2 = static_cast< WORD >(val2);if (arg1) (arg1)->Delay = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINScheduleSlot_templ<SWIG_OBJ_WRAP>::_wrap_TLINScheduleSlot_Delay_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINScheduleSlot *arg1 = (TLINScheduleSlot *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  WORD result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINScheduleSlot, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINScheduleSlot_Delay_get" "', argument " "1"" of type '" "TLINScheduleSlot *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINScheduleSlot * >(argp1);result = (WORD) ((arg1)->Delay);
-  jsresult = SWIG_From_unsigned_SS_short  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned short >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINScheduleSlot_templ<SWIG_OBJ_WRAP>::_wrap_TLINScheduleSlot_FrameId_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINScheduleSlot *arg1 = (TLINScheduleSlot *) 0 ;
-  BYTE *arg2 = (BYTE *) (BYTE *)0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINScheduleSlot, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINScheduleSlot_FrameId_set" "', argument " "1"" of type '" "TLINScheduleSlot *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINScheduleSlot * >(argp1);res2 = SWIG_ConvertPtr(value, &argp2,SWIGTYPE_p_unsigned_char, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "TLINScheduleSlot_FrameId_set" "', argument " "2"" of type '" "BYTE [8]""'"); 
-  } 
-  arg2 = reinterpret_cast< BYTE * >(argp2);{
-    if (arg2) {
-      size_t ii = 0;
-      for (; ii < (size_t)8; ++ii) *(BYTE *)&arg1->FrameId[ii] = *((BYTE *)arg2 + ii);
-    } else {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in variable '""FrameId""' of type '""BYTE [8]""'");
-    }
-  }
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINScheduleSlot_templ<SWIG_OBJ_WRAP>::_wrap_TLINScheduleSlot_FrameId_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINScheduleSlot *arg1 = (TLINScheduleSlot *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE *result = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINScheduleSlot, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINScheduleSlot_FrameId_get" "', argument " "1"" of type '" "TLINScheduleSlot *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINScheduleSlot * >(argp1);result = (BYTE *)(BYTE *) ((arg1)->FrameId);
-  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_char, 0 |  0 );
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINScheduleSlot_templ<SWIG_OBJ_WRAP>::_wrap_TLINScheduleSlot_CountResolve_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINScheduleSlot *arg1 = (TLINScheduleSlot *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINScheduleSlot, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINScheduleSlot_CountResolve_set" "', argument " "1"" of type '" "TLINScheduleSlot *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINScheduleSlot * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINScheduleSlot_CountResolve_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->CountResolve = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINScheduleSlot_templ<SWIG_OBJ_WRAP>::_wrap_TLINScheduleSlot_CountResolve_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINScheduleSlot *arg1 = (TLINScheduleSlot *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINScheduleSlot, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINScheduleSlot_CountResolve_get" "', argument " "1"" of type '" "TLINScheduleSlot *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINScheduleSlot * >(argp1);result = (BYTE) ((arg1)->CountResolve);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINScheduleSlot_templ<SWIG_OBJ_WRAP>::_wrap_TLINScheduleSlot_Handle_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINScheduleSlot *arg1 = (TLINScheduleSlot *) 0 ;
-  DWORD arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned long val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINScheduleSlot, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINScheduleSlot_Handle_set" "', argument " "1"" of type '" "TLINScheduleSlot *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINScheduleSlot * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_long(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINScheduleSlot_Handle_set" "', argument " "2"" of type '" "DWORD""'");
-  } 
-  arg2 = static_cast< DWORD >(val2);if (arg1) (arg1)->Handle = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINScheduleSlot_templ<SWIG_OBJ_WRAP>::_wrap_TLINScheduleSlot_Handle_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINScheduleSlot *arg1 = (TLINScheduleSlot *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  DWORD result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINScheduleSlot, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINScheduleSlot_Handle_get" "', argument " "1"" of type '" "TLINScheduleSlot *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINScheduleSlot * >(argp1);result = (DWORD) ((arg1)->Handle);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-template <typename SWIG_OBJ_WRAP>
-// js_ctor
-// This is the main constructor
-_exports_TLINScheduleSlot_templ<SWIG_OBJ_WRAP>::_exports_TLINScheduleSlot_templ(const Napi::CallbackInfo &info)
-:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
-  Napi::Env env = info.Env();
-  
-  this->info = SWIGTYPE_p_TLINScheduleSlot;
-  if (info.Length() == 1 && info[0].IsExternal()) {
-    // This constructor has been called internally from C++/SWIG
-    // to wrap an already existing C++ object in JS
-    this->self = info[0].As<Napi::External<void>>().Data();
-    this->owned = false;
-    return;
-  }
-  this->owned = true;
-  
-  TLINScheduleSlot *result;
-  if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_TLINScheduleSlot.");
-  }
-  result = (TLINScheduleSlot *)new TLINScheduleSlot();
-  
-  
-  this->self = result;
-  return;
-  goto fail;
-fail:
-  return;
-}
-
-// This is the bypass constructor to be used from child classes
-template <typename SWIG_OBJ_WRAP>
-_exports_TLINScheduleSlot_templ<SWIG_OBJ_WRAP>::_exports_TLINScheduleSlot_templ(bool, const Napi::CallbackInfo &info)
-:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
-  
-}
-
-
-// js_dtoroverride
-template <typename SWIG_OBJ_WRAP>
-_exports_TLINScheduleSlot_templ<SWIG_OBJ_WRAP>::~_exports_TLINScheduleSlot_templ() {
-  auto arg1 = reinterpret_cast<TLINScheduleSlot *>(this->self);
-  if (this->owned && arg1) {
-    delete arg1;
-    this->self = nullptr;
-  }
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINHardwareStatus_templ<SWIG_OBJ_WRAP>::_wrap_TLINHardwareStatus_Mode_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINHardwareStatus *arg1 = (TLINHardwareStatus *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINHardwareStatus, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINHardwareStatus_Mode_set" "', argument " "1"" of type '" "TLINHardwareStatus *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINHardwareStatus * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINHardwareStatus_Mode_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->Mode = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINHardwareStatus_templ<SWIG_OBJ_WRAP>::_wrap_TLINHardwareStatus_Mode_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINHardwareStatus *arg1 = (TLINHardwareStatus *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINHardwareStatus, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINHardwareStatus_Mode_get" "', argument " "1"" of type '" "TLINHardwareStatus *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINHardwareStatus * >(argp1);result = (BYTE) ((arg1)->Mode);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINHardwareStatus_templ<SWIG_OBJ_WRAP>::_wrap_TLINHardwareStatus_Status_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINHardwareStatus *arg1 = (TLINHardwareStatus *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINHardwareStatus, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINHardwareStatus_Status_set" "', argument " "1"" of type '" "TLINHardwareStatus *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINHardwareStatus * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINHardwareStatus_Status_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->Status = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINHardwareStatus_templ<SWIG_OBJ_WRAP>::_wrap_TLINHardwareStatus_Status_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINHardwareStatus *arg1 = (TLINHardwareStatus *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINHardwareStatus, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINHardwareStatus_Status_get" "', argument " "1"" of type '" "TLINHardwareStatus *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINHardwareStatus * >(argp1);result = (BYTE) ((arg1)->Status);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINHardwareStatus_templ<SWIG_OBJ_WRAP>::_wrap_TLINHardwareStatus_FreeOnSendQueue_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINHardwareStatus *arg1 = (TLINHardwareStatus *) 0 ;
-  BYTE arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINHardwareStatus, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINHardwareStatus_FreeOnSendQueue_set" "', argument " "1"" of type '" "TLINHardwareStatus *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINHardwareStatus * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINHardwareStatus_FreeOnSendQueue_set" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);if (arg1) (arg1)->FreeOnSendQueue = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINHardwareStatus_templ<SWIG_OBJ_WRAP>::_wrap_TLINHardwareStatus_FreeOnSendQueue_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINHardwareStatus *arg1 = (TLINHardwareStatus *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  BYTE result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINHardwareStatus, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINHardwareStatus_FreeOnSendQueue_get" "', argument " "1"" of type '" "TLINHardwareStatus *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINHardwareStatus * >(argp1);result = (BYTE) ((arg1)->FreeOnSendQueue);
-  jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINHardwareStatus_templ<SWIG_OBJ_WRAP>::_wrap_TLINHardwareStatus_FreeOnSchedulePool_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINHardwareStatus *arg1 = (TLINHardwareStatus *) 0 ;
-  WORD arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINHardwareStatus, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINHardwareStatus_FreeOnSchedulePool_set" "', argument " "1"" of type '" "TLINHardwareStatus *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINHardwareStatus * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINHardwareStatus_FreeOnSchedulePool_set" "', argument " "2"" of type '" "WORD""'");
-  } 
-  arg2 = static_cast< WORD >(val2);if (arg1) (arg1)->FreeOnSchedulePool = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINHardwareStatus_templ<SWIG_OBJ_WRAP>::_wrap_TLINHardwareStatus_FreeOnSchedulePool_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINHardwareStatus *arg1 = (TLINHardwareStatus *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  WORD result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINHardwareStatus, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINHardwareStatus_FreeOnSchedulePool_get" "', argument " "1"" of type '" "TLINHardwareStatus *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINHardwareStatus * >(argp1);result = (WORD) ((arg1)->FreeOnSchedulePool);
-  jsresult = SWIG_From_unsigned_SS_short  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned short >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_setter
-template <typename SWIG_OBJ_WRAP>
-void _exports_TLINHardwareStatus_templ<SWIG_OBJ_WRAP>::_wrap_TLINHardwareStatus_ReceiveBufferOverrun_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINHardwareStatus *arg1 = (TLINHardwareStatus *) 0 ;
-  WORD arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINHardwareStatus, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINHardwareStatus_ReceiveBufferOverrun_set" "', argument " "1"" of type '" "TLINHardwareStatus *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINHardwareStatus * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(value, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TLINHardwareStatus_ReceiveBufferOverrun_set" "', argument " "2"" of type '" "WORD""'");
-  } 
-  arg2 = static_cast< WORD >(val2);if (arg1) (arg1)->ReceiveBufferOverrun = arg2;
-  
-  
-  
-  return;
-  
-  goto fail;
-fail:
-  return;
-}
-
-
-// js_getter
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_TLINHardwareStatus_templ<SWIG_OBJ_WRAP>::_wrap_TLINHardwareStatus_ReceiveBufferOverrun_get(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINHardwareStatus *arg1 = (TLINHardwareStatus *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  WORD result;
-  
-  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_TLINHardwareStatus, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TLINHardwareStatus_ReceiveBufferOverrun_get" "', argument " "1"" of type '" "TLINHardwareStatus *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINHardwareStatus * >(argp1);result = (WORD) ((arg1)->ReceiveBufferOverrun);
-  jsresult = SWIG_From_unsigned_SS_short  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned short >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-template <typename SWIG_OBJ_WRAP>
-// js_ctor
-// This is the main constructor
-_exports_TLINHardwareStatus_templ<SWIG_OBJ_WRAP>::_exports_TLINHardwareStatus_templ(const Napi::CallbackInfo &info)
-:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
-  Napi::Env env = info.Env();
-  
-  this->info = SWIGTYPE_p_TLINHardwareStatus;
-  if (info.Length() == 1 && info[0].IsExternal()) {
-    // This constructor has been called internally from C++/SWIG
-    // to wrap an already existing C++ object in JS
-    this->self = info[0].As<Napi::External<void>>().Data();
-    this->owned = false;
-    return;
-  }
-  this->owned = true;
-  
-  TLINHardwareStatus *result;
-  if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_TLINHardwareStatus.");
-  }
-  result = (TLINHardwareStatus *)new TLINHardwareStatus();
-  
-  
-  this->self = result;
-  return;
-  goto fail;
-fail:
-  return;
-}
-
-// This is the bypass constructor to be used from child classes
-template <typename SWIG_OBJ_WRAP>
-_exports_TLINHardwareStatus_templ<SWIG_OBJ_WRAP>::_exports_TLINHardwareStatus_templ(bool, const Napi::CallbackInfo &info)
-:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
-  
-}
-
-
-// js_dtoroverride
-template <typename SWIG_OBJ_WRAP>
-_exports_TLINHardwareStatus_templ<SWIG_OBJ_WRAP>::~_exports_TLINHardwareStatus_templ() {
-  auto arg1 = reinterpret_cast<TLINHardwareStatus *>(this->self);
-  if (this->owned && arg1) {
-    delete arg1;
-    this->self = nullptr;
-  }
-}
-
-
 // js_global_function
-Napi::Value _wrap_LIN_RegisterClient(const Napi::CallbackInfo &info) {
+Napi::Value _wrap_linGetVersion(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  LPSTR arg1 = (LPSTR) 0 ;
-  DWORD arg2 ;
-  HLINCLIENT *arg3 = (HLINCLIENT *) 0 ;
-  int res1 ;
-  char *buf1 = 0 ;
-  int alloc1 = 0 ;
-  unsigned long val2 ;
-  int ecode2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_RegisterClient.");
-  }
-  
-  res1 = SWIG_AsCharPtrAndSize(info[0], &buf1, NULL, &alloc1);
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LIN_RegisterClient" "', argument " "1"" of type '" "LPSTR""'");
-  }
-  arg1 = reinterpret_cast< LPSTR >(buf1);ecode2 = SWIG_AsVal_unsigned_SS_long(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_RegisterClient" "', argument " "2"" of type '" "DWORD""'");
-  } 
-  arg2 = static_cast< DWORD >(val2);res3 = SWIG_ConvertPtr(info[2], &argp3,SWIGTYPE_p_unsigned_char, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "LIN_RegisterClient" "', argument " "3"" of type '" "HLINCLIENT *""'"); 
-  }
-  arg3 = reinterpret_cast< HLINCLIENT * >(argp3);result = (DWORD)LIN_RegisterClient(arg1,arg2,arg3);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_RemoveClient(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_RemoveClient.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_RemoveClient" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);result = (DWORD)LIN_RemoveClient(arg1);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_ConnectClient(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_ConnectClient.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_ConnectClient" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_ConnectClient" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);result = (DWORD)LIN_ConnectClient(arg1,arg2);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_DisconnectClient(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_DisconnectClient.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_DisconnectClient" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_DisconnectClient" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);result = (DWORD)LIN_DisconnectClient(arg1,arg2);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_ResetClient(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_ResetClient.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_ResetClient" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);result = (DWORD)LIN_ResetClient(arg1);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_SetClientParam(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  WORD arg2 ;
-  DWORD arg3 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  unsigned long val3 ;
-  int ecode3 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_SetClientParam.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_SetClientParam" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_SetClientParam" "', argument " "2"" of type '" "WORD""'");
-  } 
-  arg2 = static_cast< WORD >(val2);ecode3 = SWIG_AsVal_unsigned_SS_long(info[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "LIN_SetClientParam" "', argument " "3"" of type '" "DWORD""'");
-  } 
-  arg3 = static_cast< DWORD >(val3);result = (DWORD)LIN_SetClientParam(arg1,arg2,arg3);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_GetClientParam(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  WORD arg2 ;
-  void *arg3 = (void *) 0 ;
-  WORD arg4 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_GetClientParam.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_GetClientParam" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_GetClientParam" "', argument " "2"" of type '" "WORD""'");
-  } 
-  arg2 = static_cast< WORD >(val2);{
-    {
-      if (info[2].IsBuffer()) {
-        Napi::Buffer<char> buf = info[2].As<Napi::Buffer<char>>();
-        arg3 = reinterpret_cast<char *>(buf.Data());
-        arg4 = buf.ByteLength();
-        
-      } else {
-        SWIG_exception_fail(SWIG_TypeError, "in method 'LIN_GetClientParam', argument is not a Buffer");
-      }
-    }
-  }
-  result = (DWORD)LIN_GetClientParam(arg1,arg2,arg3,arg4);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_SetClientFilter(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  unsigned __int64 arg3 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  unsigned long long val3 ;
-  int ecode3 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_SetClientFilter.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_SetClientFilter" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_SetClientFilter" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);ecode3 = SWIG_AsVal_unsigned_SS_long_SS_long(info[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "LIN_SetClientFilter" "', argument " "3"" of type '" "unsigned __int64""'");
-  } 
-  arg3 = static_cast< unsigned __int64 >(val3);result = (DWORD)LIN_SetClientFilter(arg1,arg2,SWIG_STD_MOVE(arg3));
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_GetClientFilter(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  unsigned __int64 *arg3 = (unsigned __int64 *) 0 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_GetClientFilter.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_GetClientFilter" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_GetClientFilter" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);res3 = SWIG_ConvertPtr(info[2], &argp3,SWIGTYPE_p_unsigned___int64, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "LIN_GetClientFilter" "', argument " "3"" of type '" "unsigned __int64 *""'"); 
-  }
-  arg3 = reinterpret_cast< unsigned __int64 * >(argp3);result = (DWORD)LIN_GetClientFilter(arg1,arg2,arg3);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_Read(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  TLINRcvMsg *arg2 = (TLINRcvMsg *) 0 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_Read.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_Read" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);res2 = SWIG_ConvertPtr(info[1], &argp2,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "LIN_Read" "', argument " "2"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg2 = reinterpret_cast< TLINRcvMsg * >(argp2);result = (DWORD)LIN_Read(arg1,arg2);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_ReadMulti(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  TLINRcvMsg *arg2 = (TLINRcvMsg *) 0 ;
-  int arg3 ;
-  int *arg4 = (int *) 0 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  void *argp4 = 0 ;
-  int res4 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 4 || static_cast<int>(info.Length()) > 4) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_ReadMulti.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_ReadMulti" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);res2 = SWIG_ConvertPtr(info[1], &argp2,SWIGTYPE_p_TLINRcvMsg, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "LIN_ReadMulti" "', argument " "2"" of type '" "TLINRcvMsg *""'"); 
-  }
-  arg2 = reinterpret_cast< TLINRcvMsg * >(argp2);ecode3 = SWIG_AsVal_int(info[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "LIN_ReadMulti" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);res4 = SWIG_ConvertPtr(info[3], &argp4,SWIGTYPE_p_int, 0 |  0 );
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "LIN_ReadMulti" "', argument " "4"" of type '" "int *""'"); 
-  }
-  arg4 = reinterpret_cast< int * >(argp4);result = (DWORD)LIN_ReadMulti(arg1,arg2,arg3,arg4);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_Write(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  TLINMsg *arg3 = (TLINMsg *) 0 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_Write.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_Write" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_Write" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);res3 = SWIG_ConvertPtr(info[2], &argp3,SWIGTYPE_p_TLINMsg, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "LIN_Write" "', argument " "3"" of type '" "TLINMsg *""'"); 
-  }
-  arg3 = reinterpret_cast< TLINMsg * >(argp3);result = (DWORD)LIN_Write(arg1,arg2,arg3);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_InitializeHardware(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  BYTE arg3 ;
-  WORD arg4 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  unsigned char val3 ;
-  int ecode3 = 0 ;
-  unsigned short val4 ;
-  int ecode4 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 4 || static_cast<int>(info.Length()) > 4) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_InitializeHardware.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_InitializeHardware" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_InitializeHardware" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);ecode3 = SWIG_AsVal_unsigned_SS_char(info[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "LIN_InitializeHardware" "', argument " "3"" of type '" "BYTE""'");
-  } 
-  arg3 = static_cast< BYTE >(val3);ecode4 = SWIG_AsVal_unsigned_SS_short(info[3], &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "LIN_InitializeHardware" "', argument " "4"" of type '" "WORD""'");
-  } 
-  arg4 = static_cast< WORD >(val4);result = (DWORD)LIN_InitializeHardware(arg1,arg2,arg3,arg4);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_GetAvailableHardware(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINHW *arg1 = (HLINHW *) 0 ;
-  WORD arg2 ;
+  int *arg1 = (int *) 0 ;
+  int *arg2 = (int *) 0 ;
   int *arg3 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
   void *argp3 = 0 ;
   int res3 = 0 ;
-  DWORD result;
+  LinStatus result;
   
   if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_GetAvailableHardware.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linGetVersion.");
   }
   
-  res1 = SWIG_ConvertPtr(info[0], &argp1,SWIGTYPE_p_unsigned_short, 0 |  0 );
+  res1 = SWIG_ConvertPtr(info[0], &argp1,SWIGTYPE_p_int, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LIN_GetAvailableHardware" "', argument " "1"" of type '" "HLINHW *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "linGetVersion" "', argument " "1"" of type '" "int *""'"); 
   }
-  arg1 = reinterpret_cast< HLINHW * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_GetAvailableHardware" "', argument " "2"" of type '" "WORD""'");
-  } 
-  arg2 = static_cast< WORD >(val2);res3 = SWIG_ConvertPtr(info[2], &argp3,SWIGTYPE_p_int, 0 |  0 );
+  arg1 = reinterpret_cast< int * >(argp1);res2 = SWIG_ConvertPtr(info[1], &argp2,SWIGTYPE_p_int, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "linGetVersion" "', argument " "2"" of type '" "int *""'"); 
+  }
+  arg2 = reinterpret_cast< int * >(argp2);res3 = SWIG_ConvertPtr(info[2], &argp3,SWIGTYPE_p_int, 0 |  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "LIN_GetAvailableHardware" "', argument " "3"" of type '" "int *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "linGetVersion" "', argument " "3"" of type '" "int *""'"); 
   }
-  arg3 = reinterpret_cast< int * >(argp3);result = (DWORD)LIN_GetAvailableHardware(arg1,arg2,arg3);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
+  arg3 = reinterpret_cast< int * >(argp3);result = (LinStatus)linGetVersion(arg1,arg2,arg3);
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
   
   
   
@@ -9197,596 +4463,68 @@ fail:
 
 
 // js_global_function
-Napi::Value _wrap_LIN_SetHardwareParam(const Napi::CallbackInfo &info) {
+Napi::Value _wrap_linGetFirmwareVersion(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  WORD arg3 ;
-  void *arg4 = (void *) 0 ;
-  WORD arg5 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  unsigned short val3 ;
-  int ecode3 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 4 || static_cast<int>(info.Length()) > 4) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_SetHardwareParam.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_SetHardwareParam" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_SetHardwareParam" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);ecode3 = SWIG_AsVal_unsigned_SS_short(info[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "LIN_SetHardwareParam" "', argument " "3"" of type '" "WORD""'");
-  } 
-  arg3 = static_cast< WORD >(val3);{
-    {
-      if (info[3].IsBuffer()) {
-        Napi::Buffer<char> buf = info[3].As<Napi::Buffer<char>>();
-        arg4 = reinterpret_cast<char *>(buf.Data());
-        arg5 = buf.ByteLength();
-        
-      } else {
-        SWIG_exception_fail(SWIG_TypeError, "in method 'LIN_SetHardwareParam', argument is not a Buffer");
-      }
-    }
-  }
-  result = (DWORD)LIN_SetHardwareParam(arg1,arg2,arg3,arg4,arg5);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_GetHardwareParam(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINHW arg1 ;
-  WORD arg2 ;
-  void *arg3 = (void *) 0 ;
-  WORD arg4 ;
-  unsigned short val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_GetHardwareParam.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_short(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_GetHardwareParam" "', argument " "1"" of type '" "HLINHW""'");
-  } 
-  arg1 = static_cast< HLINHW >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_GetHardwareParam" "', argument " "2"" of type '" "WORD""'");
-  } 
-  arg2 = static_cast< WORD >(val2);{
-    {
-      if (info[2].IsBuffer()) {
-        Napi::Buffer<char> buf = info[2].As<Napi::Buffer<char>>();
-        arg3 = reinterpret_cast<char *>(buf.Data());
-        arg4 = buf.ByteLength();
-        
-      } else {
-        SWIG_exception_fail(SWIG_TypeError, "in method 'LIN_GetHardwareParam', argument is not a Buffer");
-      }
-    }
-  }
-  result = (DWORD)LIN_GetHardwareParam(arg1,arg2,arg3,arg4);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_ResetHardware(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_ResetHardware.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_ResetHardware" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_ResetHardware" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);result = (DWORD)LIN_ResetHardware(arg1,arg2);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_ResetHardwareConfig(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_ResetHardwareConfig.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_ResetHardwareConfig" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_ResetHardwareConfig" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);result = (DWORD)LIN_ResetHardwareConfig(arg1,arg2);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_IdentifyHardware(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINHW arg1 ;
-  unsigned short val1 ;
-  int ecode1 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_IdentifyHardware.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_short(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_IdentifyHardware" "', argument " "1"" of type '" "HLINHW""'");
-  } 
-  arg1 = static_cast< HLINHW >(val1);result = (DWORD)LIN_IdentifyHardware(arg1);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_RegisterFrameId(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  BYTE arg3 ;
-  BYTE arg4 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  unsigned char val3 ;
-  int ecode3 = 0 ;
-  unsigned char val4 ;
-  int ecode4 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 4 || static_cast<int>(info.Length()) > 4) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_RegisterFrameId.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_RegisterFrameId" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_RegisterFrameId" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);ecode3 = SWIG_AsVal_unsigned_SS_char(info[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "LIN_RegisterFrameId" "', argument " "3"" of type '" "BYTE""'");
-  } 
-  arg3 = static_cast< BYTE >(val3);ecode4 = SWIG_AsVal_unsigned_SS_char(info[3], &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "LIN_RegisterFrameId" "', argument " "4"" of type '" "BYTE""'");
-  } 
-  arg4 = static_cast< BYTE >(val4);result = (DWORD)LIN_RegisterFrameId(arg1,arg2,arg3,arg4);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_SetFrameEntry(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  TLINFrameEntry *arg3 = (TLINFrameEntry *) 0 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_SetFrameEntry.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_SetFrameEntry" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_SetFrameEntry" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);res3 = SWIG_ConvertPtr(info[2], &argp3,SWIGTYPE_p_TLINFrameEntry, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "LIN_SetFrameEntry" "', argument " "3"" of type '" "TLINFrameEntry *""'"); 
-  }
-  arg3 = reinterpret_cast< TLINFrameEntry * >(argp3);result = (DWORD)LIN_SetFrameEntry(arg1,arg2,arg3);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_GetFrameEntry(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINHW arg1 ;
-  TLINFrameEntry *arg2 = (TLINFrameEntry *) 0 ;
-  unsigned short val1 ;
+  LinHandle arg1 ;
+  unsigned char *arg2 = (unsigned char *) 0 ;
+  unsigned char *arg3 = (unsigned char *) 0 ;
+  unsigned char *arg4 = (unsigned char *) 0 ;
+  unsigned char *arg5 = (unsigned char *) 0 ;
+  unsigned char *arg6 = (unsigned char *) 0 ;
+  unsigned char *arg7 = (unsigned char *) 0 ;
+  int val1 ;
   int ecode1 = 0 ;
   void *argp2 = 0 ;
   int res2 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_GetFrameEntry.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_short(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_GetFrameEntry" "', argument " "1"" of type '" "HLINHW""'");
-  } 
-  arg1 = static_cast< HLINHW >(val1);res2 = SWIG_ConvertPtr(info[1], &argp2,SWIGTYPE_p_TLINFrameEntry, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "LIN_GetFrameEntry" "', argument " "2"" of type '" "TLINFrameEntry *""'"); 
-  }
-  arg2 = reinterpret_cast< TLINFrameEntry * >(argp2);result = (DWORD)LIN_GetFrameEntry(arg1,arg2);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_UpdateByteArray(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  BYTE arg3 ;
-  BYTE arg4 ;
-  BYTE arg5 ;
-  BYTE *arg6 = (BYTE *) 0 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  unsigned char val3 ;
-  int ecode3 = 0 ;
-  unsigned char val4 ;
-  int ecode4 = 0 ;
-  unsigned char val5 ;
-  int ecode5 = 0 ;
-  void *argp6 = 0 ;
-  int res6 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 6 || static_cast<int>(info.Length()) > 6) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_UpdateByteArray.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_UpdateByteArray" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_UpdateByteArray" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);ecode3 = SWIG_AsVal_unsigned_SS_char(info[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "LIN_UpdateByteArray" "', argument " "3"" of type '" "BYTE""'");
-  } 
-  arg3 = static_cast< BYTE >(val3);ecode4 = SWIG_AsVal_unsigned_SS_char(info[3], &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "LIN_UpdateByteArray" "', argument " "4"" of type '" "BYTE""'");
-  } 
-  arg4 = static_cast< BYTE >(val4);ecode5 = SWIG_AsVal_unsigned_SS_char(info[4], &val5);
-  if (!SWIG_IsOK(ecode5)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "LIN_UpdateByteArray" "', argument " "5"" of type '" "BYTE""'");
-  } 
-  arg5 = static_cast< BYTE >(val5);res6 = SWIG_ConvertPtr(info[5], &argp6,SWIGTYPE_p_unsigned_char, 0 |  0 );
-  if (!SWIG_IsOK(res6)) {
-    SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "LIN_UpdateByteArray" "', argument " "6"" of type '" "BYTE *""'"); 
-  }
-  arg6 = reinterpret_cast< BYTE * >(argp6);result = (DWORD)LIN_UpdateByteArray(arg1,arg2,arg3,arg4,arg5,arg6);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_StartKeepAlive(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  BYTE arg3 ;
-  WORD arg4 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  unsigned char val3 ;
-  int ecode3 = 0 ;
-  unsigned short val4 ;
-  int ecode4 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 4 || static_cast<int>(info.Length()) > 4) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_StartKeepAlive.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_StartKeepAlive" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_StartKeepAlive" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);ecode3 = SWIG_AsVal_unsigned_SS_char(info[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "LIN_StartKeepAlive" "', argument " "3"" of type '" "BYTE""'");
-  } 
-  arg3 = static_cast< BYTE >(val3);ecode4 = SWIG_AsVal_unsigned_SS_short(info[3], &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "LIN_StartKeepAlive" "', argument " "4"" of type '" "WORD""'");
-  } 
-  arg4 = static_cast< WORD >(val4);result = (DWORD)LIN_StartKeepAlive(arg1,arg2,arg3,arg4);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_SuspendKeepAlive(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_SuspendKeepAlive.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_SuspendKeepAlive" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_SuspendKeepAlive" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);result = (DWORD)LIN_SuspendKeepAlive(arg1,arg2);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_ResumeKeepAlive(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_ResumeKeepAlive.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_ResumeKeepAlive" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_ResumeKeepAlive" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);result = (DWORD)LIN_ResumeKeepAlive(arg1,arg2);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_SetSchedule(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  int arg3 ;
-  TLINScheduleSlot *arg4 = (TLINScheduleSlot *) 0 ;
-  int arg5 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
   void *argp4 = 0 ;
   int res4 = 0 ;
-  int val5 ;
-  int ecode5 = 0 ;
-  DWORD result;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  void *argp6 = 0 ;
+  int res6 = 0 ;
+  void *argp7 = 0 ;
+  int res7 = 0 ;
+  LinStatus result;
   
-  if(static_cast<int>(info.Length()) < 5 || static_cast<int>(info.Length()) > 5) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_SetSchedule.");
+  if(static_cast<int>(info.Length()) < 7 || static_cast<int>(info.Length()) > 7) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linGetFirmwareVersion.");
   }
   
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_SetSchedule" "', argument " "1"" of type '" "HLINCLIENT""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linGetFirmwareVersion" "', argument " "1"" of type '" "LinHandle""'");
   } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_SetSchedule" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);ecode3 = SWIG_AsVal_int(info[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "LIN_SetSchedule" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);res4 = SWIG_ConvertPtr(info[3], &argp4,SWIGTYPE_p_TLINScheduleSlot, 0 |  0 );
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "LIN_SetSchedule" "', argument " "4"" of type '" "TLINScheduleSlot *""'"); 
+  arg1 = static_cast< LinHandle >(val1);res2 = SWIG_ConvertPtr(info[1], &argp2,SWIGTYPE_p_unsigned_char, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "linGetFirmwareVersion" "', argument " "2"" of type '" "unsigned char *""'"); 
   }
-  arg4 = reinterpret_cast< TLINScheduleSlot * >(argp4);ecode5 = SWIG_AsVal_int(info[4], &val5);
-  if (!SWIG_IsOK(ecode5)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "LIN_SetSchedule" "', argument " "5"" of type '" "int""'");
-  } 
-  arg5 = static_cast< int >(val5);result = (DWORD)LIN_SetSchedule(arg1,arg2,arg3,arg4,arg5);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
+  arg2 = reinterpret_cast< unsigned char * >(argp2);res3 = SWIG_ConvertPtr(info[2], &argp3,SWIGTYPE_p_unsigned_char, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "linGetFirmwareVersion" "', argument " "3"" of type '" "unsigned char *""'"); 
+  }
+  arg3 = reinterpret_cast< unsigned char * >(argp3);res4 = SWIG_ConvertPtr(info[3], &argp4,SWIGTYPE_p_unsigned_char, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "linGetFirmwareVersion" "', argument " "4"" of type '" "unsigned char *""'"); 
+  }
+  arg4 = reinterpret_cast< unsigned char * >(argp4);res5 = SWIG_ConvertPtr(info[4], &argp5,SWIGTYPE_p_unsigned_char, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "linGetFirmwareVersion" "', argument " "5"" of type '" "unsigned char *""'"); 
+  }
+  arg5 = reinterpret_cast< unsigned char * >(argp5);res6 = SWIG_ConvertPtr(info[5], &argp6,SWIGTYPE_p_unsigned_char, 0 |  0 );
+  if (!SWIG_IsOK(res6)) {
+    SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "linGetFirmwareVersion" "', argument " "6"" of type '" "unsigned char *""'"); 
+  }
+  arg6 = reinterpret_cast< unsigned char * >(argp6);res7 = SWIG_ConvertPtr(info[6], &argp7,SWIGTYPE_p_unsigned_char, 0 |  0 );
+  if (!SWIG_IsOK(res7)) {
+    SWIG_exception_fail(SWIG_ArgError(res7), "in method '" "linGetFirmwareVersion" "', argument " "7"" of type '" "unsigned char *""'"); 
+  }
+  arg7 = reinterpret_cast< unsigned char * >(argp7);result = (LinStatus)linGetFirmwareVersion(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
+  
+  
   
   
   
@@ -9802,568 +4540,32 @@ fail:
 
 
 // js_global_function
-Napi::Value _wrap_LIN_GetSchedule(const Napi::CallbackInfo &info) {
+Napi::Value _wrap_linGetChannelData(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  HLINHW arg1 ;
+  int arg1 ;
   int arg2 ;
-  TLINScheduleSlot *arg3 = (TLINScheduleSlot *) 0 ;
-  int arg4 ;
-  int *arg5 = (int *) 0 ;
-  unsigned short val1 ;
+  void *arg3 = (void *) 0 ;
+  size_t arg4 ;
+  int val1 ;
   int ecode1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  int val4 ;
-  int ecode4 = 0 ;
-  void *argp5 = 0 ;
-  int res5 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 5 || static_cast<int>(info.Length()) > 5) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_GetSchedule.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_short(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_GetSchedule" "', argument " "1"" of type '" "HLINHW""'");
-  } 
-  arg1 = static_cast< HLINHW >(val1);ecode2 = SWIG_AsVal_int(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_GetSchedule" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);res3 = SWIG_ConvertPtr(info[2], &argp3,SWIGTYPE_p_TLINScheduleSlot, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "LIN_GetSchedule" "', argument " "3"" of type '" "TLINScheduleSlot *""'"); 
-  }
-  arg3 = reinterpret_cast< TLINScheduleSlot * >(argp3);ecode4 = SWIG_AsVal_int(info[3], &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "LIN_GetSchedule" "', argument " "4"" of type '" "int""'");
-  } 
-  arg4 = static_cast< int >(val4);res5 = SWIG_ConvertPtr(info[4], &argp5,SWIGTYPE_p_int, 0 |  0 );
-  if (!SWIG_IsOK(res5)) {
-    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "LIN_GetSchedule" "', argument " "5"" of type '" "int *""'"); 
-  }
-  arg5 = reinterpret_cast< int * >(argp5);result = (DWORD)LIN_GetSchedule(arg1,arg2,arg3,arg4,arg5);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_DeleteSchedule(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  int arg3 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  DWORD result;
+  LinStatus result;
   
   if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_DeleteSchedule.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linGetChannelData.");
   }
   
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_DeleteSchedule" "', argument " "1"" of type '" "HLINCLIENT""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linGetChannelData" "', argument " "1"" of type '" "int""'");
   } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
+  arg1 = static_cast< int >(val1);ecode2 = SWIG_AsVal_int(info[1], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_DeleteSchedule" "', argument " "2"" of type '" "HLINHW""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "linGetChannelData" "', argument " "2"" of type '" "int""'");
   } 
-  arg2 = static_cast< HLINHW >(val2);ecode3 = SWIG_AsVal_int(info[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "LIN_DeleteSchedule" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);result = (DWORD)LIN_DeleteSchedule(arg1,arg2,arg3);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_SetScheduleBreakPoint(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  int arg3 ;
-  DWORD arg4 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  unsigned long val4 ;
-  int ecode4 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 4 || static_cast<int>(info.Length()) > 4) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_SetScheduleBreakPoint.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_SetScheduleBreakPoint" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_SetScheduleBreakPoint" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);ecode3 = SWIG_AsVal_int(info[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "LIN_SetScheduleBreakPoint" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);ecode4 = SWIG_AsVal_unsigned_SS_long(info[3], &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "LIN_SetScheduleBreakPoint" "', argument " "4"" of type '" "DWORD""'");
-  } 
-  arg4 = static_cast< DWORD >(val4);result = (DWORD)LIN_SetScheduleBreakPoint(arg1,arg2,arg3,arg4);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_StartSchedule(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  int arg3 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_StartSchedule.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_StartSchedule" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_StartSchedule" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);ecode3 = SWIG_AsVal_int(info[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "LIN_StartSchedule" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);result = (DWORD)LIN_StartSchedule(arg1,arg2,arg3);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_SuspendSchedule(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_SuspendSchedule.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_SuspendSchedule" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_SuspendSchedule" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);result = (DWORD)LIN_SuspendSchedule(arg1,arg2);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_ResumeSchedule(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_ResumeSchedule.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_ResumeSchedule" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_ResumeSchedule" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);result = (DWORD)LIN_ResumeSchedule(arg1,arg2);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_XmtWakeUp(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_XmtWakeUp.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_XmtWakeUp" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_XmtWakeUp" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);result = (DWORD)LIN_XmtWakeUp(arg1,arg2);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_XmtDynamicWakeUp(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  WORD arg3 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  unsigned short val3 ;
-  int ecode3 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_XmtDynamicWakeUp.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_XmtDynamicWakeUp" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_XmtDynamicWakeUp" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);ecode3 = SWIG_AsVal_unsigned_SS_short(info[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "LIN_XmtDynamicWakeUp" "', argument " "3"" of type '" "WORD""'");
-  } 
-  arg3 = static_cast< WORD >(val3);result = (DWORD)LIN_XmtDynamicWakeUp(arg1,arg2,arg3);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_StartAutoBaud(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  WORD arg3 ;
-  unsigned char val1 ;
-  int ecode1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  unsigned short val3 ;
-  int ecode3 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_StartAutoBaud.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_StartAutoBaud" "', argument " "1"" of type '" "HLINCLIENT""'");
-  } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_StartAutoBaud" "', argument " "2"" of type '" "HLINHW""'");
-  } 
-  arg2 = static_cast< HLINHW >(val2);ecode3 = SWIG_AsVal_unsigned_SS_short(info[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "LIN_StartAutoBaud" "', argument " "3"" of type '" "WORD""'");
-  } 
-  arg3 = static_cast< WORD >(val3);result = (DWORD)LIN_StartAutoBaud(arg1,arg2,arg3);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_GetStatus(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINHW arg1 ;
-  TLINHardwareStatus *arg2 = (TLINHardwareStatus *) 0 ;
-  unsigned short val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_GetStatus.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_short(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_GetStatus" "', argument " "1"" of type '" "HLINHW""'");
-  } 
-  arg1 = static_cast< HLINHW >(val1);res2 = SWIG_ConvertPtr(info[1], &argp2,SWIGTYPE_p_TLINHardwareStatus, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "LIN_GetStatus" "', argument " "2"" of type '" "TLINHardwareStatus *""'"); 
-  }
-  arg2 = reinterpret_cast< TLINHardwareStatus * >(argp2);result = (DWORD)LIN_GetStatus(arg1,arg2);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_CalculateChecksum(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINMsg *arg1 = (TLINMsg *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_CalculateChecksum.");
-  }
-  
-  res1 = SWIG_ConvertPtr(info[0], &argp1,SWIGTYPE_p_TLINMsg, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LIN_CalculateChecksum" "', argument " "1"" of type '" "TLINMsg *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINMsg * >(argp1);result = (DWORD)LIN_CalculateChecksum(arg1);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_GetVersion(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  TLINVersion *arg1 = (TLINVersion *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_GetVersion.");
-  }
-  
-  res1 = SWIG_ConvertPtr(info[0], &argp1,SWIGTYPE_p_TLINVersion, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LIN_GetVersion" "', argument " "1"" of type '" "TLINVersion *""'"); 
-  }
-  arg1 = reinterpret_cast< TLINVersion * >(argp1);result = (DWORD)LIN_GetVersion(arg1);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_GetVersionInfo(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  LPSTR arg1 = (LPSTR) 0 ;
-  WORD arg2 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_GetVersionInfo.");
-  }
-  
-  {
-    {
-      if (info[0].IsBuffer()) {
-        Napi::Buffer<char> buf = info[0].As<Napi::Buffer<char>>();
-        arg1 = reinterpret_cast<char *>(buf.Data());
-        arg2 = buf.ByteLength();
-        
-      } else {
-        SWIG_exception_fail(SWIG_TypeError, "in method 'LIN_GetVersionInfo', argument is not a Buffer");
-      }
-    }
-  }
-  result = (DWORD)LIN_GetVersionInfo(arg1,arg2);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_GetErrorText(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  DWORD arg1 ;
-  BYTE arg2 ;
-  LPSTR arg3 = (LPSTR) 0 ;
-  WORD arg4 ;
-  unsigned long val1 ;
-  int ecode1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_GetErrorText.");
-  }
-  
-  ecode1 = SWIG_AsVal_unsigned_SS_long(info[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_GetErrorText" "', argument " "1"" of type '" "DWORD""'");
-  } 
-  arg1 = static_cast< DWORD >(val1);ecode2 = SWIG_AsVal_unsigned_SS_char(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_GetErrorText" "', argument " "2"" of type '" "BYTE""'");
-  } 
-  arg2 = static_cast< BYTE >(val2);{
+  arg2 = static_cast< int >(val2);{
     {
       if (info[2].IsBuffer()) {
         Napi::Buffer<char> buf = info[2].As<Napi::Buffer<char>>();
@@ -10371,13 +4573,12 @@ Napi::Value _wrap_LIN_GetErrorText(const Napi::CallbackInfo &info) {
         arg4 = buf.ByteLength();
         
       } else {
-        SWIG_exception_fail(SWIG_TypeError, "in method 'LIN_GetErrorText', argument is not a Buffer");
+        SWIG_exception_fail(SWIG_TypeError, "in method 'linGetChannelData', argument is not a Buffer");
       }
     }
   }
-  result = (DWORD)LIN_GetErrorText(arg1,arg2,arg3,arg4);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
+  result = (LinStatus)linGetChannelData(arg1,arg2,arg3,SWIG_STD_MOVE(arg4));
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
   
   
   
@@ -10390,60 +4591,31 @@ fail:
 
 
 // js_global_function
-Napi::Value _wrap_LIN_GetPID(const Napi::CallbackInfo &info) {
+Napi::Value _wrap_linSetBitrate(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  BYTE *arg1 = (BYTE *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  DWORD result;
-  
-  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_GetPID.");
-  }
-  
-  res1 = SWIG_ConvertPtr(info[0], &argp1,SWIGTYPE_p_unsigned_char, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LIN_GetPID" "', argument " "1"" of type '" "BYTE *""'"); 
-  }
-  arg1 = reinterpret_cast< BYTE * >(argp1);result = (DWORD)LIN_GetPID(arg1);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
-Napi::Value _wrap_LIN_GetTargetTime(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  HLINHW arg1 ;
-  unsigned __int64 *arg2 = (unsigned __int64 *) 0 ;
-  unsigned short val1 ;
+  LinHandle arg1 ;
+  unsigned int arg2 ;
+  int val1 ;
   int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  DWORD result;
+  unsigned int val2 ;
+  int ecode2 = 0 ;
+  LinStatus result;
   
   if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_GetTargetTime.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linSetBitrate.");
   }
   
-  ecode1 = SWIG_AsVal_unsigned_SS_short(info[0], &val1);
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_GetTargetTime" "', argument " "1"" of type '" "HLINHW""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linSetBitrate" "', argument " "1"" of type '" "LinHandle""'");
   } 
-  arg1 = static_cast< HLINHW >(val1);res2 = SWIG_ConvertPtr(info[1], &argp2,SWIGTYPE_p_unsigned___int64, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "LIN_GetTargetTime" "', argument " "2"" of type '" "unsigned __int64 *""'"); 
-  }
-  arg2 = reinterpret_cast< unsigned __int64 * >(argp2);result = (DWORD)LIN_GetTargetTime(arg1,arg2);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
+  arg1 = static_cast< LinHandle >(val1);ecode2 = SWIG_AsVal_unsigned_SS_int(info[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "linSetBitrate" "', argument " "2"" of type '" "unsigned int""'");
+  } 
+  arg2 = static_cast< unsigned int >(val2);result = (LinStatus)linSetBitrate(arg1,arg2);
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
   
   
   
@@ -10456,39 +4628,132 @@ fail:
 
 
 // js_global_function
-Napi::Value _wrap_LIN_SetResponseRemap(const Napi::CallbackInfo &info) {
+Napi::Value _wrap_linBusOn(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  HLINCLIENT arg1 ;
-  HLINHW arg2 ;
-  BYTE *arg3 = (BYTE *) 0 ;
-  unsigned char val1 ;
+  LinHandle arg1 ;
+  int val1 ;
   int ecode1 = 0 ;
-  unsigned short val2 ;
+  LinStatus result;
+  
+  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linBusOn.");
+  }
+  
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linBusOn" "', argument " "1"" of type '" "LinHandle""'");
+  } 
+  arg1 = static_cast< LinHandle >(val1);result = (LinStatus)linBusOn(arg1);
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_function
+Napi::Value _wrap_linBusOff(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinHandle arg1 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  LinStatus result;
+  
+  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linBusOff.");
+  }
+  
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linBusOff" "', argument " "1"" of type '" "LinHandle""'");
+  } 
+  arg1 = static_cast< LinHandle >(val1);result = (LinStatus)linBusOff(arg1);
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_function
+Napi::Value _wrap_linReadTimer(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinHandle arg1 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  unsigned long result;
+  
+  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linReadTimer.");
+  }
+  
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linReadTimer" "', argument " "1"" of type '" "LinHandle""'");
+  } 
+  arg1 = static_cast< LinHandle >(val1);result = (unsigned long)linReadTimer(arg1);
+  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_function
+Napi::Value _wrap_linWriteMessage(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinHandle arg1 ;
+  unsigned int arg2 ;
+  void *arg3 = (void *) 0 ;
+  unsigned int arg4 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  unsigned int val2 ;
   int ecode2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  DWORD result;
+  LinStatus result;
   
   if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_SetResponseRemap.");
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linWriteMessage.");
   }
   
-  ecode1 = SWIG_AsVal_unsigned_SS_char(info[0], &val1);
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_SetResponseRemap" "', argument " "1"" of type '" "HLINCLIENT""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linWriteMessage" "', argument " "1"" of type '" "LinHandle""'");
   } 
-  arg1 = static_cast< HLINCLIENT >(val1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[1], &val2);
+  arg1 = static_cast< LinHandle >(val1);ecode2 = SWIG_AsVal_unsigned_SS_int(info[1], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LIN_SetResponseRemap" "', argument " "2"" of type '" "HLINHW""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "linWriteMessage" "', argument " "2"" of type '" "unsigned int""'");
   } 
-  arg2 = static_cast< HLINHW >(val2);res3 = SWIG_ConvertPtr(info[2], &argp3,SWIGTYPE_p_unsigned_char, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "LIN_SetResponseRemap" "', argument " "3"" of type '" "BYTE *""'"); 
+  arg2 = static_cast< unsigned int >(val2);{
+    {
+      if (info[2].IsBuffer()) {
+        Napi::Buffer<char> buf = info[2].As<Napi::Buffer<char>>();
+        arg3 = reinterpret_cast<char *>(buf.Data());
+        arg4 = buf.ByteLength();
+        
+      } else {
+        SWIG_exception_fail(SWIG_TypeError, "in method 'linWriteMessage', argument is not a Buffer");
+      }
+    }
   }
-  arg3 = reinterpret_cast< BYTE * >(argp3);result = (DWORD)LIN_SetResponseRemap(arg1,arg2,arg3);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
-  
+  result = (LinStatus)linWriteMessage(arg1,arg2,(void const *)arg3,arg4);
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
   
   
   
@@ -10501,31 +4766,98 @@ fail:
 
 
 // js_global_function
-Napi::Value _wrap_LIN_GetResponseRemap(const Napi::CallbackInfo &info) {
+Napi::Value _wrap_linRequestMessage(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  HLINHW arg1 ;
-  BYTE *arg2 = (BYTE *) 0 ;
-  unsigned short val1 ;
+  LinHandle arg1 ;
+  unsigned int arg2 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  unsigned int val2 ;
+  int ecode2 = 0 ;
+  LinStatus result;
+  
+  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linRequestMessage.");
+  }
+  
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linRequestMessage" "', argument " "1"" of type '" "LinHandle""'");
+  } 
+  arg1 = static_cast< LinHandle >(val1);ecode2 = SWIG_AsVal_unsigned_SS_int(info[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "linRequestMessage" "', argument " "2"" of type '" "unsigned int""'");
+  } 
+  arg2 = static_cast< unsigned int >(val2);result = (LinStatus)linRequestMessage(arg1,arg2);
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
+  
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_function
+Napi::Value _wrap_linReadMessage(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinHandle arg1 ;
+  unsigned int *arg2 = (unsigned int *) 0 ;
+  void *arg3 = (void *) 0 ;
+  unsigned int *arg4 = (unsigned int *) 0 ;
+  unsigned int *arg5 = (unsigned int *) 0 ;
+  LinMessageInfo *arg6 = (LinMessageInfo *) 0 ;
+  int val1 ;
   int ecode1 = 0 ;
   void *argp2 = 0 ;
   int res2 = 0 ;
-  DWORD result;
+  int res3 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  void *argp6 = 0 ;
+  int res6 = 0 ;
+  LinStatus result;
   
-  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_GetResponseRemap.");
+  if(static_cast<int>(info.Length()) < 6 || static_cast<int>(info.Length()) > 6) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linReadMessage.");
   }
   
-  ecode1 = SWIG_AsVal_unsigned_SS_short(info[0], &val1);
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "LIN_GetResponseRemap" "', argument " "1"" of type '" "HLINHW""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linReadMessage" "', argument " "1"" of type '" "LinHandle""'");
   } 
-  arg1 = static_cast< HLINHW >(val1);res2 = SWIG_ConvertPtr(info[1], &argp2,SWIGTYPE_p_unsigned_char, 0 |  0 );
+  arg1 = static_cast< LinHandle >(val1);res2 = SWIG_ConvertPtr(info[1], &argp2,SWIGTYPE_p_unsigned_int, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "LIN_GetResponseRemap" "', argument " "2"" of type '" "BYTE *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "linReadMessage" "', argument " "2"" of type '" "unsigned int *""'"); 
   }
-  arg2 = reinterpret_cast< BYTE * >(argp2);result = (DWORD)LIN_GetResponseRemap(arg1,arg2);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
+  arg2 = reinterpret_cast< unsigned int * >(argp2);res3 = SWIG_ConvertPtr(info[2],SWIG_as_voidptrptr(&arg3), 0, 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "linReadMessage" "', argument " "3"" of type '" "void *""'"); 
+  }res4 = SWIG_ConvertPtr(info[3], &argp4,SWIGTYPE_p_unsigned_int, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "linReadMessage" "', argument " "4"" of type '" "unsigned int *""'"); 
+  }
+  arg4 = reinterpret_cast< unsigned int * >(argp4);res5 = SWIG_ConvertPtr(info[4], &argp5,SWIGTYPE_p_unsigned_int, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "linReadMessage" "', argument " "5"" of type '" "unsigned int *""'"); 
+  }
+  arg5 = reinterpret_cast< unsigned int * >(argp5);res6 = SWIG_ConvertPtr(info[5], &argp6,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res6)) {
+    SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "linReadMessage" "', argument " "6"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg6 = reinterpret_cast< LinMessageInfo * >(argp6);result = (LinStatus)linReadMessage(arg1,arg2,arg3,arg4,arg5,arg6);
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
+  
+  
+  
+  
   
   
   
@@ -10538,24 +4870,465 @@ fail:
 
 
 // js_global_function
-Napi::Value _wrap_LIN_GetSystemTime(const Napi::CallbackInfo &info) {
+Napi::Value _wrap_linReadMessageWait(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
-  unsigned __int64 *arg1 = (unsigned __int64 *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  DWORD result;
+  LinHandle arg1 ;
+  unsigned int *arg2 = (unsigned int *) 0 ;
+  void *arg3 = (void *) 0 ;
+  unsigned int *arg4 = (unsigned int *) 0 ;
+  unsigned int *arg5 = (unsigned int *) 0 ;
+  LinMessageInfo *arg6 = (LinMessageInfo *) 0 ;
+  unsigned long arg7 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  int res3 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  void *argp6 = 0 ;
+  int res6 = 0 ;
+  unsigned long val7 ;
+  int ecode7 = 0 ;
+  LinStatus result;
   
-  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_LIN_GetSystemTime.");
+  if(static_cast<int>(info.Length()) < 7 || static_cast<int>(info.Length()) > 7) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linReadMessageWait.");
   }
   
-  res1 = SWIG_ConvertPtr(info[0], &argp1,SWIGTYPE_p_unsigned___int64, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LIN_GetSystemTime" "', argument " "1"" of type '" "unsigned __int64 *""'"); 
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linReadMessageWait" "', argument " "1"" of type '" "LinHandle""'");
+  } 
+  arg1 = static_cast< LinHandle >(val1);res2 = SWIG_ConvertPtr(info[1], &argp2,SWIGTYPE_p_unsigned_int, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "linReadMessageWait" "', argument " "2"" of type '" "unsigned int *""'"); 
   }
-  arg1 = reinterpret_cast< unsigned __int64 * >(argp1);result = (DWORD)LIN_GetSystemTime(arg1);
-  jsresult = SWIG_From_unsigned_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long >(result));
+  arg2 = reinterpret_cast< unsigned int * >(argp2);res3 = SWIG_ConvertPtr(info[2],SWIG_as_voidptrptr(&arg3), 0, 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "linReadMessageWait" "', argument " "3"" of type '" "void *""'"); 
+  }res4 = SWIG_ConvertPtr(info[3], &argp4,SWIGTYPE_p_unsigned_int, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "linReadMessageWait" "', argument " "4"" of type '" "unsigned int *""'"); 
+  }
+  arg4 = reinterpret_cast< unsigned int * >(argp4);res5 = SWIG_ConvertPtr(info[4], &argp5,SWIGTYPE_p_unsigned_int, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "linReadMessageWait" "', argument " "5"" of type '" "unsigned int *""'"); 
+  }
+  arg5 = reinterpret_cast< unsigned int * >(argp5);res6 = SWIG_ConvertPtr(info[5], &argp6,SWIGTYPE_p_LinMessageInfo, 0 |  0 );
+  if (!SWIG_IsOK(res6)) {
+    SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "linReadMessageWait" "', argument " "6"" of type '" "LinMessageInfo *""'"); 
+  }
+  arg6 = reinterpret_cast< LinMessageInfo * >(argp6);ecode7 = SWIG_AsVal_unsigned_SS_long(info[6], &val7);
+  if (!SWIG_IsOK(ecode7)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "linReadMessageWait" "', argument " "7"" of type '" "unsigned long""'");
+  } 
+  arg7 = static_cast< unsigned long >(val7);result = (LinStatus)linReadMessageWait(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
+  
+  
+  
+  
+  
+  
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_function
+Napi::Value _wrap_linUpdateMessage(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinHandle arg1 ;
+  unsigned int arg2 ;
+  void *arg3 = (void *) 0 ;
+  unsigned int arg4 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  unsigned int val2 ;
+  int ecode2 = 0 ;
+  LinStatus result;
+  
+  if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linUpdateMessage.");
+  }
+  
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linUpdateMessage" "', argument " "1"" of type '" "LinHandle""'");
+  } 
+  arg1 = static_cast< LinHandle >(val1);ecode2 = SWIG_AsVal_unsigned_SS_int(info[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "linUpdateMessage" "', argument " "2"" of type '" "unsigned int""'");
+  } 
+  arg2 = static_cast< unsigned int >(val2);{
+    {
+      if (info[2].IsBuffer()) {
+        Napi::Buffer<char> buf = info[2].As<Napi::Buffer<char>>();
+        arg3 = reinterpret_cast<char *>(buf.Data());
+        arg4 = buf.ByteLength();
+        
+      } else {
+        SWIG_exception_fail(SWIG_TypeError, "in method 'linUpdateMessage', argument is not a Buffer");
+      }
+    }
+  }
+  result = (LinStatus)linUpdateMessage(arg1,arg2,(void const *)arg3,arg4);
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
+  
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_function
+Napi::Value _wrap_linSetupIllegalMessage(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinHandle arg1 ;
+  unsigned int arg2 ;
+  unsigned int arg3 ;
+  unsigned int arg4 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  unsigned int val2 ;
+  int ecode2 = 0 ;
+  unsigned int val3 ;
+  int ecode3 = 0 ;
+  unsigned int val4 ;
+  int ecode4 = 0 ;
+  LinStatus result;
+  
+  if(static_cast<int>(info.Length()) < 4 || static_cast<int>(info.Length()) > 4) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linSetupIllegalMessage.");
+  }
+  
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linSetupIllegalMessage" "', argument " "1"" of type '" "LinHandle""'");
+  } 
+  arg1 = static_cast< LinHandle >(val1);ecode2 = SWIG_AsVal_unsigned_SS_int(info[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "linSetupIllegalMessage" "', argument " "2"" of type '" "unsigned int""'");
+  } 
+  arg2 = static_cast< unsigned int >(val2);ecode3 = SWIG_AsVal_unsigned_SS_int(info[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "linSetupIllegalMessage" "', argument " "3"" of type '" "unsigned int""'");
+  } 
+  arg3 = static_cast< unsigned int >(val3);ecode4 = SWIG_AsVal_unsigned_SS_int(info[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "linSetupIllegalMessage" "', argument " "4"" of type '" "unsigned int""'");
+  } 
+  arg4 = static_cast< unsigned int >(val4);result = (LinStatus)linSetupIllegalMessage(arg1,arg2,arg3,arg4);
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
+  
+  
+  
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_LIN_MSG_DISTURB_CSUM_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_LIN_MSG_DISTURB_PARITY_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(2));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_LIN_MSG_USE_STANDARD_PARITY_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0x04));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_LIN_MSG_USE_ENHANCED_PARITY_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(0x08));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_function
+Napi::Value _wrap_linSetupLIN(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinHandle arg1 ;
+  unsigned int arg2 ;
+  unsigned int arg3 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  unsigned int val2 ;
+  int ecode2 = 0 ;
+  unsigned int val3 ;
+  int ecode3 = 0 ;
+  LinStatus result;
+  
+  if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linSetupLIN.");
+  }
+  
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linSetupLIN" "', argument " "1"" of type '" "LinHandle""'");
+  } 
+  arg1 = static_cast< LinHandle >(val1);ecode2 = SWIG_AsVal_unsigned_SS_int(info[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "linSetupLIN" "', argument " "2"" of type '" "unsigned int""'");
+  } 
+  arg2 = static_cast< unsigned int >(val2);ecode3 = SWIG_AsVal_unsigned_SS_int(info[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "linSetupLIN" "', argument " "3"" of type '" "unsigned int""'");
+  } 
+  arg3 = static_cast< unsigned int >(val3);result = (LinStatus)linSetupLIN(arg1,arg2,arg3);
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
+  
+  
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_LIN_ENHANCED_CHECKSUM_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(1));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_getter
+Napi::Value exports_LIN_VARIABLE_DLC_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(2));
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_function
+Napi::Value _wrap_linWriteWakeup(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinHandle arg1 ;
+  unsigned int arg2 ;
+  unsigned int arg3 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  unsigned int val2 ;
+  int ecode2 = 0 ;
+  unsigned int val3 ;
+  int ecode3 = 0 ;
+  LinStatus result;
+  
+  if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linWriteWakeup.");
+  }
+  
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linWriteWakeup" "', argument " "1"" of type '" "LinHandle""'");
+  } 
+  arg1 = static_cast< LinHandle >(val1);ecode2 = SWIG_AsVal_unsigned_SS_int(info[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "linWriteWakeup" "', argument " "2"" of type '" "unsigned int""'");
+  } 
+  arg2 = static_cast< unsigned int >(val2);ecode3 = SWIG_AsVal_unsigned_SS_int(info[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "linWriteWakeup" "', argument " "3"" of type '" "unsigned int""'");
+  } 
+  arg3 = static_cast< unsigned int >(val3);result = (LinStatus)linWriteWakeup(arg1,arg2,arg3);
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
+  
+  
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_function
+Napi::Value _wrap_linClearMessage(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinHandle arg1 ;
+  unsigned int arg2 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  unsigned int val2 ;
+  int ecode2 = 0 ;
+  LinStatus result;
+  
+  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linClearMessage.");
+  }
+  
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linClearMessage" "', argument " "1"" of type '" "LinHandle""'");
+  } 
+  arg1 = static_cast< LinHandle >(val1);ecode2 = SWIG_AsVal_unsigned_SS_int(info[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "linClearMessage" "', argument " "2"" of type '" "unsigned int""'");
+  } 
+  arg2 = static_cast< unsigned int >(val2);result = (LinStatus)linClearMessage(arg1,arg2);
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
+  
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_function
+Napi::Value _wrap_linWriteSync(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinHandle arg1 ;
+  unsigned long arg2 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  unsigned long val2 ;
+  int ecode2 = 0 ;
+  LinStatus result;
+  
+  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linWriteSync.");
+  }
+  
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linWriteSync" "', argument " "1"" of type '" "LinHandle""'");
+  } 
+  arg1 = static_cast< LinHandle >(val1);ecode2 = SWIG_AsVal_unsigned_SS_long(info[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "linWriteSync" "', argument " "2"" of type '" "unsigned long""'");
+  } 
+  arg2 = static_cast< unsigned long >(val2);result = (LinStatus)linWriteSync(arg1,arg2);
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
+  
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_function
+Napi::Value _wrap_linGetCanHandle(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  LinHandle arg1 ;
+  unsigned int *arg2 = (unsigned int *) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  LinStatus result;
+  
+  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_linGetCanHandle.");
+  }
+  
+  ecode1 = SWIG_AsVal_int(info[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linGetCanHandle" "', argument " "1"" of type '" "LinHandle""'");
+  } 
+  arg1 = static_cast< LinHandle >(val1);res2 = SWIG_ConvertPtr(info[1], &argp2,SWIGTYPE_p_unsigned_int, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "linGetCanHandle" "', argument " "2"" of type '" "unsigned int *""'"); 
+  }
+  arg2 = reinterpret_cast< unsigned int * >(argp2);result = (LinStatus)linGetCanHandle(arg1,arg2);
+  jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
+  
   
   
   return jsresult;
@@ -10597,59 +5370,60 @@ fail:
 
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (BEGIN) -------- */
 
-static void *_p_INT64_JSTo_p___int64(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((__int64 *)  ((INT64_JS *) x));
+static void *_p_LongArrayTo_p_unsigned_long(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((unsigned long *)  ((LongArray *) x));
 }
-static void *_p_INT_JSTo_p_int(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((int *)  ((INT_JS *) x));
+static void *_p_CharArrayTo_p_unsigned_char(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((unsigned char *)  ((CharArray *) x));
 }
-static swig_type_info _swigt__p_ByteArray = {"_p_ByteArray", "p_ByteArray|ByteArray *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_HLINCLIENT_JS = {"_p_HLINCLIENT_JS", "HLINCLIENT_JS *|p_HLINCLIENT_JS", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_HLINHW_JS = {"_p_HLINHW_JS", "HLINHW_JS *|p_HLINHW_JS", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_INT64_JS = {"_p_INT64_JS", "p_INT64_JS|INT64_JS *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_INT_JS = {"_p_INT_JS", "p_INT_JS|INT_JS *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_TLINFrameEntry = {"_p_TLINFrameEntry", "p_TLINFrameEntry|TLINFrameEntry *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_TLINHardwareStatus = {"_p_TLINHardwareStatus", "TLINHardwareStatus *|p_TLINHardwareStatus", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_TLINMsg = {"_p_TLINMsg", "p_TLINMsg|TLINMsg *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_TLINRcvMsg = {"_p_TLINRcvMsg", "p_TLINRcvMsg|TLINRcvMsg *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_TLINScheduleSlot = {"_p_TLINScheduleSlot", "p_TLINScheduleSlot|TLINScheduleSlot *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_TLINVersion = {"_p_TLINVersion", "TLINVersion *|p_TLINVersion", 0, 0, (void*)0, 0};
+static void *_p_CharPointerTo_p_unsigned_char(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((unsigned char *)  ((CharPointer *) x));
+}
+static void *_p_IntPointerTo_p_int(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((int *)  ((IntPointer *) x));
+}
+static void *_p_p_LongArrayTo_p_p_unsigned_long(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((unsigned long **)  ((LongArray **) x));
+}
+static swig_type_info _swigt__p_CharArray = {"_p_CharArray", "CharArray *|p_CharArray", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_CharPointer = {"_p_CharPointer", "CharPointer *|p_CharPointer", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_IntPointer = {"_p_IntPointer", "p_IntPointer|IntPointer *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_LinMessageInfo = {"_p_LinMessageInfo", "LinMessageInfo *|p_LinMessageInfo", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_LinStatus = {"_p_LinStatus", "LinStatus *|enum LinStatus *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_LongArray = {"_p_LongArray", "p_LongArray|LongArray *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p___int64 = {"_p___int64", "LONG64 *|LONGLONG *|__int64 *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "CCHAR *|CHAR *|TCHAR *|char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_float = {"_p_float", "FLOAT *|float *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_int = {"_p_int", "BOOL *|INT *|INT32 *|INT_PTR *|LONG32 *|int32_t *|int_fast16_t *|int_fast32_t *|int_least32_t *|intptr_t *|int *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_int = {"_p_int", "BOOL *|INT *|INT32 *|INT_PTR *|LONG32 *|LinHandle *|int32_t *|int_fast16_t *|int_fast32_t *|int_least32_t *|intptr_t *|int *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_long = {"_p_long", "HRESULT *|LONG *|LONG_PTR *|SHANDLE_PTR *|SSIZE_T *|long *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_long_long = {"_p_long_long", "int64_t *|int_fast64_t *|int_least64_t *|intmax_t *|long long *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_char = {"_p_p_char", "LPCTSTR *|LPCUTSTR *|LPTCH *|LPTSTR *|LPUTSTR *|PCTSTR *|PCUTSTR *|PTCH *|PTSTR *|PUTSTR *|char **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_unsigned_long = {"_p_p_unsigned_long", "PLCID *|unsigned long **", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_p_LongArray = {"_p_p_LongArray", 0, 0, 0, 0, 0};
 static swig_type_info _swigt__p_short = {"_p_short", "HALF_PTR *|INT16 *|SHORT *|int16_t *|int_least16_t *|short *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_signed___int64 = {"_p_signed___int64", "INT64 *|signed __int64 *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_signed_char = {"_p_signed_char", "INT8 *|int8_t *|int_fast8_t *|int_least8_t *|signed char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_unsigned___int64 = {"_p_unsigned___int64", "DWORD64 *|DWORDLONG *|UINT64 *|ULONG64 *|ULONGLONG *|unsigned __int64 *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_unsigned_char = {"_p_unsigned_char", "BOOLEAN *|BYTE *|FCHAR *|HLINCLIENT *|TBYTE *|UCHAR *|UINT8 *|uint8_t *|uint_fast8_t *|uint_least8_t *|unsigned char *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_unsigned_char = {"_p_unsigned_char", "BOOLEAN *|BYTE *|FCHAR *|TBYTE *|UCHAR *|UINT8 *|uint8_t *|uint_fast8_t *|uint_least8_t *|unsigned char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_unsigned_int = {"_p_unsigned_int", "DWORD32 *|UINT *|UINT32 *|UINT_PTR *|ULONG32 *|uint32_t *|uint_fast16_t *|uint_fast32_t *|uint_least32_t *|uintptr_t *|unsigned int *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_unsigned_long = {"_p_unsigned_long", "DWORD *|DWORD_PTR *|FLONG *|HANDLE_PTR *|LCID *|SIZE_T *|ULONG *|ULONG_PTR *|unsigned long *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_unsigned_long_long = {"_p_unsigned_long_long", "uint64_t *|uint_fast64_t *|uint_least64_t *|uintmax_t *|unsigned long long *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_unsigned_short = {"_p_unsigned_short", "FSHORT *|HLINHW *|LANGID *|UHALF_PTR *|UINT16 *|USHORT *|WORD *|uint16_t *|uint_least16_t *|unsigned short *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_unsigned_short = {"_p_unsigned_short", "FSHORT *|LANGID *|UHALF_PTR *|UINT16 *|USHORT *|WORD *|uint16_t *|uint_least16_t *|unsigned short *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
-  &_swigt__p_ByteArray,
-  &_swigt__p_HLINCLIENT_JS,
-  &_swigt__p_HLINHW_JS,
-  &_swigt__p_INT64_JS,
-  &_swigt__p_INT_JS,
-  &_swigt__p_TLINFrameEntry,
-  &_swigt__p_TLINHardwareStatus,
-  &_swigt__p_TLINMsg,
-  &_swigt__p_TLINRcvMsg,
-  &_swigt__p_TLINScheduleSlot,
-  &_swigt__p_TLINVersion,
+  &_swigt__p_CharArray,
+  &_swigt__p_CharPointer,
+  &_swigt__p_IntPointer,
+  &_swigt__p_LinMessageInfo,
+  &_swigt__p_LinStatus,
+  &_swigt__p_LongArray,
   &_swigt__p___int64,
   &_swigt__p_char,
   &_swigt__p_float,
   &_swigt__p_int,
   &_swigt__p_long,
   &_swigt__p_long_long,
+  &_swigt__p_p_LongArray,
   &_swigt__p_p_char,
   &_swigt__p_p_unsigned_long,
   &_swigt__p_short,
@@ -10663,53 +5437,45 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_unsigned_short,
 };
 
-static swig_cast_info _swigc__p_ByteArray[] = {  {&_swigt__p_ByteArray, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_HLINCLIENT_JS[] = {  {&_swigt__p_HLINCLIENT_JS, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_HLINHW_JS[] = {  {&_swigt__p_HLINHW_JS, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_INT64_JS[] = {  {&_swigt__p_INT64_JS, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_INT_JS[] = {  {&_swigt__p_INT_JS, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_TLINFrameEntry[] = {  {&_swigt__p_TLINFrameEntry, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_TLINHardwareStatus[] = {  {&_swigt__p_TLINHardwareStatus, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_TLINMsg[] = {  {&_swigt__p_TLINMsg, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_TLINRcvMsg[] = {  {&_swigt__p_TLINRcvMsg, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_TLINScheduleSlot[] = {  {&_swigt__p_TLINScheduleSlot, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_TLINVersion[] = {  {&_swigt__p_TLINVersion, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p___int64[] = {  {&_swigt__p___int64, 0, 0, 0},  {&_swigt__p_INT64_JS, _p_INT64_JSTo_p___int64, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_CharArray[] = {  {&_swigt__p_CharArray, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_CharPointer[] = {  {&_swigt__p_CharPointer, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_IntPointer[] = {  {&_swigt__p_IntPointer, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_LinMessageInfo[] = {  {&_swigt__p_LinMessageInfo, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_LinStatus[] = {  {&_swigt__p_LinStatus, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_LongArray[] = {  {&_swigt__p_LongArray, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p___int64[] = {  {&_swigt__p___int64, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_float[] = {  {&_swigt__p_float, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_int[] = {  {&_swigt__p_int, 0, 0, 0},  {&_swigt__p_INT_JS, _p_INT_JSTo_p_int, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_int[] = {  {&_swigt__p_int, 0, 0, 0},  {&_swigt__p_IntPointer, _p_IntPointerTo_p_int, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_long[] = {  {&_swigt__p_long, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_long_long[] = {  {&_swigt__p_long_long, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_char[] = {  {&_swigt__p_p_char, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_p_unsigned_long[] = {  {&_swigt__p_p_unsigned_long, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_p_LongArray[] = {{&_swigt__p_p_LongArray, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_p_unsigned_long[] = {  {&_swigt__p_p_unsigned_long, 0, 0, 0},  {&_swigt__p_p_LongArray, _p_p_LongArrayTo_p_p_unsigned_long, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_short[] = {  {&_swigt__p_short, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_signed___int64[] = {  {&_swigt__p_signed___int64, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_signed_char[] = {  {&_swigt__p_signed_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_unsigned___int64[] = {  {&_swigt__p_unsigned___int64, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_unsigned_char[] = {  {&_swigt__p_unsigned_char, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_unsigned_char[] = {  {&_swigt__p_unsigned_char, 0, 0, 0},  {&_swigt__p_CharArray, _p_CharArrayTo_p_unsigned_char, 0, 0},  {&_swigt__p_CharPointer, _p_CharPointerTo_p_unsigned_char, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_unsigned_int[] = {  {&_swigt__p_unsigned_int, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_unsigned_long[] = {  {&_swigt__p_unsigned_long, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_unsigned_long[] = {  {&_swigt__p_unsigned_long, 0, 0, 0},  {&_swigt__p_LongArray, _p_LongArrayTo_p_unsigned_long, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_unsigned_long_long[] = {  {&_swigt__p_unsigned_long_long, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_unsigned_short[] = {  {&_swigt__p_unsigned_short, 0, 0, 0},{0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
-  _swigc__p_ByteArray,
-  _swigc__p_HLINCLIENT_JS,
-  _swigc__p_HLINHW_JS,
-  _swigc__p_INT64_JS,
-  _swigc__p_INT_JS,
-  _swigc__p_TLINFrameEntry,
-  _swigc__p_TLINHardwareStatus,
-  _swigc__p_TLINMsg,
-  _swigc__p_TLINRcvMsg,
-  _swigc__p_TLINScheduleSlot,
-  _swigc__p_TLINVersion,
+  _swigc__p_CharArray,
+  _swigc__p_CharPointer,
+  _swigc__p_IntPointer,
+  _swigc__p_LinMessageInfo,
+  _swigc__p_LinStatus,
+  _swigc__p_LongArray,
   _swigc__p___int64,
   _swigc__p_char,
   _swigc__p_float,
   _swigc__p_int,
   _swigc__p_long,
   _swigc__p_long_long,
+  _swigc__p_p_LongArray,
   _swigc__p_p_char,
   _swigc__p_p_unsigned_long,
   _swigc__p_short,
@@ -11033,116 +5799,56 @@ do {
   
 
   /* register classes */
-  /* Class: INT64_JS (_exports_INT64_JS) */
+  /* Class: CharPointer (_exports_CharPointer) */
 // jsnapi_registerclass
-Napi::Function _exports_INT64_JS_ctor = _exports_INT64_JS_inst::GetClass(env);
-exports.Set("INT64_JS", _exports_INT64_JS_ctor);
-if (SWIGTYPE_p_INT64_JS->clientdata == nullptr) {
-  SWIGTYPE_p_INT64_JS->clientdata = new size_t(0);
+Napi::Function _exports_CharPointer_ctor = _exports_CharPointer_inst::GetClass(env);
+exports.Set("CharPointer", _exports_CharPointer_ctor);
+if (SWIGTYPE_p_CharPointer->clientdata == nullptr) {
+  SWIGTYPE_p_CharPointer->clientdata = new size_t(0);
 }
-Napi::FunctionReference *_exports_INT64_JS_ctor_ref = new Napi::FunctionReference();
-*_exports_INT64_JS_ctor_ref = Napi::Persistent(_exports_INT64_JS_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[0] = _exports_INT64_JS_ctor_ref;
-/* Class: INT_JS (_exports_INT_JS) */
+Napi::FunctionReference *_exports_CharPointer_ctor_ref = new Napi::FunctionReference();
+*_exports_CharPointer_ctor_ref = Napi::Persistent(_exports_CharPointer_ctor);
+env.GetInstanceData<EnvInstanceData>()->ctor[0] = _exports_CharPointer_ctor_ref;
+/* Class: IntPointer (_exports_IntPointer) */
 // jsnapi_registerclass
-Napi::Function _exports_INT_JS_ctor = _exports_INT_JS_inst::GetClass(env);
-exports.Set("INT_JS", _exports_INT_JS_ctor);
-if (SWIGTYPE_p_INT_JS->clientdata == nullptr) {
-  SWIGTYPE_p_INT_JS->clientdata = new size_t(1);
+Napi::Function _exports_IntPointer_ctor = _exports_IntPointer_inst::GetClass(env);
+exports.Set("IntPointer", _exports_IntPointer_ctor);
+if (SWIGTYPE_p_IntPointer->clientdata == nullptr) {
+  SWIGTYPE_p_IntPointer->clientdata = new size_t(1);
 }
-Napi::FunctionReference *_exports_INT_JS_ctor_ref = new Napi::FunctionReference();
-*_exports_INT_JS_ctor_ref = Napi::Persistent(_exports_INT_JS_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[1] = _exports_INT_JS_ctor_ref;
-/* Class: HLINCLIENT_JS (_exports_HLINCLIENT_JS) */
+Napi::FunctionReference *_exports_IntPointer_ctor_ref = new Napi::FunctionReference();
+*_exports_IntPointer_ctor_ref = Napi::Persistent(_exports_IntPointer_ctor);
+env.GetInstanceData<EnvInstanceData>()->ctor[1] = _exports_IntPointer_ctor_ref;
+/* Class: LongArray (_exports_LongArray) */
 // jsnapi_registerclass
-Napi::Function _exports_HLINCLIENT_JS_ctor = _exports_HLINCLIENT_JS_inst::GetClass(env);
-exports.Set("HLINCLIENT_JS", _exports_HLINCLIENT_JS_ctor);
-if (SWIGTYPE_p_HLINCLIENT_JS->clientdata == nullptr) {
-  SWIGTYPE_p_HLINCLIENT_JS->clientdata = new size_t(2);
+Napi::Function _exports_LongArray_ctor = _exports_LongArray_inst::GetClass(env);
+exports.Set("LongArray", _exports_LongArray_ctor);
+if (SWIGTYPE_p_LongArray->clientdata == nullptr) {
+  SWIGTYPE_p_LongArray->clientdata = new size_t(2);
 }
-Napi::FunctionReference *_exports_HLINCLIENT_JS_ctor_ref = new Napi::FunctionReference();
-*_exports_HLINCLIENT_JS_ctor_ref = Napi::Persistent(_exports_HLINCLIENT_JS_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[2] = _exports_HLINCLIENT_JS_ctor_ref;
-/* Class: ByteArray (_exports_ByteArray) */
+Napi::FunctionReference *_exports_LongArray_ctor_ref = new Napi::FunctionReference();
+*_exports_LongArray_ctor_ref = Napi::Persistent(_exports_LongArray_ctor);
+env.GetInstanceData<EnvInstanceData>()->ctor[2] = _exports_LongArray_ctor_ref;
+/* Class: CharArray (_exports_CharArray) */
 // jsnapi_registerclass
-Napi::Function _exports_ByteArray_ctor = _exports_ByteArray_inst::GetClass(env);
-exports.Set("ByteArray", _exports_ByteArray_ctor);
-if (SWIGTYPE_p_ByteArray->clientdata == nullptr) {
-  SWIGTYPE_p_ByteArray->clientdata = new size_t(3);
+Napi::Function _exports_CharArray_ctor = _exports_CharArray_inst::GetClass(env);
+exports.Set("CharArray", _exports_CharArray_ctor);
+if (SWIGTYPE_p_CharArray->clientdata == nullptr) {
+  SWIGTYPE_p_CharArray->clientdata = new size_t(3);
 }
-Napi::FunctionReference *_exports_ByteArray_ctor_ref = new Napi::FunctionReference();
-*_exports_ByteArray_ctor_ref = Napi::Persistent(_exports_ByteArray_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[3] = _exports_ByteArray_ctor_ref;
-/* Class: HLINHW_JS (_exports_HLINHW_JS) */
+Napi::FunctionReference *_exports_CharArray_ctor_ref = new Napi::FunctionReference();
+*_exports_CharArray_ctor_ref = Napi::Persistent(_exports_CharArray_ctor);
+env.GetInstanceData<EnvInstanceData>()->ctor[3] = _exports_CharArray_ctor_ref;
+/* Class: LinMessageInfo (_exports_LinMessageInfo) */
 // jsnapi_registerclass
-Napi::Function _exports_HLINHW_JS_ctor = _exports_HLINHW_JS_inst::GetClass(env);
-exports.Set("HLINHW_JS", _exports_HLINHW_JS_ctor);
-if (SWIGTYPE_p_HLINHW_JS->clientdata == nullptr) {
-  SWIGTYPE_p_HLINHW_JS->clientdata = new size_t(4);
+Napi::Function _exports_LinMessageInfo_ctor = _exports_LinMessageInfo_inst::GetClass(env);
+exports.Set("LinMessageInfo", _exports_LinMessageInfo_ctor);
+if (SWIGTYPE_p_LinMessageInfo->clientdata == nullptr) {
+  SWIGTYPE_p_LinMessageInfo->clientdata = new size_t(4);
 }
-Napi::FunctionReference *_exports_HLINHW_JS_ctor_ref = new Napi::FunctionReference();
-*_exports_HLINHW_JS_ctor_ref = Napi::Persistent(_exports_HLINHW_JS_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[4] = _exports_HLINHW_JS_ctor_ref;
-/* Class: TLINVersion (_exports_TLINVersion) */
-// jsnapi_registerclass
-Napi::Function _exports_TLINVersion_ctor = _exports_TLINVersion_inst::GetClass(env);
-exports.Set("TLINVersion", _exports_TLINVersion_ctor);
-if (SWIGTYPE_p_TLINVersion->clientdata == nullptr) {
-  SWIGTYPE_p_TLINVersion->clientdata = new size_t(5);
-}
-Napi::FunctionReference *_exports_TLINVersion_ctor_ref = new Napi::FunctionReference();
-*_exports_TLINVersion_ctor_ref = Napi::Persistent(_exports_TLINVersion_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[5] = _exports_TLINVersion_ctor_ref;
-/* Class: TLINMsg (_exports_TLINMsg) */
-// jsnapi_registerclass
-Napi::Function _exports_TLINMsg_ctor = _exports_TLINMsg_inst::GetClass(env);
-exports.Set("TLINMsg", _exports_TLINMsg_ctor);
-if (SWIGTYPE_p_TLINMsg->clientdata == nullptr) {
-  SWIGTYPE_p_TLINMsg->clientdata = new size_t(6);
-}
-Napi::FunctionReference *_exports_TLINMsg_ctor_ref = new Napi::FunctionReference();
-*_exports_TLINMsg_ctor_ref = Napi::Persistent(_exports_TLINMsg_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[6] = _exports_TLINMsg_ctor_ref;
-/* Class: TLINRcvMsg (_exports_TLINRcvMsg) */
-// jsnapi_registerclass
-Napi::Function _exports_TLINRcvMsg_ctor = _exports_TLINRcvMsg_inst::GetClass(env);
-exports.Set("TLINRcvMsg", _exports_TLINRcvMsg_ctor);
-if (SWIGTYPE_p_TLINRcvMsg->clientdata == nullptr) {
-  SWIGTYPE_p_TLINRcvMsg->clientdata = new size_t(7);
-}
-Napi::FunctionReference *_exports_TLINRcvMsg_ctor_ref = new Napi::FunctionReference();
-*_exports_TLINRcvMsg_ctor_ref = Napi::Persistent(_exports_TLINRcvMsg_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[7] = _exports_TLINRcvMsg_ctor_ref;
-/* Class: TLINFrameEntry (_exports_TLINFrameEntry) */
-// jsnapi_registerclass
-Napi::Function _exports_TLINFrameEntry_ctor = _exports_TLINFrameEntry_inst::GetClass(env);
-exports.Set("TLINFrameEntry", _exports_TLINFrameEntry_ctor);
-if (SWIGTYPE_p_TLINFrameEntry->clientdata == nullptr) {
-  SWIGTYPE_p_TLINFrameEntry->clientdata = new size_t(8);
-}
-Napi::FunctionReference *_exports_TLINFrameEntry_ctor_ref = new Napi::FunctionReference();
-*_exports_TLINFrameEntry_ctor_ref = Napi::Persistent(_exports_TLINFrameEntry_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[8] = _exports_TLINFrameEntry_ctor_ref;
-/* Class: TLINScheduleSlot (_exports_TLINScheduleSlot) */
-// jsnapi_registerclass
-Napi::Function _exports_TLINScheduleSlot_ctor = _exports_TLINScheduleSlot_inst::GetClass(env);
-exports.Set("TLINScheduleSlot", _exports_TLINScheduleSlot_ctor);
-if (SWIGTYPE_p_TLINScheduleSlot->clientdata == nullptr) {
-  SWIGTYPE_p_TLINScheduleSlot->clientdata = new size_t(9);
-}
-Napi::FunctionReference *_exports_TLINScheduleSlot_ctor_ref = new Napi::FunctionReference();
-*_exports_TLINScheduleSlot_ctor_ref = Napi::Persistent(_exports_TLINScheduleSlot_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[9] = _exports_TLINScheduleSlot_ctor_ref;
-/* Class: TLINHardwareStatus (_exports_TLINHardwareStatus) */
-// jsnapi_registerclass
-Napi::Function _exports_TLINHardwareStatus_ctor = _exports_TLINHardwareStatus_inst::GetClass(env);
-exports.Set("TLINHardwareStatus", _exports_TLINHardwareStatus_ctor);
-if (SWIGTYPE_p_TLINHardwareStatus->clientdata == nullptr) {
-  SWIGTYPE_p_TLINHardwareStatus->clientdata = new size_t(10);
-}
-Napi::FunctionReference *_exports_TLINHardwareStatus_ctor_ref = new Napi::FunctionReference();
-*_exports_TLINHardwareStatus_ctor_ref = Napi::Persistent(_exports_TLINHardwareStatus_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[10] = _exports_TLINHardwareStatus_ctor_ref;
+Napi::FunctionReference *_exports_LinMessageInfo_ctor_ref = new Napi::FunctionReference();
+*_exports_LinMessageInfo_ctor_ref = Napi::Persistent(_exports_LinMessageInfo_ctor);
+env.GetInstanceData<EnvInstanceData>()->ctor[4] = _exports_LinMessageInfo_ctor_ref;
 
 
   /* enable inheritance */
@@ -11159,14 +5865,14 @@ setProto = jsSetProtoValue.As<Napi::Function>();
 
   /* setup inheritances */
   
-// Inheritance for _exports_INT64_JS (INT64_JS) <- SWIG_NAPI_ObjectWrap
+// Inheritance for _exports_CharPointer (CharPointer) <- SWIG_NAPI_ObjectWrap
 // jsnapi_setup_inheritance
 do {
   Napi::Value protoBase, protoSub;
-  NAPI_CHECK_RESULT(_exports_INT64_JS_ctor.Get("prototype"), protoSub);
+  NAPI_CHECK_RESULT(_exports_CharPointer_ctor.Get("prototype"), protoSub);
   NAPI_CHECK_RESULT(SWIG_NAPI_ObjectWrap_ctor.Get("prototype"), protoBase);
   NAPI_CHECK_MAYBE(setProto.Call({
-    _exports_INT64_JS_ctor, SWIG_NAPI_ObjectWrap_ctor
+    _exports_CharPointer_ctor, SWIG_NAPI_ObjectWrap_ctor
   }));
   NAPI_CHECK_MAYBE(setProto.Call({
     protoSub, protoBase
@@ -11174,14 +5880,14 @@ do {
 } while (0);
 
 
-// Inheritance for _exports_INT_JS (INT_JS) <- SWIG_NAPI_ObjectWrap
+// Inheritance for _exports_IntPointer (IntPointer) <- SWIG_NAPI_ObjectWrap
 // jsnapi_setup_inheritance
 do {
   Napi::Value protoBase, protoSub;
-  NAPI_CHECK_RESULT(_exports_INT_JS_ctor.Get("prototype"), protoSub);
+  NAPI_CHECK_RESULT(_exports_IntPointer_ctor.Get("prototype"), protoSub);
   NAPI_CHECK_RESULT(SWIG_NAPI_ObjectWrap_ctor.Get("prototype"), protoBase);
   NAPI_CHECK_MAYBE(setProto.Call({
-    _exports_INT_JS_ctor, SWIG_NAPI_ObjectWrap_ctor
+    _exports_IntPointer_ctor, SWIG_NAPI_ObjectWrap_ctor
   }));
   NAPI_CHECK_MAYBE(setProto.Call({
     protoSub, protoBase
@@ -11189,14 +5895,14 @@ do {
 } while (0);
 
 
-// Inheritance for _exports_HLINCLIENT_JS (HLINCLIENT_JS) <- SWIG_NAPI_ObjectWrap
+// Inheritance for _exports_LongArray (LongArray) <- SWIG_NAPI_ObjectWrap
 // jsnapi_setup_inheritance
 do {
   Napi::Value protoBase, protoSub;
-  NAPI_CHECK_RESULT(_exports_HLINCLIENT_JS_ctor.Get("prototype"), protoSub);
+  NAPI_CHECK_RESULT(_exports_LongArray_ctor.Get("prototype"), protoSub);
   NAPI_CHECK_RESULT(SWIG_NAPI_ObjectWrap_ctor.Get("prototype"), protoBase);
   NAPI_CHECK_MAYBE(setProto.Call({
-    _exports_HLINCLIENT_JS_ctor, SWIG_NAPI_ObjectWrap_ctor
+    _exports_LongArray_ctor, SWIG_NAPI_ObjectWrap_ctor
   }));
   NAPI_CHECK_MAYBE(setProto.Call({
     protoSub, protoBase
@@ -11204,14 +5910,14 @@ do {
 } while (0);
 
 
-// Inheritance for _exports_ByteArray (ByteArray) <- SWIG_NAPI_ObjectWrap
+// Inheritance for _exports_CharArray (CharArray) <- SWIG_NAPI_ObjectWrap
 // jsnapi_setup_inheritance
 do {
   Napi::Value protoBase, protoSub;
-  NAPI_CHECK_RESULT(_exports_ByteArray_ctor.Get("prototype"), protoSub);
+  NAPI_CHECK_RESULT(_exports_CharArray_ctor.Get("prototype"), protoSub);
   NAPI_CHECK_RESULT(SWIG_NAPI_ObjectWrap_ctor.Get("prototype"), protoBase);
   NAPI_CHECK_MAYBE(setProto.Call({
-    _exports_ByteArray_ctor, SWIG_NAPI_ObjectWrap_ctor
+    _exports_CharArray_ctor, SWIG_NAPI_ObjectWrap_ctor
   }));
   NAPI_CHECK_MAYBE(setProto.Call({
     protoSub, protoBase
@@ -11219,104 +5925,14 @@ do {
 } while (0);
 
 
-// Inheritance for _exports_HLINHW_JS (HLINHW_JS) <- SWIG_NAPI_ObjectWrap
+// Inheritance for _exports_LinMessageInfo (LinMessageInfo) <- SWIG_NAPI_ObjectWrap
 // jsnapi_setup_inheritance
 do {
   Napi::Value protoBase, protoSub;
-  NAPI_CHECK_RESULT(_exports_HLINHW_JS_ctor.Get("prototype"), protoSub);
+  NAPI_CHECK_RESULT(_exports_LinMessageInfo_ctor.Get("prototype"), protoSub);
   NAPI_CHECK_RESULT(SWIG_NAPI_ObjectWrap_ctor.Get("prototype"), protoBase);
   NAPI_CHECK_MAYBE(setProto.Call({
-    _exports_HLINHW_JS_ctor, SWIG_NAPI_ObjectWrap_ctor
-  }));
-  NAPI_CHECK_MAYBE(setProto.Call({
-    protoSub, protoBase
-  }));
-} while (0);
-
-
-// Inheritance for _exports_TLINVersion (TLINVersion) <- SWIG_NAPI_ObjectWrap
-// jsnapi_setup_inheritance
-do {
-  Napi::Value protoBase, protoSub;
-  NAPI_CHECK_RESULT(_exports_TLINVersion_ctor.Get("prototype"), protoSub);
-  NAPI_CHECK_RESULT(SWIG_NAPI_ObjectWrap_ctor.Get("prototype"), protoBase);
-  NAPI_CHECK_MAYBE(setProto.Call({
-    _exports_TLINVersion_ctor, SWIG_NAPI_ObjectWrap_ctor
-  }));
-  NAPI_CHECK_MAYBE(setProto.Call({
-    protoSub, protoBase
-  }));
-} while (0);
-
-
-// Inheritance for _exports_TLINMsg (TLINMsg) <- SWIG_NAPI_ObjectWrap
-// jsnapi_setup_inheritance
-do {
-  Napi::Value protoBase, protoSub;
-  NAPI_CHECK_RESULT(_exports_TLINMsg_ctor.Get("prototype"), protoSub);
-  NAPI_CHECK_RESULT(SWIG_NAPI_ObjectWrap_ctor.Get("prototype"), protoBase);
-  NAPI_CHECK_MAYBE(setProto.Call({
-    _exports_TLINMsg_ctor, SWIG_NAPI_ObjectWrap_ctor
-  }));
-  NAPI_CHECK_MAYBE(setProto.Call({
-    protoSub, protoBase
-  }));
-} while (0);
-
-
-// Inheritance for _exports_TLINRcvMsg (TLINRcvMsg) <- SWIG_NAPI_ObjectWrap
-// jsnapi_setup_inheritance
-do {
-  Napi::Value protoBase, protoSub;
-  NAPI_CHECK_RESULT(_exports_TLINRcvMsg_ctor.Get("prototype"), protoSub);
-  NAPI_CHECK_RESULT(SWIG_NAPI_ObjectWrap_ctor.Get("prototype"), protoBase);
-  NAPI_CHECK_MAYBE(setProto.Call({
-    _exports_TLINRcvMsg_ctor, SWIG_NAPI_ObjectWrap_ctor
-  }));
-  NAPI_CHECK_MAYBE(setProto.Call({
-    protoSub, protoBase
-  }));
-} while (0);
-
-
-// Inheritance for _exports_TLINFrameEntry (TLINFrameEntry) <- SWIG_NAPI_ObjectWrap
-// jsnapi_setup_inheritance
-do {
-  Napi::Value protoBase, protoSub;
-  NAPI_CHECK_RESULT(_exports_TLINFrameEntry_ctor.Get("prototype"), protoSub);
-  NAPI_CHECK_RESULT(SWIG_NAPI_ObjectWrap_ctor.Get("prototype"), protoBase);
-  NAPI_CHECK_MAYBE(setProto.Call({
-    _exports_TLINFrameEntry_ctor, SWIG_NAPI_ObjectWrap_ctor
-  }));
-  NAPI_CHECK_MAYBE(setProto.Call({
-    protoSub, protoBase
-  }));
-} while (0);
-
-
-// Inheritance for _exports_TLINScheduleSlot (TLINScheduleSlot) <- SWIG_NAPI_ObjectWrap
-// jsnapi_setup_inheritance
-do {
-  Napi::Value protoBase, protoSub;
-  NAPI_CHECK_RESULT(_exports_TLINScheduleSlot_ctor.Get("prototype"), protoSub);
-  NAPI_CHECK_RESULT(SWIG_NAPI_ObjectWrap_ctor.Get("prototype"), protoBase);
-  NAPI_CHECK_MAYBE(setProto.Call({
-    _exports_TLINScheduleSlot_ctor, SWIG_NAPI_ObjectWrap_ctor
-  }));
-  NAPI_CHECK_MAYBE(setProto.Call({
-    protoSub, protoBase
-  }));
-} while (0);
-
-
-// Inheritance for _exports_TLINHardwareStatus (TLINHardwareStatus) <- SWIG_NAPI_ObjectWrap
-// jsnapi_setup_inheritance
-do {
-  Napi::Value protoBase, protoSub;
-  NAPI_CHECK_RESULT(_exports_TLINHardwareStatus_ctor.Get("prototype"), protoSub);
-  NAPI_CHECK_RESULT(SWIG_NAPI_ObjectWrap_ctor.Get("prototype"), protoBase);
-  NAPI_CHECK_MAYBE(setProto.Call({
-    _exports_TLINHardwareStatus_ctor, SWIG_NAPI_ObjectWrap_ctor
+    _exports_LinMessageInfo_ctor, SWIG_NAPI_ObjectWrap_ctor
   }));
   NAPI_CHECK_MAYBE(setProto.Call({
     protoSub, protoBase
@@ -11328,1253 +5944,462 @@ do {
   /* create and register namespace objects */
   // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_INVALID_LIN_HANDLE_get, JS_veto_set_variable>("INVALID_LIN_HANDLE");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linOK_get, JS_veto_set_variable>("linOK");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_HW_TYPE_USB_get, JS_veto_set_variable>("LIN_HW_TYPE_USB");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_NOMSG_get, JS_veto_set_variable>("linERR_NOMSG");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_HW_TYPE_USB_PRO_get, JS_veto_set_variable>("LIN_HW_TYPE_USB_PRO");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_NOTRUNNING_get, JS_veto_set_variable>("linERR_NOTRUNNING");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_HW_TYPE_USB_PRO_FD_get, JS_veto_set_variable>("LIN_HW_TYPE_USB_PRO_FD");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_RUNNING_get, JS_veto_set_variable>("linERR_RUNNING");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_HW_TYPE_PLIN_USB_get, JS_veto_set_variable>("LIN_HW_TYPE_PLIN_USB");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_MASTERONLY_get, JS_veto_set_variable>("linERR_MASTERONLY");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_MAX_FRAME_ID_get, JS_veto_set_variable>("LIN_MAX_FRAME_ID");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_SLAVEONLY_get, JS_veto_set_variable>("linERR_SLAVEONLY");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_MAX_SCHEDULES_get, JS_veto_set_variable>("LIN_MAX_SCHEDULES");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_PARAM_get, JS_veto_set_variable>("linERR_PARAM");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_MIN_SCHEDULE_NUMBER_get, JS_veto_set_variable>("LIN_MIN_SCHEDULE_NUMBER");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_NOTFOUND_get, JS_veto_set_variable>("linERR_NOTFOUND");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_MAX_SCHEDULE_NUMBER_get, JS_veto_set_variable>("LIN_MAX_SCHEDULE_NUMBER");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_NOMEM_get, JS_veto_set_variable>("linERR_NOMEM");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_MAX_SCHEDULE_SLOTS_get, JS_veto_set_variable>("LIN_MAX_SCHEDULE_SLOTS");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_NOCHANNELS_get, JS_veto_set_variable>("linERR_NOCHANNELS");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_MIN_BAUDRATE_get, JS_veto_set_variable>("LIN_MIN_BAUDRATE");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_TIMEOUT_get, JS_veto_set_variable>("linERR_TIMEOUT");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_MAX_BAUDRATE_get, JS_veto_set_variable>("LIN_MAX_BAUDRATE");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_NOTINITIALIZED_get, JS_veto_set_variable>("linERR_NOTINITIALIZED");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_MAX_NAME_LENGTH_get, JS_veto_set_variable>("LIN_MAX_NAME_LENGTH");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_NOHANDLES_get, JS_veto_set_variable>("linERR_NOHANDLES");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_MAX_USER_DATA_get, JS_veto_set_variable>("LIN_MAX_USER_DATA");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_INVHANDLE_get, JS_veto_set_variable>("linERR_INVHANDLE");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_MIN_BREAK_LENGTH_get, JS_veto_set_variable>("LIN_MIN_BREAK_LENGTH");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_CANERROR_get, JS_veto_set_variable>("linERR_CANERROR");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_MAX_BREAK_LENGTH_get, JS_veto_set_variable>("LIN_MAX_BREAK_LENGTH");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_ERRRESP_get, JS_veto_set_variable>("linERR_ERRRESP");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_MAX_RCV_QUEUE_COUNT_get, JS_veto_set_variable>("LIN_MAX_RCV_QUEUE_COUNT");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_WRONGRESP_get, JS_veto_set_variable>("linERR_WRONGRESP");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_FRAME_FLAG_RESPONSE_ENABLE_get, JS_veto_set_variable>("FRAME_FLAG_RESPONSE_ENABLE");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_DRIVER_get, JS_veto_set_variable>("linERR_DRIVER");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_FRAME_FLAG_SINGLE_SHOT_get, JS_veto_set_variable>("FRAME_FLAG_SINGLE_SHOT");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_DRIVERFAILED_get, JS_veto_set_variable>("linERR_DRIVERFAILED");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_FRAME_FLAG_IGNORE_INIT_DATA_get, JS_veto_set_variable>("FRAME_FLAG_IGNORE_INIT_DATA");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_NOCARD_get, JS_veto_set_variable>("linERR_NOCARD");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LOG_FLAG_DEFAULT_get, JS_veto_set_variable>("LOG_FLAG_DEFAULT");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_LICENSE_get, JS_veto_set_variable>("linERR_LICENSE");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LOG_FLAG_ENTRY_get, JS_veto_set_variable>("LOG_FLAG_ENTRY");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_INTERNAL_get, JS_veto_set_variable>("linERR_INTERNAL");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LOG_FLAG_PARAMETERS_get, JS_veto_set_variable>("LOG_FLAG_PARAMETERS");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_NO_ACCESS_get, JS_veto_set_variable>("linERR_NO_ACCESS");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LOG_FLAG_LEAVE_get, JS_veto_set_variable>("LOG_FLAG_LEAVE");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_VERSION_get, JS_veto_set_variable>("linERR_VERSION");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LOG_FLAG_WRITE_get, JS_veto_set_variable>("LOG_FLAG_WRITE");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_NO_REF_POWER_get, JS_veto_set_variable>("linERR_NO_REF_POWER");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LOG_FLAG_READ_get, JS_veto_set_variable>("LOG_FLAG_READ");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linERR_NOT_IMPLEMENTED_get, JS_veto_set_variable>("linERR_NOT_IMPLEMENTED");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LOG_FLAG_ALL_get, JS_veto_set_variable>("LOG_FLAG_ALL");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_TX_get, JS_veto_set_variable>("LIN_TX");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_MSG_ERR_INCONSISTENT_SYNC_get, JS_veto_set_variable>("MSG_ERR_INCONSISTENT_SYNC");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_RX_get, JS_veto_set_variable>("LIN_RX");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_MSG_ERR_ID_PARITY_BIT0_get, JS_veto_set_variable>("MSG_ERR_ID_PARITY_BIT0");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_WAKEUP_FRAME_get, JS_veto_set_variable>("LIN_WAKEUP_FRAME");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_MSG_ERR_ID_PARITY_BIT1_get, JS_veto_set_variable>("MSG_ERR_ID_PARITY_BIT1");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_NODATA_get, JS_veto_set_variable>("LIN_NODATA");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_MSG_ERR_SLAVE_NOT_RESPONDING_get, JS_veto_set_variable>("MSG_ERR_SLAVE_NOT_RESPONDING");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_CSUM_ERROR_get, JS_veto_set_variable>("LIN_CSUM_ERROR");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_MSG_ERR_TIMEOUT_get, JS_veto_set_variable>("MSG_ERR_TIMEOUT");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_PARITY_ERROR_get, JS_veto_set_variable>("LIN_PARITY_ERROR");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_MSG_ERR_CHECKSUM_get, JS_veto_set_variable>("MSG_ERR_CHECKSUM");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_SYNCH_ERROR_get, JS_veto_set_variable>("LIN_SYNCH_ERROR");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_MSG_ERR_GND_SHORT_get, JS_veto_set_variable>("MSG_ERR_GND_SHORT");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_BIT_ERROR_get, JS_veto_set_variable>("LIN_BIT_ERROR");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_variable
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_MSG_ERR_VBAT_SHORT_get, JS_veto_set_variable>("MSG_ERR_VBAT_SHORT");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_MSG_ERR_SLOT_DELAY_get, JS_veto_set_variable>("MSG_ERR_SLOT_DELAY");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_MSG_ERR_OTHER_RESPONSE_get, JS_veto_set_variable>("MSG_ERR_OTHER_RESPONSE");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_clpName_get, JS_veto_set_variable>("clpName");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_clpMessagesOnQueue_get, JS_veto_set_variable>("clpMessagesOnQueue");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_clpWindowHandle_get, JS_veto_set_variable>("clpWindowHandle");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_clpConnectedHardware_get, JS_veto_set_variable>("clpConnectedHardware");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_clpTransmittedMessages_get, JS_veto_set_variable>("clpTransmittedMessages");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_clpReceivedMessages_get, JS_veto_set_variable>("clpReceivedMessages");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_clpReceiveStatusFrames_get, JS_veto_set_variable>("clpReceiveStatusFrames");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_clpOnReceiveEventHandle_get, JS_veto_set_variable>("clpOnReceiveEventHandle");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_clpOnPluginEventHandle_get, JS_veto_set_variable>("clpOnPluginEventHandle");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_clpLogStatus_get, JS_veto_set_variable>("clpLogStatus");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_clpLogConfiguration_get, JS_veto_set_variable>("clpLogConfiguration");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpName_get, JS_veto_set_variable>("hwpName");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpDeviceNumber_get, JS_veto_set_variable>("hwpDeviceNumber");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpChannelNumber_get, JS_veto_set_variable>("hwpChannelNumber");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpConnectedClients_get, JS_veto_set_variable>("hwpConnectedClients");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpMessageFilter_get, JS_veto_set_variable>("hwpMessageFilter");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpBaudrate_get, JS_veto_set_variable>("hwpBaudrate");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpMode_get, JS_veto_set_variable>("hwpMode");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpFirmwareVersion_get, JS_veto_set_variable>("hwpFirmwareVersion");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpBufferOverrunCount_get, JS_veto_set_variable>("hwpBufferOverrunCount");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpBossClient_get, JS_veto_set_variable>("hwpBossClient");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpSerialNumber_get, JS_veto_set_variable>("hwpSerialNumber");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpVersion_get, JS_veto_set_variable>("hwpVersion");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpType_get, JS_veto_set_variable>("hwpType");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpQueueOverrunCount_get, JS_veto_set_variable>("hwpQueueOverrunCount");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpIdNumber_get, JS_veto_set_variable>("hwpIdNumber");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpUserData_get, JS_veto_set_variable>("hwpUserData");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpBreakLength_get, JS_veto_set_variable>("hwpBreakLength");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpLinTermination_get, JS_veto_set_variable>("hwpLinTermination");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpFlashMode_get, JS_veto_set_variable>("hwpFlashMode");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpScheduleActive_get, JS_veto_set_variable>("hwpScheduleActive");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpScheduleState_get, JS_veto_set_variable>("hwpScheduleState");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwpScheduleSuspendedSlot_get, JS_veto_set_variable>("hwpScheduleSuspendedSlot");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_mstStandard_get, JS_veto_set_variable>("mstStandard");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_mstBusSleep_get, JS_veto_set_variable>("mstBusSleep");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_mstBusWakeUp_get, JS_veto_set_variable>("mstBusWakeUp");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_mstAutobaudrateTimeOut_get, JS_veto_set_variable>("mstAutobaudrateTimeOut");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_mstAutobaudrateReply_get, JS_veto_set_variable>("mstAutobaudrateReply");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_mstOverrun_get, JS_veto_set_variable>("mstOverrun");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_mstQueueOverrun_get, JS_veto_set_variable>("mstQueueOverrun");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_mstClientQueueOverrun_get, JS_veto_set_variable>("mstClientQueueOverrun");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_sltUnconditional_get, JS_veto_set_variable>("sltUnconditional");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_sltEvent_get, JS_veto_set_variable>("sltEvent");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_sltSporadic_get, JS_veto_set_variable>("sltSporadic");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_sltMasterRequest_get, JS_veto_set_variable>("sltMasterRequest");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_sltSlaveResponse_get, JS_veto_set_variable>("sltSlaveResponse");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_dirDisabled_get, JS_veto_set_variable>("dirDisabled");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_dirPublisher_get, JS_veto_set_variable>("dirPublisher");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_dirSubscriber_get, JS_veto_set_variable>("dirSubscriber");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_dirSubscriberAutoLength_get, JS_veto_set_variable>("dirSubscriberAutoLength");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_cstCustom_get, JS_veto_set_variable>("cstCustom");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_cstClassic_get, JS_veto_set_variable>("cstClassic");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_cstEnhanced_get, JS_veto_set_variable>("cstEnhanced");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_cstAuto_get, JS_veto_set_variable>("cstAuto");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_modNone_get, JS_veto_set_variable>("modNone");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_modSlave_get, JS_veto_set_variable>("modSlave");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_modMaster_get, JS_veto_set_variable>("modMaster");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwsNotInitialized_get, JS_veto_set_variable>("hwsNotInitialized");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwsAutobaudrate_get, JS_veto_set_variable>("hwsAutobaudrate");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwsActive_get, JS_veto_set_variable>("hwsActive");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwsSleep_get, JS_veto_set_variable>("hwsSleep");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwsShortGround_get, JS_veto_set_variable>("hwsShortGround");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_hwsVBatMissing_get, JS_veto_set_variable>("hwsVBatMissing");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_schNotRunning_get, JS_veto_set_variable>("schNotRunning");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_schSuspended_get, JS_veto_set_variable>("schSuspended");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_schRunning_get, JS_veto_set_variable>("schRunning");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errOK_get, JS_veto_set_variable>("errOK");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errXmtQueueFull_get, JS_veto_set_variable>("errXmtQueueFull");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errIllegalPeriod_get, JS_veto_set_variable>("errIllegalPeriod");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errRcvQueueEmpty_get, JS_veto_set_variable>("errRcvQueueEmpty");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errIllegalChecksumType_get, JS_veto_set_variable>("errIllegalChecksumType");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errIllegalHardware_get, JS_veto_set_variable>("errIllegalHardware");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errIllegalClient_get, JS_veto_set_variable>("errIllegalClient");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errWrongParameterType_get, JS_veto_set_variable>("errWrongParameterType");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errWrongParameterValue_get, JS_veto_set_variable>("errWrongParameterValue");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errIllegalDirection_get, JS_veto_set_variable>("errIllegalDirection");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errIllegalLength_get, JS_veto_set_variable>("errIllegalLength");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errIllegalBaudrate_get, JS_veto_set_variable>("errIllegalBaudrate");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errIllegalFrameID_get, JS_veto_set_variable>("errIllegalFrameID");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errBufferInsufficient_get, JS_veto_set_variable>("errBufferInsufficient");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errIllegalScheduleNo_get, JS_veto_set_variable>("errIllegalScheduleNo");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errIllegalSlotCount_get, JS_veto_set_variable>("errIllegalSlotCount");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errIllegalIndex_get, JS_veto_set_variable>("errIllegalIndex");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errIllegalRange_get, JS_veto_set_variable>("errIllegalRange");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errIllegalHardwareState_get, JS_veto_set_variable>("errIllegalHardwareState");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errIllegalSchedulerState_get, JS_veto_set_variable>("errIllegalSchedulerState");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errIllegalFrameConfiguration_get, JS_veto_set_variable>("errIllegalFrameConfiguration");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errScheduleSlotPoolFull_get, JS_veto_set_variable>("errScheduleSlotPoolFull");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errIllegalSchedule_get, JS_veto_set_variable>("errIllegalSchedule");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errIllegalHardwareMode_get, JS_veto_set_variable>("errIllegalHardwareMode");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errOutOfResource_get, JS_veto_set_variable>("errOutOfResource");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errManagerNotLoaded_get, JS_veto_set_variable>("errManagerNotLoaded");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errManagerNotResponding_get, JS_veto_set_variable>("errManagerNotResponding");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errMemoryAccess_get, JS_veto_set_variable>("errMemoryAccess");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errNotImplemented_get, JS_veto_set_variable>("errNotImplemented");
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_variable
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_errUnknown_get, JS_veto_set_variable>("errUnknown");
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_linCHANNELDATA_CARD_FIRMWARE_REV_get, JS_veto_set_variable>("linCHANNELDATA_CARD_FIRMWARE_REV");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_RegisterClient", _wrap_LIN_RegisterClient);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linInitializeLibrary", _wrap_linInitializeLibrary);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_RemoveClient", _wrap_LIN_RemoveClient);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linUnloadLibrary", _wrap_linUnloadLibrary);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_ConnectClient", _wrap_LIN_ConnectClient);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linGetTransceiverData", _wrap_linGetTransceiverData);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_DisconnectClient", _wrap_LIN_DisconnectClient);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linOpenChannel", _wrap_linOpenChannel);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
+// jsnapi_register_global_variable
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_MASTER_get, JS_veto_set_variable>("LIN_MASTER");
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
+// jsnapi_register_global_variable
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_SLAVE_get, JS_veto_set_variable>("LIN_SLAVE");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_ResetClient", _wrap_LIN_ResetClient);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linClose", _wrap_linClose);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_SetClientParam", _wrap_LIN_SetClientParam);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linGetVersion", _wrap_linGetVersion);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_GetClientParam", _wrap_LIN_GetClientParam);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linGetFirmwareVersion", _wrap_linGetFirmwareVersion);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_SetClientFilter", _wrap_LIN_SetClientFilter);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linGetChannelData", _wrap_linGetChannelData);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_GetClientFilter", _wrap_LIN_GetClientFilter);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linSetBitrate", _wrap_linSetBitrate);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_Read", _wrap_LIN_Read);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linBusOn", _wrap_linBusOn);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_ReadMulti", _wrap_LIN_ReadMulti);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linBusOff", _wrap_linBusOff);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_Write", _wrap_LIN_Write);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linReadTimer", _wrap_linReadTimer);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_InitializeHardware", _wrap_LIN_InitializeHardware);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linWriteMessage", _wrap_linWriteMessage);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_GetAvailableHardware", _wrap_LIN_GetAvailableHardware);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linRequestMessage", _wrap_linRequestMessage);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_SetHardwareParam", _wrap_LIN_SetHardwareParam);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linReadMessage", _wrap_linReadMessage);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_GetHardwareParam", _wrap_LIN_GetHardwareParam);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linReadMessageWait", _wrap_linReadMessageWait);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_ResetHardware", _wrap_LIN_ResetHardware);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linUpdateMessage", _wrap_linUpdateMessage);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_ResetHardwareConfig", _wrap_LIN_ResetHardwareConfig);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linSetupIllegalMessage", _wrap_linSetupIllegalMessage);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
+// jsnapi_register_global_variable
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_MSG_DISTURB_CSUM_get, JS_veto_set_variable>("LIN_MSG_DISTURB_CSUM");
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
+// jsnapi_register_global_variable
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_MSG_DISTURB_PARITY_get, JS_veto_set_variable>("LIN_MSG_DISTURB_PARITY");
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
+// jsnapi_register_global_variable
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_MSG_USE_STANDARD_PARITY_get, JS_veto_set_variable>("LIN_MSG_USE_STANDARD_PARITY");
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
+// jsnapi_register_global_variable
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_MSG_USE_ENHANCED_PARITY_get, JS_veto_set_variable>("LIN_MSG_USE_ENHANCED_PARITY");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_IdentifyHardware", _wrap_LIN_IdentifyHardware);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linSetupLIN", _wrap_linSetupLIN);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
+// jsnapi_register_global_variable
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_ENHANCED_CHECKSUM_get, JS_veto_set_variable>("LIN_ENHANCED_CHECKSUM");
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
+// jsnapi_register_global_variable
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Accessor<exports_LIN_VARIABLE_DLC_get, JS_veto_set_variable>("LIN_VARIABLE_DLC");
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_RegisterFrameId", _wrap_LIN_RegisterFrameId);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linWriteWakeup", _wrap_linWriteWakeup);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_SetFrameEntry", _wrap_LIN_SetFrameEntry);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linClearMessage", _wrap_linClearMessage);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_GetFrameEntry", _wrap_LIN_GetFrameEntry);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linWriteSync", _wrap_linWriteSync);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_UpdateByteArray", _wrap_LIN_UpdateByteArray);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_StartKeepAlive", _wrap_LIN_StartKeepAlive);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_SuspendKeepAlive", _wrap_LIN_SuspendKeepAlive);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_ResumeKeepAlive", _wrap_LIN_ResumeKeepAlive);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_SetSchedule", _wrap_LIN_SetSchedule);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_GetSchedule", _wrap_LIN_GetSchedule);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_DeleteSchedule", _wrap_LIN_DeleteSchedule);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_SetScheduleBreakPoint", _wrap_LIN_SetScheduleBreakPoint);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_StartSchedule", _wrap_LIN_StartSchedule);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_SuspendSchedule", _wrap_LIN_SuspendSchedule);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_ResumeSchedule", _wrap_LIN_ResumeSchedule);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_XmtWakeUp", _wrap_LIN_XmtWakeUp);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_XmtDynamicWakeUp", _wrap_LIN_XmtDynamicWakeUp);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_StartAutoBaud", _wrap_LIN_StartAutoBaud);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_GetStatus", _wrap_LIN_GetStatus);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_CalculateChecksum", _wrap_LIN_CalculateChecksum);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_GetVersion", _wrap_LIN_GetVersion);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_GetVersionInfo", _wrap_LIN_GetVersionInfo);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_GetErrorText", _wrap_LIN_GetErrorText);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_GetPID", _wrap_LIN_GetPID);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_GetTargetTime", _wrap_LIN_GetTargetTime);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_SetResponseRemap", _wrap_LIN_SetResponseRemap);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_GetResponseRemap", _wrap_LIN_GetResponseRemap);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("LIN_GetSystemTime", _wrap_LIN_GetSystemTime);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("linGetCanHandle", _wrap_linGetCanHandle);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));

@@ -235,11 +235,7 @@ typedef struct {
 // (linlib.c provides its own definition of LINLIBAPI before including this file.)
 //
 #ifndef LINLIBAPI
-#   if defined(__BORLANDC__)
-#      define LINLIBAPI __stdcall
-#   elif defined(_MSC_VER) || defined(__MWERKS__) || defined(__GNUC__)
-#      define LINLIBAPI __stdcall
-#   endif
+#define LINLIBAPI __stdcall
 #endif
 
 #ifdef __cplusplus

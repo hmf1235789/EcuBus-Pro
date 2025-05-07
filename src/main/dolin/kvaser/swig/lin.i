@@ -23,13 +23,14 @@
 %typemap(typecheck) (const void *msg,unsigned int dlc) = (const void* buffer_data, const size_t buffer_len);
 
 
-// %include <cpointer.i>
+%include <cpointer.i>
 
-// %pointer_class(__int64,INT64_JS)
+%pointer_class(unsigned char,CharPointer)
+%pointer_class(int,IntPointer)
 // %pointer_class(int,INT_JS)
 // %pointer_class(HLINCLIENT,HLINCLIENT_JS)
 
-// %include <carrays.i>
+%include <carrays.i>
 
 %array_class(unsigned long, LongArray);
 %array_class(unsigned char, CharArray);
