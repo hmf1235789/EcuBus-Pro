@@ -548,17 +548,15 @@ export class ZLG_CAN extends CanBase {
             // this.log.error((getTsUs() - this.startTime),'bus error')
           } else {
             if (this.canMiniBug) {
-              setTimeout(() => {
-                this._read(
-                  {
-                    canId: id,
-                    msgType: msgType,
-                    isEcho: true,
-                    data
-                  },
-                  getTsUs() - this.startTime
-                )
-              }, 0)
+              this._read(
+                {
+                  canId: id,
+                  msgType: msgType,
+                  isEcho: true,
+                  data
+                },
+                getTsUs() - this.startTime
+              )
             }
           }
         }
