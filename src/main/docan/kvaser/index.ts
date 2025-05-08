@@ -285,12 +285,15 @@ export class KVASER_CAN extends CanBase {
       const devices: CanDevice[] = []
       for (let i = 0; i < num; i++) {
         const buf = Buffer.alloc(1024)
-        KV.canGetChannelData(i, 13, buf)
+        KV.canGetChannelData(i, KV.canCHANNELDATA_CHANNEL_NAME, buf)
         const serial = buf2str(buf)
+        KV.canGetChannelData(i, KV.canCHANNELDATA_CARD_SERIAL_NO, buf)
+        const serialNumber = buf.readBigUInt64LE(0).toString(10)
         devices.push({
           id: `kvaser-${i}`,
           handle: i,
-          label: `${serial}`
+          label: `${serial}`,
+          serialNumber: serialNumber
         })
       }
       return devices
@@ -314,12 +317,15 @@ export class KVASER_CAN extends CanBase {
         KV.canGetChannelData(i, 1, buf)
         const flags = buf.readUInt32LE(0)
         if (flags & KV.canCHANNEL_CAP_LIN_HYBRID) {
-          KV.canGetChannelData(i, 13, buf)
+          KV.canGetChannelData(i, KV.canCHANNELDATA_CHANNEL_NAME, buf)
           const serial = buf2str(buf)
+          KV.canGetChannelData(i, KV.canCHANNELDATA_CARD_SERIAL_NO, buf)
+          const serialNumber = buf.readBigUInt64LE(0).toString(10)
           devices.push({
             id: `kvaser-${i}`,
             handle: i,
-            label: `${serial}`
+            label: `${serial}`,
+            serialNumber: serialNumber
           })
         }
       }
@@ -330,8 +336,10 @@ export class KVASER_CAN extends CanBase {
 
   static override getLibVersion(): string {
     if (process.platform == 'win32') {
-      const v = KV.canGetVersion()
-      return `${v}`
+      const v = KV.canGetVersionEx(KV.canVERSION_CANLIB32_PRODVER)
+      const buf = Buffer.alloc(2)
+      buf.writeUInt16BE(v, 0)
+      return `${buf[0]}.${buf[1]}`
     }
     return 'only support windows'
   }

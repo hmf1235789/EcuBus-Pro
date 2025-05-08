@@ -269,6 +269,7 @@ export interface CanDevice {
   label: string
   id: string
   handle: any
+  serialNumber?: string
   busy?: boolean
 }
 

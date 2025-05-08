@@ -24,14 +24,6 @@ function err2Str(result: number): string {
   return `Error Code:${result}`
 }
 
-function buf2str(buf: Buffer) {
-  const nullCharIndex = buf.indexOf(0) // 0 是 '\0' 的 ASCII 码
-  if (nullCharIndex === -1) {
-    return buf.toString('utf8')
-  }
-  return buf.toString('utf8', 0, nullCharIndex)
-}
-
 export class KvaserLin extends LinBase {
   queue = queue((task: QueueItem, cb) => {
     if (task.discard) {
