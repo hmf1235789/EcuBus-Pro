@@ -27,18 +27,21 @@
 %include <cpointer.i>
 %include <vxlapi.h>
 
-//
+// typedef XL_CAN_EV_TAG_TX_MSG xl_can_ev_tag_tx_msg;
 // typedef long XLportHandle;
 // typedef XL_DRIVER_CONFIG XLdriverConfig;
 // typedef XL_CHANNEL_CONFIG XLchannelConfig;
 // typedef XLuint64 XLaccess;
 // typedef XLlinStatPar XLlinStatPar;
 
+%pointer_class(unsigned int, UINT32)
+%pointer_class(XLportHandle, XLPORTHANDLE)
+%pointer_class(XLaccess, XLACCESS)
+// %pointer_class(XLcanFdConf, XLCANFDCONF);
+
 %array_class(XLchannelConfig, CHANNEL_CONFIG);
-// %array_class(XLdriverConfig, xldriverconfig);
-// %array_class(XLchannelConfig, xlchannelconfig);
-// %array_class(XLaccess, xlaccess);
-// %array_class(XLlinStatPar, xllinstatpar);
+%array_class(XLstatus, xlstatus);
+// %array_class(XLcanFdConf, XLCANFDCONF);
 
 %inline %{
 void LoadDll(const char* path) {
