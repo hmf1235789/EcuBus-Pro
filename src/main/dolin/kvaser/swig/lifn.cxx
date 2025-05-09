@@ -107,8 +107,8 @@ void threadEntry(TsfnContext *context) {
       // Message received, call the callback
       context->tsfn.BlockingCall([id, msg, dlc, flags, msgInfo](Napi::Env env, Napi::Function jsCallback) {
         // Create JavaScript objects for the message data
-        auto msgArray = Napi::ArrayBuffer::New(env, 8);
-        memcpy(msgArray.Data(), msg, 8);
+        auto msgArray = Napi::ArrayBuffer::New(env, dlc);
+        memcpy(msgArray.Data(), msg, dlc);
         
         auto msgInfoObj = Napi::Object::New(env);
         msgInfoObj.Set("timestamp", Napi::Number::New(env, msgInfo.timestamp));

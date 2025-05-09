@@ -26,7 +26,22 @@
           :label="item.label"
           :value="item.handle"
           :disabled="item.busy"
-        />
+        >
+          <span
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              width: 100%;
+              gap: 15px;
+            "
+          >
+            <span>{{ item.label }}</span>
+            <span v-if="item.serialNumber" style="color: var(--el-text-color-secondary)">
+              #{{ item.serialNumber }}
+            </span>
+          </span>
+        </el-option>
         <template #footer>
           <el-button
             text
