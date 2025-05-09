@@ -24,7 +24,7 @@ describe('vector test', () => {
   let client!: VECTOR_CAN
   beforeAll(() => {
     client = new VECTOR_CAN({
-      handle: '2:2',
+      handle: '0:0',
       name: 'test',
       id: 'VECTOR_2_#CAN',
       vendor: 'vector',
@@ -46,25 +46,25 @@ describe('vector test', () => {
     })
   })
 
-//   test('write multi frame', async () => {
-//     const list = []
-//     for (let i = 0; i < 10; i++) {
-//       list.push(
-//         client.writeBase(
-//           3,
-//           {
-//             idType: CAN_ID_TYPE.STANDARD,
-//             brs: false,
-//             canfd: false,
-//             remote: false
-//           },
-//           Buffer.alloc(8, i)
-//         )
-//       )
-//     }
-//     const r = await Promise.all(list)
-//     console.log(r)
-//   })
+  //   test('write multi frame', async () => {
+  //     const list = []
+  //     for (let i = 0; i < 10; i++) {
+  //       list.push(
+  //         client.writeBase(
+  //           3,
+  //           {
+  //             idType: CAN_ID_TYPE.STANDARD,
+  //             brs: false,
+  //             canfd: false,
+  //             remote: false
+  //           },
+  //           Buffer.alloc(8, i)
+  //         )
+  //       )
+  //     }
+  //     const r = await Promise.all(list)
+  //     console.log(r)
+  //   })
   afterAll(() => {
     client.close()
   })

@@ -35,12 +35,14 @@
 // typedef XLlinStatPar XLlinStatPar;
 
 %pointer_class(unsigned int, UINT32)
+
 %pointer_class(XLportHandle, XLPORTHANDLE)
 %pointer_class(XLaccess, XLACCESS)
 // %pointer_class(XLcanFdConf, XLCANFDCONF);
 
 %array_class(XLchannelConfig, CHANNEL_CONFIG);
 %array_class(XLstatus, xlstatus);
+%array_class(unsigned char, UINT8ARRAY)
 // %array_class(XLcanFdConf, XLCANFDCONF);
 
 %inline %{

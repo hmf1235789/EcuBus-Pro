@@ -139,7 +139,6 @@ export class VECTOR_CAN extends CanBase {
     //'0:0' = 第几路总线：通道索引
     this.index = parseInt(info.handle.split(':')[1]) //通道索引： :0
 
-
     this.deviceType = parseInt(info.handle.split('_')[0]) //父类中设备类型：XL_HWTYPE_VN1611
     this.deviceIndex = parseInt(info.handle.split('_')[2]) //通道索引：_0
     const targetDevice = deviceMap.get(`${this.deviceType}_${this.index}`) //返回键对应的值，查找设备类型_设备索引
@@ -189,8 +188,9 @@ export class VECTOR_CAN extends CanBase {
     // 总线类型处理
     if (ConnectionConfigured.ChannelConfig.busParams.busType === VECTOR.XL_BUS_TYPE_CAN) {
       // CAN端口配置（完整条件分支）
-      if (info.canfd) { //CANFD使能
-          xlStatus = VECTOR.xlOpenPort(
+      if (info.canfd) {
+        //CANFD使能
+        xlStatus = VECTOR.xlOpenPort(
           PortHandle.cast(),
           ConnectionConfigured.AppName,
           ConnectionConfigured.ChannelMask,
@@ -199,7 +199,8 @@ export class VECTOR_CAN extends CanBase {
           VECTOR.XL_INTERFACE_VERSION_V4,
           VECTOR.XL_BUS_TYPE_CAN
         )
-      } else { //普通CAN
+      } else {
+        //普通CAN
         xlStatus = VECTOR.xlOpenPort(
           PortHandle.cast(),
           ConnectionConfigured.AppName,
@@ -217,24 +218,25 @@ export class VECTOR_CAN extends CanBase {
       }
 
       // CAN波特率配置（完整逻辑）
-      if (info.canfd) { //CANFD使能
+      if (info.canfd && info.bitratefd) {
+        //CANFD使能
         const fdParams = new VECTOR.XLcanFdConf()
-        fdParams.arbitrationBitRate = info.bitrate.freq, //普通波特率
-        fdParams.tseg1Abr = 6,
-        fdParams.tseg2Abr = 3,
-        fdParams.sjwAbr = 2,
-
-        fdParams.dataBitRate = info.bitratefd.freq, //CANFD波特率
-        fdParams.tseg1Dbr = 6,
-        fdParams.tseg2Dbr = 3,
-        fdParams.sjwDbr = 2
+        ;(fdParams.arbitrationBitRate = info.bitrate.freq), //普通波特率
+          (fdParams.tseg1Abr = 6),
+          (fdParams.tseg2Abr = 3),
+          (fdParams.sjwAbr = 2),
+          (fdParams.dataBitRate = info.bitratefd.freq), //CANFD波特率
+          (fdParams.tseg1Dbr = 6),
+          (fdParams.tseg2Dbr = 3),
+          (fdParams.sjwDbr = 2)
 
         xlStatus = VECTOR.xlCanFdSetConfiguration(
           PortHandle.value(),
           PermissionMask.value(),
           fdParams
         )
-      } else { //普通CAN
+      } else {
+        //普通CAN
         xlStatus = VECTOR.xlCanSetChannelBitrate(
           PortHandle.value(),
           PermissionMask.value(),
@@ -246,10 +248,7 @@ export class VECTOR_CAN extends CanBase {
       }
 
       // 通道激活（完整操作序列）
-      xlStatus = VECTOR.xlDeactivateChannel(
-        PortHandle.value(),
-        PermissionMask.value()
-      )
+      xlStatus = VECTOR.xlDeactivateChannel(PortHandle.value(), PermissionMask.value())
       xlStatus = VECTOR.xlCanSetChannelOutput(
         PortHandle.value(),
         PermissionMask.value(),
@@ -297,17 +296,13 @@ export class VECTOR_CAN extends CanBase {
       )
 
       const dlc = new Array(64).fill(8)
-      xlStatus = VECTOR.xlLinSetDLC(
-        PortHandle.cast(),
-        ConnectionConfigured.ChannelMask,
-        dlc
-      )
+      xlStatus = VECTOR.xlLinSetDLC(PortHandle.cast(), ConnectionConfigured.ChannelMask, dlc)
 
       const data = new Array(8).fill(0)
       xlStatus = VECTOR.xlLinSetSlave(
         PortHandle.cast(),
         ConnectionConfigured.ChannelMask,
-        0x3C,
+        0x3c,
         data,
         8,
         ConnectionConfigured.Checksum
@@ -327,7 +322,8 @@ export class VECTOR_CAN extends CanBase {
       // CAN测试发送（完整分支）
       const messageCount = 1
       const flcnt = 0
-      if (info.canfd) { //CANFD使能
+      if (info.canfd) {
+        //CANFD使能
         const fl = [
           messageCount,
           VECTOR.XL_CAN_TXMSG_FLAG_EDL,
@@ -335,8 +331,8 @@ export class VECTOR_CAN extends CanBase {
         ]
         const canTxEvt = new VECTOR.XLcanTxEvent()
         canTxEvt.tag = 0x0440
-
-
+        const msg = new VECTOR.XL_CAN_TX_MSG()
+        canTxEvt.msg = msg
         // canTxEvt.tag.canMsg.canId = 0x723
         // // canTxEvt.tag.msgFlags = fl[flcnt % fl.length]
         // canTxEvt.tag.msgFlags = 3
@@ -349,19 +345,18 @@ export class VECTOR_CAN extends CanBase {
         //   canTxEvt.tag.data[i] = i - 1
         // }
 
-
-        canTxEvt.tagData.canId = 0x723
+        msg.canId = 0x723
         // canTxEvt.tag.msgFlags = fl[flcnt % fl.length]
-        canTxEvt.tagData.msgFlags = 3
-        canTxEvt.tagData.dlc = 8
+        msg.msgFlags = 3
+        msg.dlc = 8
 
-        if (canTxEvt.tagData.msgFlags & VECTOR.XL_CAN_TXMSG_FLAG_EDL) {
-          canTxEvt.tagData.dlc = 15
+        if (msg.msgFlags & VECTOR.XL_CAN_TXMSG_FLAG_EDL) {
+          msg.dlc = 15
         }
+        const dataPtr = VECTOR.UINT8ARRAY.frompointer(msg.data)
         for (let i = 1; i < 64; i++) {
-          // canTxEvt.tagData.data[i] = i - 1
+          dataPtr.setitem(i, i - 1)
         }
-
 
         // const can_tx_msg = new VECTOR.XL_CAN_TX_MSG()
         // can_tx_msg.canId = 0x723
@@ -377,8 +372,8 @@ export class VECTOR_CAN extends CanBase {
         // }
         // canTxEvt.canMsg = can_tx_msg
 
-
         const cntSent = new VECTOR.UINT32()
+        cntSent.assign(0)
         // cntSent.value = 1
         xlStatus = VECTOR.xlCanTransmitEx(
           PortHandle.value(),
@@ -389,14 +384,17 @@ export class VECTOR_CAN extends CanBase {
         )
         if (xlStatus !== VECTOR.XL_SUCCESS) {
           throw new Error('CanTransmitEx failed')
+        } else {
+          console.log('CanTransmitEx success', cntSent.value())
         }
-      } else { //普通CAN
+      } else {
+        //普通CAN
         const framedata = new VECTOR.XLevent()
-        framedata.tag = VECTOR.XL_TRANSMIT_MSG,
-        framedata.tag.tagData.msg.id = 0x722,
-        framedata.tag.tagData.msg.dlc = 8,
-        framedata.tag.tagData.msg.flags = 0,
-        framedata.tag.tagData.msg.data = [1, 2, 3, 4, 5, 6, 7, 8]
+        ;(framedata.tag = VECTOR.XL_TRANSMIT_MSG),
+          (framedata.tag.tagData.msg.id = 0x722),
+          (framedata.tag.tagData.msg.dlc = 8),
+          (framedata.tag.tagData.msg.flags = 0),
+          (framedata.tag.tagData.msg.data = [1, 2, 3, 4, 5, 6, 7, 8])
         xlStatus = VECTOR.xlCanTransmit(
           PortHandle.cast(),
           ConnectionConfigured.ChannelMask,
@@ -407,27 +405,17 @@ export class VECTOR_CAN extends CanBase {
     } else {
       // LIN测试发送（完整逻辑）
       const framedata = new VECTOR.s_xl_lin_msg()
-      framedata.id = 0x3c,
-      framedata.dlc = 8,
-      framedata.data = [0x08, 0x02, 0x3e, 0x00, 0xff, 0xff, 0xff, 0xff]
-      VECTOR.xlLinSendRequest(
-        PortHandle.cast(),
-        ConnectionConfigured.ChannelMask,
-        framedata.id,
-        0
-      )
+      ;(framedata.id = 0x3c),
+        (framedata.dlc = 8),
+        (framedata.data = [0x08, 0x02, 0x3e, 0x00, 0xff, 0xff, 0xff, 0xff])
+      VECTOR.xlLinSendRequest(PortHandle.cast(), ConnectionConfigured.ChannelMask, framedata.id, 0)
       // await Sleep(10)
 
       const pEventCountSend = 1
       const LinMsgXLeventSend = new VECTOR.XLevent()
-      LinMsgXLeventSend.tag = 0,
-      LinMsgXLeventSend.tagData = { msg: { id: 0, dlc: 0, flags: 0, data: [] } }
-      VECTOR.xlLinSendRequest(
-        PortHandle.cast(),
-        ConnectionConfigured.ChannelMask,
-        0x3d,
-        0
-      )
+      ;(LinMsgXLeventSend.tag = 0),
+        (LinMsgXLeventSend.tagData = { msg: { id: 0, dlc: 0, flags: 0, data: [] } })
+      VECTOR.xlLinSendRequest(PortHandle.cast(), ConnectionConfigured.ChannelMask, 0x3d, 0)
       VECTOR.xlReceive(PortHandle.cast(), pEventCountSend, LinMsgXLeventSend)
     }
 
@@ -651,7 +639,8 @@ export class VECTOR_CAN extends CanBase {
       console.log('valid channle count', deviceHandle.channelCount)
       if (ret === VECTOR.XL_SUCCESS) {
         const channles = VECTOR.CHANNEL_CONFIG.frompointer(deviceHandle.channel) //通道配置
-        for (let num = 0; num < deviceHandle.channelCount; num++) { //设备通道循环索引
+        for (let num = 0; num < deviceHandle.channelCount; num++) {
+          //设备通道循环索引
           const channel = channles.getitem(num) //通道数组索引
           const channelName = channel.name.replace(/\0/g, '') //通道名称
           let busType = ''
