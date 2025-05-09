@@ -15,36 +15,37 @@ import { CanTp } from 'src/main/docan/cantp'
 const dllPath = path.join(__dirname, '../../resources/lib')
 VECTOR_CAN.loadDllPath(dllPath)
 
-test('vector devices', () => {
-  const devices = VECTOR_CAN.getValidDevices()
-  console.log(devices)
-})
+// test('vector devices', () => {
+//   const devices = VECTOR_CAN.getValidDevices()
+//   console.log(devices)
+// })
 
-// describe('kvaser test', () => {
-//   let client!: VECTOR_CAN
-//   beforeAll(() => {
-//     client = new VECTOR_CAN({
-//       handle: 0,
-//       name: 'test',
-//       id: 'kvaser',
-//       vendor: 'kvaser',
-//       canfd: false,
-//       bitrate: {
-//         freq: 250000,
-//         preScaler: 2,
-//         timeSeg1: 68,
-//         timeSeg2: 11,
-//         sjw: 11
-//       },
-//       bitratefd: {
-//         freq: 1000000,
-//         preScaler: 1,
-//         timeSeg1: 20,
-//         timeSeg2: 19,
-//         sjw: 19
-//       }
-//     })
-//   })
+describe('vector test', () => {
+  let client!: VECTOR_CAN
+  beforeAll(() => {
+    client = new VECTOR_CAN({
+      handle: '2:2',
+      name: 'test',
+      id: 'VECTOR_2_#CAN',
+      vendor: 'vector',
+      canfd: true, //false true
+      bitrate: {
+        freq: 500000,
+        preScaler: 2,
+        timeSeg1: 68,
+        timeSeg2: 11,
+        sjw: 11
+      },
+      bitratefd: {
+        freq: 2000000,
+        preScaler: 1,
+        timeSeg1: 20,
+        timeSeg2: 19,
+        sjw: 19
+      }
+    })
+  })
+
 //   test('write multi frame', async () => {
 //     const list = []
 //     for (let i = 0; i < 10; i++) {
@@ -64,7 +65,7 @@ test('vector devices', () => {
 //     const r = await Promise.all(list)
 //     console.log(r)
 //   })
-//   afterAll(() => {
-//     client.close()
-//   })
-// })
+  afterAll(() => {
+    client.close()
+  })
+})

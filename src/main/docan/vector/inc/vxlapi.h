@@ -1098,7 +1098,7 @@ typedef short XLstatus;
 
 #define CANFD_CONFOPT_NO_ISO                       0x08   // configuration option CANFD-BOSCH
 
-typedef struct { 
+typedef struct xlcanfdconf{ 
   unsigned int  arbitrationBitRate;
   unsigned int  sjwAbr;              // CAN bus timing for nominal / arbitration bit rate
   unsigned int  tseg1Abr;
@@ -4026,7 +4026,7 @@ typedef struct s_xl_most150_stream_get_info {
 // CAN / CAN-FD tx event definitions
 ////////////////////////////////////////////////////////////////////////
 
-typedef struct {
+typedef struct xl_can_tx_msg{
   unsigned int       canId;
   unsigned int       msgFlags;
   unsigned char      dlc;
@@ -4034,13 +4034,13 @@ typedef struct {
   unsigned char      data[XL_CAN_MAX_DATA_LEN];
 } XL_CAN_TX_MSG;
 
-typedef struct {
+typedef struct xlcantxevent{
   unsigned short     tag;              //  2 - type of the event
   unsigned short     transId;          //  2
   unsigned char      channelIndex;     //  1 - internal has to be 0
   unsigned char      reserved[3];      //  3 - has to be zero 
 
-  union {
+  union tagdata{
     XL_CAN_TX_MSG   canMsg;
   } tagData;
 } XLcanTxEvent;
