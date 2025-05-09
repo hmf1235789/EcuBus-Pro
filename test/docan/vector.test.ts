@@ -24,7 +24,7 @@ describe('vector test', () => {
   let client!: VECTOR_CAN
   beforeAll(() => {
     client = new VECTOR_CAN({
-      handle: '0:0',
+      handle: '2:2',
       name: 'test',
       id: 'VECTOR_2_#CAN',
       vendor: 'vector',
@@ -32,6 +32,7 @@ describe('vector test', () => {
       bitrate: {
         freq: 500000,
         preScaler: 2,
+
         timeSeg1: 68,
         timeSeg2: 11,
         sjw: 11

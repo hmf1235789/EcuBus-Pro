@@ -128,6 +128,7 @@ export class VECTOR_CAN extends CanBase {
     this.info = info
 
     const devices = VECTOR_CAN.getValidDevices() //方法，获取设备列表
+    console.log(devices)
     const target = devices.find((item) => item.handle == info.handle) //获取设备列表中的句柄 == 下拉框中选择的句柄
     if (!target) {
       throw new Error('Invalid handle') //无效句柄，无效设备
@@ -331,8 +332,10 @@ export class VECTOR_CAN extends CanBase {
         ]
         const canTxEvt = new VECTOR.XLcanTxEvent()
         canTxEvt.tag = 0x0440
-        const msg = new VECTOR.XL_CAN_TX_MSG()
-        canTxEvt.msg = msg
+        // const tagData=VECTOR.XL_CAN_TX_MSG_UNION.frompointer(canTxEvt.tagData)
+        // const msg = new VECTOR.XL_CAN_TX_MSG()
+        // tagData.canMsg = msg
+
         // canTxEvt.tag.canMsg.canId = 0x723
         // // canTxEvt.tag.msgFlags = fl[flcnt % fl.length]
         // canTxEvt.tag.msgFlags = 3
@@ -345,15 +348,15 @@ export class VECTOR_CAN extends CanBase {
         //   canTxEvt.tag.data[i] = i - 1
         // }
 
-        msg.canId = 0x723
+        canTxEvt.tagData.canMsg.canId = 0x723
         // canTxEvt.tag.msgFlags = fl[flcnt % fl.length]
-        msg.msgFlags = 3
-        msg.dlc = 8
+        canTxEvt.tagData.canMsg.msgFlags = 0
+        canTxEvt.tagData.canMsg.dlc = 8
 
-        if (msg.msgFlags & VECTOR.XL_CAN_TXMSG_FLAG_EDL) {
-          msg.dlc = 15
+        if (canTxEvt.tagData.canMsg.msgFlags & VECTOR.XL_CAN_TXMSG_FLAG_EDL) {
+          canTxEvt.tagData.canMsg.dlc = 15
         }
-        const dataPtr = VECTOR.UINT8ARRAY.frompointer(msg.data)
+        const dataPtr = VECTOR.UINT8ARRAY.frompointer(canTxEvt.tagData.canMsg.data)
         for (let i = 1; i < 64; i++) {
           dataPtr.setitem(i, i - 1)
         }
@@ -367,7 +370,9 @@ export class VECTOR_CAN extends CanBase {
         // if (can_tx_msg.msgFlags & VECTOR.XL_CAN_TXMSG_FLAG_EDL) {
         //   can_tx_msg.dlc = 15
         // }
-        // for (let i = 1; i < 64; i++) {
+        // for (let i = 1; i < 64; i++)
+
+        // {
         //   can_tx_msg.data[i] = i - 1
         // }
         // canTxEvt.canMsg = can_tx_msg
@@ -382,8 +387,9 @@ export class VECTOR_CAN extends CanBase {
           cntSent.cast(),
           canTxEvt
         )
+        console.log('status', xlStatus, cntSent.value())
         if (xlStatus !== VECTOR.XL_SUCCESS) {
-          throw new Error('CanTransmitEx failed')
+          // throw new Error('CanTransmitEx failed')
         } else {
           console.log('CanTransmitEx success', cntSent.value())
         }

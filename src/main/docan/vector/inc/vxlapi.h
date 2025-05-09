@@ -4034,15 +4034,19 @@ typedef struct xl_can_tx_msg{
   unsigned char      data[XL_CAN_MAX_DATA_LEN];
 } XL_CAN_TX_MSG;
 
+
+typedef union {
+  XL_CAN_TX_MSG   canMsg;
+} XL_CAN_TX_MSG_UNION;
+
+
 typedef struct xlcantxevent{
   unsigned short     tag;              //  2 - type of the event
   unsigned short     transId;          //  2
   unsigned char      channelIndex;     //  1 - internal has to be 0
   unsigned char      reserved[3];      //  3 - has to be zero 
 
-  union tagdata{
-    XL_CAN_TX_MSG   canMsg;
-  } tagData;
+  XL_CAN_TX_MSG_UNION tagData;
 } XLcanTxEvent;
 
 
