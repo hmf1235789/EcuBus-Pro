@@ -10,6 +10,10 @@ Feel free to contact us for more details on sponsorship.
 
 ## Payment Methods
 
+### Github Sponsor
+
+<iframe src="https://github.com/sponsors/frankie-zeng/card" title="Sponsor frankie-zeng" height="225" width="600" style="border: 0;"></iframe>
+
 ### Paypal
 
 ![alt text](paypal.png)
