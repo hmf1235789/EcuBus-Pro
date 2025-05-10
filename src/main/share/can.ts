@@ -21,6 +21,7 @@ export interface CanBaseInfo {
   canfd: boolean
   bitrate: CanBitrate
   bitratefd?: CanBitrate
+  silent?: boolean
   database?: string
   toomossRes?: boolean
   zlgRes?: boolean

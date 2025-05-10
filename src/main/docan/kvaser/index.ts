@@ -98,7 +98,10 @@ export class KVASER_CAN extends CanBase {
       throw new Error(err2str(ret))
     }
 
-    ret = KV.canSetBusOutputControl(this.handle, KV.canDRIVER_NORMAL)
+    ret = KV.canSetBusOutputControl(
+      this.handle,
+      info.silent ? KV.canDRIVER_SILENT : KV.canDRIVER_NORMAL
+    )
     if (ret != 0) {
       throw new Error(err2str(ret))
     }

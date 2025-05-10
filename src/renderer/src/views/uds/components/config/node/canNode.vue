@@ -77,6 +77,29 @@
         <el-option label="Disable" :value="false" />
       </el-select>
     </el-form-item>
+    <el-form-item
+      v-else-if="props.vendor == 'kvaser'"
+      label="Silent Mode"
+      prop="silent"
+      placeholder="Disable"
+    >
+      <!-- add tips, silent mode will not send any message -->
+      <template #label="{ label }">
+        <span class="vm">
+          <span style="margin-right: 2px">{{ label }}</span>
+          <el-tooltip>
+            <template #content>
+              Silent mode will not send any message, only receive message
+            </template>
+
+            <el-icon>
+              <InfoFilled />
+            </el-icon>
+          </el-tooltip>
+        </span>
+      </template>
+      <el-checkbox v-model="data.silent" />
+    </el-form-item>
     <el-divider content-position="left"> Can Parameters </el-divider>
     <el-form-item label-width="0">
       <el-col :span="12">
