@@ -16,10 +16,12 @@
               <span
                 :class="{
                   isTop: node.level === 1,
-
+                  vm: true,
                   treeLabel: true
                 }"
-                >{{ node.label }}
+              >
+                <img v-if="data.vendor == 'kvaser' && node.level == 1" src="@r/assets/kvaser.jpg" />
+                <span>{{ node.label }}</span>
               </span>
               <el-button
                 v-if="data.append"
@@ -544,5 +546,17 @@ onMounted(() => {
   text-overflow: ellipsis;
   /* 使用省略号表示超出部分 */
   width: v-bind(leftWidth - 100 + 'px') !important;
+}
+
+.vm {
+  display: flex;
+  align-items: center;
+  /* 垂直居中对齐 */
+  gap: 4px;
+}
+
+.vm img {
+  width: 16px;
+  height: 16px;
 }
 </style>
