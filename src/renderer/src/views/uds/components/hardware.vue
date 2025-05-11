@@ -20,8 +20,12 @@
                   treeLabel: true
                 }"
               >
-                <img v-if="data.vendor == 'kvaser' && node.level == 1" src="@r/assets/kvaser.jpg" />
-                <span>{{ node.label }}</span>
+                <img
+                  v-if="data.vendor == 'kvaser' && node.level == 1"
+                  class="logo"
+                  src="@r/assets/kvaser.svg"
+                />
+                <span v-else>{{ node.label }}</span>
               </span>
               <el-button
                 v-if="data.append"
@@ -53,6 +57,7 @@
         <canNodeVue
           v-if="activeTree.type == 'can'"
           v-model="dataModify"
+          :height="h"
           :index="activeTree.id"
           :vendor="activeTree.vendor"
           @change="nodeChange"
@@ -548,15 +553,12 @@ onMounted(() => {
   width: v-bind(leftWidth - 100 + 'px') !important;
 }
 
+.logo {
+  height: 11px;
+}
+
 .vm {
   display: flex;
   align-items: center;
-  /* 垂直居中对齐 */
-  gap: 4px;
-}
-
-.vm img {
-  width: 16px;
-  height: 16px;
 }
 </style>

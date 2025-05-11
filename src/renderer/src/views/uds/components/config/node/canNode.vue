@@ -101,10 +101,48 @@
       <el-checkbox v-model="data.silent" />
     </el-form-item>
     <el-divider content-position="left"> Can Parameters </el-divider>
+
     <el-form-item label-width="0">
       <el-col :span="12">
         <el-form-item label="CAN FD Enable" prop="canfd">
           <el-checkbox v-model="data.canfd" @change="canFdChange" />
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item
+          v-if="configInfo[props.vendor].clock"
+          label="Clock Freq (MHz)"
+          prop="bitrate.clock"
+        >
+          <template #label="{ label }">
+            <span class="vm">
+              <span style="margin-right: 2px">{{ label }}</span>
+              <el-tooltip>
+                <template #content>
+                  If you can't find the frequency you need, you can input it manually
+                </template>
+
+                <el-icon>
+                  <InfoFilled />
+                </el-icon>
+              </el-tooltip>
+            </span>
+          </template>
+          <el-select
+            v-model="data.bitrate.clock"
+            size="small"
+            allow-create
+            filterable
+            style="width: 300px"
+            @change="clockChange"
+          >
+            <el-option
+              v-for="item in clockList"
+              :key="item.clock"
+              :label="item.name"
+              :value="item.clock"
+            />
+          </el-select>
         </el-form-item>
       </el-col>
       <!-- <el-col :span="12">
@@ -145,7 +183,13 @@
     <el-form-item label-width="0" prop="bitrate">
       <vxe-grid v-bind="gridOptions" style="width: 100%">
         <template #edit_freq="{ row }">
-          <el-input v-model.number="row.freq" />
+          <el-input v-model.number="row.freq" style="width: calc(100% - 40px)" />
+          <el-tooltip effect="light" placement="bottom">
+            <template #content> Bit Timing Calculator </template>
+            <el-button type="primary" size="small" plain @click="showCalculator(row)">
+              <Icon :icon="tableIcon" />
+            </el-button>
+          </el-tooltip>
         </template>
         <template #edit_clock="{ row, rowIndex }">
           <el-select v-if="rowIndex == 0" v-model="row.clock" size="small" allow-create filterable>
@@ -203,6 +247,14 @@
       </div>
     </el-form-item>
   </el-form>
+  <BitTimingCalculator
+    v-if="calculatorVisible"
+    v-model="calculatorVisible"
+    :height="height - 100"
+    :freq="currentRow?.freq || 0"
+    :clock="Number(data.bitrate.clock || 0)"
+    @result="handleCalculatorResult"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -224,8 +276,20 @@ import { InfoFilled } from '@element-plus/icons-vue'
 import { assign, cloneDeep } from 'lodash'
 import { useDataStore } from '@r/stores/data'
 import { VxeGridProps, VxeGrid } from 'vxe-table'
+import { Icon } from '@iconify/vue'
+import tableIcon from '@iconify/icons-mdi/table'
+import BitTimingCalculator from '@r/components/BitTimingCalculator.vue'
 
+const props = defineProps<{
+  index: string
+  vendor: CanVendor
+  height: number
+}>()
+const height = toRef(props, 'height')
 const ruleFormRef = ref<FormInstance>()
+onMounted(() => {
+  ruleFormRef.value?.validate()
+})
 const devices = useDataStore()
 const globalStart = toRef(window, 'globalStart')
 const data = ref<CanBaseInfo>({
@@ -245,6 +309,12 @@ const data = ref<CanBaseInfo>({
     clock: '80'
   }
 })
+
+if (props.vendor == 'kvaser') {
+  data.value.bitrate.clock = '16'
+  data.value.bitrate.preScaler = 2
+}
+
 const tableList = computed(() => {
   const list = [data.value.bitrate]
   if (data.value.canfd && data.value.bitratefd) {
@@ -253,6 +323,13 @@ const tableList = computed(() => {
   return list
 })
 
+const clockChange = (value: string) => {
+  //form validate
+  ruleFormRef.value?.validateField('bitrate')
+  if (data.value.canfd) {
+    ruleFormRef.value?.validateField('bitratefd')
+  }
+}
 const configInfo: Record<CanVendor, any> = {
   zlg: {
     clock: false,
@@ -315,18 +392,19 @@ const gridOptions = computed(() => {
       autoClear: true
     },
     columns: [
-      {
-        field: 'clock',
-        title: 'Clock',
-        minWidth: 180,
-        visible: configInfo[props.vendor].clock,
-        editRender: {},
-        slots: { edit: 'edit_clock', default: 'default_clock' }
-      },
+      // {
+      //   field: 'clock',
+      //   title: 'Clock',
+      //   minWidth: 180,
+      //   visible: configInfo[props.vendor].clock,
+      //   editRender: {},
+      //   slots: { edit: 'edit_clock', default: 'default_clock' }
+      // },
       {
         field: 'freq',
-        title: 'Frequency',
+        title: 'Frequency (Hz)',
         minWidth: 180,
+        fixed: 'left',
         visible: configInfo[props.vendor].freq,
         editRender: {},
         slots: { edit: 'edit_freq' }
@@ -334,7 +412,7 @@ const gridOptions = computed(() => {
       {
         field: 'timeSeg1',
         title: 'TSEG1',
-        width: 180,
+        width: 150,
         visible: configInfo[props.vendor].timeSeg1,
         editRender: {},
         slots: { edit: 'edit_timeSeg1' }
@@ -342,7 +420,7 @@ const gridOptions = computed(() => {
       {
         field: 'timeSeg2',
         title: 'TSEG2',
-        width: 180,
+        width: 150,
         visible: configInfo[props.vendor].timeSeg2,
         editRender: {},
         slots: { edit: 'edit_timeSeg2' }
@@ -350,7 +428,7 @@ const gridOptions = computed(() => {
       {
         field: 'sjw',
         title: 'SJW',
-        width: 180,
+        width: 150,
         visible: configInfo[props.vendor].sjw,
         editRender: {},
         slots: { edit: 'edit_sjw' }
@@ -358,7 +436,7 @@ const gridOptions = computed(() => {
       {
         field: 'preScaler',
         title: 'Pre Scaler',
-        width: 180,
+        width: 150,
         visible: configInfo[props.vendor].preScaler,
         editRender: {},
         slots: { edit: 'edit_preScaler' }
@@ -375,7 +453,8 @@ const gridOptions = computed(() => {
         field: 'baudrate',
         title: 'Baudrate/Sample Point',
         align: 'center',
-        minWidth: 250,
+        fixed: 'right',
+        minWidth: 200,
         slots: { default: 'default_baudrate' }
       }
     ],
@@ -396,8 +475,9 @@ const clockList = computed(() => {
     ]
   } else if (props.vendor == 'kvaser') {
     return [
-      { clock: '80', name: '80' },
-      { clock: '40', name: '40' }
+      { clock: '16', name: '16' },
+      { clock: '40', name: '40' },
+      { clock: '80', name: '80' }
     ]
   } else if (props.vendor == 'toomoss') {
     return [{ clock: '40', name: '40' }]
@@ -592,6 +672,14 @@ const rules: FormRules<CanBaseInfo> = {
       trigger: 'change'
     }
   ],
+  'bitrate.clock': {
+    required: configInfo[props.vendor].clock,
+    type: 'number',
+    message: 'Clock must be a number',
+    transform(value: string) {
+      return Number(value)
+    }
+  },
   bitrate: [
     {
       validator: bitrateCheck
@@ -603,11 +691,6 @@ const rules: FormRules<CanBaseInfo> = {
     }
   ]
 }
-
-const props = defineProps<{
-  index: string
-  vendor: CanVendor
-}>()
 
 const editIndex = ref(props.index)
 
@@ -664,6 +747,25 @@ onBeforeMount(() => {
 onUnmounted(() => {
   watcher()
 })
+
+const showCalculator = (row: CanBitrate) => {
+  calculatorVisible.value = true
+  currentRow.value = row
+}
+
+const calculatorVisible = ref(false)
+const currentRow = ref<CanBitrate | null>(null)
+
+const handleCalculatorResult = (result: any) => {
+  if (currentRow.value) {
+    console.log(result)
+    // currentRow.value.timeSeg1 = result.t1
+    // currentRow.value.timeSeg2 = result.t2
+    // currentRow.value.sjw = result.sjw
+    // currentRow.value.preScaler = result.presc
+    // currentRow.value.freq = result.bitRate * 1000
+  }
+}
 </script>
 <style scoped>
 .hardware {

@@ -419,6 +419,11 @@ export class KVASER_CAN extends CanBase {
   ) {
     return new Promise<number>(
       (resolve: (value: number) => void, reject: (reason: CanError) => void) => {
+        if (this.info.silent) {
+          reject(new CanError(CAN_ERROR_ID.CAN_DRIVER_SILENT, msgType))
+          return
+        }
+
         const item = this.pendingBaseCmds.get(cmdId)
         if (item) {
           item.push({ resolve, reject, data, msgType, extra })

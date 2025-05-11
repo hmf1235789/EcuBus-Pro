@@ -163,7 +163,8 @@ export enum CAN_ERROR_ID {
   CAN_BUS_BUSY,
   CAN_BUS_CLOSED,
   CAN_INTERNAL_ERROR,
-  CAN_PARAM_ERROR
+  CAN_PARAM_ERROR,
+  CAN_DRIVER_SILENT
 }
 
 const canErrorMap: Record<CAN_ERROR_ID, string> = {
@@ -172,7 +173,8 @@ const canErrorMap: Record<CAN_ERROR_ID, string> = {
   [CAN_ERROR_ID.CAN_BUS_BUSY]: 'bus busy',
   [CAN_ERROR_ID.CAN_INTERNAL_ERROR]: 'dll lib internal error',
   [CAN_ERROR_ID.CAN_BUS_CLOSED]: 'bus closed',
-  [CAN_ERROR_ID.CAN_PARAM_ERROR]: 'param error'
+  [CAN_ERROR_ID.CAN_PARAM_ERROR]: 'param error',
+  [CAN_ERROR_ID.CAN_DRIVER_SILENT]: 'driver silent'
 }
 
 export function getTsUs() {
