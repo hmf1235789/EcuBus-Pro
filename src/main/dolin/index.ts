@@ -25,6 +25,7 @@ import { findService } from '../docan/uds'
 import { NodeItem } from 'src/preload/data'
 import { getJsPath } from '../util'
 import { ToomossLin } from './toomoss'
+import { KvaserLin } from './kvaser'
 
 const libPath = path.dirname(dllLib)
 PeakLin.loadDllPath(libPath)
@@ -38,6 +39,8 @@ export function openLinDevice(device: LinBaseInfo) {
     linBase = new PeakLin(device)
   } else if (device.vendor == 'toomoss') {
     linBase = new ToomossLin(device)
+  } else if (device.vendor == 'kvaser') {
+    linBase = new KvaserLin(device)
   }
 
   return linBase
@@ -50,6 +53,8 @@ export function getLinVersion(vendor: string) {
     return PeakLin.getLibVersion()
   } else if (vendor === 'TOOMOSS') {
     return ToomossLin.getLibVersion()
+  } else if (vendor === 'KVASER') {
+    return KvaserLin.getLibVersion()
   }
   // #v-endif
   else {
@@ -64,6 +69,8 @@ export function getLinDevices(vendor: string) {
     return PeakLin.getValidDevices()
   } else if (vendor === 'TOOMOSS') {
     return ToomossLin.getValidDevices()
+  } else if (vendor === 'KVASER') {
+    return KvaserLin.getValidDevices()
   }
   // #v-endif
   else {

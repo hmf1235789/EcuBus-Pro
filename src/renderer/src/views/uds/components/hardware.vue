@@ -16,10 +16,16 @@
               <span
                 :class="{
                   isTop: node.level === 1,
-
+                  vm: true,
                   treeLabel: true
                 }"
-                >{{ node.label }}
+              >
+                <img
+                  v-if="data.vendor == 'kvaser' && node.level == 1"
+                  class="logo"
+                  src="@r/assets/kvaser.svg"
+                />
+                <span v-else>{{ node.label }}</span>
               </span>
               <el-button
                 v-if="data.append"
@@ -51,6 +57,7 @@
         <canNodeVue
           v-if="activeTree.type == 'can'"
           v-model="dataModify"
+          :height="h"
           :index="activeTree.id"
           :vendor="activeTree.vendor"
           @change="nodeChange"
@@ -275,7 +282,7 @@ function addSubTree(vendor: CanVendor, node: tree) {
     type: 'lin',
     children: []
   }
-  if (vendor == 'peak' || vendor == 'toomoss') {
+  if (vendor == 'peak' || vendor == 'toomoss' || vendor == 'kvaser') {
     node.children?.push(linTree)
   }
   for (const [key, value] of Object.entries(devices.devices)) {
@@ -544,5 +551,14 @@ onMounted(() => {
   text-overflow: ellipsis;
   /* 使用省略号表示超出部分 */
   width: v-bind(leftWidth - 100 + 'px') !important;
+}
+
+.logo {
+  height: 11px;
+}
+
+.vm {
+  display: flex;
+  align-items: center;
 }
 </style>
