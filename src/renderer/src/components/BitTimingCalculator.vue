@@ -21,12 +21,18 @@
       @current-change="handleCurrentChange"
     >
       <el-table-column type="index" width="40" label="#" :resizable="false" align="center" />
-      <el-table-column prop="sp" label="Sample Point (%)" width="140" sortable :resizable="false" />
+      <el-table-column
+        prop="sp"
+        label="Sample Point (%)"
+        min-width="140"
+        align="center"
+        sortable
+        :resizable="false"
+      />
+      <el-table-column prop="t1" label="TSEG1" min-width="100" sortable :resizable="false" />
+      <el-table-column prop="t2" label="TSEG2" width="100" sortable :resizable="false" />
+
       <el-table-column prop="presc" label="Prescaler" width="100" sortable :resizable="false" />
-      <el-table-column prop="t1" label="TSEG1" width="90" sortable :resizable="false" />
-      <el-table-column prop="t2" label="TSEG2" width="90" sortable :resizable="false" />
-      <el-table-column prop="tq" label="tq (ns)" :resizable="false" />
-      <el-table-column prop="btq" label="Nq" :resizable="false" />
     </el-table>
 
     <template #footer>
@@ -42,28 +48,26 @@
 
 <script lang="ts" setup>
 import { ref, defineModel, defineEmits, onMounted } from 'vue'
+import { CanVendor } from 'nodeCan/can'
 
 interface CalculatorResult {
   t1: number
   t2: number
-  btq: number
   sp: number
   sjw: number
   presc: number
-  tq: number
 }
 
 const props = defineProps<{
   freq: number
   clock: number
   height: number
+  vendor: CanVendor
+  ability: Record<string, any>
 }>()
 const dialogVisible = defineModel<boolean>('modelValue')
 const emit = defineEmits<{
-  (
-    e: 'result',
-    result: { t1: number; t2: number; sjw: number; presc: number; bitRate: number }
-  ): void
+  (e: 'result', result: { t1: number; t2: number; sjw: number; presc: number }): void
 }>()
 
 const form = ref({
@@ -78,43 +82,54 @@ function calculate() {
   const clock = form.value.clockFreq * 1000000
   const bitrate = form.value.bitRate * 1000
 
-  let matches = 0
-  let exactMatches = 0
   const newResults: CalculatorResult[] = []
 
-  const tmp = clock / bitrate / 2
-  const maxPrescaler = 64
+  // Get limits from ability
+  const prescalerMin = props.ability.preScaler?.min || 1
+  const prescalerMax = props.ability.preScaler?.max || 64
+  const tseg1Min = props.ability.tsg1?.min || 2
+  const tseg1Max = props.ability.tsg1?.max || 256
+  const tseg2Min = props.ability.tsg2?.min || 1
+  const tseg2Max = props.ability.tsg2?.max || 128
 
-  for (let presc = 1; presc <= maxPrescaler; presc++) {
-    const tmp2 = tmp / presc
-    const btq = Math.round(tmp2)
-    if (btq >= 4 && btq <= 32) {
-      const err = -(tmp2 / btq - 1)
+  // Calculate target number of time quanta
+  const targetTq = clock / bitrate
 
-      for (let t1 = 3; t1 < 18; t1++) {
-        const t2 = btq - t1
-        if (t1 < t2 || t2 > 8 || t2 < 2) continue
-        for (let sjw = 1; sjw <= 4; sjw++) {
-          const tq = Math.round((1e9 / clock) * presc)
-          const result: CalculatorResult = {
-            t1,
-            t2,
-            btq,
-            sp: Math.round((t1 / btq) * 10000) / 100,
-            sjw,
-            presc,
-            tq
-          }
+  // Enumerate all possible combinations
+  for (let presc = prescalerMin; presc <= prescalerMax; presc++) {
+    // Skip if clock/prescaler is not integer
+    if (clock % presc !== 0) continue
 
-          newResults.push(result)
-          matches++
-          if (err === 0) exactMatches++
-        }
-      }
+    // Calculate total time quanta for this prescaler
+    const totalTq = Math.round(targetTq / presc)
+
+    // Enumerate all possible TSEG1 values
+    for (let t1 = tseg1Min; t1 <= tseg1Max; t1++) {
+      // Calculate TSEG2 based on total time quanta
+      const t2 = totalTq - t1 - 1 // Subtract 1 for sync segment
+
+      // Skip if TSEG2 is outside valid range
+      if (t2 < tseg2Min || t2 > tseg2Max) continue
+
+      // Skip if TSEG1 is less than TSEG2
+      if (t1 < t2) continue
+
+      // Calculate sample point percentage using the correct formula
+      const sp = Math.round(((t1 + 1) / (t1 + t2 + 1)) * 10000) / 100
+
+      // Add valid combination to results
+      newResults.push({
+        t1,
+        t2,
+        sp,
+        sjw: 1, // Default SJW to 1 as per requirements
+        presc
+      })
     }
   }
 
-  results.value = newResults
+  // Sort results by sp
+  results.value = newResults.sort((a, b) => a.sp - b.sp)
 }
 
 function handleCurrentChange(row: CalculatorResult) {
@@ -127,8 +142,7 @@ function onOk() {
       t1: selectedRow.value.t1,
       t2: selectedRow.value.t2,
       sjw: selectedRow.value.sjw,
-      presc: selectedRow.value.presc,
-      bitRate: selectedRow.value.btq * 1000
+      presc: selectedRow.value.presc
     })
     dialogVisible.value = false
   }
