@@ -57,6 +57,10 @@ export default withMermaid({
       { name: 'google-site-verification', content: '8p_3SCSQGHvWlpmik3zhY902wyQ0QwxQsHaBJocrxfA' }
     ],
     [
+      'meta',
+      { name: 'google-adsense-account', content: 'ca-pub-9034244817339073' }
+    ],
+    [
       'script',
       {},
       `
