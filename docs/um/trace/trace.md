@@ -7,7 +7,18 @@ The Trace window provides an interface for viewing and exporting data. Users can
 >[!INFO]
 > Currently, Trace has a maximum storage capacity of 50,000 entries. When this limit is exceeded, the oldest data will be automatically deleted.
 
-## Supported Receive Filters
+## Filter
+
+### Filter By Device
+The Trace window supports filtering by device, signal name, and signal value.
+> [!NOTE]
+> Selecting all devices or no devices has the same effect.
+
+![alt text](image-3.png)
+
+## Filter By Message Type
+
+![alt text](image-4.png)
 
 * CAN - Receive CAN-related data
 * LIN - Receive LIN-related data

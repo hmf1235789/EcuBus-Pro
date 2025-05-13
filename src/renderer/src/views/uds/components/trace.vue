@@ -39,7 +39,7 @@
         </span>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-checkbox-group v-model="checkList" size="small" style="margin: 10px">
+            <el-checkbox-group v-model="checkList" size="small" style="margin: 10px; width: 150px">
               <el-checkbox
                 v-for="item of LogFilter"
                 :key="item.v"
