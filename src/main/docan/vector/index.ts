@@ -24,40 +24,19 @@ interface CANFrame {
   isEcho: boolean
 }
 
-const gDeviceParameters = {
-  tool: '',
-  ch: '',
-  index: 0,
-  CANFD: false,
-  CANOnCANFD: false,
-  br: 0,
-  type: 0,
-  req_phy_id: 0,
-  resp_id: 0
-}
-
 interface stVectorConnection {
-  RxThreadRun: boolean
   AppName: string
-  PortHandle: number
-  DrvConfig: any
   ChannelConfig: any
   ChannelMask: number
-  PermissionMask: number
-  HandleMsgEvent: number
-  LinStatPar: any
-  Checksum: number
 }
+
+let gitxlStatus = VECTOR.XL_SUCCESS
+const PortHandle = new VECTOR.XLPORTHANDLE()
+const PermissionMask = new VECTOR.XLACCESS()
 
 // 设备配置结构体
 const ConnectionConfigured: stVectorConnection = {
-  RxThreadRun: false,
   AppName: 'xlCANdemo'.padEnd(VECTOR.XL_MAX_APPNAME + 1, '\0'),
-  PortHandle: VECTOR.XL_INVALID_PORTHANDLE,
-  DrvConfig: {
-    channelCount: 0,
-    channel: []
-  },
   ChannelConfig: {
     hwType: 0,
     hwIndex: 0,
@@ -66,15 +45,7 @@ const ConnectionConfigured: stVectorConnection = {
     busParams: { busType: 0 },
     channelCapabilities: 0
   },
-  ChannelMask: 0,
-  PermissionMask: 0,
-  HandleMsgEvent: 0,
-  LinStatPar: {
-    baudrate: 0,
-    LINMode: 0,
-    LINVersion: 0
-  },
-  Checksum: 0
+  ChannelMask: 0
 }
 
 //Map类型，对象保存键-值对，“键”-“值”，设备Map
@@ -139,21 +110,10 @@ export class VECTOR_CAN extends CanBase {
 
     //'0:0' = 第几路总线：通道索引
     this.index = parseInt(info.handle.split(':')[1]) //通道索引： :0
-
     this.deviceType = parseInt(info.handle.split('_')[0]) //父类中设备类型：XL_HWTYPE_VN1611
     this.deviceIndex = parseInt(info.handle.split('_')[2]) //通道索引：_0
     const targetDevice = deviceMap.get(`${this.deviceType}_${this.index}`) //返回键对应的值，查找设备类型_设备索引
-
-    let xlStatus: any //Map没有这个驱动
-    let m_Vectordevtype = VECTOR.XL_HWTYPE_VN1611
-    let m_Vectorbustype = VECTOR.XL_BUS_TYPE_CAN
-    let m_VectorChannel = 0
-    // 设备类型判断（完整分支）
-    m_Vectordevtype = this.deviceType
-    m_Vectorbustype = VECTOR.XL_BUS_TYPE_CAN
-    m_VectorChannel = this.deviceIndex
-
-    const PortHandle = new VECTOR.XLPORTHANDLE()
+    let xlStatus = VECTOR.XL_SUCCESS
 
     if (targetDevice) {
       this.handle = targetDevice.device //Map中有这个驱动 //获取索引
@@ -163,6 +123,7 @@ export class VECTOR_CAN extends CanBase {
       // 驱动初始化
       xlStatus = VECTOR.xlOpenDriver()
       if (xlStatus !== VECTOR.XL_SUCCESS) {
+        gitxlStatus = xlStatus
         throw new Error('OpenDriver failed')
       }
 
@@ -175,6 +136,24 @@ export class VECTOR_CAN extends CanBase {
         const channles = VECTOR.CHANNEL_CONFIG.frompointer(DrvConfig.channel) //通道配置
         ConnectionConfigured.ChannelConfig = channles.getitem(this.index) //通道数组索引
       }
+      deviceMap.set(`${this.deviceType}_${this.index}`, { device: this.handle, channel: [this] })
+    }
+
+    if (info.canfd) {
+      if (
+        //CANFD使能
+        ConnectionConfigured.ChannelConfig.channelCapabilities &
+        VECTOR.XL_CHANNEL_FLAG_CANFD_ISO_SUPPORT
+      ) {
+        console.log('valid channle count')
+      } else if (
+        ConnectionConfigured.ChannelConfig.channelCapabilities &
+        VECTOR.XL_CHANNEL_FLAG_CANFD_BOSCH_SUPPORT
+      ) {
+        console.log('valid channle count')
+      } else {
+        throw new Error('CANFD failed')
+      }
     }
 
     // 通道掩码计算
@@ -183,7 +162,7 @@ export class VECTOR_CAN extends CanBase {
       ConnectionConfigured.ChannelConfig.hwIndex,
       ConnectionConfigured.ChannelConfig.hwChannel
     )
-    const PermissionMask = new VECTOR.XLACCESS()
+    // PermissionMask.value = ConnectionConfigured.ChannelMask
     // PermissionMask.value = 0
 
     // 总线类型处理
@@ -213,23 +192,24 @@ export class VECTOR_CAN extends CanBase {
         )
       }
       if (xlStatus !== VECTOR.XL_SUCCESS) {
-        VECTOR.xlClosePort(PortHandle.cast())
-        ConnectionConfigured.PortHandle = VECTOR.XL_INVALID_PORTHANDLE
+        VECTOR.xlClosePort(PortHandle.value())
         throw new Error('OpenPort failed')
       }
 
       // CAN波特率配置（完整逻辑）
-      if (info.canfd && info.bitratefd) {
+      if (info.canfd) {
         //CANFD使能
         const fdParams = new VECTOR.XLcanFdConf()
-        ;(fdParams.arbitrationBitRate = info.bitrate.freq), //普通波特率
-          (fdParams.tseg1Abr = 6),
-          (fdParams.tseg2Abr = 3),
-          (fdParams.sjwAbr = 2),
-          (fdParams.dataBitRate = info.bitratefd.freq), //CANFD波特率
-          (fdParams.tseg1Dbr = 6),
-          (fdParams.tseg2Dbr = 3),
-          (fdParams.sjwDbr = 2)
+        fdParams.arbitrationBitRate = info.bitrate.freq //普通波特率
+        fdParams.tseg1Abr = 6
+        fdParams.tseg2Abr = 3
+        fdParams.sjwAbr = 2
+
+        fdParams.dataBitRate = info.bitrate.freq //CANFD波特率
+        fdParams.tseg1Dbr = 6
+        fdParams.tseg2Dbr = 3
+        fdParams.sjwDbr = 2
+        fdParams.options = VECTOR.CANFD_CONFOPT_NO_ISO // 可选：启用 ISO 标准帧格式
 
         xlStatus = VECTOR.xlCanFdSetConfiguration(
           PortHandle.value(),
@@ -264,185 +244,27 @@ export class VECTOR_CAN extends CanBase {
       if (xlStatus !== VECTOR.XL_SUCCESS) {
         throw new Error('ActivateChannel failed')
       }
-    } else if (ConnectionConfigured.ChannelConfig.busParams.busType === VECTOR.XL_BUS_TYPE_LIN) {
-      // LIN配置（完整逻辑）
-      xlStatus = VECTOR.xlOpenPort(
-        PortHandle.cast(),
-        ConnectionConfigured.AppName,
-        ConnectionConfigured.ChannelMask,
-        PermissionMask.cast(),
-        VECTOR.RX_QUEUE_SIZE_LIN,
-        VECTOR.XL_INTERFACE_VERSION,
-        VECTOR.XL_BUS_TYPE_LIN
-      )
-      if (xlStatus !== VECTOR.XL_SUCCESS) {
-        throw new Error('OpenPort failed')
-      }
-
-      // ConnectionConfigured.Checksum =
-      //   gDeviceParameters.type === 0
-      //     ? VECTOR.XL_LIN_CALC_CHECKSUM
-      //     : VECTOR.XL_LIN_CALC_CHECKSUM_ENHANCED
-      ConnectionConfigured.Checksum == VECTOR.XL_LIN_CALC_CHECKSUM
-
-      ConnectionConfigured.LinStatPar = {
-        baudrate: info.bitrate.freq, //LIN波特率
-        LINMode: VECTOR.XL_LIN_MASTER,
-        LINVersion: VECTOR.XL_LIN_VERSION_2_1
-      }
-      xlStatus = VECTOR.xlLinSetChannelParams(
-        PortHandle.cast(),
-        ConnectionConfigured.ChannelMask,
-        ConnectionConfigured.LinStatPar
-      )
-
-      const dlc = new Array(64).fill(8)
-      xlStatus = VECTOR.xlLinSetDLC(PortHandle.cast(), ConnectionConfigured.ChannelMask, dlc)
-
-      const data = new Array(8).fill(0)
-      xlStatus = VECTOR.xlLinSetSlave(
-        PortHandle.cast(),
-        ConnectionConfigured.ChannelMask,
-        0x3c,
-        data,
-        8,
-        ConnectionConfigured.Checksum
-      )
-
-      xlStatus = VECTOR.xlActivateChannel(
-        PortHandle.cast(),
-        ConnectionConfigured.ChannelMask,
-        VECTOR.XL_BUS_TYPE_LIN,
-        1
-      )
-      xlStatus = VECTOR.xlFlushReceiveQueue(PortHandle.cast())
-    }
-
-    //测试发送逻辑
-    if (ConnectionConfigured.ChannelConfig.busParams.busType === VECTOR.XL_BUS_TYPE_CAN) {
-      // CAN测试发送（完整分支）
-      const messageCount = 1
-      const flcnt = 0
-      if (info.canfd) {
-        //CANFD使能
-        const fl = [
-          messageCount,
-          VECTOR.XL_CAN_TXMSG_FLAG_EDL,
-          VECTOR.XL_CAN_TXMSG_FLAG_EDL | VECTOR.XL_CAN_TXMSG_FLAG_BRS
-        ]
-        const canTxEvt = new VECTOR.XLcanTxEvent()
-        canTxEvt.tag = 0x0440
-        // const tagData=VECTOR.XL_CAN_TX_MSG_UNION.frompointer(canTxEvt.tagData)
-        // const msg = new VECTOR.XL_CAN_TX_MSG()
-        // tagData.canMsg = msg
-
-        // canTxEvt.tag.canMsg.canId = 0x723
-        // // canTxEvt.tag.msgFlags = fl[flcnt % fl.length]
-        // canTxEvt.tag.msgFlags = 3
-        // canTxEvt.tag.dlc = 8
-
-        // if (canTxEvt.tag.msgFlags & VECTOR.XL_CAN_TXMSG_FLAG_EDL) {
-        //   canTxEvt.tag.dlc = 15
-        // }
-        // for (let i = 1; i < 64; i++) {
-        //   canTxEvt.tag.data[i] = i - 1
-        // }
-
-        canTxEvt.tagData.canMsg.canId = 0x723
-        // canTxEvt.tag.msgFlags = fl[flcnt % fl.length]
-        canTxEvt.tagData.canMsg.msgFlags = 0
-        canTxEvt.tagData.canMsg.dlc = 8
-
-        if (canTxEvt.tagData.canMsg.msgFlags & VECTOR.XL_CAN_TXMSG_FLAG_EDL) {
-          canTxEvt.tagData.canMsg.dlc = 15
-        }
-        const dataPtr = VECTOR.UINT8ARRAY.frompointer(canTxEvt.tagData.canMsg.data)
-        for (let i = 1; i < 64; i++) {
-          dataPtr.setitem(i, i - 1)
-        }
-
-        // const can_tx_msg = new VECTOR.XL_CAN_TX_MSG()
-        // can_tx_msg.canId = 0x723
-        // // can_tx_msg.msgFlags = fl[flcnt % fl.length]
-        // can_tx_msg.msgFlags = 3
-        // can_tx_msg.dlc = 8
-
-        // if (can_tx_msg.msgFlags & VECTOR.XL_CAN_TXMSG_FLAG_EDL) {
-        //   can_tx_msg.dlc = 15
-        // }
-        // for (let i = 1; i < 64; i++)
-
-        // {
-        //   can_tx_msg.data[i] = i - 1
-        // }
-        // canTxEvt.canMsg = can_tx_msg
-
-        const cntSent = new VECTOR.UINT32()
-        cntSent.assign(0)
-        // cntSent.value = 1
-        xlStatus = VECTOR.xlCanTransmitEx(
-          PortHandle.value(),
-          ConnectionConfigured.ChannelMask,
-          messageCount,
-          cntSent.cast(),
-          canTxEvt
-        )
-        console.log('status', xlStatus, cntSent.value())
-        if (xlStatus !== VECTOR.XL_SUCCESS) {
-          // throw new Error('CanTransmitEx failed')
-        } else {
-          console.log('CanTransmitEx success', cntSent.value())
-        }
-      } else {
-        //普通CAN
-        const framedata = new VECTOR.XLevent()
-        ;(framedata.tag = VECTOR.XL_TRANSMIT_MSG),
-          (framedata.tag.tagData.msg.id = 0x722),
-          (framedata.tag.tagData.msg.dlc = 8),
-          (framedata.tag.tagData.msg.flags = 0),
-          (framedata.tag.tagData.msg.data = [1, 2, 3, 4, 5, 6, 7, 8])
-        xlStatus = VECTOR.xlCanTransmit(
-          PortHandle.cast(),
-          ConnectionConfigured.ChannelMask,
-          messageCount,
-          framedata
-        )
-      }
-    } else {
-      // LIN测试发送（完整逻辑）
-      const framedata = new VECTOR.s_xl_lin_msg()
-      ;(framedata.id = 0x3c),
-        (framedata.dlc = 8),
-        (framedata.data = [0x08, 0x02, 0x3e, 0x00, 0xff, 0xff, 0xff, 0xff])
-      VECTOR.xlLinSendRequest(PortHandle.cast(), ConnectionConfigured.ChannelMask, framedata.id, 0)
-      // await Sleep(10)
-
-      const pEventCountSend = 1
-      const LinMsgXLeventSend = new VECTOR.XLevent()
-      ;(LinMsgXLeventSend.tag = 0),
-        (LinMsgXLeventSend.tagData = { msg: { id: 0, dlc: 0, flags: 0, data: [] } })
-      VECTOR.xlLinSendRequest(PortHandle.cast(), ConnectionConfigured.ChannelMask, 0x3d, 0)
-      VECTOR.xlReceive(PortHandle.cast(), pEventCountSend, LinMsgXLeventSend)
     }
 
     VECTOR.CreateTSFN(
       //创建线程安全函数
-      // numHandle.getitem(0),                                     //设备句柄
-      // numHandle.getitem(1),
+      1, //设备句柄
+      2,
       this.id,
       this.id + 'fd',
       this.callback.bind(this), //标准CAN帧回调函数
       this.callbackFd.bind(this), //CANFD帧接收回调函数
-      this.id + 'error' //错误处理
-      // this.callbackError.bind(this)                           //总线错误事件回调
+      this.id + 'error', //错误处理
+      this.callbackError.bind(this) //总线错误事件回调
     )
     this.attachCanMessage(this.busloadCb)
   }
 
-  // callbackError() {
-  //   this.log.error(getTsUs() - this.startTime, 'bus error')    //总线错误事件回调
-  //   this.close(true)                                          //关闭设备
-  // }
+  callbackError() {
+    this.log.error(getTsUs() - this.startTime, 'bus error') //总线错误事件回调
+    this.close(true) //关闭设备
+  }
+
   static loadDllPath(dllPath: string) {
     if (process.platform == 'win32') {
       VECTOR.LoadDll(dllPath) //加载设备DLL
@@ -507,18 +329,27 @@ export class VECTOR_CAN extends CanBase {
     if (num == 0) {
       return
     }
-    const frames = new VECTOR.ReceiveDataArray(num)
-    const ret = 1
-    // const ret = VECTOR.ZCAN_Receive(this.channel, frames.cast(), num, 0)
-    if (ret > 0) {
-      for (let i = 0; i < ret; i++) {
+    // 普通CAN接收
+    let xlStatus = VECTOR.XL_SUCCESS
+    const len = new VECTOR.UINT32()
+    len.assign(num)
+    const frames = new VECTOR.XLEVENT(num)
+
+    xlStatus = VECTOR.xlReceive(PortHandle.value(), len, frames.cast())
+    if (xlStatus === VECTOR.XL_ERR_QUEUE_IS_EMPTY) {
+      // break
+    }
+
+    if (num > 0) {
+      for (let i = 0; i < num; i++) {
         const frame = frames.getitem(i)
-        const id = frame.frame.can_id
-        const data = Buffer.alloc(frame.frame.can_dlc)
-        const b = VECTOR.ByteArray.frompointer(frame.frame.data)
-        for (let j = 0; j < frame.frame.can_dlc; j++) {
+        const id = frame.tagData.msg.id
+        const data = Buffer.alloc(frame.tagData.msg.dlc)
+        const b = VECTOR.UINT8ARRAY.frompointer(frame.tagData.msg.data)
+        for (let j = 0; j < frame.tagData.msg.dlc; j++) {
           data[j] = b.getitem(j)
         }
+
         const jsFrame: CANFrame = {
           canId: id & 0x1fffffff,
           msgType: {
@@ -528,9 +359,9 @@ export class VECTOR_CAN extends CanBase {
             remote: id & 0x40000000 ? true : false
           },
           data: data,
-          isEcho: frame.frame.__pad & 0x20 ? true : false
+          isEcho: false
         }
-        this._read(jsFrame, frame.timestamp)
+        this._read(jsFrame, frame.timeStamp)
         //让出时间片
         await new Promise((resolve) => {
           setImmediate(() => {
@@ -548,86 +379,47 @@ export class VECTOR_CAN extends CanBase {
       return
     }
 
-    // CANFD接收处理
-    //   let xlStatus: VECTOR.XLstatus;
-    //   let len = 1;
-    //   const CanMsgBuffer: VECTOR.XLcanRxEvent[] = new Array(1).fill({
-    //       tag: 0,
-    //       tagData: {
-    //           canRxOkMsg: {
-    //               canId: 0,
-    //               dlc: 0,
-    //               data: []
-    //           }
-    //       }
-    //   });
+    let xlStatus = VECTOR.XL_SUCCESS
+    const frames = new VECTOR.XLCANRXEVENT(num)
 
-    //   xlStatus = 0; // XL_SUCCESS
+    xlStatus = VECTOR.xlCanReceive(PortHandle.value(), frames.cast())
+    if (xlStatus === VECTOR.XL_ERR_QUEUE_IS_EMPTY) {
+      // break
+    }
 
-    //   // 模拟xlCanReceive调用
-    //   xlStatus = VECTOR.canReceive(VECTOR.PortHandle.cast(), CanMsgBuffer);
+    if (num > 0) {
+      //有数据
+      for (let i = 0; i < num; i++) {
+        const frame = frames.getitem(i)
+        const id = frame.tagData.canRxOkMsg.canId
+        const data = Buffer.alloc(frame.tagData.canRxOkMsg.dlc)
+        const b = VECTOR.UINT8ARRAY.frompointer(frame.tagData.canRxOkMsg.data)
+        for (let j = 0; j < data.length; j++) {
+          data[j] = b.getitem(j)
+        }
 
-    //   if (xlStatus === VECTOR.XL_ERR_QUEUE_IS_EMPTY) {
-    //       break;
-    //   } else {
-    //     if (IS_RTR(CanMsgBuffer[1].tagData.canRxOkMsg.canId) === 0) {
-    //         if (CanMsgBuffer[1].tag === VECTOR.XL_CAN_EV_TAG_RX_OK) {
-    //             if (CanMsgBuffer[1].tagData.canRxOkMsg.canId === gDeviceParameters.resp_id) {
-    //                 if (CanMsgBuffer[1].tagData.canRxOkMsg.dlc > 64) continue;
-
-    //                 m_stRxCanInfo.DataId = CanMsgBuffer[1].tagData.canRxOkMsg.canId;
-    //                 m_stRxCanInfo.Index = 0;
-    //                 m_stRxCanInfo.DataPtr = CanMsgBuffer[1].tagData.canRxOkMsg.data;
-
-    //                 switch (CanMsgBuffer[1].tagData.canRxOkMsg.dlc) {
-    //                     case 9: m_stRxCanInfo.len = 12; break;
-    //                     case 10: m_stRxCanInfo.len = 16; break;
-    //                     case 11: m_stRxCanInfo.len = 20; break;
-    //                     case 12: m_stRxCanInfo.len = 24; break;
-    //                     case 13: m_stRxCanInfo.len = 32; break;
-    //                     case 14: m_stRxCanInfo.len = 48; break;
-    //                     case 15: m_stRxCanInfo.len = 64; break;
-    //                     default: m_stRxCanInfo.len = CanMsgBuffer[1].tagData.canRxOkMsg.dlc;
-    //                 }
-
-    //                 emitter.emit('sgnlCanTpRx', { ...m_stRxCanInfo });
-    //             }
-    //         }
-    //     }
-    //   }
-
-    //   const frames = new VECTOR.ReceiveFDDataArray(num)                      //接收数组
-    //   const ret = VECTOR.ZCAN_ReceiveFD(this.channel, frames.cast(), num, 0) //接收
-    //   if (ret > 0) {                                                      //有数据
-    //     for (let i = 0 i < ret i++) {
-    //       const frame = frames.getitem(i)
-    //       const id = frame.frame.can_id
-    //       const data = Buffer.alloc(frame.frame.len)
-    //       const b = VECTOR.ByteArray.frompointer(frame.frame.data)
-    //       for (let j = 0 j < data.length j++) {
-    //         data[j] = b.getitem(j)
-    //       }
-    //       const jsFrame: CANFrame = {
-    //         canId: id & 0x1fffffff,
-    //         msgType: {
-    //           idType: id & 0x80000000 ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD,
-    //           brs: frame.frame.flags & 0x01 ? true : false,
-    //           canfd: true,
-    //           remote: id & 0x40000000 ? true : false
-    //         },
-    //         data: data,
-    //         isEcho: frame.frame.flags & 0x20 ? true : false
-    //       }
-    //       this._read(jsFrame, frame.timestamp)                            //读取解析后的报文
-    //       //让出时间片
-    //       await new Promise((resolve) => {                                //等待下一个报文
-    //         setImmediate(() => {
-    //           resolve(null)
-    //         })
-    //       })
-    //     }
-    //     // setImmediate(()=>{this.callbackFd(100)})
-    //   }
+        const jsFrame: CANFrame = {
+          canId: id & 0x1fffffff,
+          msgType: {
+            idType: id & 0x80000000 ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD,
+            brs: frame.frame.flags & 0x01 ? true : false,
+            canfd: true,
+            remote: id & 0x40000000 ? true : false
+          },
+          data: data,
+          isEcho: false
+        }
+        this._read(jsFrame, frame.timeStamp) //读取解析后的报文
+        //让出时间片
+        await new Promise((resolve) => {
+          //等待下一个报文
+          setImmediate(() => {
+            resolve(null)
+          })
+        })
+      }
+      // setImmediate(()=>{this.callbackFd(100)})
+    }
   }
   setOption(cmd: string, val: any): any {
     return this._setOption(cmd, val)
@@ -675,7 +467,7 @@ export class VECTOR_CAN extends CanBase {
   static override getLibVersion(): string {
     //库版本信息
     if (process.platform == 'win32') {
-      return '25.3.17.16'
+      return '11.0.14.00'
     }
     return 'only support windows'
   }
@@ -718,7 +510,17 @@ export class VECTOR_CAN extends CanBase {
         target.channel = target.channel.filter((item) => item != this)
         if (target.channel.length == 0) {
           //close device
-          VECTOR.ZCAN_CloseDevice(this.handle)
+          let xlStatus: any
+          xlStatus = VECTOR.xlDeactivateChannel(
+            PortHandle.value(),
+            ConnectionConfigured.ChannelMask
+          ) //所选的通道退出总线。如果没有其他情况，通道将被禁用激活通道的端口。
+          xlStatus = VECTOR.xlClosePort(PortHandle.value()) //这个函数关闭一个端口并禁用它的通道
+          xlStatus = VECTOR.xlCloseDriver() //关闭驱动程序
+          if (xlStatus !== VECTOR.XL_SUCCESS) {
+            // throw new Error('xlCanTransmit failed')
+          }
+
           deviceMap.delete(`${this.deviceType}_${this.index}`) //删除
         }
       }
@@ -785,31 +587,41 @@ export class VECTOR_CAN extends CanBase {
         }
 
         if (msgType.canfd) {
-          const frame = new VECTOR.ZCAN_TransmitFD_Data() //CANFD数据结构
-          frame.transmit_type = 0
+          //CANFD使能
           let rid = id
-
           if (msgType.idType == CAN_ID_TYPE.EXTENDED) {
             rid += 0x80000000
           }
           if (msgType.remote) {
             rid += 0x40000000
           }
-          frame.frame.can_id = rid
-          //TX_ECHO_FLAG
-          frame.frame.flags |= 0x20
-          if (msgType.brs) {
-            frame.frame.flags |= 0x01
-          }
-          frame.frame.len = data.length
-          const b = VECTOR.ByteArray.frompointer(frame.frame.data)
+          const canTxEvt = new VECTOR.XLcanTxEvent()
+          canTxEvt.tag = 0x0440
 
-          for (let i = 0; i < data.length; i++) {
-            b.setitem(i, data[i])
+          canTxEvt.tagData.canMsg.canId = rid
+          canTxEvt.tagData.canMsg.msgFlags = 0
+          canTxEvt.tagData.canMsg.dlc = data.length
+          if (canTxEvt.tagData.canMsg.msgFlags & VECTOR.XL_CAN_TXMSG_FLAG_EDL) {
+            canTxEvt.tagData.canMsg.dlc = data.length
           }
-          const len = 1
-          // const len = VECTOR.ZCAN_TransmitFD(this.channel, frame, 1) //CANFD发送
-          if (len != 1) {
+          const dataPtr = VECTOR.UINT8ARRAY.frompointer(canTxEvt.tagData.canMsg.data)
+          for (let i = 0; i < data.length; i++) {
+            dataPtr.setitem(i, data[i])
+          }
+
+          let xlStatus = VECTOR.XL_SUCCESS //Map没有这个驱动
+          const messageCount = 1
+          const cntSent = new VECTOR.UINT32()
+          cntSent.assign(1)
+          xlStatus = VECTOR.xlCanTransmitEx(
+            PortHandle.value(),
+            ConnectionConfigured.ChannelMask,
+            messageCount,
+            cntSent.cast(),
+            canTxEvt
+          )
+          console.log('status', xlStatus, cntSent.value())
+          if (xlStatus != VECTOR.XL_SUCCESS) {
             this.pendingBaseCmds.get(cmdId)?.pop()
             // const err = this.getError()
             // this.close(true)
@@ -817,31 +629,36 @@ export class VECTOR_CAN extends CanBase {
             // this.log.error((getTsUs() - this.startTime),'bus error')
           }
         } else {
-          const frame = new VECTOR.ZCAN_Transmit_Data() //CAN帧结构
-          frame.transmit_type = 0
+          //普通CAN
           let rid = id
-
           if (msgType.idType == CAN_ID_TYPE.EXTENDED) {
             rid += 0x80000000
           }
           if (msgType.remote) {
             rid += 0x40000000
           }
-          frame.frame.can_id = rid
-          //TX_ECHO_FLAG
-          frame.frame.__pad = 0x20
-          if (this.canMiniBug) {
-            frame.frame.__pad = 0x00
-          }
-          frame.frame.can_dlc = data.length
-          const b = VECTOR.ByteArray.frompointer(frame.frame.data)
 
+          const framedata = new VECTOR.s_xl_event()
+          framedata.tag = VECTOR.XL_TRANSMIT_MSG
+          framedata.tagData.msg.id = rid
+          framedata.tagData.msg.dlc = data.length
+          framedata.tagData.msg.flags = 0
+          const dataPtr = VECTOR.UINT8ARRAY.frompointer(framedata.tagData.msg.data)
           for (let i = 0; i < data.length; i++) {
-            b.setitem(i, data[i])
+            dataPtr.setitem(i, data[i])
           }
-          const len = 1
-          // const len = VECTOR.ZCAN_Transmit(this.channel, frame, 1) //CAN发送
-          if (len != 1) {
+
+          let xlStatus = VECTOR.XL_SUCCESS //Map没有这个驱动
+          const cntSent = new VECTOR.UINT32()
+          cntSent.assign(1)
+          xlStatus = VECTOR.xlCanTransmit(
+            PortHandle.value(),
+            ConnectionConfigured.ChannelMask,
+            cntSent.cast(),
+            framedata
+          )
+          console.log('status', xlStatus)
+          if (xlStatus !== VECTOR.XL_SUCCESS) {
             //发送错误
             this.pendingBaseCmds.get(cmdId)?.pop()
             // const msg = this.getError()
@@ -871,55 +688,7 @@ export class VECTOR_CAN extends CanBase {
 
   getError() {
     //获取错误
-    const errInfo = new VECTOR.ZCAN_CHANNEL_ERR_INFO()
-    // VECTOR.ZCAN_ReadChannelErrInfo(this.channel, errInfo)
-    const errCode = errInfo.error_code
-    let msg = ''
-    if (errCode & 0x0001) {
-      msg += 'ZCAN_ERROR_CAN_OVERFLOW '
-    }
-    if (errCode & 0x0002) {
-      msg += 'ZCAN_ERROR_CAN_ERRALARM '
-    }
-    if (errCode & 0x0004) {
-      msg += 'ZCAN_ERROR_CAN_PASSIVE '
-    }
-    if (errCode & 0x0008) {
-      msg += 'ZCAN_ERROR_CAN_LOSE '
-    }
-    if (errCode & 0x0010) {
-      msg += 'ZCAN_ERROR_CAN_BUSERR '
-    }
-    if (errCode & 0x0020) {
-      msg += 'ZCAN_ERROR_CAN_BUSOFF '
-    }
-    if (errCode & 0x0040) {
-      msg += 'ZCAN_ERROR_CAN_BUFFER_OVERFLOW '
-    }
-    if (errCode & 0x0100) {
-      msg += 'ZCAN_ERROR_DEVICEOPENED '
-    }
-    if (errCode & 0x0200) {
-      msg += 'ZCAN_ERROR_DEVICEOPEN '
-    }
-    if (errCode & 0x0400) {
-      msg += 'ZCAN_ERROR_DEVICENOTOPEN '
-    }
-    if (errCode & 0x0800) {
-      msg += 'ZCAN_ERROR_BUFFEROVERFLOW '
-    }
-    if (errCode & 0x1000) {
-      msg += 'ZCAN_ERROR_DEVICENOTEXIST '
-    }
-    if (errCode & 0x2000) {
-      msg += 'ZCAN_ERROR_LOADKERNELDLL '
-    }
-    if (errCode & 0x4000) {
-      msg += 'ZCAN_ERROR_CMDFAILED '
-    }
-    if (errCode & 0x8000) {
-      msg += 'ZCAN_ERROR_BUFFERCREATE '
-    }
+    const msg = new VECTOR.xlGetErrorString(gitxlStatus)
     return msg
   }
   getReadBaseId(id: number, msgType: CanMsgType): string {
