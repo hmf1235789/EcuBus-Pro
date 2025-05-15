@@ -346,6 +346,15 @@ function buildTree() {
   }
   t.push(toomoss)
   addSubTree('toomoss', toomoss)
+  const vector: tree = {
+    label: 'VECTOR',
+    vendor: 'vector',
+    append: false,
+    id: 'VECTOR',
+    children: []
+  }
+  t.push(vector)
+  addSubTree('vector', vector)
 
   tData.value = t
 }

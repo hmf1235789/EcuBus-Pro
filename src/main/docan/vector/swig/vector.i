@@ -1,13 +1,5 @@
 %module vector
 
-// %typemap(typescript) unsigned int "number";
-// %napi_export(XLportHandle);
-// %napi_export(xlOpenDriver);
-// %napi_export(xlGetDriverConfig);
-// %napi_export(xlCloseDriver);
-// %napi_export(xlGetChannelMask);
-// %node_export(swig_export, 1);
-
 %header %{
 #include <windows.h>
 #include <winnt.h>
@@ -27,36 +19,20 @@
 %include <cpointer.i>
 %include <vxlapi.h>
 
-// typedef XL_CAN_EV_TAG_TX_MSG xl_can_ev_tag_tx_msg;
-// typedef long XLportHandle;
-// typedef XL_DRIVER_CONFIG XLdriverConfig;
-// typedef XL_CHANNEL_CONFIG XLchannelConfig;
-// typedef XLuint64 XLaccess;
-// typedef XLlinStatPar XLlinStatPar;
-
 %pointer_class(unsigned int, UINT32)
-
 %pointer_class(XLportHandle, XLPORTHANDLE)
 %pointer_class(XLaccess, XLACCESS)
-// %pointer_class(XLcanFdConf, XLCANFDCONF);
 
 %array_class(XLchannelConfig, CHANNEL_CONFIG);
 %array_class(XLstatus, xlstatus);
 %array_class(unsigned char, UINT8ARRAY)
-// %array_class(XLcanFdConf, XLCANFDCONF);
+%array_class(XLevent, XLEVENT);
+%array_class(XL_CAN_RX_EVENT, XLCANRXEVENT);
 
 %inline %{
 void LoadDll(const char* path) {
   SetDllDirectory(path);
 }
-
-// const char* xlCanGetEventString(XLevent* event) {
-//   return ::xlCanGetEventString(event);
-// }
-
-// XLstatus xlOpenDriver() {
-//   return ::xlOpenDriver();
-// }
 
 %}
 

@@ -548,7 +548,7 @@ enum e_XLevent_type {
 #define XL_A429_EV_TAG_RX_ERR                   ((unsigned short)0x0609)
 #define XL_A429_EV_TAG_BUS_STATISTIC            ((unsigned short)0x060F)
 
-typedef unsigned __int64 XLuint64; 
+typedef unsigned long long XLuint64; 
 
 #include <pshpack8.h>
 
@@ -709,7 +709,7 @@ typedef void * XLhandle;
 //------------------------------------------------------------------------------
 // structures for LIN
 //------------------------------------------------------------------------------
-typedef struct xllinstatpar{
+typedef struct {
      unsigned int LINMode;                           //!< XL_LIN_SLAVE | XL_LIN_MASTER
      int          baudrate;                          //!< the baudrate will be calculated within the API. Here: e.g. 9600, 19200
      unsigned int LINVersion;                        //!< define for the LIN version (actual V1.3 of V2.0)
@@ -1098,7 +1098,7 @@ typedef short XLstatus;
 
 #define CANFD_CONFOPT_NO_ISO                       0x08   // configuration option CANFD-BOSCH
 
-typedef struct xlcanfdconf{ 
+typedef struct { 
   unsigned int  arbitrationBitRate;
   unsigned int  sjwAbr;              // CAN bus timing for nominal / arbitration bit rate
   unsigned int  tseg1Abr;
@@ -4026,7 +4026,7 @@ typedef struct s_xl_most150_stream_get_info {
 // CAN / CAN-FD tx event definitions
 ////////////////////////////////////////////////////////////////////////
 
-typedef struct xl_can_tx_msg{
+typedef struct {
   unsigned int       canId;
   unsigned int       msgFlags;
   unsigned char      dlc;
@@ -4040,7 +4040,7 @@ typedef union {
 } XL_CAN_TX_MSG_UNION;
 
 
-typedef struct xlcantxevent{
+typedef struct {
   unsigned short     tag;              //  2 - type of the event
   unsigned short     transId;          //  2
   unsigned char      channelIndex;     //  1 - internal has to be 0
@@ -4116,17 +4116,7 @@ typedef struct {
 
 //------------------------------------------------------------------------------
 // General RX Event
-typedef struct {
-  unsigned int         size;             // 4 - overall size of the complete event
-  unsigned short       tag;              // 2 - type of the event
-  unsigned short       channelIndex;     // 2        
-  unsigned int         userHandle;       // 4 (lower 12 bit available for CAN)
-  unsigned short       flagsChip;        // 2 queue overflow (upper 8bit)
-  unsigned short       reserved0;        // 2
-  XLuint64             reserved1;        // 8 
-  XLuint64             timeStampSync;    // 8 - timestamp which is synchronized by the driver
-
-  union {
+typedef union {
     unsigned char             raw[XL_CANFD_MAX_EVENT_SIZE - XL_CANFD_RX_EVENT_HEADER_SIZE];
     XL_CAN_EV_RX_MSG          canRxOkMsg;
     XL_CAN_EV_RX_MSG          canTxOkMsg;
@@ -4135,8 +4125,23 @@ typedef struct {
     XL_CAN_EV_ERROR           canError;
     XL_CAN_EV_CHIP_STATE      canChipState;
     XL_CAN_EV_SYNC_PULSE      canSyncPulse;
-  } tagData;
+  } XL_CAN_RX_EVENT_UNION;
+
+typedef struct xl_can_rx_event{
+  unsigned int         size;             // 4 - overall size of the complete event
+  unsigned short       tag;              // 2 - type of the event
+  unsigned short       channelIndex;     // 2        
+  unsigned int         userHandle;       // 4 (lower 12 bit available for CAN)
+  unsigned short       flagsChip;        // 2 queue overflow (upper 8bit)
+  unsigned short       reserved0;        // 2
+  XLuint64             reserved1;        // 8 
+  XLuint64             timeStampSync;    // 8 - timestamp which is synchronized by the driver
+  
+  XL_CAN_RX_EVENT_UNION tagData;
 } XLcanRxEvent;
+
+typedef struct xl_can_rx_event XL_CAN_RX_EVENT;
+
 #include <poppack.h>
 
 #include <pshpack8.h>
