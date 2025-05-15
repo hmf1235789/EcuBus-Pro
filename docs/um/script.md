@@ -21,6 +21,8 @@ you can get the build error info in `Message` window if there is any error in th
 You can open the `API` window to get the API info.
 ![alt text](image-2.png)
 
+or check this online documentation [API](https://app.whyengineer.com/scriptApi/index.html)
+
 ## Script Usage
 
 ### Node.js Ability
@@ -93,3 +95,58 @@ Util.On('Can.DiagRequest.send', (msg) => {
   //receive diag request
 })
 ```
+
+
+## Example
+
+::: details Send 10 CAN messages on script initialization, then send one more message after 30s delay {open}
+
+```typescript
+async function sendCanMessage(msgId: number, targetId: number, dataPattern: string) {
+    console.log(`sendCanMessage called with msgId: ${msgId}, targetId: ${targetId}`);
+
+    const dataBytes = Buffer.from(dataPattern.repeat(8), 'hex');
+    console.log("Total Length:", dataBytes.length);
+
+    const fdMsg: CanMessage = {
+        id: targetId,
+        dir: 'OUT',
+        data: dataBytes,
+        msgType: {
+            idType: CAN_ID_TYPE.STANDARD,
+            brs: true,
+            canfd: true,
+            remote: false,
+        }
+    };
+
+    try {
+        await output(fdMsg);
+    } catch (error) {
+        console.error(`CAN FD 发送失败 (ID: ${msgId}):`, error);
+    }
+
+}
+
+Util.Init(async () => {
+    console.log("Init");
+    // 循环 10 次，定义不同的消息 ID 和数据内容
+    for (let i = 0; i < 10; i++) {
+        const msgId = 0x510 + i;
+        const targetId = 0x520 + i;
+        const dataPattern = i % 2 === 0 ? '1234567890ABCDEF' : 'FFAABBCCDDEE5599';
+        await sendCanMessage(msgId, targetId, dataPattern);
+    }
+
+    setTimeout(() => {
+        console.log("Timeout triggered, preparing to send CAN message...");
+        const msgId = 0x510 + 10;
+        const targetId = 0x520 + 10;
+        const dataPattern = 'DEADBEEFCAFEBABE';
+    
+        sendCanMessage(msgId, targetId, dataPattern);
+    }, 30000); // 延时 30 秒
+})
+```
+:::
+
