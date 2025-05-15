@@ -41,6 +41,7 @@ void LoadDll(const char* path) {
 
 extern void CreateTSFN(const Napi::CallbackInfo &info);
 extern void FreeTSFN(const Napi::CallbackInfo &info);
+extern Napi::String JSxlGetErrorString(const Napi::CallbackInfo &info);
 
 
 do {
@@ -52,6 +53,13 @@ do {
 
 do {
   Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("FreeTSFN", FreeTSFN);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+	pd
+  }));
+} while (0);
+
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("JSxlGetErrorString", JSxlGetErrorString);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
 	pd
   }));

@@ -48,26 +48,88 @@ describe('vector test', () => {
     })
   })
 
-  test('write multi frame', async () => {
-    // const list = []
-    // for (let i = 0; i < 10; i++) {
-    //   list.push(
-    //     client.writeBase(
-    //       3,
-    //       {
-    //         idType: CAN_ID_TYPE.STANDARD,
-    //         brs: false,
-    //         canfd: false, //false true
-    //         remote: false
-    //       },
-    //       Buffer.alloc(8, i)
-    //     )
-    //   )
-    // }
-    // const r = await Promise.all(list)
-    // console.log(r)
-  })
+  // test('write multi frame', async () => {
+  //   const list = []
+  //   for (let i = 0; i < 10; i++) {
+  //     list.push(
+  //       client.writeBase(
+  //         3,
+  //         {
+  //           idType: CAN_ID_TYPE.STANDARD,
+  //           brs: false,
+  //           canfd: true, //false true
+  //           remote: false
+  //         },
+  //         Buffer.alloc(8, i)
+  //       )
+  //     )
+  //   }
+  //   const r = await Promise.all(list)
 
+  //   console.log(r)
+  // })
+  test('write error frame can-fd', async () => {
+    try {
+      await client.writeBase(
+        3,
+        {
+          idType: CAN_ID_TYPE.STANDARD,
+          brs: false,
+          canfd: true, //false true
+          remote: false
+        },
+        Buffer.alloc(63, 1)
+      )
+    } catch (e) {
+      console.log(e)
+    }
+
+    try {
+      await client.writeBase(
+        3,
+        {
+          idType: CAN_ID_TYPE.STANDARD,
+          brs: false,
+          canfd: true, //false true
+          remote: false
+        },
+        Buffer.alloc(33, 1)
+      )
+    } catch (e) {
+      // console.log(e)
+    }
+  })
+  test.skip('write error frame can', async () => {
+    try {
+      await client.writeBase(
+        3,
+        {
+          idType: CAN_ID_TYPE.STANDARD,
+          brs: false,
+          canfd: false, //false true
+          remote: false
+        },
+        Buffer.alloc(8, 1)
+      )
+    } catch (e) {
+      console.log(e)
+    }
+
+    try {
+      await client.writeBase(
+        3,
+        {
+          idType: CAN_ID_TYPE.STANDARD,
+          brs: false,
+          canfd: false, //false true
+          remote: false
+        },
+        Buffer.alloc(8, 1)
+      )
+    } catch (e) {
+      // console.log(e)
+    }
+  })
   afterAll(() => {
     client.close()
   })
