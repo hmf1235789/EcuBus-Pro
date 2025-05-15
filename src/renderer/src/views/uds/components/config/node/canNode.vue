@@ -234,6 +234,15 @@ const configInfo: Record<CanVendor, any> = {
     freq: true,
     zlgSpec: false
   },
+  vector: {
+    clock: true,
+    timeSeg1: true,
+    timeSeg2: true,
+    sjw: true,
+    preScaler: true,
+    freq: true,
+    zlgSpec: false
+  },
   kvaser: {
     clock: true,
     timeSeg1: true,

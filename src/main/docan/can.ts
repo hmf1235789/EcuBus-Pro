@@ -49,7 +49,7 @@ export function getCanVersion(vendor: string) {
     return SIMULATE_CAN.getLibVersion()
   } else if (vendor === 'TOOMOSS') {
     return TOOMOSS_CAN.getLibVersion()
-  } else if (vendor === 'vector') {
+  } else if (vendor === 'VECTOR') {
     return VECTOR_CAN.getLibVersion()
   } else {
     return 'unknown'
@@ -69,7 +69,7 @@ export function getCanDevices(vendor: string) {
     return SIMULATE_CAN.getValidDevices()
   } else if (vendor === 'TOOMOSS') {
     return TOOMOSS_CAN.getValidDevices()
-  } else if (vendor === 'vector') {
+  } else if (vendor === 'VECTOR') {
     return VECTOR_CAN.getValidDevices()
   }
   // #v-endif

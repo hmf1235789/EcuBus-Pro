@@ -99,7 +99,7 @@ export class VECTOR_CAN extends CanBase {
     this.info = info
 
     const devices = VECTOR_CAN.getValidDevices() //方法，获取设备列表
-    console.log(devices)
+
     const target = devices.find((item) => item.handle == info.handle) //获取设备列表中的句柄 == 下拉框中选择的句柄
     if (!target) {
       throw new Error('Invalid handle') //无效句柄，无效设备
@@ -434,7 +434,6 @@ export class VECTOR_CAN extends CanBase {
     if (process.platform === 'win32') {
       const deviceHandle = new VECTOR.XL_DRIVER_CONFIG()
       const ret = VECTOR.xlGetDriverConfig(deviceHandle) //获取/打印硬件配置g_xlDrvConfig
-      console.log('valid channle count', deviceHandle.channelCount)
       if (ret === VECTOR.XL_SUCCESS) {
         const channles = VECTOR.CHANNEL_CONFIG.frompointer(deviceHandle.channel) //通道配置
         for (let num = 0; num < deviceHandle.channelCount; num++) {
@@ -444,7 +443,8 @@ export class VECTOR_CAN extends CanBase {
           let busType = ''
 
           if (channel.transceiverName.indexOf('LIN') !== -1) {
-            busType = '#LIN' //总线类型
+            // busType = '#LIN' //总线类型
+            continue
           } else if (channel.name.indexOf('Virtual') !== -1) {
             busType = ''
           } else {
