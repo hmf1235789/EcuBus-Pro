@@ -132,7 +132,6 @@ export class VECTOR_CAN extends CanBase {
       if (xlStatus !== VECTOR.XL_SUCCESS) {
         throw new Error('GetDriverConfig failed')
       } else {
-        console.log('valid channle count', DrvConfig.channelCount)
         const channles = VECTOR.CHANNEL_CONFIG.frompointer(DrvConfig.channel) //通道配置
         ConnectionConfigured.ChannelConfig = channles.getitem(this.index) //通道数组索引
       }
@@ -145,12 +144,12 @@ export class VECTOR_CAN extends CanBase {
         ConnectionConfigured.ChannelConfig.channelCapabilities &
         VECTOR.XL_CHANNEL_FLAG_CANFD_ISO_SUPPORT
       ) {
-        console.log('valid channle count')
+        //ISO
       } else if (
         ConnectionConfigured.ChannelConfig.channelCapabilities &
         VECTOR.XL_CHANNEL_FLAG_CANFD_BOSCH_SUPPORT
       ) {
-        console.log('valid channle count')
+        //BOSCH
       } else {
         throw new Error('CANFD failed')
       }
@@ -197,18 +196,18 @@ export class VECTOR_CAN extends CanBase {
       }
 
       // CAN波特率配置（完整逻辑）
-      if (info.canfd) {
+      if (info.canfd && info.bitratefd) {
         //CANFD使能
         const fdParams = new VECTOR.XLcanFdConf()
         fdParams.arbitrationBitRate = info.bitrate.freq //普通波特率
-        fdParams.tseg1Abr = 6
-        fdParams.tseg2Abr = 3
-        fdParams.sjwAbr = 2
+        fdParams.tseg1Abr = info.bitrate.timeSeg1
+        fdParams.tseg2Abr = info.bitrate.timeSeg2
+        fdParams.sjwAbr = info.bitrate.sjw
 
-        fdParams.dataBitRate = info.bitrate.freq //CANFD波特率
-        fdParams.tseg1Dbr = 6
-        fdParams.tseg2Dbr = 3
-        fdParams.sjwDbr = 2
+        fdParams.dataBitRate = info.bitratefd.freq //CANFD波特率
+        fdParams.tseg1Dbr = info.bitratefd.timeSeg1
+        fdParams.tseg2Dbr = info.bitratefd.timeSeg2
+        fdParams.sjwDbr = info.bitratefd.sjw
         fdParams.options = VECTOR.CANFD_CONFOPT_NO_ISO // 可选：启用 ISO 标准帧格式
 
         xlStatus = VECTOR.xlCanFdSetConfiguration(
@@ -216,16 +215,24 @@ export class VECTOR_CAN extends CanBase {
           PermissionMask.value(),
           fdParams
         )
+        if (xlStatus !== VECTOR.XL_SUCCESS) {
+          throw new Error('CanFdSetConfiguration failed')
+        } else {
+          console.log('CanFdSetConfiguration success')
+        }
       } else {
         //普通CAN
-        xlStatus = VECTOR.xlCanSetChannelBitrate(
-          PortHandle.value(),
-          PermissionMask.value(),
-          info.bitrate.freq //普通波特率
-        )
-      }
-      if (xlStatus !== VECTOR.XL_SUCCESS) {
-        throw new Error('CanSetChannelBitrate failed')
+        const params = new VECTOR.XLchipParams()
+        params.bitRate = info.bitrate.freq
+        params.sjw = info.bitrate.sjw
+        params.tseg1 = info.bitrate.timeSeg1
+        params.tseg2 = info.bitrate.timeSeg2
+        params.sam = 1
+
+        xlStatus = VECTOR.xlCanSetChannelParams(PortHandle.value(), PermissionMask.value(), params)
+        if (xlStatus !== VECTOR.XL_SUCCESS) {
+          throw new Error('CanSetChannelBitrate failed')
+        }
       }
 
       // 通道激活（完整操作序列）

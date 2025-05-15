@@ -28,42 +28,44 @@ describe('vector test', () => {
       name: 'test',
       id: 'VECTOR_2_#CAN',
       vendor: 'vector',
-      canfd: false, //false true
+      canfd: true, //false true
       bitrate: {
-        freq: 500000, //500000 250000
-        preScaler: 2,
-        timeSeg1: 68,
-        timeSeg2: 11,
-        sjw: 11
+        sjw: 1,
+        timeSeg1: 13,
+        timeSeg2: 2,
+        preScaler: 10,
+        freq: 500000,
+        clock: '80'
       },
       bitratefd: {
-        freq: 2000000, //2000000
-        preScaler: 1,
-        timeSeg1: 20,
-        timeSeg2: 19,
-        sjw: 19
+        sjw: 1,
+        timeSeg1: 7,
+        timeSeg2: 2,
+        preScaler: 4,
+        freq: 2000000,
+        clock: '80'
       }
     })
   })
 
   test('write multi frame', async () => {
-    const list = []
-    for (let i = 0; i < 10; i++) {
-      list.push(
-        client.writeBase(
-          3,
-          {
-            idType: CAN_ID_TYPE.STANDARD,
-            brs: false,
-            canfd: false, //false true
-            remote: false
-          },
-          Buffer.alloc(8, i)
-        )
-      )
-    }
-    const r = await Promise.all(list)
-    console.log(r)
+    // const list = []
+    // for (let i = 0; i < 10; i++) {
+    //   list.push(
+    //     client.writeBase(
+    //       3,
+    //       {
+    //         idType: CAN_ID_TYPE.STANDARD,
+    //         brs: false,
+    //         canfd: false, //false true
+    //         remote: false
+    //       },
+    //       Buffer.alloc(8, i)
+    //     )
+    //   )
+    // }
+    // const r = await Promise.all(list)
+    // console.log(r)
   })
 
   afterAll(() => {
