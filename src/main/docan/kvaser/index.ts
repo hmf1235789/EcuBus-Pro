@@ -15,6 +15,7 @@ import { CanLOG } from '../../log'
 import KV from './../build/Release/kvaser.node'
 import { v4 } from 'uuid'
 import { CanBase } from '../base'
+import { LinDevice } from 'nodeCan/lin'
 
 function buf2str(buf: Buffer) {
   const nullCharIndex = buf.indexOf(0) // 0 是 '\0' 的 ASCII 码
@@ -97,7 +98,10 @@ export class KVASER_CAN extends CanBase {
       throw new Error(err2str(ret))
     }
 
-    ret = KV.canSetBusOutputControl(this.handle, KV.canDRIVER_NORMAL)
+    ret = KV.canSetBusOutputControl(
+      this.handle,
+      info.silent ? KV.canDRIVER_SILENT : KV.canDRIVER_NORMAL
+    )
     if (ret != 0) {
       throw new Error(err2str(ret))
     }
@@ -284,13 +288,49 @@ export class KVASER_CAN extends CanBase {
       const devices: CanDevice[] = []
       for (let i = 0; i < num; i++) {
         const buf = Buffer.alloc(1024)
-        KV.canGetChannelData(i, 13, buf)
+        KV.canGetChannelData(i, KV.canCHANNELDATA_CHANNEL_NAME, buf)
         const serial = buf2str(buf)
+        KV.canGetChannelData(i, KV.canCHANNELDATA_CARD_SERIAL_NO, buf)
+        const serialNumber = buf.readBigUInt64LE(0).toString(10)
         devices.push({
           id: `kvaser-${i}`,
           handle: i,
-          label: `${serial}`
+          label: `${serial}`,
+          serialNumber: serialNumber
         })
+      }
+      return devices
+    }
+    return []
+  }
+  static getLinDevices(): LinDevice[] {
+    if (process.platform == 'win32') {
+      KV.canUnloadLibrary()
+      KV.canInitializeLibrary()
+      const tsClass = new KV.JSINT32()
+      const status = KV.canGetNumberOfChannels(tsClass.cast())
+      if (status != 0) {
+        throw new Error(err2str(status))
+      }
+      const num = tsClass.value()
+      const devices: CanDevice[] = []
+      for (let i = 0; i < num; i++) {
+        const buf = Buffer.alloc(1024)
+        //canCHANNEL_CAP_xxx
+        KV.canGetChannelData(i, 1, buf)
+        const flags = buf.readUInt32LE(0)
+        if (flags & KV.canCHANNEL_CAP_LIN_HYBRID) {
+          KV.canGetChannelData(i, KV.canCHANNELDATA_CHANNEL_NAME, buf)
+          const serial = buf2str(buf)
+          KV.canGetChannelData(i, KV.canCHANNELDATA_CARD_SERIAL_NO, buf)
+          const serialNumber = buf.readBigUInt64LE(0).toString(10)
+          devices.push({
+            id: `kvaser-${i}`,
+            handle: i,
+            label: `${serial}`,
+            serialNumber: serialNumber
+          })
+        }
       }
       return devices
     }
@@ -299,8 +339,10 @@ export class KVASER_CAN extends CanBase {
 
   static override getLibVersion(): string {
     if (process.platform == 'win32') {
-      const v = KV.canGetVersion()
-      return `${v}`
+      const v = KV.canGetVersionEx(KV.canVERSION_CANLIB32_PRODVER)
+      const buf = Buffer.alloc(2)
+      buf.writeUInt16BE(v, 0)
+      return `${buf[0]}.${buf[1]}`
     }
     return 'only support windows'
   }
@@ -377,6 +419,11 @@ export class KVASER_CAN extends CanBase {
   ) {
     return new Promise<number>(
       (resolve: (value: number) => void, reject: (reason: CanError) => void) => {
+        if (this.info.silent) {
+          reject(new CanError(CAN_ERROR_ID.CAN_DRIVER_SILENT, msgType))
+          return
+        }
+
         const item = this.pendingBaseCmds.get(cmdId)
         if (item) {
           item.push({ resolve, reject, data, msgType, extra })

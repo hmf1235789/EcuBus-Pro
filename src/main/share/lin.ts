@@ -8,6 +8,7 @@ export interface LinDevice {
   label: string
   id: string
   handle: any
+  serialNumber?: string
   busy?: boolean
   toomossVolt?: number
 }

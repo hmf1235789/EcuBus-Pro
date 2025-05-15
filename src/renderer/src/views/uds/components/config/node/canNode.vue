@@ -26,7 +26,22 @@
           :label="item.label"
           :value="item.handle"
           :disabled="item.busy"
-        />
+        >
+          <span
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              width: 100%;
+              gap: 15px;
+            "
+          >
+            <span>{{ item.label }}</span>
+            <span v-if="item.serialNumber" style="color: var(--el-text-color-secondary)">
+              #{{ item.serialNumber }}
+            </span>
+          </span>
+        </el-option>
         <template #footer>
           <el-button
             text
@@ -62,11 +77,68 @@
         <el-option label="Disable" :value="false" />
       </el-select>
     </el-form-item>
+    <el-form-item
+      v-else-if="props.vendor == 'kvaser'"
+      label="Silent Mode"
+      prop="silent"
+      placeholder="Disable"
+    >
+      <!-- add tips, silent mode will not send any message -->
+      <template #label="{ label }">
+        <span class="vm">
+          <span style="margin-right: 2px">{{ label }}</span>
+          <el-tooltip>
+            <template #content>
+              Silent mode will not send any message, only receive message
+            </template>
+
+            <el-icon>
+              <InfoFilled />
+            </el-icon>
+          </el-tooltip>
+        </span>
+      </template>
+      <el-checkbox v-model="data.silent" />
+    </el-form-item>
     <el-divider content-position="left"> Can Parameters </el-divider>
+
     <el-form-item label-width="0">
       <el-col :span="12">
         <el-form-item label="CAN FD Enable" prop="canfd">
           <el-checkbox v-model="data.canfd" @change="canFdChange" />
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item v-if="vendorConfigLimit.clock" label="Clock Freq (MHz)" prop="bitrate.clock">
+          <template #label="{ label }">
+            <span class="vm">
+              <span style="margin-right: 2px">{{ label }}</span>
+              <el-tooltip>
+                <template #content>
+                  If you can't find the frequency you need, you can input it manually
+                </template>
+
+                <el-icon>
+                  <InfoFilled />
+                </el-icon>
+              </el-tooltip>
+            </span>
+          </template>
+          <el-select
+            v-model="data.bitrate.clock"
+            size="small"
+            allow-create
+            filterable
+            style="width: 300px"
+            @change="clockChange"
+          >
+            <el-option
+              v-for="item in vendorConfigLimit.clock"
+              :key="item.clock"
+              :label="item.name"
+              :value="item.clock"
+            />
+          </el-select>
         </el-form-item>
       </el-col>
       <!-- <el-col :span="12">
@@ -107,17 +179,15 @@
     <el-form-item label-width="0" prop="bitrate">
       <vxe-grid v-bind="gridOptions" style="width: 100%">
         <template #edit_freq="{ row }">
-          <el-input v-model.number="row.freq" />
+          <el-input v-model.number="row.freq" style="width: 100%" />
         </template>
-        <template #edit_clock="{ row, rowIndex }">
-          <el-select v-if="rowIndex == 0" v-model="row.clock" size="small" allow-create filterable>
-            <el-option
-              v-for="item in clockList"
-              :key="item.clock"
-              :label="item.name"
-              :value="item.clock"
-            />
-          </el-select>
+        <template #default_time="{ row }">
+          <el-tooltip effect="light" placement="bottom">
+            <template #content> Bit Timing Calculator </template>
+            <el-button type="primary" size="small" plain @click="showCalculator(row)">
+              <Icon :icon="tableIcon" />
+            </el-button>
+          </el-tooltip>
         </template>
         <template #default_clock="{ row, rowIndex }">
           <span v-if="rowIndex == 0">{{ row.clock }}</span>
@@ -165,6 +235,16 @@
       </div>
     </el-form-item>
   </el-form>
+  <BitTimingCalculator
+    v-if="calculatorVisible"
+    v-model="calculatorVisible"
+    :height="height - 100"
+    :freq="currentRow?.freq || 0"
+    :clock="Number(data.bitrate.clock || 0)"
+    :vendor="props.vendor"
+    :ability="vendorConfigLimit"
+    @result="handleCalculatorResult"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -172,6 +252,7 @@ import {
   Ref,
   computed,
   inject,
+  nextTick,
   onBeforeMount,
   onMounted,
   onUnmounted,
@@ -186,10 +267,21 @@ import { InfoFilled } from '@element-plus/icons-vue'
 import { assign, cloneDeep } from 'lodash'
 import { useDataStore } from '@r/stores/data'
 import { VxeGridProps, VxeGrid } from 'vxe-table'
+import { Icon } from '@iconify/vue'
+import tableIcon from '@iconify/icons-mdi/table'
+import BitTimingCalculator from '@r/components/BitTimingCalculator.vue'
 
+const props = defineProps<{
+  index: string
+  vendor: CanVendor
+  height: number
+}>()
+const height = toRef(props, 'height')
 const ruleFormRef = ref<FormInstance>()
+
 const devices = useDataStore()
 const globalStart = toRef(window, 'globalStart')
+
 const data = ref<CanBaseInfo>({
   id: '',
   name: '',
@@ -207,6 +299,7 @@ const data = ref<CanBaseInfo>({
     clock: '80'
   }
 })
+
 const tableList = computed(() => {
   const list = [data.value.bitrate]
   if (data.value.canfd && data.value.bitratefd) {
@@ -214,6 +307,14 @@ const tableList = computed(() => {
   }
   return list
 })
+
+const clockChange = (value: string) => {
+  //form validate
+  ruleFormRef.value?.validateField('bitrate')
+  if (data.value.canfd) {
+    ruleFormRef.value?.validateField('bitratefd')
+  }
+}
 
 const configInfo: Record<CanVendor, any> = {
   zlg: {
@@ -223,7 +324,9 @@ const configInfo: Record<CanVendor, any> = {
     sjw: false,
     preScaler: false,
     freq: true,
-    zlgSpec: true
+    zlgSpec: true,
+    can: {},
+    canFd: {}
   },
   peak: {
     clock: true,
@@ -232,7 +335,76 @@ const configInfo: Record<CanVendor, any> = {
     sjw: true,
     preScaler: true,
     freq: true,
-    zlgSpec: false
+    zlgSpec: false,
+    can: {
+      clock: [
+        { clock: '8', name: '8' },
+        { clock: '20', name: '20' },
+        { clock: '24', name: '24' },
+        { clock: '30', name: '30' },
+        { clock: '40', name: '40' },
+        { clock: '60', name: '60' },
+        { clock: '80', name: '80' }
+      ],
+      preScaler: {
+        min: 1,
+        max: 32
+      },
+      tsg1: {
+        min: 2,
+        max: 256
+      },
+      tsg2: {
+        min: 1,
+        max: 128
+      },
+      bitrate: {
+        sjw: 1,
+        timeSeg1: 13,
+        timeSeg2: 2,
+        preScaler: 10,
+        freq: 500000,
+        clock: '80'
+      }
+    },
+    canFd: {
+      clock: [
+        { clock: '20', name: '20' },
+        { clock: '24', name: '24' },
+        { clock: '30', name: '30' },
+        { clock: '40', name: '40' },
+        { clock: '60', name: '60' },
+        { clock: '80', name: '80' }
+      ],
+      preScaler: {
+        min: 1,
+        max: 256
+      },
+      tsg1: {
+        min: 2,
+        max: 256
+      },
+      tsg2: {
+        min: 1,
+        max: 128
+      },
+      bitrate: {
+        sjw: 1,
+        timeSeg1: 13,
+        timeSeg2: 2,
+        preScaler: 10,
+        freq: 500000,
+        clock: '80'
+      },
+      bitratefd: {
+        sjw: 1,
+        timeSeg1: 7,
+        timeSeg2: 2,
+        preScaler: 4,
+        freq: 2000000,
+        clock: '80'
+      }
+    }
   },
   vector: {
     clock: true,
@@ -250,7 +422,56 @@ const configInfo: Record<CanVendor, any> = {
     sjw: true,
     preScaler: true,
     freq: true,
-    zlgSpec: false
+    zlgSpec: false,
+    can: {
+      clock: [
+        { clock: '16', name: '16' },
+        { clock: '20', name: '20' }
+      ],
+      preScaler: {
+        min: 2,
+        max: 8
+      },
+      tsg1: {
+        min: 2,
+        max: 256
+      },
+      tsg2: {
+        min: 2,
+        max: 128
+      },
+      bitrate: {
+        sjw: 1,
+        timeSeg1: 13,
+        timeSeg2: 2,
+        preScaler: 2,
+        freq: 500000,
+        clock: '16'
+      }
+    },
+    canFd: {
+      clock: [{ clock: '80', name: '80' }],
+      bitrate: {
+        sjw: 1,
+        timeSeg1: 13,
+        timeSeg2: 2,
+        preScaler: 10,
+        freq: 500000,
+        clock: '80'
+      },
+      bitratefd: {
+        sjw: 1,
+        timeSeg1: 7,
+        timeSeg2: 2,
+        preScaler: 4,
+        freq: 2000000,
+        clock: '80'
+      },
+      preScaler: {
+        min: 1,
+        max: 32
+      }
+    }
   },
   simulate: {
     clock: false,
@@ -259,7 +480,9 @@ const configInfo: Record<CanVendor, any> = {
     sjw: false,
     preScaler: false,
     freq: true,
-    zlgSpec: false
+    zlgSpec: false,
+    can: {},
+    canFd: {}
   },
   toomoss: {
     clock: true,
@@ -268,9 +491,57 @@ const configInfo: Record<CanVendor, any> = {
     sjw: true,
     preScaler: true,
     freq: true,
-    zlgSpec: false
+    zlgSpec: false,
+    can: {
+      clock: [
+        { clock: '80', name: '80' },
+        { clock: '40', name: '40' }
+      ],
+      preScaler: {
+        min: 1,
+        max: 256
+      },
+      bitrate: {
+        sjw: 1,
+        timeSeg1: 13,
+        timeSeg2: 2,
+        preScaler: 10,
+        freq: 500000,
+        clock: '80'
+      }
+    },
+    canFd: {
+      clock: [
+        { clock: '80', name: '80' },
+        { clock: '40', name: '40' }
+      ],
+      bitrate: {
+        sjw: 1,
+        timeSeg1: 13,
+        timeSeg2: 2,
+        preScaler: 10,
+        freq: 500000,
+        clock: '80'
+      },
+      bitratefd: {
+        sjw: 1,
+        timeSeg1: 7,
+        timeSeg2: 2,
+        preScaler: 4,
+        freq: 2000000,
+        clock: '80'
+      },
+      preScaler: {
+        min: 1,
+        max: 256
+      }
+    }
   }
 }
+
+const vendorConfigLimit = computed(() => {
+  return configInfo[props.vendor][data.value.canfd ? 'canFd' : 'can']
+})
 
 const gridOptions = computed(() => {
   const v: VxeGridProps<CanBitrate> = {
@@ -285,19 +556,38 @@ const gridOptions = computed(() => {
       mode: 'row',
       autoClear: true
     },
+    rowClassName: ({ rowIndex }) => {
+      if (rowIndex == 0 && error0.value) {
+        return 'can-node-error-row'
+      }
+      if (rowIndex == 1 && error1.value) {
+        return 'can-node-error-row'
+      }
+      return ''
+    },
     columns: [
+      // {
+      //   field: 'clock',
+      //   title: 'Clock',
+      //   minWidth: 180,
+      //   visible: configInfo[props.vendor].clock,
+      //   editRender: {},
+      //   slots: { edit: 'edit_clock', default: 'default_clock' }
+      // },
       {
-        field: 'clock',
-        title: 'Clock',
-        minWidth: 180,
-        visible: configInfo[props.vendor].clock,
-        editRender: {},
-        slots: { edit: 'edit_clock', default: 'default_clock' }
+        field: 'time',
+
+        fixed: 'left',
+        width: 60,
+        visible: configInfo[props.vendor].time,
+
+        slots: { default: 'default_time' }
       },
       {
         field: 'freq',
-        title: 'Frequency',
-        minWidth: 180,
+        title: 'Frequency (Hz)',
+        minWidth: 150,
+        fixed: 'left',
         visible: configInfo[props.vendor].freq,
         editRender: {},
         slots: { edit: 'edit_freq' }
@@ -305,7 +595,7 @@ const gridOptions = computed(() => {
       {
         field: 'timeSeg1',
         title: 'TSEG1',
-        width: 180,
+        width: 150,
         visible: configInfo[props.vendor].timeSeg1,
         editRender: {},
         slots: { edit: 'edit_timeSeg1' }
@@ -313,7 +603,7 @@ const gridOptions = computed(() => {
       {
         field: 'timeSeg2',
         title: 'TSEG2',
-        width: 180,
+        width: 150,
         visible: configInfo[props.vendor].timeSeg2,
         editRender: {},
         slots: { edit: 'edit_timeSeg2' }
@@ -321,7 +611,7 @@ const gridOptions = computed(() => {
       {
         field: 'sjw',
         title: 'SJW',
-        width: 180,
+        width: 150,
         visible: configInfo[props.vendor].sjw,
         editRender: {},
         slots: { edit: 'edit_sjw' }
@@ -329,7 +619,7 @@ const gridOptions = computed(() => {
       {
         field: 'preScaler',
         title: 'Pre Scaler',
-        width: 180,
+        width: 150,
         visible: configInfo[props.vendor].preScaler,
         editRender: {},
         slots: { edit: 'edit_preScaler' }
@@ -346,34 +636,14 @@ const gridOptions = computed(() => {
         field: 'baudrate',
         title: 'Baudrate/Sample Point',
         align: 'center',
-        minWidth: 250,
+        fixed: 'right',
+        minWidth: 200,
         slots: { default: 'default_baudrate' }
       }
     ],
     data: tableList.value
   }
   return v
-})
-const clockList = computed(() => {
-  if (props.vendor == 'peak') {
-    return [
-      { clock: '8', name: '8' },
-      { clock: '20', name: '20' },
-      { clock: '24', name: '24' },
-      { clock: '30', name: '30' },
-      { clock: '40', name: '40' },
-      { clock: '60', name: '60' },
-      { clock: '80', name: '80' }
-    ]
-  } else if (props.vendor == 'kvaser') {
-    return [
-      { clock: '80', name: '80' },
-      { clock: '40', name: '40' }
-    ]
-  } else if (props.vendor == 'toomoss') {
-    return [{ clock: '40', name: '40' }]
-  }
-  return []
 })
 
 const dbList = computed(() => {
@@ -388,18 +658,35 @@ const dbList = computed(() => {
 })
 
 function canFdChange() {
-  if (data.value.canfd) {
-    if (!data.value.bitratefd) {
-      data.value.bitratefd = {
-        sjw: 1,
-        timeSeg1: 2,
-        timeSeg2: 1,
-        preScaler: 1,
-        freq: 500000
+  nextTick(() => {
+    if (vendorConfigLimit.value.clock) {
+      //check if clock is in vendorConfigLimit.value.clock,不存在则使用vendorConfigLimit.value.clock[0].clock
+      if (!vendorConfigLimit.value.clock.some((item) => item.clock == data.value.bitrate.clock)) {
+        data.value.bitrate.clock = vendorConfigLimit.value.clock[0].clock
       }
     }
-  }
+    if (data.value.canfd) {
+      if (!data.value.bitratefd) {
+        if (vendorConfigLimit.value.bitratefd) {
+          data.value.bitratefd = cloneDeep(vendorConfigLimit.value.bitratefd)
+        } else {
+          data.value.bitratefd = cloneDeep(data.value.bitrate)
+        }
+      }
+    }
+    ruleFormRef.value?.validateField('bitrate')
+    if (data.value.canfd) {
+      ruleFormRef.value?.validateField('bitratefd')
+    }
+  })
 }
+
+onMounted(() => {
+  if (vendorConfigLimit.value.bitrate) {
+    data.value.bitrate = cloneDeep(vendorConfigLimit.value.bitrate)
+  }
+  // ruleFormRef.value?.validate()
+})
 
 //peak baudrate calc
 /*
@@ -464,8 +751,11 @@ const nameCheck = (rule: any, value: any, callback: any) => {
     callback(new Error('Please input node name'))
   }
 }
-
+const error0 = ref(false)
+const error1 = ref(false)
 const bitrateCheck = (rule: any, value: any, callback: any) => {
+  error0.value = false
+  error1.value = false
   if (props.vendor == 'peak' || props.vendor == 'kvaser' || props.vendor == 'toomoss') {
     if (data.value.bitrate.clock == undefined) {
       callback(new Error('Please select clock'))
@@ -475,40 +765,50 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
     //   callback(new Error('Please select correct clock'))
     // }
     if (data.value.bitrate.timeSeg1 + 1 < data.value.bitrate.timeSeg2) {
+      error0.value = true
       callback(new Error('normal tseg1 must be greater than tseg2-1'))
     }
     if (data.value.bitrate.sjw > data.value.bitrate.timeSeg2) {
+      error0.value = true
       callback(new Error('normal sjw must be less than tseg2'))
     }
     //brp from 1-1024
     if (data.value.bitrate.preScaler < 1 || data.value.bitrate.preScaler > 1024) {
+      error0.value = true
       callback(new Error('normal prescale must be between 1-1024'))
     }
     //tseg1 from 1-256
     if (data.value.bitrate.timeSeg1 < 1 || data.value.bitrate.timeSeg1 > 256) {
+      error0.value = true
       callback(new Error('normal tseg1 must be between 1-256'))
     }
     //tseg2 from 1-128
     if (data.value.bitrate.timeSeg2 < 1 || data.value.bitrate.timeSeg2 > 128) {
+      error0.value = true
       callback(new Error('normal tseg2 must be between 1-128'))
     }
     if (data.value.canfd && data.value.bitratefd) {
       if (data.value.bitratefd.timeSeg1 + 1 <= data.value.bitratefd.timeSeg2) {
+        error1.value = true
         callback(new Error('data tseg1 must be greater than tseg2-1'))
       }
       if (data.value.bitratefd.sjw > data.value.bitratefd.timeSeg2) {
+        error1.value = true
         callback(new Error('data sjw must be less than tseg2'))
       }
       //brp from 1-1024
       if (data.value.bitratefd.preScaler < 1 || data.value.bitratefd.preScaler > 1024) {
+        error1.value = true
         callback(new Error('data prescale must be between 1-1024'))
       }
       //tseg1 from 1-32
       if (data.value.bitratefd.timeSeg1 < 1 || data.value.bitratefd.timeSeg1 > 32) {
+        error1.value = true
         callback(new Error('data tseg1 must be between 1-32'))
       }
       //tseg2 from 1-128
       if (data.value.bitratefd.timeSeg2 < 1 || data.value.bitratefd.timeSeg2 > 16) {
+        error1.value = true
         callback(new Error('data tseg2 must be between 1-16'))
       }
     }
@@ -518,6 +818,7 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
         (data.value.bitrate.preScaler *
           (data.value.bitrate.timeSeg1 + data.value.bitrate.timeSeg2 + 1))
       if (calcFreq != data.value.bitrate.freq) {
+        error0.value = true
         callback(new Error(`Please input correct frequency, calculated frequency is ${calcFreq}Hz`))
       }
       if (data.value.canfd && data.value.bitratefd) {
@@ -526,6 +827,7 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
           (data.value.bitratefd.preScaler *
             (data.value.bitratefd.timeSeg1 + data.value.bitratefd.timeSeg2 + 1))
         if (calcFreq != data.value.bitratefd.freq) {
+          error1.value = true
           callback(
             new Error(`Please input correct data frequency, calculated frequency is ${calcFreq}Hz`)
           )
@@ -541,12 +843,14 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
           if (data.value.bitratefd.freq) {
             callback()
           } else {
+            error1.value = true
             callback(new Error('Please input data frequency'))
           }
         } else {
           callback()
         }
       } else {
+        error0.value = true
         callback(new Error('Please input frequency'))
       }
     }
@@ -563,6 +867,14 @@ const rules: FormRules<CanBaseInfo> = {
       trigger: 'change'
     }
   ],
+  'bitrate.clock': {
+    required: configInfo[props.vendor].clock,
+    type: 'number',
+    message: 'Clock must be a number',
+    transform(value: string) {
+      return Number(value)
+    }
+  },
   bitrate: [
     {
       validator: bitrateCheck
@@ -574,11 +886,6 @@ const rules: FormRules<CanBaseInfo> = {
     }
   ]
 }
-
-const props = defineProps<{
-  index: string
-  vendor: CanVendor
-}>()
 
 const editIndex = ref(props.index)
 
@@ -635,6 +942,27 @@ onBeforeMount(() => {
 onUnmounted(() => {
   watcher()
 })
+
+const showCalculator = (row: CanBitrate) => {
+  calculatorVisible.value = true
+  currentRow.value = row
+}
+
+const calculatorVisible = ref(false)
+const currentRow = ref<CanBitrate | null>(null)
+
+const handleCalculatorResult = (result: any) => {
+  if (currentRow.value) {
+    currentRow.value.timeSeg1 = result.t1
+    currentRow.value.timeSeg2 = result.t2
+    currentRow.value.sjw = result.sjw
+    currentRow.value.preScaler = result.presc
+    ruleFormRef.value?.validateField('bitrate')
+    if (data.value.canfd && data.value.bitratefd) {
+      ruleFormRef.value?.validateField('bitratefd')
+    }
+  }
+}
 </script>
 <style scoped>
 .hardware {
@@ -645,5 +973,10 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   /* 垂直居中对齐 */
+}
+</style>
+<style>
+.can-node-error-row {
+  background-color: var(--el-color-danger-light-3);
 }
 </style>

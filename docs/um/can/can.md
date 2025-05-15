@@ -20,6 +20,16 @@ For demonstration purposes, we'll use a simulated device. You can configure the 
 
 ![alt text](image.png)
 
+### Baud Rate Setting
+
+The baud rate setting is used to configure the baud rate of the CAN bus.
+
+Click the `Bit Timing` button to open the bit timing configuration window.
+![alt text](image-8.png)
+![alt text](image-9.png)
+
+
+
 ## Interactive Mode and Node Scripts
 
 EcuBus-Pro offers two primary methods for CAN communication:

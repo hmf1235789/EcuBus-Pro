@@ -33,13 +33,13 @@
         </el-button>
       </el-tooltip>
       <el-divider v-if="showFilter" direction="vertical" />
-      <el-dropdown v-if="showFilter">
+      <el-dropdown v-if="showFilter" trigger="click">
         <span class="el-dropdown-link">
           <Icon :icon="filterIcon" />
         </span>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-checkbox-group v-model="checkList" size="small" style="width: 200px; margin: 10px">
+            <el-checkbox-group v-model="checkList" size="small" style="margin: 10px; width: 150px">
               <el-checkbox
                 v-for="item of LogFilter"
                 :key="item.v"
@@ -51,6 +51,17 @@
           </el-dropdown-menu>
         </template>
       </el-dropdown>
+      <el-select
+        v-model="instanceList"
+        size="small"
+        style="width: 200px; margin: 4px; margin-left: 6px"
+        multiple
+        collapse-tags
+        placeholder="Filter by device"
+        clearable
+      >
+        <el-option v-for="item of allInstanceList" :key="item" :label="item" :value="item" />
+      </el-select>
       <el-divider direction="vertical" />
       <el-dropdown size="small" @command="saveAll">
         <el-button type="info" link>
@@ -126,6 +137,20 @@ interface LogData {
 }
 
 const database = useDataStore()
+const instanceList = ref<string[]>([])
+const allInstanceList = computed(() => {
+  const list: string[] = []
+  for (const item of Object.values(database.devices)) {
+    if (item.type == 'can' && item.canDevice) {
+      list.push(item.canDevice.name)
+    } else if (item.type == 'lin' && item.linDevice) {
+      list.push(item.linDevice.name)
+    } else if (item.type == 'eth' && item.ethDevice) {
+      list.push(item.ethDevice.name)
+    }
+  }
+  return list
+})
 // const logData = ref<LogData[]>([])
 
 interface CanBaseLog {
@@ -231,6 +256,8 @@ function logDisplay(method: string, vals: LogItem[]) {
     logData.push(data)
   }
   for (const val of vals) {
+    if (instanceList.value.length && val.instance && !instanceList.value.includes(val.instance))
+      continue
     if (val.message.method == 'canBase') {
       insertData({
         method: val.message.method,
@@ -444,7 +471,7 @@ function filterChange(method: 'uds' | 'canBase' | 'ipBase' | 'linBase', val: boo
 }
 
 const tableHeight = computed(() => {
-  return props.height - 20
+  return props.height - 30
 })
 const tableWidth = computed(() => {
   return props.width

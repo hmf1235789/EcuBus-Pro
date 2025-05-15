@@ -10,6 +10,10 @@ Feel free to contact us for more details on sponsorship.
 
 ## Payment Methods
 
+### Github Sponsor
+
+<iframe src="https://github.com/sponsors/frankie-zeng/card" title="Sponsor frankie-zeng" height="225" width="600" style="border: 0;"></iframe>
+
 ### Paypal
 
 ![alt text](paypal.png)
@@ -86,3 +90,5 @@ Please contact me to discuss what you want for this tier!
 | Date | Supporter | Method | Amount | Comment |
 | --- | --- | --- | --- | --- |
 | 2025-03-25 | 胖胖的风笛 | WeChat | ¥20 | 一杯coffee |
+| 2025-05-06 | **刚 | AliPay | ¥9.9 | 感谢作者开源 |
+| 2025-05-14 | 悦动思行 | WeChat | ¥20 | 请楼主一杯奶茶 |
