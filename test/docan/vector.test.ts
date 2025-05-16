@@ -14,7 +14,8 @@ import { CanTp } from 'src/main/docan/cantp'
 
 const dllPath = path.join(__dirname, '../../resources/lib')
 VECTOR_CAN.loadDllPath(dllPath)
-
+console.log(VECTOR_CAN.getLibVersion())
+console.log(VECTOR_CAN.getValidDevices())
 // test('vector devices', () => {
 //   const devices = VECTOR_CAN.getValidDevices()
 //   console.log(devices)
@@ -24,11 +25,11 @@ describe('vector test', () => {
   let client!: VECTOR_CAN
   beforeAll(() => {
     client = new VECTOR_CAN({
-      handle: '2:2',
+      handle: '3:3',
       name: 'test',
-      id: 'VECTOR_2_#CAN',
+      id: 'VECTOR_3_#CAN',
       vendor: 'vector',
-      canfd: true, //false true
+      canfd: true,
       bitrate: {
         sjw: 1,
         timeSeg1: 13,
@@ -48,56 +49,72 @@ describe('vector test', () => {
     })
   })
 
-  // test('write multi frame', async () => {
-  //   const list = []
-  //   for (let i = 0; i < 10; i++) {
-  //     list.push(
-  //       client.writeBase(
-  //         3,
-  //         {
-  //           idType: CAN_ID_TYPE.STANDARD,
-  //           brs: false,
-  //           canfd: true, //false true
-  //           remote: false
-  //         },
-  //         Buffer.alloc(8, i)
-  //       )
-  //     )
-  //   }
-  //   const r = await Promise.all(list)
-
-  //   console.log(r)
-  // })
-  test('write error frame can-fd', async () => {
-    try {
-      await client.writeBase(
-        3,
-        {
-          idType: CAN_ID_TYPE.STANDARD,
-          brs: false,
-          canfd: true, //false true
-          remote: false
-        },
-        Buffer.alloc(63, 1)
+  test.skip('write multi frame', async () => {
+    const list = []
+    for (let i = 0; i < 10; i++) {
+      list.push(
+        client.writeBase(
+          3,
+          {
+            idType: CAN_ID_TYPE.STANDARD,
+            brs: false,
+            canfd: false, //false true
+            remote: false
+          },
+          Buffer.alloc(8, i)
+        )
       )
-    } catch (e) {
-      console.log(e)
     }
+    const r = await Promise.all(list)
 
-    try {
-      await client.writeBase(
-        3,
-        {
-          idType: CAN_ID_TYPE.STANDARD,
-          brs: false,
-          canfd: true, //false true
-          remote: false
-        },
-        Buffer.alloc(33, 1)
-      )
-    } catch (e) {
-      // console.log(e)
-    }
+    console.log(r)
+  })
+  test('read frame', async () => {
+    const r = await client.readBase(
+      0xa2,
+      {
+        idType: CAN_ID_TYPE.STANDARD,
+        brs: false,
+        canfd: false, //false true
+        remote: false
+      },
+      5000 * 1000
+    )
+    console.log(r)
+    // const r1 = await client.readBase(
+    //   0x0,
+    //   {
+    //     idType: CAN_ID_TYPE.STANDARD,
+    //     brs: true,
+    //     canfd: true, //false true
+    //     remote: false
+    //   },
+    //   5000 * 1000
+    // )
+    // console.log(r1)
+  })
+  test('write frame can-fd', async () => {
+    await client.writeBase(
+      3,
+      {
+        idType: CAN_ID_TYPE.STANDARD,
+        brs: false,
+        canfd: true, //false true
+        remote: false
+      },
+      Buffer.alloc(63, 1)
+    )
+
+    await client.writeBase(
+      3,
+      {
+        idType: CAN_ID_TYPE.STANDARD,
+        brs: false,
+        canfd: true, //false true
+        remote: false
+      },
+      Buffer.alloc(33, 1)
+    )
   })
   test.skip('write error frame can', async () => {
     try {
@@ -131,6 +148,7 @@ describe('vector test', () => {
     }
   })
   afterAll(() => {
+    console.log('close')
     client.close()
   })
 })

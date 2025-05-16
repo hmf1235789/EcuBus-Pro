@@ -1,17 +1,19 @@
-#include "vxlapi.h"
+
 #include "napi.h"
 #include <chrono>
 #include <thread>
 #include <windows.h>
 #include <map>
 #include <cstring>
+#include "vxlapi.h"
+
 
 // Data structure representing our thread-safe function context
 struct TsfnContext {
   std::thread nativeThread;  
   bool closed;                // Flag to signal thread termination
   Napi::ThreadSafeFunction tsfn;
-  HANDLE xlHandle;          // Vector handle for notification
+  XLhandle xlHandle;          // Vector handle for notification
   HANDLE stopEvent;
   XLportHandle portHandle;    // Vector port handle
 };

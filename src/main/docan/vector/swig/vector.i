@@ -27,7 +27,7 @@
 %array_class(XLstatus, xlstatus);
 %array_class(unsigned char, UINT8ARRAY)
 %array_class(XLevent, XLEVENT);
-%array_class(XL_CAN_RX_EVENT, XLCANRXEVENT);
+%array_class(XLcanRxEvent, XLCANRXEVENT);
 
 %inline %{
 void LoadDll(const char* path) {
