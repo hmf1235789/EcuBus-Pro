@@ -20,12 +20,13 @@
                   treeLabel: true
                 }"
               >
-                <img
+                <!-- <img
                   v-if="data.vendor == 'kvaser' && node.level == 1"
                   class="logo"
                   src="@r/assets/kvaser.svg"
                 />
-                <span v-else>{{ node.label }}</span>
+                <span v-else>{{ node.label }}</span> -->
+                {{ node.label }}
               </span>
               <el-button
                 v-if="data.append"

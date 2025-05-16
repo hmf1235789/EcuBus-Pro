@@ -12,7 +12,8 @@ CAN/CAN-FD is an industry-standard vehicle bus protocol designed for reliable EC
 > | PEAK | CAN, CAN-FD |
 > | KVASER | CAN, CAN-FD |
 > | ZLG | CAN, CAN-FD |
-> | Toomoss | CAN, CAN-FD (Coming Soon) |
+> | Toomoss | CAN, CAN-FD |
+> | VECTOR | CAN, CAN-FD |
 
 ## Device Configuration
 

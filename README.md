@@ -35,9 +35,10 @@ EcuBus-Pro is an open-source alternative to commercial automotive diagnostic too
 - 💻 Cross-platform support (Windows, Linux, MacOS) - [Install](./docs/about/install.md)
 - 🔌 Multi-hardware support
   - **PEAK**: CAN, CAN-FD, LIN
-  - **KVASER**: CAN, CAN-FD
+  - **KVASER**: CAN, CAN-FD, LIN
   - **ZLG**: CAN, CAN-FD
   - **Toomoss**: CAN, CAN-FD, LIN
+  - **VECTOR**: CAN, CAN-FD
 - 🛠️ Comprehensive diagnostic capabilities
   - **Diagnostic Protocols**: CAN/CAN-FD, DoIP, LIN
 - 📝 **Scripting**: Advanced TypeScript-based automation - [Details](./docs/um/script.md)
@@ -81,7 +82,7 @@ Take a visual journey through EcuBus-Pro's powerful features:
     <tr>
       <td style="width: 25%; text-align: center; padding: 20px; border: 1px solid #eee;">
         <a href="http://www.cdkhdz.com" target="_blank">
-          <img src="/logo/KUNHONG-LOGO - re-E1.png" alt="KUNHONG" width="120"/>
+          <img src="./public/logo/KUNHONG-LOGO - re-E1.png" alt="KUNHONG" width="120"/>
         </a>
       </td>
       <td style="width: 25%; text-align: center; padding: 20px; border: 1px solid #eee;">
@@ -102,19 +103,12 @@ Take a visual journey through EcuBus-Pro's powerful features:
 
 Consider [becoming a sponsor](./docs/about/sponsor) to support ongoing development. Sponsors receive prominent logo placement with website links. 🙏
 
-### Professional Support
-
-We offer premium technical support for sponsors, including access to the private [ecubus/technical-support](https://github.com/ecubus/technical-support) repository with these benefits:
-
-- [x] Priority issue resolution
-- [x] One-on-one technical consultation
-- [x] Custom development support for Security Access (0x27) and Authentication (0x29)
 
 ## Contributors
 
 Thanks to all the contributors who have helped shape EcuBus-Pro:
 
-<a href="https://github.com/ecubus/EcuBus-Pro/graphs/contributors" target="_blank"><img src="https://opencollective.com/ecubus/contributors.svg?width=890&amp;button=false"></a>
+<a href="https://github.com/ecubus/EcuBus-Pro/graphs/contributors" target="_blank"><img src="https://contrib.rocks/image?repo=ecubus/EcuBus-Pro"></a>
 
 We welcome contributions! Please review our [contribution guidelines](./.github/contributing.md) before getting started.
 

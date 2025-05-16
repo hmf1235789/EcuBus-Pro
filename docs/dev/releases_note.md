@@ -1,5 +1,19 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.36
+Changes from v0.8.35 to v0.8.36:
+
+ 
+* **[feat]:vector can done**
+* [feat]:add device filter in trace 
+* [bug]:fix can ia period send data length 
+* [opt]:opt can baudrate choose 
+* [feat]:add kvaser can silent mode 
+* [feat]:add kvaser lin feature
+---
+
+# EcuBus-Pro Release Notes
+
 ## v0.8.35
 Changes from v0.8.34 to v0.8.35:
 
