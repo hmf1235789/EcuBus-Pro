@@ -406,6 +406,69 @@ const configInfo: Record<CanVendor, any> = {
       }
     }
   },
+  vector: {
+    clock: true,
+    timeSeg1: true,
+    timeSeg2: true,
+    sjw: true,
+    preScaler: true,
+    freq: true,
+    zlgSpec: false,
+    can: {
+      clock: [{ clock: '16', name: '16' }],
+      preScaler: {
+        min: 1,
+        max: 32
+      },
+      tsg1: {
+        min: 2,
+        max: 256
+      },
+      tsg2: {
+        min: 1,
+        max: 128
+      },
+      bitrate: {
+        sjw: 1,
+        timeSeg1: 13,
+        timeSeg2: 2,
+        preScaler: 2,
+        freq: 500000,
+        clock: '16'
+      }
+    },
+    canFd: {
+      clock: [{ clock: '80', name: '80' }],
+      preScaler: {
+        min: 1,
+        max: 256
+      },
+      tsg1: {
+        min: 2,
+        max: 256
+      },
+      tsg2: {
+        min: 1,
+        max: 128
+      },
+      bitrate: {
+        sjw: 1,
+        timeSeg1: 13,
+        timeSeg2: 2,
+        preScaler: 10,
+        freq: 500000,
+        clock: '80'
+      },
+      bitratefd: {
+        sjw: 1,
+        timeSeg1: 7,
+        timeSeg2: 2,
+        preScaler: 4,
+        freq: 2000000,
+        clock: '80'
+      }
+    }
+  },
   kvaser: {
     clock: true,
     timeSeg1: true,
@@ -688,7 +751,12 @@ f_clock=20000000,nom_brp=1,nom_tseg1=14,nom_tseg2=5,nom_sjw=5  sample point = (t
 */
 
 function getBaudrateSP(speed: CanBitrate, index: number) {
-  if (props.vendor == 'peak' || props.vendor == 'kvaser' || props.vendor == 'toomoss') {
+  if (
+    props.vendor == 'peak' ||
+    props.vendor == 'kvaser' ||
+    props.vendor == 'toomoss' ||
+    props.vendor == 'vector'
+  ) {
     let f_clock = Number(speed.clock || 80) * 1000000
     if (index == 1) {
       f_clock = Number(data.value.bitrate.clock || 80) * 1000000

@@ -12,7 +12,7 @@ export interface CanBitrate {
   zlgSpec?: string
 }
 
-export type CanVendor = 'peak' | 'simulate' | 'zlg' | 'kvaser' | 'toomoss'
+export type CanVendor = 'peak' | 'simulate' | 'zlg' | 'kvaser' | 'toomoss' | 'vector'
 export interface CanBaseInfo {
   id: string
   handle: any
