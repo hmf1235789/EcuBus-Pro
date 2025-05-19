@@ -56,9 +56,14 @@ export default withMermaid({
       'meta',
       { name: 'google-site-verification', content: '8p_3SCSQGHvWlpmik3zhY902wyQ0QwxQsHaBJocrxfA' }
     ],
+    ['meta', { name: 'google-adsense-account', content: 'ca-pub-9034244817339073' }],
     [
-      'meta',
-      { name: 'google-adsense-account', content: 'ca-pub-9034244817339073' }
+      'script',
+      {
+        src: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9034244817339073',
+        async: 'true',
+        crossorigin: 'anonymous'
+      }
     ],
     [
       'script',
@@ -195,31 +200,34 @@ export default withMermaid({
       },
       {
         text: 'User Manual',
-       
+
         items: [
           { text: 'CAN', link: '/docs/um/can/can.md' },
           { text: 'LIN', link: '/docs/um/lin/lin.md' },
-          { text: 'Ethernet',items:[
-            {
-              text:'DoIP',
-              items:[
-                {
-                  text:'VIN Request Behavior',
-                  link:'/docs/um/doip/vin.md'
-                }
-              ]
-            }
-          ] },
           {
-            text:'Diagnostic',
-            items:[
+            text: 'Ethernet',
+            items: [
               {
-                text:'Build In Script',
-                link:'/docs/um/uds/buildInScript.md'
+                text: 'DoIP',
+                items: [
+                  {
+                    text: 'VIN Request Behavior',
+                    link: '/docs/um/doip/vin.md'
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            text: 'Diagnostic',
+            items: [
+              {
+                text: 'Build In Script',
+                link: '/docs/um/uds/buildInScript.md'
               },
               {
-                text:'Tester Present',
-                link:'/docs/um/uds/testerPresent.md'
+                text: 'Tester Present',
+                link: '/docs/um/uds/testerPresent.md'
               }
             ]
           },
@@ -234,8 +242,7 @@ export default withMermaid({
           },
           {
             text: 'Test',
-            link: '/docs/um/test/test.md',
-            
+            link: '/docs/um/test/test.md'
           },
           {
             text: 'Database',
@@ -246,20 +253,17 @@ export default withMermaid({
             ]
           },
           {
-            text:'Panel',link:'/docs/um/panel/index.md'
+            text: 'Panel',
+            link: '/docs/um/panel/index.md'
           },
           {
             text: 'Setting',
-          
-            items: [
-              { text: 'General', link: '/docs/um/setting/general' },
-             
-              
-            ]
+
+            items: [{ text: 'General', link: '/docs/um/setting/general' }]
           },
           {
-            text:'FAQ',
-            link:'/docs/faq/index'
+            text: 'FAQ',
+            link: '/docs/faq/index'
           }
         ]
       },
