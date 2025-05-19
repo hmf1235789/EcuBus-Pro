@@ -2,6 +2,12 @@
 
 `Lin` adapter is similar to `Can` adapter, so you can refer to the `Can` adapter for development.
 
+## Reference Pull Request
+
+You may be able to get some reference from these PRs:
+-  [#137](https://github.com/ecubus/EcuBus-Pro/pull/137) - Vector Can 
+
+
 ## Prerequisites
 
 - [node-gyp](https://github.com/nodejs/node-gyp) - For building native modules
