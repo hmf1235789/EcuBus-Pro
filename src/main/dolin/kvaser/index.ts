@@ -280,10 +280,10 @@ export class KvaserLin extends LinBase {
       throw new LinError(LIN_ERROR_ID.LIN_INTERNAL_ERROR, undefined, err2Str(result))
     }
   }
-  static getValidDevices(): LinDevice[] {
+  static getValidDevices(reaload = true): LinDevice[] {
     const devices: LinDevice[] = []
     if (process.platform == 'win32') {
-      return KVASER_CAN.getLinDevices()
+      return KVASER_CAN.getLinDevices(reaload)
     } else {
       return devices
     }

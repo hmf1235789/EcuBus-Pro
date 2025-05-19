@@ -69,7 +69,7 @@ export class KVASER_CAN extends CanBase {
     if (info.canfd) {
       flag |= KV.canOPEN_CAN_FD
     }
-    const devices = KVASER_CAN.getValidDevices()
+    const devices = KVASER_CAN.getValidDevices(false)
     let ret = KV.canOpenChannel(info.handle, flag)
     if (ret < 0) {
       throw new Error(err2str(ret))
@@ -275,10 +275,12 @@ export class KVASER_CAN extends CanBase {
   setOption(cmd: string, val: any): any {
     return this._setOption(cmd, val)
   }
-  static override getValidDevices(): CanDevice[] {
+  static override getValidDevices(reaload = true): CanDevice[] {
     if (process.platform == 'win32') {
-      KV.canUnloadLibrary()
-      KV.canInitializeLibrary()
+      if (reaload) {
+        KV.canUnloadLibrary()
+        KV.canInitializeLibrary()
+      }
       const tsClass = new KV.JSINT32()
       const status = KV.canGetNumberOfChannels(tsClass.cast())
       if (status != 0) {
@@ -303,17 +305,19 @@ export class KVASER_CAN extends CanBase {
     }
     return []
   }
-  static getLinDevices(): LinDevice[] {
+  static getLinDevices(reaload = true): LinDevice[] {
     if (process.platform == 'win32') {
-      KV.canUnloadLibrary()
-      KV.canInitializeLibrary()
+      if (reaload) {
+        KV.canUnloadLibrary()
+        KV.canInitializeLibrary()
+      }
       const tsClass = new KV.JSINT32()
       const status = KV.canGetNumberOfChannels(tsClass.cast())
       if (status != 0) {
         throw new Error(err2str(status))
       }
       const num = tsClass.value()
-      const devices: CanDevice[] = []
+      const devices: LinDevice[] = []
       for (let i = 0; i < num; i++) {
         const buf = Buffer.alloc(1024)
         //canCHANNEL_CAP_xxx
