@@ -423,17 +423,35 @@ function saveParam(index: number, justValid: boolean) {
     paramError.value['value'] = e.message
     error = true
   }
+
   if (otherService.value && checkServiceId(props.serviceId, ['uds'])) {
+    const editService = otherService.value.find((item) => item.id == props.sid)
+    let editParam: Param[] = []
+    if (editService) {
+      editParam = props.id == 'req' ? editService.params : editService.respParams
+    }
     for (const ss of otherService.value) {
       if (ss.id != props.sid) {
         const params = props.id == 'req' ? ss.params : ss.respParams
-        const item = params[editIndex.value]
-        if (item && item.deletable == false) {
-          if (Buffer.compare(d.value, Buffer.from(item.value)) == 0) {
-            paramError.value['value'] = 'The id already exists in other service, please change it'
-            error = true
-            break
+        let newBuffer = Buffer.alloc(0)
+        let oldBuffer = Buffer.alloc(0)
+        for (const [index, item] of params.entries()) {
+          if (item.deletable == false) {
+            oldBuffer = Buffer.concat([oldBuffer, item.value])
+
+            if (index == editIndex.value) {
+              newBuffer = Buffer.concat([newBuffer, d.value])
+            } else {
+              newBuffer = Buffer.concat([newBuffer, editParam[index].value])
+            }
           }
+        }
+
+        if (Buffer.compare(newBuffer, oldBuffer) == 0) {
+          paramError.value['value'] =
+            `The id already exists in service ${ss.name}, please change it`
+          error = true
+          break
         }
       }
     }
