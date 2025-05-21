@@ -20,8 +20,8 @@ LIN_language_version = "2.2";
 LIN_speed = 19.2 kbps;
 
 Nodes {
-  Master: SeatECU, 5 ms, 0.1 ms ;
-  Slaves: Motor1, Motor2 ;
+  Master : SeatECU, 5 ms, 0.1 ms ;
+  Slaves : Motor1, Motor2 ;
 }
 
 Signals {
